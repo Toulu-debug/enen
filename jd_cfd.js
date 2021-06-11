@@ -1153,7 +1153,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `http://share.turinglabs.net/api/v3/jxcfd/query/${randomCount}/`,
+      url: `http://api.JDHelloWorld.ga/api/jxcfd/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {

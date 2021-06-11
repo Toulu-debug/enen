@@ -1302,7 +1302,7 @@ async function showMsg() {
 function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
-    $.get({url: `http://share.turinglabs.net/api/v3/jxfactory/query/${randomCount}/`, 'timeout': 10000}, (err, resp, data) => {
+    $.get({url: `http://api.JDHelloWorld.ga/api/jxfactory/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)

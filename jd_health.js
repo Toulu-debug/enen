@@ -255,7 +255,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `http://share.turinglabs.net/api/v3/health/query/${randomCount}/`,
+      url: `http://api.JDHelloWorld.ga/api/health/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {
