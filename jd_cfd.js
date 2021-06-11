@@ -1153,7 +1153,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `http://api.sharecode.ga:10001/api/jxcfd/${randomCount}`,
+      url: `http://api.sharecode.ga/api/jxcfd/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {

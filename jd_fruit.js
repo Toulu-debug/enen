@@ -1251,7 +1251,7 @@ function timeFormat(time) {
 }
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `http://api.sharecode.ga:10001/api/farm/${randomCount}`, timeout: 10000,}, (err, resp, data) => {
+    $.get({url: `http://api.sharecode.ga/api/farm/${randomCount}`, timeout: 10000,}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
