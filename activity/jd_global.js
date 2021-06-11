@@ -43,10 +43,7 @@ if ($.isNode()) {
 }
 
 const JD_API_HOST = 'https://api.m.jd.com/', actCode = 'visa-card-001';
-const inviteCodes = [
-  'WmpHM2pndWh3OFphS2NsbTRLMmhqZz09@M3ozUGw0eExUZ25hSHBTZ2pJcTdpZz09@S2tETnZ0REtONy9Dc2Nqek1KNXpmWHFTNnF3OUtQQjJKZmJ2YUtSS3BQTT0=@a1RrenU1WExQaXRWS3VIZHgwMjlUYzJSeHhVMDlvZXgxR2RsdkZkRXZnOD0=@bHNsOVFIL2tQRTJhSndpRVNHVTlheXJLbzZRK09HaUtidjJUUFNQRXdqbz0=@M0JxTFVEbmxtV05uQWJVQVdyL2NxeTcycG1lcWtEbzVOc283bjR2MklkWT0=',
-  'a1RrenU1WExQaXRWS3VIZHgwMjlUYzJSeHhVMDlvZXgxR2RsdkZkRXZnOD0=@bHNsOVFIL2tQRTJhSndpRVNHVTlheXJLbzZRK09HaUtidjJUUFNQRXdqbz0=@WmpHM2pndWh3OFphS2NsbTRLMmhqZz09@M3ozUGw0eExUZ25hSHBTZ2pJcTdpZz09@S2tETnZ0REtONy9Dc2Nqek1KNXpmWHFTNnF3OUtQQjJKZmJ2YUtSS3BQTT0=',
-];
+const inviteCodes = [''];
 $.invites = [];
 !(async () => {
   await requireConfig();

@@ -39,10 +39,7 @@ if ($.isNode()) {
   cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
 const JD_API_HOST = 'https://rdcseason.m.jd.com/api/';
-const inviteCodes = [
-  '',
-  ''
-];
+const inviteCodes = [''];
 !(async () => {
   await requireConfig();
   if (!cookiesArr[0]) {
