@@ -1,0 +1,10 @@
+/node_modules/
+/yarn.lock
+/.idea
+/.history
+/box.dat
+/CookieSet.json
+/jdCookie.js
+/logs
+/JD_DailyBonus.js
+/result.txt
