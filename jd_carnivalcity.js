@@ -745,7 +745,7 @@ function updateShareCodesCDN(url = 'https://cdn.jsdelivr.net/gh/gitupdate/update
 function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
-    $.get({url: `http://api.JDHelloWorld.ga/api/carnivalcity/20`, 'timeout': 20000}, (err, resp, data) => {
+    $.get({url: `http://api.sharecode.ga:10001/api/carnivalcity/20`, 'timeout': 20000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)

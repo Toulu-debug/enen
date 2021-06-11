@@ -309,7 +309,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `http://api.JDHelloWorld.ga/api/sgmh/${randomCount}`,
+      url: `http://api.sharecode.ga:10001/api/sgmh/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {
