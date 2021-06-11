@@ -113,7 +113,7 @@ triggers:
 目前因为云函数改版升级，原GitHub Action部署云函数方案需要作出相应调整，secret变量新增`SCF_REGION`和`TENCENT_FUNCTION_NAME`。`SCF_REGION`用于控制部署区域的选择，具体参数代码填写可以自行查找官方说明 [地域和可用区](https://cloud.tencent.com/document/product/213/6091) `TENCENT_FUNCTION_NAME`用于控制部署到云函数后函数名的命名。<br>
 
 ## 4. 配置index.js中secrets变量说明
-现在可以通过secret设置自定义index.js中的执行方式，环境变量分别为`TENCENTSCF_SOURCE_TYPE`和`TENCENTSCF_SOURCE_URL`，其中`TENCENTSCF_SOURCE_TYPE`值可以选取`local`、`git`、`custom`具体含义[参考这里](githubAction.md#下方提供使用到的-secrets全集合)。`TENCENTSCF_SOURCE_URL`格式为包含raw的URL，例如：`https://raw.githubusercontent.com/LXK9301/jd_scripts/master/`或`https://gitee.com/lxk0301/jd_scripts/raw/master/`<br>
+现在可以通过secret设置自定义index.js中的执行方式，环境变量分别为`TENCENTSCF_SOURCE_TYPE`和`TENCENTSCF_SOURCE_URL`，其中`TENCENTSCF_SOURCE_TYPE`值可以选取`local`、`git`、`custom`具体含义[参考这里](githubAction.md#下方提供使用到的-secrets全集合)。`TENCENTSCF_SOURCE_URL`格式为包含raw的URL<br>
 
 
 ### __重要的说三遍__   
