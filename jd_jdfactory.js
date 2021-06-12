@@ -26,6 +26,8 @@ cron "10 * * * *" script-path=jd_jdfactory.js,tag=东东工厂
  */
 const $ = new Env('东东工厂');
 
+console.log('\n====================Hello World====================\n')
+
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';

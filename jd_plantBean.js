@@ -24,6 +24,9 @@ cron "1 7-21/2 * * *" script-path=jd_plantBean.js,tag=京东种豆得豆
 搬的https://github.com/uniqueque/QuantumultX/blob/4c1572d93d4d4f883f483f907120a75d925a693e/Script/jd_plantBean.js
 */
 const $ = new Env('京东种豆得豆');
+
+console.log('\n====================Hello World====================\n')
+
 //Node.js用户请在jdCookie.js处填写京东ck;
 //ios等软件用户直接用NobyDa的jd cookie
 let jdNotify = true;//是否开启静默运行。默认true开启

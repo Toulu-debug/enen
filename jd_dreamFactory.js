@@ -34,6 +34,9 @@ cron "10 * * * *" script-path=jd_dreamFactory.js,tag=京喜工厂
 });
 
 const $ = new Env('京喜工厂');
+
+console.log('\n====================Hello World====================\n')
+
 const JD_API_HOST = 'https://m.jingxi.com';
 const helpAu = true; //帮作者助力 免费拿活动
 const notify = $.isNode() ? require('./sendNotify') : '';
