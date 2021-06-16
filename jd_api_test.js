@@ -12,7 +12,7 @@
 
 =====================Loon================
 [Script]
-cron "0 0-18/6 * * *" script-path=jd_api_test.js, tag=环境测试
+cron "0 12 * * *" script-path=jd_api_test.js, tag=环境测试
 
 ====================Surge================
 环境测试 = type=cron,cronexp=0 12 * * *,wake-system=1,timeout=3600,script-path=jd_api_test.js
