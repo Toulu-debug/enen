@@ -46,11 +46,20 @@ function version() {
           if (data === $.version) {
             console.log('已是最新版本')
           } else {
-            $.msg($.version, data, "请更新！")
+            $.msg("JDHelloWorld", "请更新！", `本地：${$.version}\n远程：${data}`)
+            if ($.isNode()) {
+              const notify = require('./sendNotify')
+              notify.sendNotify("JDHelloWorld", `本地：${$.version}\n远程：${data}\n\n请及时更新！`)
+            }
           }
         }
       } catch (e) {
         $.logErr(e, resp)
+        $.msg("JDHelloWorld", "版本检测失败", `请手动访问http://api.sharecode.ga/api/version`,{"open-url": "http://api.sharecode.ga/api/version"})
+        if ($.isNode()) {
+          const notify = require('./sendNotify')
+          notify.sendNotify("JDHelloWorld", `版本检测失败\n请手动访问\nhttp://api.sharecode.ga/api/version`)
+        }
       } finally {
         resolve()
       }
