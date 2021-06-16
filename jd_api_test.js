@@ -1,5 +1,24 @@
 /*
-0 12 * * *
+环境测试:
+  1. 互助码api访问测试
+  2. 脚本版本检测
+时间: 2021-06-16-
+
+脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
+===================quantumultx================
+[task_local]
+#环境测试
+0 12 * * * jd_api_test.js, tag=环境测试, enabled=true
+
+=====================Loon================
+[Script]
+cron "0 0-18/6 * * *" script-path=jd_api_test.js, tag=环境测试
+
+====================Surge================
+环境测试 = type=cron,cronexp=0 12 * * *,wake-system=1,timeout=3600,script-path=jd_api_test.js
+
+============小火箭=========
+环境测试 = type=cron,script-path=jd_api_test.js, cronexpr="0 12 * * *", timeout=3600, enable=true
 */
 
 console.log(`==================脚本执行- 北京时间(UTC+8)：${new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000 + 8*60*60*1000).toLocaleString()}=====================\n`)
