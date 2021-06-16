@@ -43,7 +43,7 @@ function getRandomCode() {
     $.get({url: `http://api.sharecode.ga/api/${db}/${num}`, timeout: 10000}, (err, resp, data) => {
       try {
         data = JSON.parse(data)
-        console.log(data)
+        console.log(JSON.stringify(data, null,'  '))
         if (data.code === 200) {
           if (data.data.length === num) {
             console.log(`成功获取${num}个`)
