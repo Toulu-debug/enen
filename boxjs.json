@@ -349,14 +349,14 @@
         {
           "id": "jd_joy_invite_pin",
           "name": "账号一邀请助力friendPin名单",
-          "val": "jd_6cd93e613b0e5,被折叠的记忆33",
+          "val": "",
           "type": "text",
           "desc": "多个账号使用英文逗号','隔开,最多3个"
         },
         {
           "id": "jd_joy_run_pin",
           "name": "账号一赛跑助力friendPin名单",
-          "val": "jd_6cd93e613b0e5,被折叠的记忆33",
+          "val": "",
           "type": "text",
           "desc": "多个账号使用英文逗号','隔开,最多6个"
         },
@@ -754,6 +754,35 @@
       "icons": [
         "https://raw.githubusercontent.com/58xinian/icon/master/jd_jxd_mini.png",
         "https://raw.githubusercontent.com/58xinian/icon/master/jd_jxd.png"
+      ]
+    },
+    {
+      "id": "jd_EsportsManager",
+      "name": "东东电竞经理",
+      "keys": [
+        "jd_EsportsManager_Bearer"
+      ],
+      "descs_html": [
+        "请在输入框输入东东电竞Bearer"
+      ],
+      "settings": [
+        {
+          "id": "jd_EsportsManager_Bearer",
+          "name": "东东电竞Bearer",
+          "val": "",
+          "placeholder": "Bearer XXX",
+          "type": "textarea",
+          "autoGrow": true,
+          "rows": 8,
+          "desc": "使用东东电竞CK脚本会自动填写"
+        }
+      ],
+      "author": "",
+      "repo": "",
+      "script": "",
+      "icons": [
+        "https://raw.githubusercontent.com/JDHelloWorld/jd_scripts_demo/main/jd_EsportsManager.png",
+        "https://raw.githubusercontent.com/JDHelloWorld/jd_scripts_demo/main/jd_EsportsManager.png"
       ]
     }
   ]
