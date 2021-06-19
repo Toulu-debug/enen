@@ -21,7 +21,7 @@ cron "0 12 * * *" script-path=jd_api_test.js, tag=环境测试
 环境测试 = type=cron,script-path=jd_api_test.js, cronexpr="0 12 * * *", timeout=3600, enable=true
 */
 
-console.log(`==================脚本执行- 北京时间(UTC+8)：${new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000 + 8*60*60*1000).toLocaleString()}=====================\n`)
+console.log(`==================脚本执行- 北京时间(UTC+8)：${new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000).toLocaleString()}=====================\n`)
 
 const $ = new Env("环境测试")
 
@@ -39,18 +39,33 @@ function getRandomCode() {
     let cars = ['bean', 'farm', 'health', 'jxfactory', 'pet'];
     let db = cars[Math.floor(Math.random() * 5)]
     let num = Math.floor(Math.random() * 20 + 5)
-    console.log(`本次从${db}获取${num}个助力码`)
-    $.get({url: `http://api.sharecode.ga/api/${db}/${num}`, timeout: 10000}, (err, resp, data) => {
+    console.log(`本次随机选择${db}获取${num}个随机助力码`)
+    $.get({url: `http://api.sharecode.ga/api/${db}/${num}`, timeout: 3000}, (err, resp, data) => {
       try {
-        data = JSON.parse(data)
-        console.log(JSON.stringify(data, null,'  '))
-        if (data.code === 200) {
-          if (data.data.length === num) {
-            console.log(`成功获取${num}个`)
+        if (data) {
+          data = JSON.parse(data)
+          console.log(JSON.stringify(data, null, '  '))
+          if (data.code === 200) {
+            if (data.data.length === num) {
+              console.log(`成功获取${num}个`)
+            }
           }
+        } else {
+          // $.msg("JDHelloWorld", "获取助力池失败！", `请手动访问http://api.sharecode.ga/api/version`, {"open-url": "http://api.sharecode.ga/api/version"})
+          $.msg("JDHelloWorld", "获取助力池失败！", '请检查网络！')
+          if ($.isNode()) {
+            const notify = require('./sendNotify')
+            notify.sendNotify("JDHelloWorld", `获取助力池失败！请检查网络！`)
+          }
+          $.logErr("获取助力池失败！请检查网络！\n")
         }
       } catch (e) {
-        $.logErr(e, resp)
+        $.msg("JDHelloWorld", "获取助力池失败！", '请检查网络！')
+        if ($.isNode()) {
+            const notify = require('./sendNotify')
+            notify.sendNotify("JDHelloWorld", `获取助力池失败！请检查网络！`)
+          }
+        $.logErr("获取助力池失败！请检查网络！\n")
       } finally {
         resolve()
       }
@@ -61,10 +76,10 @@ function getRandomCode() {
 function version() {
   return new Promise(resolve => {
     console.log('\n开始版本检测......')
-    $.get({url: `http://api.sharecode.ga/api/version`, timeout: 10000}, (err, resp, data) => {
+    $.get({url: `http://api.sharecode.ga/api/version`, timeout: 3000}, (err, resp, data) => {
       try {
-        console.log(`本地：${$.version}\n远程：${data}`)
-        if (!err) {
+        if (data) {
+          console.log(`本地：${$.version}\n远程：${data}`)
           if (data === $.version) {
             console.log('已是最新版本')
           } else {
@@ -74,13 +89,18 @@ function version() {
               notify.sendNotify("JDHelloWorld", `本地：${$.version}\n远程：${data}\n\n请及时更新！`)
             }
           }
+        } else {
+          $.msg("JDHelloWorld", "版本检测失败", `请手动访问 http://api.sharecode.ga/api/version 测试网络`, {"open-url": "http://api.sharecode.ga/api/version"})
+          if ($.isNode()) {
+            const notify = require('./sendNotify')
+            notify.sendNotify("JDHelloWorld", `版本检测失败\n请手动访问\nhttp://api.sharecode.ga/api/version\n测试网络`)
+          }
         }
       } catch (e) {
-        $.logErr(e, resp)
-        $.msg("JDHelloWorld", "版本检测失败", `请手动访问http://api.sharecode.ga/api/version`,{"open-url": "http://api.sharecode.ga/api/version"})
+        $.msg("JDHelloWorld", "版本检测失败", `请手动访问 http://api.sharecode.ga/api/version 测试网络`, {"open-url": "http://api.sharecode.ga/api/version"})
         if ($.isNode()) {
           const notify = require('./sendNotify')
-          notify.sendNotify("JDHelloWorld", `版本检测失败\n请手动访问\nhttp://api.sharecode.ga/api/version`)
+          notify.sendNotify("JDHelloWorld", `版本检测失败\n请手动访问\nhttp://api.sharecode.ga/api/version 测试网络`)
         }
       } finally {
         resolve()
