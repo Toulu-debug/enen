@@ -36,16 +36,16 @@ inputs:
           argument: jd_fruit&jd_pet&jd_bookshop&jd_jxnc&jd_speed_sign&jd_family&jd_gold_creator&jd_star_shop
     - timer: #宠汪汪喂食 #宠汪汪 #摇钱树 #京东种豆得豆 #京喜工厂 #东东工厂 #东东健康社区收集能量
         parameters:
-          name: feedPets_joy_moneyTree_plantBean_dreamFactory_jdfactory_healthcollect
+          name: feedPets_joy_moneyTree_plantBean_dreamFactory_jdfactory
           cronExpression: "0 3 */1 * * * *"
           enable: true
-          argument: jd_joy_feedPets&jd_joy&jd_moneyTree&jd_plantBean&jd_dreamFactory&jd_jdfactory&jd_health_collect
+          argument: jd_joy_feedPets&jd_joy&jd_moneyTree&jd_plantBean&jd_dreamFactory&jd_jdfactory
     - timer: #宠汪汪积分兑换京豆 #签到领现金 #点点券 #东东小窝 #京喜财富岛 #京东直播 #东东健康社区 #每日抽奖 #女装魔盒 #跳跳乐 #5G超级盲盒
         parameters:
-          name: joyreward_cash_necklace_smallhome_cfd_live_health_dailylottery_nzmh_jump_mohe
+          name: joyreward_cash_necklace_smallhome_cfd_live_dailylottery_nzmh_jump_mohe
           cronExpression: "0 0 0-16/8,20 * * * *"
           enable: true
-          argument: jd_joy_reward&jd_cash&jd_necklace&jd_small_home&jd_cfd&jd_live&jd_health&jd_daily_lottery&jd_nzmh&jd_jump&jd_mohe
+          argument: jd_joy_reward&jd_cash&jd_necklace&jd_small_home&jd_cfd&jd_live&jd_daily_lottery&jd_nzmh&jd_jump&jd_mohe
     - timer: #京东全民开红包 #进店领豆 #取关京东店铺商品 #京东抽奖机 #京东汽车
         parameters:
           name: redPacket_shop_unsubscribe_lotteryMachine_car
