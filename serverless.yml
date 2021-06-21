@@ -52,12 +52,12 @@ inputs:
           cronExpression: "0 10 0 * * * *"
           enable: true
           argument: jd_redPacket&jd_shop&jd_unsubscribe&jd_lotteryMachine&jd_car&jd_ms
-    - timer: #天天提鹅
+    - timer: #天天提鹅 #京喜牧场
         parameters:
-          name: dailyegg
+          name: dailyegg_jxmc
           cronExpression: "0 8 */3 * * * *"
           enable: true
-          argument: jd_daily_egg
+          argument: jd_daily_egg&jd_jxmc
     - timer: #东东超市 #十元街 #翻翻乐
         parameters:
           name: superMarket_syj_bigwinner
