@@ -522,7 +522,7 @@ function injectToRequest(fn) {
           while (1) {
             let h = new Date().getHours();
             let s = new Date().getSeconds();
-            if ((h === 23 || h === 0) && (s >= 55 || s <= 20)) {
+            if (s >= 50 || s <= 30) {
               console.log('start......')
               break;
             }
@@ -546,7 +546,7 @@ function injectToRequest(fn) {
           while (1) {
             let h = new Date().getHours();
             let s = new Date().getSeconds();
-            if ((h === 23 || h === 0) && (s >= 55 || s <= 20)) {
+            if (s >= 50 || s <= 30) {
               console.log('start......')
               break;
             }
@@ -607,11 +607,13 @@ let flag = true;
       for (let bean of config) {
         console.log(bean.id, bean.giftName, bean.leftStock)
         if (bean.giftValue === target) {
-          if (bean.leftStock) {
-            await exchange(bean.id)
-          } else {
-            console.log(`${bean.giftName}无货`)
-          }
+          await exchange(bean.id)
+
+          // if (bean.leftStock) {
+          //   await exchange(bean.id)
+          // } else {
+          //   console.log(`${bean.giftName}无货`)
+          // }
         }
       }
     }
