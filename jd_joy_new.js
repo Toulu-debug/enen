@@ -559,7 +559,6 @@ $.post = injectToRequest($.post.bind($))
       await feed();
 
       let tasks = await taskList();
-      writeFile($.toStr(tasks))
 
       for (let tp of tasks.datas) {
         console.log(tp.taskName, tp.receiveStatus)
@@ -662,8 +661,7 @@ function taskList() {
 
 function doTask(body, fnId = 'scan') {
   return new Promise(async resolve => {
-    let config = {
-      // https://jdjoy.jd.com/common/pet/feed?feedCount=80
+    $.post({
       url: `https://jdjoy.jd.com/common/pet/${fnId}?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
       headers: {
         'Host': 'jdjoy.jd.com',
@@ -676,9 +674,7 @@ function doTask(body, fnId = 'scan') {
         'cookie': cookie
       },
       body: body,
-    }
-    console.log(config)
-    $.post(config, (err, resp, data) => {
+    }, (err, resp, data) => {
       try {
         console.log('dotask:', data)
         data = $.toObj(data);

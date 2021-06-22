@@ -522,35 +522,37 @@ function injectToRequest(fn) {
           while (1) {
             let h = new Date().getHours();
             let s = new Date().getSeconds();
-            if (h >= 22 && (s >= 55 || s <= 10)) {
+            if ((h === 23 || h === 0) && (s >= 55 || s <= 20)) {
               console.log('start......')
               break;
             }
-            console.log('wait...')
             await $.wait(100);
           }
+          flag = false
           fn(opts, cb)
         }
         if (flag) {
           console.log('2')
+          flag = false
           fn(opts, cb);
         }
       } else {
-        if (flag)
+        if (flag) {
+          console.log('3')
+          flag = false
           cb(err, resp, data);
-        else {
+        } else {
+          console.log('4')
           while (1) {
             let h = new Date().getHours();
             let s = new Date().getSeconds();
-            if (h >= 22 && (s >= 55 || s <= 10)) {
+            if ((h === 23 || h === 0) && (s >= 55 || s <= 20)) {
               console.log('start......')
               break;
             }
-            console.log('wait...')
             await $.wait(100);
           }
           cb(err, resp, data);
-
         }
       }
     });
@@ -593,7 +595,6 @@ let flag = true;
 
       let tasks = await init();
 
-      flag = false;
 
       let h = new Date().getHours();
       let config = ''
@@ -606,8 +607,7 @@ let flag = true;
       for (let bean of config) {
         console.log(bean.id, bean.giftName, bean.leftStock)
         if (bean.giftValue === target) {
-          // TODO
-          if (!bean.leftStock) {
+          if (bean.leftStock) {
             await exchange(bean.id)
           } else {
             console.log(`${bean.giftName}无货`)
