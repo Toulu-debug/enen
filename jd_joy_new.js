@@ -237,7 +237,7 @@ class JDJRValidator {
       return await tryRecognize();
     };
     const puzzleX = await tryRecognize();
-    console.log(puzzleX);
+    // console.log(puzzleX);
     const pos = new MousePosFaker(puzzleX).run();
     const d = getCoordinate(pos);
 
@@ -287,11 +287,11 @@ class JDJRValidator {
 
       if (x > 0) count++;
       if (i % 50 === 0) {
-        console.log('%f\%', (i / n) * 100);
+        // console.log('%f\%', (i / n) * 100);
       }
     }
 
-    console.log('successful: %f\%', (count / n) * 100);
+    // console.log('successful: %f\%', (count / n) * 100);
     console.timeEnd('PuzzleRecognizer');
   }
 
@@ -312,41 +312,39 @@ class JDJRValidator {
         'User-Agent': UA,
       };
       const req = http.get(url, {headers}, (response) => {
-        let res = response;
-        if (res.headers['content-encoding'] === 'gzip') {
-          const unzipStream = new stream.PassThrough();
-          stream.pipeline(
-            response,
-            zlib.createGunzip(),
-            unzipStream,
-            reject,
-          );
-          res = unzipStream;
-        }
-        res.setEncoding('utf8');
-
-        let rawData = '';
-
-        res.on('data', (chunk) => rawData += chunk);
-        res.on('end', () => {
-          try {
-            const ctx = {
-              [fnId]: (data) => ctx.data = data,
-              data: {},
-            };
-
-            vm.createContext(ctx);
-            vm.runInContext(rawData, ctx);
-
-            // console.log(ctx.data);
-            res.resume();
-            resolve(ctx.data);
-          } catch (e) {
-            reject(e);
+        try {
+          let res = response;
+          if (res.headers['content-encoding'] === 'gzip') {
+            const unzipStream = new stream.PassThrough();
+            stream.pipeline(
+              response,
+              zlib.createGunzip(),
+              unzipStream,
+              reject,
+            );
+            res = unzipStream;
           }
-        });
-      }).catch(e=>{
-        console.log('生成validate需使用大陆IP')
+          res.setEncoding('utf8');
+
+          let rawData = '';
+
+          res.on('data', (chunk) => rawData += chunk);
+          res.on('end', () => {
+            try {
+              const ctx = {
+                [fnId]: (data) => ctx.data = data,
+                data: {},
+              };
+              vm.createContext(ctx);
+              vm.runInContext(rawData, ctx);
+              res.resume();
+              resolve(ctx.data);
+            } catch (e) {
+              console.log('生成验证码必须使用大陆IP')
+            }
+          })
+        } catch (e) {
+        }
       })
 
       req.on('error', reject);
@@ -418,7 +416,7 @@ class MousePosFaker {
     // [9,1600] [10,1400]
     this.STEP = 9;
     // this.DURATION = 2000;
-    console.log(this.STEP, this.DURATION);
+    // console.log(this.STEP, this.DURATION);
   }
 
   run() {
@@ -527,9 +525,6 @@ function injectToRequest(fn) {
   };
 }
 
-exports.injectToRequest = injectToRequest;
-
-
 let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, newShareCodes, allMessage = '';
 $.get = injectToRequest($.get.bind($))
 $.post = injectToRequest($.post.bind($))
@@ -570,15 +565,15 @@ $.post = injectToRequest($.post.bind($))
 
       for (let tp of tasks.datas) {
         console.log(tp.taskName, tp.receiveStatus)
-        if (tp.taskName === '每日签到' && tp.receiveStatus === 'chance_left')
-          await sign();
+        // if (tp.taskName === '每日签到' && tp.receiveStatus === 'chance_left')
+        //   await sign();
 
         if (tp.receiveStatus === 'unreceive') {
           await award(tp.taskType);
           await $.wait(5000);
         }
         if (tp.taskName === '浏览频道') {
-          for (let i = 0; i < 5; i++) {
+          for (let i = 0; i < 3; i++) {
             console.log(`\t第${i + 1}次浏览频道 检查遗漏`)
             let followChannelList = await getFollowChannels();
             for (let t of followChannelList['datas']) {

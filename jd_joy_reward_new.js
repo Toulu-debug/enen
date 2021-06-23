@@ -291,7 +291,7 @@ class JDJRValidator {
       }
     }
 
-    console.log('successful: %f\%', (count / n) * 100);
+    // console.log('successful: %f\%', (count / n) * 100);
     console.timeEnd('PuzzleRecognizer');
   }
 
@@ -312,40 +312,40 @@ class JDJRValidator {
         'User-Agent': UA,
       };
       const req = http.get(url, {headers}, (response) => {
-        let res = response;
-        if (res.headers['content-encoding'] === 'gzip') {
-          const unzipStream = new stream.PassThrough();
-          stream.pipeline(
-            response,
-            zlib.createGunzip(),
-            unzipStream,
-            reject,
-          );
-          res = unzipStream;
-        }
-        res.setEncoding('utf8');
-
-        let rawData = '';
-
-        res.on('data', (chunk) => rawData += chunk);
-        res.on('end', () => {
-          try {
-            const ctx = {
-              [fnId]: (data) => ctx.data = data,
-              data: {},
-            };
-
-            vm.createContext(ctx);
-            vm.runInContext(rawData, ctx);
-
-            // console.log(ctx.data);
-            res.resume();
-            resolve(ctx.data);
-          } catch (e) {
-            reject(e);
+        try {
+          let res = response;
+          if (res.headers['content-encoding'] === 'gzip') {
+            const unzipStream = new stream.PassThrough();
+            stream.pipeline(
+              response,
+              zlib.createGunzip(),
+              unzipStream,
+              reject,
+            );
+            res = unzipStream;
           }
-        });
-      });
+          res.setEncoding('utf8');
+
+          let rawData = '';
+
+          res.on('data', (chunk) => rawData += chunk);
+          res.on('end', () => {
+            try {
+              const ctx = {
+                [fnId]: (data) => ctx.data = data,
+                data: {},
+              };
+              vm.createContext(ctx);
+              vm.runInContext(rawData, ctx);
+              res.resume();
+              resolve(ctx.data);
+            } catch (e) {
+              console.log('生成验证码必须使用大陆IP')
+            }
+          })
+        } catch (e) {
+        }
+      })
 
       req.on('error', reject);
       req.end();
