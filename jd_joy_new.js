@@ -237,7 +237,7 @@ class JDJRValidator {
       return await tryRecognize();
     };
     const puzzleX = await tryRecognize();
-    // console.log(puzzleX);
+    console.log(puzzleX);
     const pos = new MousePosFaker(puzzleX).run();
     const d = getCoordinate(pos);
 
@@ -287,7 +287,7 @@ class JDJRValidator {
 
       if (x > 0) count++;
       if (i % 50 === 0) {
-        // console.log('%f\%', (i / n) * 100);
+        console.log('%f\%', (i / n) * 100);
       }
     }
 
@@ -297,69 +297,60 @@ class JDJRValidator {
 
   static jsonp(api, data = {}) {
     return new Promise((resolve, reject) => {
-      try {
-        const fnId = `jsonp_${String(Math.random()).replace('.', '')}`;
-        const extraData = {callback: fnId};
-        const query = new URLSearchParams({...DATA, ...extraData, ...data}).toString();
-        const url = `http://${SERVER}${api}?${query}`;
-        const headers = {
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip,deflate,br',
-          'Accept-Language': 'zh-CN,en-US',
-          'Connection': 'keep-alive',
-          'Host': SERVER,
-          'Proxy-Connection': 'keep-alive',
-          'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
-          'User-Agent': UA,
-        };
-        const req = http.get(url, {headers}, (response) => {
+      const fnId = `jsonp_${String(Math.random()).replace('.', '')}`;
+      const extraData = {callback: fnId};
+      const query = new URLSearchParams({...DATA, ...extraData, ...data}).toString();
+      const url = `http://${SERVER}${api}?${query}`;
+      const headers = {
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip,deflate,br',
+        'Accept-Language': 'zh-CN,en-US',
+        'Connection': 'keep-alive',
+        'Host': SERVER,
+        'Proxy-Connection': 'keep-alive',
+        'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+        'User-Agent': UA,
+      };
+      const req = http.get(url, {headers}, (response) => {
+        let res = response;
+        if (res.headers['content-encoding'] === 'gzip') {
+          const unzipStream = new stream.PassThrough();
+          stream.pipeline(
+            response,
+            zlib.createGunzip(),
+            unzipStream,
+            reject,
+          );
+          res = unzipStream;
+        }
+        res.setEncoding('utf8');
+
+        let rawData = '';
+
+        res.on('data', (chunk) => rawData += chunk);
+        res.on('end', () => {
           try {
-            let res = response;
-            if (res.headers['content-encoding'] === 'gzip') {
-              const unzipStream = new stream.PassThrough();
-              stream.pipeline(
-                response,
-                zlib.createGunzip(),
-                unzipStream,
-                reject,
-              );
-              res = unzipStream;
-            }
-            res.setEncoding('utf8');
+            const ctx = {
+              [fnId]: (data) => ctx.data = data,
+              data: {},
+            };
 
-            let rawData = '';
+            vm.createContext(ctx);
+            vm.runInContext(rawData, ctx);
 
-            res.on('data', (chunk) => rawData += chunk);
-            res.on('end', () => {
-              try {
-                const ctx = {
-                  [fnId]: (data) => ctx.data = data,
-                  data: {},
-                };
-
-                vm.createContext(ctx);
-                vm.runInContext(rawData, ctx);
-
-                // console.log(ctx.data);
-                res.resume();
-                resolve(ctx.data);
-              } catch (e) {
-                reject('11111:',e);
-              } finally {
-              }
-            });
+            // console.log(ctx.data);
+            res.resume();
+            resolve(ctx.data);
           } catch (e) {
-            console.log('22222:', e)
-          } finally {
+            reject(e);
           }
-
         });
-        req.on('error', reject);
-        req.end();
-      } catch (e) {
-        console.log('环境不支持')
-      } finally {
-      }
+      }).catch(e=>{
+        console.log('生成validate需使用大陆IP')
+      })
+
+      req.on('error', reject);
+      req.end();
     });
   }
 }
@@ -427,7 +418,7 @@ class MousePosFaker {
     // [9,1600] [10,1400]
     this.STEP = 9;
     // this.DURATION = 2000;
-    // console.log(this.STEP, this.DURATION);
+    console.log(this.STEP, this.DURATION);
   }
 
   run() {
@@ -519,12 +510,14 @@ function injectToRequest(fn) {
   return (opts, cb) => {
     fn(opts, async (err, resp, data) => {
       if (err) {
-        console.error('Error: ', err);
+        console.error('Failed to request.');
         return;
       }
+
       if (data.search('验证') > -1) {
         console.log('JDJRValidator trying......');
         const res = await new JDJRValidator().run();
+
         opts.url += `&validate=${res.validate}`;
         fn(opts, cb);
       } else {
@@ -533,6 +526,9 @@ function injectToRequest(fn) {
     });
   };
 }
+
+exports.injectToRequest = injectToRequest;
+
 
 let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, newShareCodes, allMessage = '';
 $.get = injectToRequest($.get.bind($))
