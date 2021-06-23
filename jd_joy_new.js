@@ -297,58 +297,61 @@ class JDJRValidator {
 
   static jsonp(api, data = {}) {
     return new Promise((resolve, reject) => {
-      const fnId = `jsonp_${String(Math.random()).replace('.', '')}`;
-      const extraData = {callback: fnId};
-      const query = new URLSearchParams({...DATA, ...extraData, ...data}).toString();
-      const url = `http://${SERVER}${api}?${query}`;
-      const headers = {
-        'Accept': '*/*',
-        'Accept-Encoding': 'gzip,deflate,br',
-        'Accept-Language': 'zh-CN,en-US',
-        'Connection': 'keep-alive',
-        'Host': SERVER,
-        'Proxy-Connection': 'keep-alive',
-        'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
-        'User-Agent': UA,
-      };
-      const req = http.get(url, {headers}, (response) => {
-        let res = response;
-        if (res.headers['content-encoding'] === 'gzip') {
-          const unzipStream = new stream.PassThrough();
-          stream.pipeline(
-            response,
-            zlib.createGunzip(),
-            unzipStream,
-            reject,
-          );
-          res = unzipStream;
-        }
-        res.setEncoding('utf8');
-
-        let rawData = '';
-
-        res.on('data', (chunk) => rawData += chunk);
-        res.on('end', () => {
-          try {
-            const ctx = {
-              [fnId]: (data) => ctx.data = data,
-              data: {},
-            };
-
-            vm.createContext(ctx);
-            vm.runInContext(rawData, ctx);
-
-            // console.log(ctx.data);
-            res.resume();
-            resolve(ctx.data);
-          } catch (e) {
-            reject(e);
+      try {
+        const fnId = `jsonp_${String(Math.random()).replace('.', '')}`;
+        const extraData = {callback: fnId};
+        const query = new URLSearchParams({...DATA, ...extraData, ...data}).toString();
+        const url = `http://${SERVER}${api}?${query}`;
+        const headers = {
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip,deflate,br',
+          'Accept-Language': 'zh-CN,en-US',
+          'Connection': 'keep-alive',
+          'Host': SERVER,
+          'Proxy-Connection': 'keep-alive',
+          'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+          'User-Agent': UA,
+        };
+        const req = http.get(url, {headers}, (response) => {
+          let res = response;
+          if (res.headers['content-encoding'] === 'gzip') {
+            const unzipStream = new stream.PassThrough();
+            stream.pipeline(
+              response,
+              zlib.createGunzip(),
+              unzipStream,
+              reject,
+            );
+            res = unzipStream;
           }
-        });
-      });
+          res.setEncoding('utf8');
 
-      req.on('error', reject);
-      req.end();
+          let rawData = '';
+
+          res.on('data', (chunk) => rawData += chunk);
+          res.on('end', () => {
+            try {
+              const ctx = {
+                [fnId]: (data) => ctx.data = data,
+                data: {},
+              };
+
+              vm.createContext(ctx);
+              vm.runInContext(rawData, ctx);
+
+              // console.log(ctx.data);
+              res.resume();
+              resolve(ctx.data);
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
+        req.on('error', reject);
+        req.end();
+      } catch (e) {
+        console.log('环境不支持')
+      }
     });
   }
 }
@@ -508,14 +511,12 @@ function injectToRequest(fn) {
   return (opts, cb) => {
     fn(opts, async (err, resp, data) => {
       if (err) {
-        console.error('Failed to request.');
+        console.error('Error: ', err);
         return;
       }
-
       if (data.search('验证') > -1) {
         console.log('JDJRValidator trying......');
         const res = await new JDJRValidator().run();
-
         opts.url += `&validate=${res.validate}`;
         fn(opts, cb);
       } else {
@@ -543,6 +544,10 @@ $.post = injectToRequest($.post.bind($))
       $.isLogin = true;
       $.nickName = '';
       await TotalBean();
+      if (!notify.HelloWorld) {
+        console.log(`\n【京东账号${$.index}】${$.nickName || $.UserName}：黑号等死\n`);
+        continue
+      }
       console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
       if (!$.isLogin) {
         $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
@@ -570,7 +575,7 @@ $.post = injectToRequest($.post.bind($))
         }
         if (tp.taskName === '浏览频道') {
           for (let i = 0; i < 5; i++) {
-            console.log(`\t第${i+1}次浏览频道 检查遗漏`)
+            console.log(`\t第${i + 1}次浏览频道 检查遗漏`)
             let followChannelList = await getFollowChannels();
             for (let t of followChannelList['datas']) {
               if (!t.status) {
@@ -586,7 +591,10 @@ $.post = injectToRequest($.post.bind($))
           for (let t of tp.scanMarketList) {
             if (!t.status) {
               console.log('┖', t.marketName)
-              await doTask(JSON.stringify({"marketLink": `${t.marketLink || t.marketLinkH5}`, "taskType": "ScanMarket"}))
+              await doTask(JSON.stringify({
+                "marketLink": `${t.marketLink || t.marketLinkH5}`,
+                "taskType": "ScanMarket"
+              }))
               await $.wait(5000)
             }
           }
