@@ -544,7 +544,7 @@ $.post = injectToRequest($.post.bind($))
       $.isLogin = true;
       $.nickName = '';
       await TotalBean();
-      if (!notify.HelloWorld) {
+      if (!require('./JS_USER_AGENTS').HelloWorld) {
         console.log(`\n【京东账号${$.index}】${$.nickName || $.UserName}：黑号等死\n`);
         continue
       }
