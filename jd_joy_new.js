@@ -545,7 +545,7 @@ $.post = injectToRequest($.post.bind($))
       $.nickName = '';
       await TotalBean();
       if (!require('./JS_USER_AGENTS').HelloWorld) {
-        console.log(`\n【京东账号${$.index}】${$.nickName || $.UserName}：黑号等死\n`);
+        console.log(`\n【京东账号${$.index}】${$.nickName || $.UserName}：运行环境校验失败！\n`);
         continue
       }
       console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
