@@ -627,7 +627,7 @@ function getFollowChannels() {
         'cookie': cookie
       },
     }, (err, resp, data) => {
-      resolve($.toObj(data))
+      resolve(JSON.parse(data))
     })
   })
 }
@@ -683,8 +683,8 @@ function doTask(body, fnId = 'scan') {
         console.log('\tdoTask() Error:', err)
       try {
         console.log('\tdotask:', data)
-        data = $.toObj(data);
-        data.success ? console.log('\t任务成功') : console.log('\t任务失败', $.toStr(data))
+        data = JSON.parse(data);
+        data.success ? console.log('\t任务成功') : console.log('\t任务失败', JSON.stringify(data))
       } catch (e) {
         $.logErr(e);
       } finally {
@@ -712,7 +712,7 @@ function feed() {
       },
       body: JSON.stringify({})
     }, (err, resp, data) => {
-      data = $.toObj(data)
+      data = JSON.parse(data)
       if (new Date().getTime() - new Date(data.data.lastFeedTime) < 10800000) {
         console.log('喂食间隔不够。')
         resolve();
@@ -733,8 +733,8 @@ function feed() {
         }, (err, resp, data) => {
           try {
             // console.log('喂食', data)
-            data = $.toObj(data);
-            data.errorCode === 'feed_ok' ? console.log(`\t喂食成功！`) : console.log('\t喂食失败', $.toStr(data))
+            data = JSON.parse(data);
+            data.errorCode === 'feed_ok' ? console.log(`\t喂食成功！`) : console.log('\t喂食失败', JSON.stringify(data))
           } catch (e) {
             $.logErr(e);
           } finally {
@@ -764,8 +764,8 @@ function award(taskType) {
     }, (err, resp, data) => {
       try {
         console.log('领取奖励', data)
-        data = $.toObj(data);
-        data.errorCode === 'received' ? console.log(`\t任务成功！获得${data.data}狗粮`) : console.log('\t任务失败', $.toStr(data))
+        data = JSON.parse(data);
+        data.errorCode === 'received' ? console.log(`\t任务成功！获得${data.data}狗粮`) : console.log('\t任务失败', JSON.stringify(data))
       } catch (e) {
         $.logErr(e);
       } finally {
@@ -792,8 +792,8 @@ function sign() {
       },
     }, (err, resp, data) => {
       try {
-        data = $.toObj(data);
-        data.success ? console.log(`\t签到成功！`) : console.log('\t签到失败！', $.toStr(data))
+        data = JSON.parse(data);
+        data.success ? console.log(`\t签到成功！`) : console.log('\t签到失败！', JSON.stringify(data))
       } catch (e) {
         $.logErr(e);
       } finally {
