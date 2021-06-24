@@ -40,12 +40,12 @@ inputs:
           cronExpression: "0 3 */1 * * * *"
           enable: true
           argument: jd_joy_new&jd_moneyTree&jd_plantBean&jd_dreamFactory&jd_jdfactory&jd_EsportsManager
-    - timer: #宠汪汪积分兑换京豆 #签到领现金 #东东小窝 #京喜财富岛 #京东直播 #每日抽奖 #5G超级盲盒
+    - timer: #宠汪汪积分兑换京豆 #签到领现金 #点点券 #东东小窝 #京喜财富岛 #京东直播 #每日抽奖 #5G超级盲盒
         parameters:
-          name: joyreward_cash_smallhome_cfd_live_dailylottery_mohe
+          name: joyreward_cash_necklace_smallhome_cfd_live_dailylottery_mohe
           cronExpression: "0 0 0-16/8,20 * * * *"
           enable: true
-          argument: jd_joy_reward_new&jd_cash&jd_small_home&jd_cfd&jd_live&jd_daily_lottery&jd_mohe
+          argument: jd_joy_reward_new&jd_cash&jd_necklace_new&jd_small_home&jd_cfd&jd_live&jd_daily_lottery&jd_mohe
     - timer: #京东全民开红包 #进店领豆 #取关京东店铺商品 #京东汽车 #京东秒秒币
         parameters:
           name: redPacket_shop_unsubscribe_car_ms
