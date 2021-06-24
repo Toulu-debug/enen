@@ -159,7 +159,7 @@ async function getBody($ = {}) {
 }
 
 let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, newShareCodes, allMessage = '';
-let body = '', res = '', uuid = randomString(40);
+let body = '', res = '', uuid = 'fc13275e23b2613e6aae772533ca6f349d2e0a86'
 
 !(async () => {
   await requireConfig();
@@ -195,77 +195,94 @@ let body = '', res = '', uuid = randomString(40);
 })()
 
 async function main() {
-  let result = (await api('necklace_homePage', {}))['data']['result'];
-  // writeFile(JSON.stringify(result))
+  try {
+    let result = (await api('necklace_homePage', {}))['data']['result'];
+    // writeFile(JSON.stringify(result))
 
-  if (result.signInfo.todayCurrentSceneSignStatus === 1) {
-    $.action = 'sign';
-    body = await getBody($)
-    res = await api('necklace_sign', body);
-    res.data.biz_code === 0 ? console.log('签到成功！获得', res.data.result.totalScoreNum) : console.log('签到失败！', JSON.stringify(res))
-  }
-
-  for (let t of result.taskConfigVos) {
-    // console.log(t.id, t.taskName, t.taskType, t.taskStage)
-    if (t.taskStage === 0 || t.taskStage === 1) {
-      if (t.taskType === 2) {
-        console.log(t.taskType, t.id, t.taskName, t.taskStage)
-        if (t.taskStage === 0) {
-          $.id = t.id
-          $.action = 'startTask'
-          body = await getBody($)
-          res = await api('necklace_startTask', body)
-          console.log('startTask: ', res)
-          await $.wait(3000)
+    try {
+      if (result.signInfo.todayCurrentSceneSignStatus === 1) {
+        $.action = 'sign';
+        body = await getBody($)
+        res = await api('necklace_sign', body);
+        try {
+          res.data.biz_code === 0 ? console.log('签到成功！获得', res.data.result.totalScoreNum) : console.log('签到失败！', JSON.stringify(res))
+        } catch (e) {
+          $.logErr("Signin Error: ", res)
         }
-        res = await api('necklace_reportTask', {"taskId": t.id})
-        console.log('reportTask: ', res)
-        await $.wait(2000)
-      } else if (t.taskType === 6) {
-        console.log(t.taskType, t.id, t.taskName, t.taskStage)
-        res = await api('necklace_getTask', {taskId: t.id})
-        for (let t6 of res.data.result.taskItems) {
-          console.log(t6.id, t6.title)
-          res = await api('necklace_reportTask', {taskId: t.id, itemId: t6.id})
-          console.log(res)
+      }
+    } catch (e) {
+      console.log('没有获取到签到信息！')
+    }
+    await $.wait(3000)
+
+    for (let t of result.taskConfigVos) {
+      // console.log(t.id, t.taskName, t.taskType, t.taskStage)
+      if (t.taskStage === 0 || t.taskStage === 1) {
+        if (t.taskType === 2) {
+          console.log(t.taskType, t.id, t.taskName, t.taskStage)
+          if (t.taskStage === 0) {
+            $.id = t.id
+            $.action = 'startTask'
+            body = await getBody($)
+            res = await api('necklace_startTask', body)
+            console.log('startTask: ', res)
+            await $.wait(3000)
+          }
+          res = await api('necklace_reportTask', {"taskId": t.id})
+          console.log('reportTask: ', res)
           await $.wait(2000)
+        } else if (t.taskType === 6) {
+          console.log(t.taskType, t.id, t.taskName, t.taskStage)
+          res = await api('necklace_getTask', {taskId: t.id})
+          for (let t6 of res.data.result.taskItems) {
+            console.log(t6.id, t6.title)
+            res = await api('necklace_reportTask', {taskId: t.id, itemId: t6.id})
+            console.log(res)
+            await $.wait(2000)
+          }
+        } else {
+          console.log('其他任务')
+          console.log('我不会')
         }
-      } else {
-        console.log('其他任务')
-        console.log('我不会')
       }
     }
-  }
 
-  for (let bubble of result.bubbles) {
-    console.log('bubble:', bubble.score, bubble.id)
-    $.action = 'chargeScores'
-    $.id = bubble.id
-    body = await getBody($)
-    res = await api('necklace_chargeScores', body)
-    // console.log(res)
-    res.data.biz_code === 0
-      ? console.log('领奖成功！获得', res.data.result.giftScoreNum)
-      : console.log('领奖失败！', JSON.stringify(res))
-    await $.wait(1000)
+    result = (await api('necklace_homePage', {}))['data']['result'];
+    for (let bubble of result.bubbles) {
+      console.log('bubble:', bubble.score, bubble.id)
+      $.action = 'chargeScores'
+      $.id = bubble.id
+      body = await getBody($)
+      res = await api('necklace_chargeScores', body)
+      try {
+        res.data.biz_code === 0
+          ? console.log('领奖成功！获得', res.data.result.giftScoreNum)
+          : console.log('领奖失败！', JSON.stringify(res))
+      } catch (e) {
+        console.log('Bubble Error: ', res)
+      }
+      await $.wait(2000)
+    }
+  } catch (e) {
+    console.log('运行失败，请手动进入app查看是否正常！')
+    console.log('-----------')
+    console.log(e)
+    console.log('-----------')
   }
 }
 
 function api(fnId, body) {
   return new Promise(resolve => {
     $.post({
-      url: `https://api.m.jd.com/api?appid=coupon-necklace&functionId=${fnId}&t=${Date.now()}&uuid=${uuid}`,
+      url: `https://api.m.jd.com/api?appid=coupon-necklace&functionId=${fnId}&loginType=2&client=coupon-necklace&t=${Date.now()}&uuid=${uuid}`,
       headers: {
         'Host': 'api.m.jd.com',
         'accept': 'application/json, text/plain, */*',
-        'origin': 'https://h5.m.jd.com',
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-        'sec-fetch-mode': 'cors',
         'content-type': 'application/x-www-form-urlencoded',
-        'x-requested-with': 'com.jingdong.app.mall',
-        'sec-fetch-site': 'same-site',
+        'origin': 'https://h5.m.jd.com',
+        'accept-language': 'zh-cn',
+        'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
         'referer': 'https://h5.m.jd.com/',
-        'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
         'cookie': cookie
       },
       body: `body=${escape(JSON.stringify(body))}`
