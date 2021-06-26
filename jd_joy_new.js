@@ -526,8 +526,14 @@ function injectToRequest(fn) {
 }
 
 let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, newShareCodes, allMessage = '';
-$.get = injectToRequest($.get.bind($))
-$.post = injectToRequest($.post.bind($))
+
+try{
+  $.get = injectToRequest($.get.bind($))
+  $.post = injectToRequest($.post.bind($))
+}catch{
+  $.log('', `${$.name}:injectToRequest失败! 原因: ${e}!`, '')
+  console.log(e);
+}
 
 !(async () => {
   await requireConfig();
