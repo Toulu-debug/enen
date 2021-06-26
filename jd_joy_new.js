@@ -561,7 +561,7 @@ $.post = injectToRequest($.post.bind($))
       message = '';
       subTitle = '';
 
-      await run();
+      //await run();
       await feed();
 
       let tasks = await taskList();
