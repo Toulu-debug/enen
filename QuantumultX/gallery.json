@@ -1,6 +1,6 @@
 {
  "name": "task gallery",
- "description": "see you latter",
+ "description": "",
  "task": [
     {"config":"2 9 * * * https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/jd_bean_change.js, tag=京东资产变动通知, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true", "addons":"https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/QuantumultX/cookies.conf"},
     {"config":"10 7 * * * https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/jd_bean_home.js, tag=领京豆额外奖励, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jd_bean_home.png, enabled=true", "addons":"https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/QuantumultX/cookies.conf"},
