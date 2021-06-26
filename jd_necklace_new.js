@@ -233,7 +233,7 @@ async function main() {
           await $.wait(2000)
         } else if (t.taskType === 6) {
           console.log(t.taskType, t.id, t.taskName, t.taskStage)
-          res = await api('necklace_getTask', {taskId: t.id})
+          res = await getTask(t.id)
           for (let t6 of res.data.result.taskItems) {
             console.log(t6.id, t6.title)
             res = await api('necklace_reportTask', {taskId: t.id, itemId: t6.id})
@@ -286,6 +286,36 @@ function api(fnId, body) {
         'cookie': cookie
       },
       body: `body=${escape(JSON.stringify(body))}`
+    }, (err, resp, data) => {
+      try {
+        data = JSON.parse(data)
+      } catch (e) {
+        $.logErr('Error: ', e, resp)
+      } finally {
+        resolve(data)
+      }
+    })
+  })
+}
+
+function getTask(tid){
+  return new Promise(resolve => {
+    $.post({
+      url: `https://api.m.jd.com/api?appid=coupon-necklace&functionId=necklace_getTask&loginType=2&client=coupon-necklace&t=${Date.now()}`,
+      headers: {
+        'Host': 'api.m.jd.com',
+        'accept': 'application/json, text/plain, */*',
+        'origin': 'https://h5.m.jd.com',
+        'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+        'sec-fetch-mode': 'cors',
+        'content-type': 'application/x-www-form-urlencoded',
+        'x-requested-with': 'com.jingdong.app.mall',
+        'sec-fetch-site': 'same-site',
+        'referer': 'https://h5.m.jd.com/babelDiy/Zeus/41Lkp7DumXYCFmPYtU3LTcnTTXTX/index.html',
+        'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cookie': cookie
+      },
+      body: `body=%7B%22taskId%22%3A${tid}%7D`
     }, (err, resp, data) => {
       try {
         data = JSON.parse(data)
