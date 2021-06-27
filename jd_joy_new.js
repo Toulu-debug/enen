@@ -817,6 +817,7 @@ function run(fn = 'match') {
           console.log('还未开始！')
         } else if (race === 'matching') {
           console.log('正在匹配！')
+          await $.wait(2000)
           await run()
         } else {
           console.log('这是什么！')
