@@ -295,6 +295,20 @@ async function jdJXNC() {
         notifyBool = true;
         $.log(`【成熟】水果已成熟请及时收取，activestatus：${startInfo.activestatus}\n`);
         message += `【成熟】水果已成熟请及时收取，activestatus：${startInfo.activestatus}\n`;
+        
+        // 水果成熟单独通知
+        if (notifyLevel >= 1) {
+          let sendContent = `【京东账号${$.index}】${$.nickName}\n`;
+          sendContent += `【水果名称】${startInfo.prizename}\n`
+          sendContent += `【成熟】水果已成熟请及时收取，activestatus：${startInfo.activestatus}\n`;
+          sendContent += `请去京喜APP或京喜微信小程序收取\n`;
+          $.msg($.name, `${$.name} - 账号${$.index} - ${$.nickName}水果已收取`, sendContent, option);
+          
+          if ($.isNode()) {
+            await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName}水果已收取`, sendContent);
+          }
+        }
+        
       } else if (startInfo.activestatus === 0) { // 未种植（成熟已收取）
         $.log('账号未选择种子，请先去京喜农场选择种子。\n如果选择 APP 专属种子，必须提供 token。');
         message += '账号未选择种子，请先去京喜农场选择种子。\n如果选择 APP 专属种子，必须提供 token。\n';
