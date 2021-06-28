@@ -562,6 +562,8 @@ $.post = injectToRequest($.post.bind($))
       subTitle = '';
 
       await run();
+      // await run('detail/v2');
+
       await feed();
 
       let tasks = await taskList();
@@ -785,11 +787,11 @@ function award(taskType) {
   })
 }
 
-function run() {
+function run(fn = 'match') {
   let level = process.env.JD_JOY_teamLevel ? process.env.JD_JOY_teamLevel : 2
   return new Promise(resolve => {
     $.get({
-      url: `https://jdjoy.jd.com/common/pet/combat/match?teamLevel=${level}&reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
+      url: `https://jdjoy.jd.com/common/pet/combat/${fn}?teamLevel=${level}&reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
       headers: {
         'Host': 'jdjoy.jd.com',
         'sec-fetch-mode': 'cors',
@@ -807,12 +809,18 @@ function run() {
       try {
         console.log('赛跑', data)
         data = JSON.parse(data);
-        if (data.data.petRaceResult === 'participate') {
+        let race = data.data.petRaceResult
+
+        if (race === 'participate') {
           console.log('匹配成功！')
+        } else if (race === 'unbegin') {
+          console.log('还未开始！')
+        } else if (race === 'matching') {
+          console.log('正在匹配！')
+          await $.wait(2000)
+          await run()
         } else {
-          console.log('重新匹配...')
-          await $.wait(1500)
-          await run();
+          console.log('这是什么！')
         }
       } catch (e) {
         $.logErr(e);
