@@ -8,11 +8,12 @@
  export JD_JOY_REWARD_NAME = 500
  */
 
+const fs = require('fs')
 const $ = new Env("宠汪汪兑换二代目")
 console.log('\n====================Hello World====================\n')
 
 let target = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JOY_REWARD_NAME) : 500;
-let validate = ''
+let validate = '', cookiesArr = [];
 
 !(async () => {
   await requireConfig();
@@ -77,7 +78,7 @@ let validate = ''
 function init() {
   return new Promise(resolve => {
     $.get({
-      url: `https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
+      url: `https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE&validate=${validate}`,
       headers: {
         'Host': 'jdjoy.jd.com',
         'accept': '*/*',
@@ -104,6 +105,7 @@ function init() {
 function exchange(beanId) {
   console.log('exchange()')
   return new Promise(async resolve => {
+
     while (1) {
       if (new Date().getSeconds() < 30) {
         break
@@ -112,7 +114,7 @@ function exchange(beanId) {
       }
     }
     $.post({
-      url: `https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
+      url: `https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE&validate=${validate}`,
       headers: {
         "Host": "jdjoy.jd.com",
         "Accept-Language": "zh-cn",
@@ -211,14 +213,6 @@ function jsonParse(str) {
       $.msg($.name, '', '请勿随意在BoxJs输入框修改内容\n建议通过脚本去获取cookie')
       return [];
     }
-  }
-}
-
-function writeFile(text) {
-  if ($.isNode()) {
-    const fs = require('fs');
-    fs.writeFile('a.json', text, () => {
-    })
   }
 }
 
