@@ -7,7 +7,7 @@ cookies = ['ck1','ck2','ck3']
 或环境变量JD_COOKIE以&分割
 export JD_COOKIE="ck1&ck2&ck3"
 
-cron 59 7,15,23 * * * * 或 0 7,15,23 * * *
+cron 59 7,15,23 * * * * 或 0 0,8,16 * * *
 """
 
 import json
