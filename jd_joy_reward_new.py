@@ -59,7 +59,7 @@ def main(cookie, validate):
 
 
 if __name__ == '__main__':
-    print("🔔宠汪汪兑换加强版,开始！")
+    print("🔔宠汪汪兑换Pro,开始！")
     cookies = [
         # 'ck1',
         # 'ck2',
