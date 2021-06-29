@@ -1,3 +1,15 @@
+"""
+宠汪汪兑换Pro
+更新时间：2021-06-30
+
+在Line 63设置cookie
+cookies = ['ck1','ck2','ck3']
+或环境变量JD_COOKIE以&分割
+export JD_COOKIE="ck1&ck2&ck3"
+
+cron 59 7,15,23 * * * * 或 0 7,15,23 * * *
+"""
+
 import json
 import os
 import threading
@@ -49,11 +61,13 @@ def main(cookie, validate):
 if __name__ == '__main__':
     print("🔔宠汪汪兑换加强版,开始！")
     cookies = [
-        'ck1',
-        'ck2',
-        'ck3',
+        # 'ck1',
+        # 'ck2',
+        # 'ck3',
         # ...
     ]
+    if os.environ.get("JD_COOKIE"):
+        cookies.append(os.environ.get("JD_COOKIE").split('&'))
     lock = threading.BoundedSemaphore(20)
     if 'test' in os.getcwd():
         path = '..'
