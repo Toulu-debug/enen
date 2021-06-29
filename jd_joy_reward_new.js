@@ -12,7 +12,7 @@ const $ = new Env("宠汪汪兑换二代目")
 console.log('\n====================Hello World====================\n')
 
 let target = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JOY_REWARD_NAME) : 500;
-let flag = true;
+let validate = ''
 
 !(async () => {
   await requireConfig();
@@ -103,7 +103,7 @@ function init() {
 
 function exchange(beanId) {
   console.log('exchange()')
-  return new Promise(resolve => {
+  return new Promise(async resolve => {
     while (1) {
       if (new Date().getSeconds() < 30) {
         break
