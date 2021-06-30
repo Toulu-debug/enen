@@ -8,7 +8,6 @@ cron 59 7,15,23 * * * * 或 0 0,8,16 * * *
 """
 
 import json
-import os
 import random
 import sys
 import threading
