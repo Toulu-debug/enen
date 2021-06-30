@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # cookies = ['ck1','ck2','ck3']
     cookies = []
     if os.environ.get("JD_COOKIE"):
-        cookies.append(os.environ.get("JD_COOKIE").split('&'))
+        cookies = os.environ.get("JD_COOKIE").split('&')
     lock = threading.BoundedSemaphore(20)
     if 'test' in os.getcwd():
         path = '..'
