@@ -16,7 +16,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^2.8.0",
     "crypto-js": "^4.0.0",
     "download": "^8.0.0",
     "got": "^11.5.1",
