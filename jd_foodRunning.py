@@ -117,9 +117,7 @@ class FoodRunning:
 
 
 if __name__ == '__main__':
-    if 'Options:' not in os.popen('sudo -h').read():
-        print('珍爱ck，远离docker')
-    else:
+    if root():
         ck = cookies[0]
         fr = FoodRunning(ck)
         fr.run()

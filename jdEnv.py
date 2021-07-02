@@ -1,5 +1,6 @@
 import os
 import random
+import re
 
 
 def env(key):
@@ -56,3 +57,11 @@ USER_AGENTS = [
     "jdapp;iPhone;10.0.2;14.1;network/wifi;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1",
 ]
 USER_AGENTS = USER_AGENTS[random.randint(0, len(USER_AGENTS) - 1)]
+
+
+def root():
+    if 'Options:' in os.popen('sudo -h').read() or re.match(r'[C-Z]:.*', os.getcwd()):
+        return True
+    else:
+        print('珍爱ck，远离docker')
+        return False
