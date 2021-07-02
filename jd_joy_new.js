@@ -14,13 +14,14 @@
 const $ = new Env("宠汪汪二代目")
 console.log('\n====================Hello World====================\n')
 
-const https = require('https');
 const http = require('http');
 const stream = require('stream');
 const zlib = require('zlib');
 const vm = require('vm');
 const PNG = require('png-js');
 const UA = require('./USER_AGENTS.js').USER_AGENT;
+const fetch = require('node-fetch');
+const fs = require("fs");
 
 
 Math.avg = function average() {
@@ -527,7 +528,7 @@ function injectToRequest(fn) {
   };
 }
 
-let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, newShareCodes, allMessage = '';
+let cookiesArr = [], cookie = '', notify;
 $.get = injectToRequest($.get.bind($))
 $.post = injectToRequest($.post.bind($))
 
@@ -561,17 +562,13 @@ $.post = injectToRequest($.post.bind($))
       message = '';
       subTitle = '';
 
+      await run('detail/v2');
       await run();
-      // await run('detail/v2');
-
       await feed();
 
       let tasks = await taskList();
-
       for (let tp of tasks.datas) {
         console.log(tp.taskName, tp.receiveStatus)
-        // if (tp.taskName === '每日签到' && tp.receiveStatus === 'chance_left')
-        //   await sign();
 
         if (tp.receiveStatus === 'unreceive') {
           await award(tp.taskType);
@@ -584,11 +581,12 @@ $.post = injectToRequest($.post.bind($))
             for (let t of followChannelList['datas']) {
               if (!t.status) {
                 console.log('┖', t['channelName'])
+                await beforeTask('follow_channel', t.channelId);
                 await doTask(JSON.stringify({"channelId": t.channelId, "taskType": 'FollowChannel'}))
-                await $.wait(5000)
+                await $.wait(3000)
               }
             }
-            await $.wait(5000)
+            await $.wait(3000)
           }
         }
         if (tp.taskName === '逛会场') {
@@ -615,8 +613,10 @@ $.post = injectToRequest($.post.bind($))
         if (tp.taskName === '关注店铺') {
           for (let t of tp.followShops) {
             if (!t.status) {
-              await doTask(`shopId=${t.shopId}`, 'followShop')
-              await $.wait(5000)
+              await beforeTask('follow_shop', t.shopId);
+              await $.wait(1000);
+              await followShop(t.shopId)
+              await $.wait(2000);
             }
           }
         }
@@ -647,7 +647,6 @@ function getFollowChannels() {
 function taskList() {
   return new Promise(resolve => {
     $.get({
-      // url: `https://jdjoy.jd.com/common/pet/getPetTaskConfig?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
       url: `https://jdjoy.jd.com/common/pet/getPetTaskConfig?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
       headers: {
         'Host': 'jdjoy.jd.com',
@@ -674,6 +673,51 @@ function taskList() {
   })
 }
 
+function beforeTask(fn, shopId) {
+  return new Promise(resolve => {
+    $.get({
+      url: `https://jdjoy.jd.com/common/pet/icon/click?iconCode=${fn}&linkAddr=${shopId}&reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
+      headers: {
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/json',
+        'Origin': 'https://h5.m.jd.com',
+        'Accept-Language': 'zh-cn',
+        'Host': 'jdjoy.jd.com',
+        'User-Agent': 'jdapp;iPhone;10.0.6;12.4.1;fc13275e23b2613e6aae772533ca6f349d2e0a86;network/wifi;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;model/iPhone11,6;addressid/589374288;appBuild/167724;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+        'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+        'cookie': cookie
+      }
+    }, (err, resp, data) => {
+      console.log('before task:', data);
+      resolve();
+    })
+  })
+}
+
+function followShop(shopId) {
+  return new Promise(resolve => {
+    $.post({
+      url: `https://jdjoy.jd.com/common/pet/followShop?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE`,
+      headers: {
+        'User-Agent': 'jdapp;iPhone;10.0.6;12.4.1;fc13275e23b2613e6aae772533ca6f349d2e0a86;network/wifi;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;model/iPhone11,6;addressid/589374288;appBuild/167724;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+        'Accept-Language': 'zh-cn',
+        'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html?babelChannel=ttt12&lng=0.000000&lat=0.000000&sid=87e644ae51ba60e68519b73d1518893w&un_area=12_904_3373_62101',
+        'Host': 'jdjoy.jd.com',
+        'Origin': 'https://h5.m.jd.com',
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'cookie': cookie
+      },
+      body: `shopId=${shopId}`
+    }, (err, resp, data) => {
+      console.log(data)
+      resolve();
+    })
+  })
+}
+
 function doTask(body, fnId = 'scan') {
   return new Promise(resolve => {
     $.post({
@@ -681,7 +725,7 @@ function doTask(body, fnId = 'scan') {
       headers: {
         'Host': 'jdjoy.jd.com',
         'accept': '*/*',
-        'content-type': fnId === 'followGood' ? 'application/x-www-form-urlencoded' : 'application/json',
+        'content-type': fnId === 'followGood' || fnId === 'followShop' ? 'application/x-www-form-urlencoded' : 'application/json',
         'origin': 'https://h5.m.jd.com',
         'accept-language': 'zh-cn',
         'referer': 'https://h5.m.jd.com/',
@@ -807,23 +851,29 @@ function run(fn = 'match') {
       },
     }, async (err, resp, data) => {
       try {
-        console.log('赛跑', data)
-        data = JSON.parse(data);
-        let race = data.data.petRaceResult
-
-        if (race === 'participate') {
-          console.log('匹配成功！')
-        } else if (race === 'unbegin') {
-          console.log('还未开始！')
-        } else if (race === 'matching') {
-          console.log('正在匹配！')
-          await $.wait(2000)
-          await run()
+        if (fn === 'receive') {
+          console.log('领取赛跑奖励：', data)
         } else {
-          console.log('这是什么！')
+          console.log('赛跑', data)
+          data = JSON.parse(data);
+          let race = data.data.petRaceResult
+          if (race === 'participate') {
+            console.log('匹配成功！')
+          } else if (race === 'unbegin') {
+            console.log('还未开始！')
+          } else if (race === 'matching') {
+            console.log('正在匹配！')
+            await $.wait(2000)
+            await run()
+          } else if (race === 'unreceive') {
+            console.log('开始领奖')
+            await run('receive')
+          } else {
+            console.log('这是什么！')
+          }
         }
       } catch (e) {
-        $.logErr(e);
+        console.log(e)
       } finally {
         resolve();
       }
@@ -836,7 +886,6 @@ function requireConfig() {
     notify = $.isNode() ? require('./sendNotify') : '';
     //Node.js用户请在jdCookie.js处填写京东ck;
     const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
-    const jdPetShareCodes = '';
     //IOS等用户直接用NobyDa的jd cookie
     if ($.isNode()) {
       Object.keys(jdCookieNode).forEach((item) => {
@@ -850,18 +899,6 @@ function requireConfig() {
       cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
     }
     console.log(`共${cookiesArr.length}个京东账号\n`)
-    $.shareCodesArr = [];
-    if ($.isNode()) {
-      Object.keys(jdPetShareCodes).forEach((item) => {
-        if (jdPetShareCodes[item]) {
-          $.shareCodesArr.push(jdPetShareCodes[item])
-        }
-      })
-    } else {
-      // if ($.getdata('jd_pet_inviter')) $.shareCodesArr = $.getdata('jd_pet_inviter').split('\n').filter(item => !!item);
-      // console.log(`\nBoxJs设置的${$.name}好友邀请码:${$.getdata('jd_pet_inviter') ? $.getdata('jd_pet_inviter') : '暂无'}\n`);
-    }
-    // console.log(`您提供了${$.shareCodesArr.length}个账号的东东萌宠助力码\n`);
     resolve()
   })
 }
@@ -925,14 +962,9 @@ function jsonParse(str) {
 
 function writeFile(text) {
   if ($.isNode()) {
-    const fs = require('fs');
     fs.writeFile('a.json', text, () => {
     })
   }
-}
-
-function random() {
-  return Math.round(Math.random() * 2)
 }
 
 // prettier-ignore
