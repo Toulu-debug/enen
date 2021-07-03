@@ -98,6 +98,7 @@ def main():
             print('未登录')
         else:
             print('其他错误：', res)
+            break
         time.sleep(1)
 
 
