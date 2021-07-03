@@ -16,7 +16,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "crypto-js": "^4.0.0",
+    "date-fns": "^2.22.1",
     "download": "^8.0.0",
     "got": "^11.5.1",
     "http-server": "^0.12.3",
