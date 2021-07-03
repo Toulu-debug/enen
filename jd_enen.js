@@ -50,6 +50,7 @@ if ($.isNode()) {
         // $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
         continue
       } else {
+        /*
         $.get({
           url: `https://plogin.m.jd.com/cgi-bin/ml/mlogout?appid=300&returnurl=https%3A%2F%2Fm.jd.com%2F`,
           headers: {
@@ -58,6 +59,7 @@ if ($.isNode()) {
             'cookie': cookie
           }
         })
+        */
       }
     }
   }
