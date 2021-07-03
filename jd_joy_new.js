@@ -605,7 +605,7 @@ $.post = injectToRequest($.post.bind($))
           for (let t of tp.followGoodList) {
             if (!t.status) {
               console.log('┖', t.skuName)
-              await beforeTask('folow_good', t.sku)
+              await beforeTask('follow_good', t.sku)
               await $.wait(1000)
               await doTask(`sku=${t.sku}`, 'followGood')
               await $.wait(3000)
