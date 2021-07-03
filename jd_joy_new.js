@@ -572,7 +572,7 @@ $.post = injectToRequest($.post.bind($))
 
         if (tp.receiveStatus === 'unreceive') {
           await award(tp.taskType);
-          await $.wait(5000);
+          await $.wait(3000);
         }
         if (tp.taskName === '浏览频道') {
           for (let i = 0; i < 3; i++) {
@@ -597,7 +597,7 @@ $.post = injectToRequest($.post.bind($))
                 "marketLink": `${t.marketLink || t.marketLinkH5}`,
                 "taskType": "ScanMarket"
               }))
-              await $.wait(5000)
+              await $.wait(3000)
             }
           }
         }
@@ -605,8 +605,10 @@ $.post = injectToRequest($.post.bind($))
           for (let t of tp.followGoodList) {
             if (!t.status) {
               console.log('┖', t.skuName)
+              await beforeTask('folow_good', t.sku)
+              await $.wait(1000)
               await doTask(`sku=${t.sku}`, 'followGood')
-              await $.wait(5000)
+              await $.wait(3000)
             }
           }
         }
@@ -854,7 +856,6 @@ function run(fn = 'match') {
         if (fn === 'receive') {
           console.log('领取赛跑奖励：', data)
         } else {
-          console.log('赛跑', data)
           data = JSON.parse(data);
           let race = data.data.petRaceResult
           if (race === 'participate') {
