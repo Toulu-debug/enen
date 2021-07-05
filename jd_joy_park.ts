@@ -36,7 +36,7 @@ let cookie: string = '', cookiesArr: Array<string> = [], res: any = '';
             taskResult = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg", "itemId": encodeURIComponent(apTaskDetail.itemId)})
             console.log('doTask: ',JSON.stringify(taskResult))
             if(taskResult.errMsg === '任务已完成') break
-            await wait(2000)
+            await wait(10000)
             awardRes = await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
             if (awardRes.success && awardRes.code === 0)
               console.log(awardRes.data[0].awardGivenNumber)
