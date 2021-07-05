@@ -68,8 +68,12 @@ function api(fn: string, body: Object): Object {
   })
 }
 
-function wait(t: number) {
-  return new Promise(e => setTimeout(e, t))
+function wait(t:number){
+  return new Promise<void>(resolve => {
+    setTimeout(()=>{
+      resolve()
+    },t)
+  })
 }
 
 function requireConfig() {

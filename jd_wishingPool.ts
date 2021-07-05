@@ -83,8 +83,12 @@ function doTask(taskToken: string, taskId: number, timeout: number) {
   })
 }
 
-function wait(t: number) {
-  return new Promise(e => setTimeout(e, t))
+function wait(t:number){
+  return new Promise<void>(resolve => {
+    setTimeout(()=>{
+      resolve()
+    },t)
+  })
 }
 
 function requireConfig() {
