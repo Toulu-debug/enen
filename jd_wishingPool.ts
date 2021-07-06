@@ -3,6 +3,7 @@ import USER_AGENT from './TS_USER_AGENTS';
 
 let $: any = {};
 let cookie: string = '', cookiesArr: Array<string> = [];
+let balance: number;
 
 !(async () => {
   await requireConfig();
@@ -16,6 +17,16 @@ let cookie: string = '', cookiesArr: Array<string> = [];
     await TotalBean();
     console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
     let taskVos: any = await api('healthyDay_getHomeData', {"appId": "1EFVQwQ", "taskToken": "", "channelId": 1});
+    balance = taskVos.data.result.userInfo.userScore * 1
+    console.log('余额:', balance)
+    while (balance >= 500) {
+      console.log('exchange()')
+      let res: any = await api('interact_template_getLotteryResult', {"appId": "1EFVQwQ"})
+      // console.log('抽奖结果:', res.data.result.lotteryReturnCode)
+      console.log('抽奖结果:', res.data)
+      balance -= 500
+    }
+
     let tasks: any = taskVos.data.result.taskVos
     for (let t of tasks) {
       console.log(t.taskName)
@@ -41,6 +52,8 @@ let cookie: string = '', cookiesArr: Array<string> = [];
         }
       }
     }
+    console.log('-------------------------------')
+    await wait(1000)
   }
 })()
 
@@ -83,11 +96,11 @@ function doTask(taskToken: string, taskId: number, timeout: number) {
   })
 }
 
-function wait(t:number){
+function wait(t: number) {
   return new Promise<void>(resolve => {
-    setTimeout(()=>{
+    setTimeout(() => {
       resolve()
-    },t)
+    }, t)
   })
 }
 
