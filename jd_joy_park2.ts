@@ -146,7 +146,7 @@ function joyList() {
 function merge() {
   return new Promise<void>(async resolve => {
     runtimes++;
-    if (runtimes === 10) resolve()
+    if (runtimes === 10) return
     let minLevel: Array<number> = [];
     for (let j of joys.data.activityJoyList) {
       minLevel.push(j.level)
