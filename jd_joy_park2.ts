@@ -6,6 +6,7 @@ let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCod
 let joyId: Array<number> = [], workJoyInfoList: any = [];
 let joyId1: number, userLevel: number, Joys: Joy[] = [];
 let joys: any;
+let level: number = 4, runtimes: number = 0;
 
 interface Joy {
   id: number,
@@ -30,66 +31,62 @@ interface Joy {
       console.log('id:', j.id, '等级:', j.level)
     }
 
-    await wait(7000);
-
     await makeShareCodes();
-    await wait(7000);
 
     await merge();
 
-    /*
     let joy: any = await joyList();
     if (joy.data.activityJoyList.length !== 0) {
       joyId1 = joy.data.activityJoyList[0].id
       console.log(joy.data.activityJoyList)
       // 1:种田  2:出来
-      res = await api('joyMove', {"joyId": joyId1, "location": 0, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+      res = await api('joyMove', {"joyId": joyId1, "location": 1, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
       console.log(res)
     }
-
-    let taskVos: any = await api('apTaskList', {"linkId": "LsQNxL7iWDlXUs6cFl-AAg"});
-    let tasks: any = taskVos.data
-    for (let t of tasks) {
-      if (t.taskTitle === '汪汪乐园签到') {
-        if (t.taskDoTimes === 0) {
-          res = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-          console.log('签到:', res)
-          await wait(1000)
-          await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-        }
-      } else if (t.taskTitle === '汪汪乐园浏览会场' || t.taskTitle === '汪汪乐园浏览商品') {
-        let arr: Array<string> = ['汪汪乐园浏览会场', '汪汪乐园浏览商品']
-        for (let name of arr) {
-          if (t.taskDoTimes + 1 === t.taskLimitTimes || t.taskDoTimes === t.taskLimitTimes) continue
-          let times: number = name === '汪汪乐园浏览会场' ? 5 : 10;
-          res = await api('apTaskDetail', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-          let apTaskDetail: any, taskResult: any, awardRes: any;
-
-          // console.log(res.data)
-
-          for (let i = 0; i < times; i++) {
-            try {
-              apTaskDetail = res.data.taskItemList[i]
-            } catch (e) {
-              break
+    /*
+        let taskVos: any = await api('apTaskList', {"linkId": "LsQNxL7iWDlXUs6cFl-AAg"});
+        let tasks: any = taskVos.data
+        for (let t of tasks) {
+          if (t.taskTitle === '汪汪乐园签到') {
+            if (t.taskDoTimes === 0) {
+              res = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+              console.log('签到:', res)
+              await wait(1000)
+              await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
             }
-            taskResult = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg", "itemId": encodeURIComponent(apTaskDetail.itemId)})
-            console.log('doTask: ', JSON.stringify(taskResult))
-            if (taskResult.errMsg === '任务已完成') break
-            console.log('等待中...')
-            await wait(10000)
-            awardRes = await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-            if (awardRes.success && awardRes.code === 0)
-              console.log(awardRes.data[0].awardGivenNumber)
-            else
-              console.log('领取奖励出错:', JSON.stringify(awardRes))
-            await wait(1000)
+          } else if (t.taskTitle === '汪汪乐园浏览会场' || t.taskTitle === '汪汪乐园浏览商品') {
+            let arr: Array<string> = ['汪汪乐园浏览会场', '汪汪乐园浏览商品']
+            for (let name of arr) {
+              if (t.taskDoTimes + 1 === t.taskLimitTimes || t.taskDoTimes === t.taskLimitTimes) continue
+              let times: number = name === '汪汪乐园浏览会场' ? 5 : 10;
+              res = await api('apTaskDetail', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+              let apTaskDetail: any, taskResult: any, awardRes: any;
+
+              // console.log(res.data)
+
+              for (let i = 0; i < times; i++) {
+                try {
+                  apTaskDetail = res.data.taskItemList[i]
+                } catch (e) {
+                  break
+                }
+                taskResult = await api('apDoTask', {"taskType": t.taskType, "taskId": t.id, "channel": 4, "linkId": "LsQNxL7iWDlXUs6cFl-AAg", "itemId": encodeURIComponent(apTaskDetail.itemId)})
+                console.log('doTask: ', JSON.stringify(taskResult))
+                if (taskResult.errMsg === '任务已完成') break
+                console.log('等待中...')
+                await wait(10000)
+                awardRes = await api('apTaskDrawAward', {"taskType": t.taskType, "taskId": t.id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
+                if (awardRes.success && awardRes.code === 0)
+                  console.log(awardRes.data[0].awardGivenNumber)
+                else
+                  console.log('领取奖励出错:', JSON.stringify(awardRes))
+                await wait(1000)
+              }
+            }
           }
         }
-      }
-    }
 
-     */
+         */
 
     break
   }
@@ -123,6 +120,7 @@ function api(fn: string, body: Object): Object {
           'Cookie': cookie
         }
       })
+    await heartBeat();
     resolve(data);
   })
 }
@@ -138,6 +136,8 @@ function joyList() {
         'referer': 'https://joypark.jd.com'
       }
     })
+    await wait(1000)
+    await heartBeat()
     resolve(data)
   })
 }
@@ -145,39 +145,41 @@ function joyList() {
 
 function merge() {
   return new Promise<void>(async resolve => {
-    let level: number = userLevel < 6 ? 1 : 2
+    runtimes++;
+    if (runtimes === 10) resolve()
+    let minLevel: Array<number> = [];
+    for (let j of joys.data.activityJoyList) {
+      minLevel.push(j.level)
+    }
+    minLevel = minLevel.sort()
+    console.log('min:', minLevel)
+
     let mergeTemp = joys.data.activityJoyList.filter((j: Joy) => {
-      return j.level === 3
+      return j.level === minLevel[0]
     })
     console.log(mergeTemp)
 
     if (mergeTemp.length >= 2) {
       console.log('aaa')
+      await wait(1000)
       res = await api('joyMerge', {"joyOneId": mergeTemp[0].id, "joyTwoId": mergeTemp[1].id, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
       console.log(res)
+      joys = await joyList();
+      await merge();
     } else if (mergeTemp.length === 1) {
       console.log('bbb')
       res = await api('joyBuy', {"level": level, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
       console.log('joyBuy:', res)
-      await wait(7000)
+      if (res.errMsg === '参数非法') level--
       joys = await joyList();
-      await wait(7000)
+      await heartBeat()
       await merge()
     }
 
-    /*
-    let level: number = userLevel < 6 ? 1 : 2
-    res = await api('joyBuy', {"level": level, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-    let jid1: number = res.data.id
-    console.log(jid1)
-    await wait(2000)
-    res = await api('joyBuy', {"level": level, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-    let jid2: number = res.data.id
-    console.log(jid2)
-    await wait(2000)
-    res = await api('joyMerge', {"joyOneId": jid1, "joyTwoId": jid2, "linkId": "LsQNxL7iWDlXUs6cFl-AAg"})
-    console.log(res)
-    */
+    await wait(1000)
+
+    await heartBeat()
+
     resolve()
   })
 }
@@ -188,12 +190,35 @@ function makeShareCodes() {
     console.log('用户等级:', res.data.level, '助力码:', res.data.invitePin)
     shareCodes.push(res.data.invitePin)
     userLevel = res.data.level
+    await wait(1000)
+    await heartBeat()
     resolve()
   })
 }
 
+function heartBeat() {
+  return new Promise<void>(resolve => {
+    axios.get("https://api.m.jd.com/?functionId=gameHeartbeat&body={%22businessCode%22:1,%22linkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22}&_t=1625556213451&appid=activities_platform", {
+      headers: {
+        'host': 'api.m.jd.com',
+        'User-agent': USER_AGENT,
+        'cookie': cookie,
+        'origin': 'https://joypark.jd.com',
+        'referer': 'https://joypark.jd.com'
+      }
+    }).then(async () => {
+      resolve()
+    })
+  })
+}
+
 function wait(t: number) {
-  return new Promise(e => setTimeout(e, t))
+  return new Promise<void>(resolve => {
+    setTimeout(async () => {
+      await heartBeat()
+      resolve()
+    }, 2000)
+  })
 }
 
 function requireConfig() {
