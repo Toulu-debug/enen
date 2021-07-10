@@ -1,8 +1,16 @@
-import {format} from 'date-fns';
+/**
+ * 京喜牧场
+ * 买、喂、收蛋、锄草、挑逗
+ * // TODO
+ * 领奖、任务
+ */
 
-const CryptoJS = require('crypto-js')
+import {format} from 'date-fns';
+import {writeFileSync} from 'fs'
 import axios from 'axios';
 import USER_AGENT from './TS_USER_AGENTS';
+
+const CryptoJS = require('crypto-js')
 
 // console.log('时间戳：', format(new Date(), 'yyyyMMddHHmmssSSS'));
 
@@ -24,7 +32,8 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     await TotalBean();
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
-    homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,sceneid')
+    homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
+    console.log(homePageInfo)
     let food: number = homePageInfo.data.materialinfo[0].value;
     let petid: number = homePageInfo.data.petinfo[0].petid
     let coins = homePageInfo.data.coins;
@@ -32,6 +41,8 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     console.log('pet id:', petid)
     console.log('现有草:', food);
     console.log('金币:', coins);
+
+    await getTask();
 
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'channel,sceneid,type', {type: '1'})
@@ -52,23 +63,24 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       if (res.ret === 0) {
         food -= 10
         console.log('剩余草:', res.data.newnum)
-      } else if (res.data.maintaskId === 'pause' && res.ret === 2020) {
-        console.log('收🥚')
-        res = await api('operservice/GetSelfResult', 'channel,itemid,sceneid,type', {petid: petid, type: '11'})
-        if (res.ret === 0) {
-          console.log('收🥚成功:', res.data.newnum)
+      } else if (res.ret === 2020) {
+        if (res.data.maintaskId === 'pause') {
+          console.log('收🥚')
+          res = await api('operservice/GetSelfResult', 'channel,itemid,sceneid,type', {petid: petid, type: '11'})
+          if (res.ret === 0) {
+            console.log('收🥚成功:', res.data.newnum)
+          }
         }
       } else {
         console.log(res)
         break
       }
-      await wait(3000)
+      await wait(4000)
     }
     await wait(2000)
 
     while (1) {
       res = await api('operservice/Action', 'channel,sceneid,type', {type: '2'})
-      console.log(res)
       if (res.data.addcoins === 0) break
       console.log('锄草:', res.data.addcoins)
       await wait(1500)
@@ -77,28 +89,23 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 
     while (1) {
       res = await api('operservice/Action', 'channel,sceneid,type', {type: '1', petid: petid})
-      console.log(res)
       if (res.data.addcoins === 0) break
       console.log('挑逗:', res.data.addcoins)
       await wait(1500)
     }
-    await wait(2000)
-
-    let tasks: any
-
-    break
   }
 })()
 
 interface Params {
+  isgift?: number,
   petid?: number,
   type?: string,
-
+  taskId?: number
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async resolve => {
-    let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+    let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
     if (Object.keys(params).length !== 0) {
       let key: (keyof Params)
       for (key in params) {
@@ -109,13 +116,72 @@ function api(fn: string, stk: string, params: Params = {}) {
     url += '&h5st=' + decrypt(stk, url)
     let {data} = await axios.get(url, {
       headers: {
-        'User-Agent': USER_AGENT,
-        'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',
+        'Cookie': cookie,
         'Host': 'm.jingxi.com',
+        'User-Agent': 'jdpingou;iPhone;4.11.0;12.4.1;52cf225f0c463b69e1e36b11783074f9a7d9cbf0;network/wifi;model/iPhone11,6;appBuild/100591;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/503;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+        'Referer': 'https://st.jingxi.com/',
+      }
+    })
+    resolve(data)
+  })
+}
+
+function getTask() {
+  return new Promise<void>(async resolve => {
+    let tasks: any = await taskAPI('GetUserTaskStatusList', 'bizCode,dateType,source')
+    // console.log(tasks)
+    // writeFileSync('./a.json', JSON.stringify(tasks), 'utf-8')
+    let doTaskRes: any
+    for (let t of tasks.data.userTaskStatusList) {
+      if ((t.dateType === 1 || t.dateType === 2) && t.completedTimes == t.targetTimes && t.awardStatus === 2) {
+        // 成就任务
+        t.dateType === 1
+          ?
+          console.log('成就任务可领取:', t.taskName, t.completedTimes, t.targetTimes)
+          :
+          console.log('每日任务可领取:', t.taskName, t.completedTimes, t.targetTimes)
+
+        doTaskRes = await taskAPI('Award', 'bizCode,source,taskId', {taskId: t.taskId})
+        console.log(doTaskRes)
+        if (doTaskRes.ret === 0) {
+          let awardCoin = doTaskRes['data']['prizeInfo'].match(/:(.*)}/)![1] * 1
+          console.log('任务完成:', awardCoin)
+        } else {
+          break
+        }
+        await wait(4000)
+        await getTask()
+      }
+      // if (t.dateType === 2 && t.completedTimes < t.targetTimes) {
+    }
+    await wait(3000)
+    resolve()
+  })
+}
+
+function taskAPI(fn: string, stk: string, params: Params = {}) {
+  return new Promise(async resolve => {
+    let url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_ste=1&sceneval=2&_stk=${encodeURIComponent(stk)}&g_login_type=1&g_ty=ajax`
+    if (Object.keys(params).length !== 0) {
+      let key: (keyof Params)
+      for (key in params) {
+        if (params.hasOwnProperty(key))
+          url += `&${key}=${params[key]}`
+      }
+    }
+    url += '&h5st=' + decrypt(stk, url)
+    let {data} = await axios.get(url, {
+      headers: {
+        'Origin': 'https://st.jingxi.com',
+        'Accept-Language': 'zh-cn',
+        'Connection': 'keep-alive',
+        'Host': 'm.jingxi.com',
+        'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html?nativeConfig=%7B%22immersion%22%3A1%2C%22toColor%22%3A%22%23e62e0f%22%7D&__mcwvt=sjcp&PTAG=139279.13.31&jxsid=16257474246337594063',
+        'Accept': 'application/json',
+        'User-Agent': 'jdpingou;iPhone;4.11.0;12.4.1;52cf225f0c463b69e1e36b11783074f9a7d9cbf0;network/wifi;model/iPhone11,6;appBuild/100591;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/503;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
         'Cookie': cookie
       }
     })
-
     resolve(data)
   })
 }
@@ -180,17 +246,16 @@ function decrypt(stk: string, url: string) {
 }
 
 function requireConfig() {
-  return new Promise(resolve => {
-    console.log('\n====================Hello World====================\n');
-    console.log('开始获取配置文件\n');
+  return new Promise<void>(resolve => {
+    console.log('开始获取配置文件\n')
     const jdCookieNode = require('./jdCookie.js');
     Object.keys(jdCookieNode).forEach((item) => {
       if (jdCookieNode[item]) {
-        cookiesArr.push(jdCookieNode[item]);
+        cookiesArr.push(jdCookieNode[item])
       }
     })
-    console.log(`共${cookiesArr.length}个京东账号\n`);
-    resolve(0);
+    console.log(`共${cookiesArr.length}个京东账号\n`)
+    resolve()
   })
 }
 
