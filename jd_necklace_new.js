@@ -238,6 +238,11 @@ async function main() {
           }
         } else if (t.taskType === 4 || t.taskType === 3) {
           if (t.taskStage === 0) {
+            $.id = t.id
+            $.action = 'startTask'
+            body = await getBody($)
+            res = await api('necklace_startTask', body)
+            console.log(res)
             console.log(t.taskType, t.id, t.taskName)
             await homePageTask(t.taskType, t.id)
             await $.wait(2000)
