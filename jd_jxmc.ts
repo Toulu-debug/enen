@@ -42,7 +42,16 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     console.log('现有草:', food);
     console.log('金币:', coins);
 
-    await getTask();
+    let taskRetCode: number = 0;
+    while (taskRetCode === 0) {
+      taskRetCode = await getTask();
+      console.log('taskRetCode:', taskRetCode)
+      if (taskRetCode === 0) {
+        await wait(4000);
+      } else {
+        break
+      }
+    }
 
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'channel,sceneid,type', {type: '1'})
@@ -127,7 +136,7 @@ function api(fn: string, stk: string, params: Params = {}) {
 }
 
 function getTask() {
-  return new Promise<void>(async resolve => {
+  return new Promise<number>(async resolve => {
     let tasks: any = await taskAPI('GetUserTaskStatusList', 'bizCode,dateType,source')
     // console.log(tasks)
     // writeFileSync('./a.json', JSON.stringify(tasks), 'utf-8')
@@ -142,20 +151,17 @@ function getTask() {
           console.log('每日任务可领取:', t.taskName, t.completedTimes, t.targetTimes)
 
         doTaskRes = await taskAPI('Award', 'bizCode,source,taskId', {taskId: t.taskId})
-        console.log(doTaskRes)
         if (doTaskRes.ret === 0) {
           let awardCoin = doTaskRes['data']['prizeInfo'].match(/:(.*)}/)![1] * 1
           console.log('任务完成:', awardCoin)
+          resolve(0)
         } else {
-          break
+          resolve(1)
         }
-        await wait(4000)
-        await getTask()
       }
       // if (t.dateType === 2 && t.completedTimes < t.targetTimes) {
     }
-    await wait(3000)
-    resolve()
+    resolve(1)
   })
 }
 
