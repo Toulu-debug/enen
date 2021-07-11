@@ -106,7 +106,7 @@ function joyList() {
 }
 
 function wait(t: number) {
-  return new Promise(e => setTimeout(e, t))
+  return new Promise<void>(e => setTimeout(e, t))
 }
 
 function requireConfig() {
