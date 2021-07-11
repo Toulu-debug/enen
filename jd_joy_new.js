@@ -562,7 +562,6 @@ $.post = injectToRequest($.post.bind($))
       subTitle = '';
 
       await getFriends();
-      break
 
       await run('detail/v2');
       await run();
@@ -903,7 +902,7 @@ function getFriends() {
     }, async (err, resp, data) => {
       await $.wait(1000)
       $.get({
-        url: 'https://jdjoy.jd.com/common/pet/h5/getFriends?itemsPerPage=20&currentPage=2&reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE',
+        url: 'https://jdjoy.jd.com/common/pet/h5/getFriends?itemsPerPage=20&currentPage=1&reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE',
         headers: {
           'Host': 'jdjoy.jd.com',
           'Accept': '*/*',
@@ -911,12 +910,37 @@ function getFriends() {
           "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
           'cookie': cookie
         }
-      }, (err, resp, data) => {
+      }, async (err, resp, data) => {
         data = JSON.parse(data)
         for (let f of data.datas) {
           if (f.stealStatus === 'can_steal') {
             console.log('可偷:', f.friendPin)
+            $.get({
+              url: `https://jdjoy.jd.com/common/pet/enterFriendRoom?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE&friendPin=${encodeURIComponent(f.friendPin)}`,
+              headers: {
+                'Host': 'jdjoy.jd.com',
+                'Accept': '*/*',
+                'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+                "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+                'cookie': cookie
+              }
+            }, (err, resp, data) => {
+              $.get({
+                url: `https://jdjoy.jd.com/common/pet/getRandomFood?reqSource=h5&invokeKey=NRp8OPxZMFXmGkaE&friendPin=${encodeURIComponent(f.friendPin)}`,
+                headers: {
+                  'Host': 'jdjoy.jd.com',
+                  'Accept': '*/*',
+                  'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+                  "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+                  'cookie': cookie
+                }
+              }, (err, resp, data) => {
+                data = JSON.parse(data)
+                console.log('偷狗粮:', data.errorCode, data.data)
+              })
+            })
           }
+          await $.wait(1500)
         }
         resolve();
       })
