@@ -33,6 +33,14 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
+    if (JSON.stringify(homePageInfo.data) === '{}') {
+      console.log('此号活动火爆')
+      continue
+      }
+    else if (JSON.stringify(homePageInfo.data.isactivenewuser) === '1') {
+      console.log('此号未完成教学任务')
+      continue
+      }
     let food: number = homePageInfo.data.materialinfo[0].value;
     let petid: number = homePageInfo.data.petinfo[0].petid
     let coins = homePageInfo.data.coins;
