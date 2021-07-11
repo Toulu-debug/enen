@@ -17,6 +17,10 @@ let balance: number;
     await TotalBean();
     console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
     let taskVos: any = await api('healthyDay_getHomeData', {"appId": "1EFVQwQ", "taskToken": "", "channelId": 1});
+    if (JSON.stringify(taskVos.data.success) === 'false') {
+      console.log('此号活动火爆')
+      continue
+      }
     balance = taskVos.data.result.userInfo.userScore * 1
     console.log('余额:', balance)
     while (balance >= 500) {
