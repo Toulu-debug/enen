@@ -10,7 +10,7 @@ import USER_AGENT from './TS_USER_AGENTS';
 const CryptoJS = require('crypto-js')
 
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
-let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCodes: Array<string>;
+let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCodes: string[] = [];
 
 let UserName: string, index: number, isLogin: boolean, nickName: string
 !(async () => {
@@ -25,6 +25,8 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     nickName = '';
     await TotalBean();
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+
+    await makeShareCodes();
 
     // 任务1
     let tasks: any
@@ -55,7 +57,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     // 导游
     res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     for (let e of res.TourGuideList) {
-      console.log(e.dwIsUnLock, e.strGuideName)
       if (e.strBuildIndex !== 'food' && e.ddwRemainTm === 0) {
         let employ: any = await api('user/EmployTourGuide', '_cfd_t,bizCode,ddwConsumeCoin,dwEnv,dwIsFree,ptag,source,strBuildIndex,strZone',
           {ddwConsumeCoin: e.ddwCostCoin, dwIsFree: 0, strBuildIndex: e.strBuildIndex})
@@ -101,6 +102,16 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       await wait(1000)
     }
   }
+  if (cookiesArr.length === shareCodes.length) {
+    for (let i = 0; i < cookiesArr.length; i++) {
+      for (let j = 0; j < shareCodes.length; j++) {
+        cookie = cookiesArr[i]
+        res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
+        console.log(res)
+        await wait(1000)
+      }
+    }
+  }
 })()
 
 interface Params {
@@ -114,7 +125,9 @@ interface Params {
   ddwTriggerDay?: number,
   ddwConsumeCoin?: number,
   dwIsFree?: number,
-
+  ddwTaskId?: string,
+  strShareId?: string,
+  strMarkList?: string
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
@@ -165,6 +178,15 @@ function mainTask(fn: string, stk: string, params: Params = {}) {
       }
     })
     resolve(data)
+  })
+}
+
+function makeShareCodes() {
+  return new Promise<void>(async resolve => {
+    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
+    console.log('助力码:', res.strMyShareId)
+    shareCodes.push(res.strMyShareId)
+    resolve()
   })
 }
 
