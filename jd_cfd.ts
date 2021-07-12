@@ -20,9 +20,9 @@ const CryptoJS = require('crypto-js')
 dotenv.config()
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
 let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCodes: string[] = [];
-let CFD_HELP_HW: boolean | string = process.env.CFD_HELP_HW ? process.env.CFD_HELP_HW : true;
+let CFD_HELP_HW: string = process.env.CFD_HELP_HW ? process.env.CFD_HELP_HW : "true";
 console.log('帮助HelloWorld:', CFD_HELP_HW)
-let CFD_HELP_POOL: boolean | string = process.env.CFD_HELP_POOL ? process.env.CFD_HELP_POOL : true;
+let CFD_HELP_POOL: string = process.env.CFD_HELP_POOL ? process.env.CFD_HELP_POOL : "true";
 console.log('帮助助力池:', CFD_HELP_POOL)
 
 
@@ -122,7 +122,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
   }
 
   // 获取随机助力码
-  if (CFD_HELP_HW) {
+  if (CFD_HELP_HW === 'true') {
     shareCodes = [
       ...shareCodes,
       ...[
@@ -132,7 +132,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       ]
     ]
   }
-  if (CFD_HELP_POOL) {
+  if (CFD_HELP_POOL === 'true') {
     let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20')
     console.log('获取到20个随机助力码:', data.data)
     shareCodes = [...shareCodes, ...data.data]
@@ -145,6 +145,9 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log('去助力:', shareCodes[j])
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
       console.log(res)
+      if (res.sErrMsg === '参数错误') {
+        console.log('可合理举报错误助力码')
+      }
       if (res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~')
         break
       await wait(3000)
