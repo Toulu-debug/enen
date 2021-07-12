@@ -125,11 +125,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
   if (CFD_HELP_HW === 'true') {
     shareCodes = [
       ...shareCodes,
-      ...[
-        '845605C0CDB46E027B53DBFD505C152CE2FDBBFB74ABBD8CB9FD0FE0ACC43FF8',
-        '84A1A690E9AA8B7267F347E319954401BF810183738AA300E8FCFDEE97F12036',
-        'C533B4DCDAA0EA415CEBC49F13851C2556F2BE27E8D4026713C7D5229A5F0C55',
-      ]
     ]
   }
   if (CFD_HELP_POOL === 'true') {
@@ -145,11 +140,9 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log('去助力:', shareCodes[j])
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
       console.log(res)
-      if (res.sErrMsg === '参数错误') {
-        console.log('可合理举报错误助力码')
-      }
-      if (res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~')
+      if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
         break
+      }
       await wait(3000)
     }
   }
@@ -224,10 +217,30 @@ function mainTask(fn: string, stk: string, params: Params = {}) {
 
 function makeShareCodes() {
   return new Promise<void>(async resolve => {
+    let {data} = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
+      headers: {
+        "cookie": cookie,
+        "origin": "https://home.m.jd.com",
+        "referer": "https://home.m.jd.com/myJd/newhome.action",
+        "User-Agent": USER_AGENT,
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    })
+    let farm: string = data.farmUserPro.shareCode
     res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
     console.log('助力码:', res.strMyShareId)
     shareCodes.push(res.strMyShareId)
-    resolve()
+    axios.get(`https://api.sharecode.ga/api/jxcfd/insert?code=${res.strMyShareId}&farm=${farm}`)
+      .then(res => {
+        if (res.data.code === 200)
+          console.log('已自动提交助力码')
+        else
+          console.log('提交失败！已提交farm的cookie才可提交cfd')
+        resolve()
+      })
+      .catch(e => {
+        console.log(e)
+      })
   })
 }
 

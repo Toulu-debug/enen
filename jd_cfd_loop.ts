@@ -49,22 +49,27 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 })()
 
 function speedUp(stk: string, dwType?: number) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     let url: string = `https://m.jingxi.com/jxbfd/user/SpeedUp?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&strBuildIndex=food&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
     if (stk === '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
       url = `https://m.jingxi.com/jxbfd/story/queryshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=_cfd_t%2CbizCode%2CdwEnv%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2`
     if (stk === '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone')
       url = `https://m.jingxi.com/jxbfd/story/pickshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&dwType=${dwType}&_stk=_cfd_t%2CbizCode%2CdwEnv%2CdwType%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2`
     url += '&h5st=' + decrypt(stk, url)
-    let {data} = await axios.get(url, {
-      headers: {
-        'Host': 'm.jingxi.com',
-        'Referer': 'https://st.jingxi.com/',
-        'User-Agent': USER_AGENT,
-        'Cookie': cookie
-      }
-    })
-    resolve(data)
+    try {
+      let {data} = await axios.get(url, {
+        headers: {
+          'Host': 'm.jingxi.com',
+          'Referer': 'https://st.jingxi.com/',
+          'User-Agent': USER_AGENT,
+          'Cookie': cookie
+        }
+      })
+      resolve(data)
+    } catch (e) {
+      reject(e)
+    }
+
   })
 }
 
@@ -165,6 +170,6 @@ function wait(t: number) {
   })
 }
 
-function getRandomNumberByRange(start, end) {
+function getRandomNumberByRange(start: number, end: number): number {
   return Math.floor(Math.random() * (end - start) + start)
 }
