@@ -54,6 +54,10 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 
     // 导游
     res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    if (JSON.stringify(res.iRet) === '2001') {
+      console.log('您需要到财富岛开启营业哦~')
+      continue
+      }
     for (let e of res.TourGuideList) {
       console.log(e.dwIsUnLock, e.strGuideName)
       if (e.strBuildIndex !== 'food' && e.ddwRemainTm === 0) {
