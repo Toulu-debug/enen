@@ -33,14 +33,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
-    if (JSON.stringify(homePageInfo.data) === '{}') {
-      console.log('此号活动火爆')
-      continue
-      }
-    else if (JSON.stringify(homePageInfo.data.isactivenewuser) === '1') {
-      console.log('此号未完成教学任务')
-      continue
-      }
     let food: number = homePageInfo.data.materialinfo[0].value;
     let petid: number = homePageInfo.data.petinfo[0].petid
     let coins = homePageInfo.data.coins;
@@ -59,7 +51,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         break
       }
     }
-
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'channel,sceneid,type', {type: '1'})
       if (res.ret === 0) {
@@ -73,7 +64,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       await wait(1500)
     }
     await wait(2000)
-
     while (food >= 10) {
       res = await api('operservice/Feed', 'channel,sceneid')
       if (res.ret === 0) {
@@ -96,18 +86,27 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     await wait(2000)
 
     while (1) {
-      res = await api('operservice/Action', 'channel,sceneid,type', {type: '2'})
-      if (res.data.addcoins === 0) break
-      console.log('锄草:', res.data.addcoins)
-      await wait(1500)
+      try {
+        res = await api('operservice/Action', 'channel,sceneid,type', {type: '2'})
+        console.log(res)
+        if (res.data.addcoins === 0) break
+        console.log('锄草:', res.data.addcoins)
+        await wait(1500)
+      } catch (e) {
+        console.log('Error:', e)
+      }
     }
     await wait(2000)
 
     while (1) {
-      res = await api('operservice/Action', 'channel,sceneid,type', {type: '1', petid: petid})
-      if (res.data.addcoins === 0) break
-      console.log('挑逗:', res.data.addcoins)
-      await wait(1500)
+      try {
+        res = await api('operservice/Action', 'channel,sceneid,type', {type: '1', petid: petid})
+        if (res.data.addcoins === 0) break
+        console.log('挑逗:', res.data.addcoins)
+        await wait(1500)
+      } catch (e) {
+        console.log('Error:', e)
+      }
     }
   }
 })()
@@ -121,7 +120,7 @@ interface Params {
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
     if (Object.keys(params).length !== 0) {
       let key: (keyof Params)
@@ -131,15 +130,19 @@ function api(fn: string, stk: string, params: Params = {}) {
       }
     }
     url += '&h5st=' + decrypt(stk, url)
-    let {data} = await axios.get(url, {
-      headers: {
-        'Cookie': cookie,
-        'Host': 'm.jingxi.com',
-        'User-Agent': 'jdpingou;iPhone;4.11.0;12.4.1;52cf225f0c463b69e1e36b11783074f9a7d9cbf0;network/wifi;model/iPhone11,6;appBuild/100591;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/503;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-        'Referer': 'https://st.jingxi.com/',
-      }
-    })
-    resolve(data)
+    try {
+      let {data} = await axios.get(url, {
+        headers: {
+          'Cookie': cookie,
+          'Host': 'm.jingxi.com',
+          'User-Agent': 'jdpingou;iPhone;4.11.0;12.4.1;52cf225f0c463b69e1e36b11783074f9a7d9cbf0;network/wifi;model/iPhone11,6;appBuild/100591;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/503;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+          'Referer': 'https://st.jingxi.com/',
+        }
+      })
+      resolve(data)
+    } catch (e) {
+      reject(401)
+    }
   })
 }
 
