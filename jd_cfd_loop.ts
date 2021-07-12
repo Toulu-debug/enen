@@ -27,7 +27,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
         res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
-        if (res.iRet !== 0){
+        if (res.iRet !== 0) {
           console.log('去手动新手教程')
           continue
         }
@@ -44,7 +44,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log(e)
       break
     }
-    await wait(10000)
+    await wait(getRandomNumberByRange(10, 25))
   }
 })()
 
@@ -163,4 +163,8 @@ function wait(t: number) {
       resolve()
     }, t)
   })
+}
+
+function getRandomNumberByRange(start, end) {
+  return Math.floor(Math.random() * (end - start) + start)
 }
