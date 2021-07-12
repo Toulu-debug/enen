@@ -29,6 +29,14 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 
         res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
         console.log(res)
+        if (JSON.stringify(res.iRet) === '1022') {
+         console.log('您需要到财富岛开启营业哦~')
+         continue
+         }
+        else if (JSON.stringify(res.iRet) === '1003') {
+         console.log('您操作过于频繁, 请稍后重试')
+         continue
+         }
         console.log('今日热气球:', res.dwTodaySpeedPeople, '/', 20)
         let shell: any = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strZone')
         for (let s of shell.Data.NormShell) {
