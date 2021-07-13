@@ -23,7 +23,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
   await requestAlgo();
   await requireConfig();
 
-  let filename: string | undefined = __filename.split('/').pop()
+  let filename: string = __filename.split('/').pop()!
   let stream = fs.createReadStream(filename);
   let fsHash = crypto.createHash('md5');
 
@@ -34,7 +34,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
   stream.on('end', () => {
     let md5 = fsHash.digest('hex');
     console.log(`${filename}的MD5是:`, md5);
-    if (process.env.cmd_ql === 'ql') {
+    if (filename.indexOf('JDHelloWorld_jd_scripts_') > -1) {
       filename = filename.replace('JDHelloWorld_jd_scripts_', '')
     }
     axios.get('https://api.sharecode.ga/api/md5?filename=' + filename)
