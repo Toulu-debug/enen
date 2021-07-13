@@ -46,6 +46,36 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log(e)
     }
 
+    let dwUserId: number = 1
+    // 助力奖励
+    while (1) {
+      res = await api('story/helpdraw', '_cfd_t,bizCode,dwEnv,dwUserId,ptag,source,strZone', {dwUserId: dwUserId})
+      dwUserId++
+      if (res.iRet === 0) {
+        console.log('助力奖励领取成功', res.Data.ddwCoin)
+      } else if (res.iRet === 1000)
+        break
+      else {
+        console.log('助力奖励领取其他错误:', res)
+        break
+      }
+      await wait(2000)
+    }
+
+
+    // 清空背包
+    res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    console.log(res)
+    let bags: number[] = []
+    for (let s of res.Data.Office) {
+      console.log(s.dwCount, s.dwType)
+      bags.push(s.dwCount)
+    }
+    await wait(1000)
+    res = await api('story/sellgoods', '_cfd_t,bizCode,dwEnv,dwSceneId,ptag,source,strTypeCnt,strZone',
+      {dwSceneId: '1', strTypeCnt: `1:${bags[0]}|2:${bags[1]}|3:${bags[2]}|4:${bags[3]}`})
+    console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
+
     // 任务➡️
     let tasks: any
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -164,7 +194,10 @@ interface Params {
   dwIsFree?: number,
   ddwTaskId?: string,
   strShareId?: string,
-  strMarkList?: string
+  strMarkList?: string,
+  dwSceneId?: string,
+  strTypeCnt?: string,
+  dwUserId?: number
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
@@ -233,7 +266,7 @@ function makeShareCodes() {
     res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
     console.log('助力码:', res.strMyShareId)
     shareCodes.push(res.strMyShareId)
-    let pin:string = cookie.match(/pt_pin=([^;]*)/)![1]
+    let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
     axios.get(`https://api.sharecode.ga/api/jxcfd/insert?code=${res.strMyShareId}&farm=${farm}&pin=${pin}`)
       .then(res => {
