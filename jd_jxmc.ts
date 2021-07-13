@@ -15,7 +15,7 @@ const CryptoJS = require('crypto-js')
 // console.log('时间戳：', format(new Date(), 'yyyyMMddHHmmssSSS'));
 
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
-let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCodes: Array<string>;
+let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCodes: string[] = [];
 let homePageInfo: any;
 
 let UserName: string, index: number, isLogin: boolean, nickName: string
@@ -34,9 +34,10 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
     let food: number = homePageInfo.data.materialinfo[0].value;
-    let petid: number = homePageInfo.data.petinfo[0].petid
+    let petid: number = homePageInfo.data.petinfo[0].petid;
     let coins = homePageInfo.data.coins;
-
+    shareCodes.push(homePageInfo.data.sharekey)
+    console.log('助力码：', homePageInfo.data.sharekey)
     console.log('pet id:', petid)
     console.log('现有草:', food);
     console.log('金币:', coins);
@@ -88,7 +89,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     while (1) {
       try {
         res = await api('operservice/Action', 'channel,sceneid,type', {type: '2'})
-        console.log(res)
         if (res.data.addcoins === 0) break
         console.log('锄草:', res.data.addcoins)
         await wait(1500)
@@ -111,6 +111,20 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       }
     }
   }
+  for (let i = 0; i < cookiesArr.length; i++) {
+    cookie = cookiesArr[i]
+    for (let j = 0; j < shareCodes.length; j++) {
+      res = await api('operservice/EnrollFriend', 'channel,sceneid,sharekey', {sharekey: shareCodes[j]})
+      if (res.data.result === 1) {
+        console.log('不助力自己')
+      } else if (res.ret === 0) {
+        console.log('助力成功，获得：', res.data.addcoins)
+      } else {
+        break
+      }
+      await wait(2000)
+    }
+  }
 })()
 
 interface Params {
@@ -118,7 +132,8 @@ interface Params {
   petid?: number,
   type?: string,
   taskId?: number
-  configExtra?: string
+  configExtra?: string,
+  sharekey?: string
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
