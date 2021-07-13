@@ -65,7 +65,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 
     // 清空背包
     res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    console.log(res)
     let bags: number[] = []
     for (let s of res.Data.Office) {
       console.log(s.dwCount, s.dwType)
@@ -80,10 +79,11 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       else
         strTypeCnt += `${bags[n]}|`
     }
-    res = await api('story/sellgoods', '_cfd_t,bizCode,dwEnv,dwSceneId,ptag,source,strTypeCnt,strZone',
-      {dwSceneId: '1', strTypeCnt: strTypeCnt})
-    console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
-
+    if (bags.length !== 0) {
+      res = await api('story/sellgoods', '_cfd_t,bizCode,dwEnv,dwSceneId,ptag,source,strTypeCnt,strZone',
+        {dwSceneId: '1', strTypeCnt: strTypeCnt})
+      console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
+    }
     // 任务➡️
     let tasks: any
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -125,8 +125,8 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
             console.log(`${t.taskName}领奖成功:`, res.data.prizeInfo)
           }
           await wait(2000)
-        } else if (t.awardStatus === 2 && t.completedTimes < t.targetTimes && (t.orderId === 2 || t.orderId === 3)) {
-          // console.log('做任务:', t.taskId, t.taskName, t.completedTimes, t.targetTimes)
+        } else if (t.awardStatus === 2 && t.completedTimes < t.targetTimes && ([1, 2, 3, 4].includes(t.orderId))) {
+          console.log('做任务:', t.taskId, t.taskName, t.completedTimes, t.targetTimes)
           res = await mainTask('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId, configExtra: ''})
           console.log('做任务:', res)
           await wait(5000)
