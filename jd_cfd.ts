@@ -13,6 +13,7 @@
 import {format} from 'date-fns';
 import axios from 'axios';
 import USER_AGENT from './TS_USER_AGENTS';
+import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
@@ -232,7 +233,9 @@ function makeShareCodes() {
     res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
     console.log('助力码:', res.strMyShareId)
     shareCodes.push(res.strMyShareId)
-    axios.get(`https://api.sharecode.ga/api/jxcfd/insert?code=${res.strMyShareId}&farm=${farm}`)
+    let pin:string = cookie.match(/pt_pin=([^;]*)/)![1]
+    pin = Md5.hashStr(pin)
+    axios.get(`https://api.sharecode.ga/api/jxcfd/insert?code=${res.strMyShareId}&farm=${farm}&pin=${pin}`)
       .then(res => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')
