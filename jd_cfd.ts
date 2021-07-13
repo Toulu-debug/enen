@@ -69,11 +69,19 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     let bags: number[] = []
     for (let s of res.Data.Office) {
       console.log(s.dwCount, s.dwType)
+      bags.push(s.dwType)
       bags.push(s.dwCount)
     }
     await wait(1000)
+    let strTypeCnt: string = ''
+    for (let n = 0; n < bags.length; n++) {
+      if (n % 2 === 0)
+        strTypeCnt += `${bags[n]}:`
+      else
+        strTypeCnt += `${bags[n]}|`
+    }
     res = await api('story/sellgoods', '_cfd_t,bizCode,dwEnv,dwSceneId,ptag,source,strTypeCnt,strZone',
-      {dwSceneId: '1', strTypeCnt: `1:${bags[0]}|2:${bags[1]}|3:${bags[2]}|4:${bags[3]}`})
+      {dwSceneId: '1', strTypeCnt: strTypeCnt})
     console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
 
     // 任务➡️
