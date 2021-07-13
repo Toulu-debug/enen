@@ -36,7 +36,6 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         for (let s of shell.Data.NormShell) {
           for (let j = 0; j < s.dwNum; j++) {
             await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
-            await wait(1000)
           }
         }
       }
@@ -44,7 +43,9 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log(e)
       break
     }
-    await wait(getRandomNumberByRange(10, 25))
+    let t: number = getRandomNumberByRange(10, 25)
+    console.log('sleep...', t)
+    await wait(t)
   }
 })()
 
@@ -165,8 +166,9 @@ function getQueryString(url: string, name: string) {
 function wait(t: number) {
   return new Promise<void>(resolve => {
     setTimeout(() => {
+      console.log('sleep end')
       resolve()
-    }, t)
+    }, t * 1000)
   })
 }
 
