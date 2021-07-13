@@ -50,12 +50,14 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     // 助力奖励
     while (1) {
       res = await api('story/helpdraw', '_cfd_t,bizCode,dwEnv,dwUserId,ptag,source,strZone', {dwUserId: dwUserId})
+      console.log('助力奖励:', res)
       dwUserId++
       if (res.iRet === 0) {
         console.log('助力奖励领取成功', res.Data.ddwCoin)
-      } else if (res.iRet === 1000)
+      } else if (res.iRet === 1000) {
         break
-      else {
+      } else if (res.iRet === 2203) {
+      } else {
         console.log('助力奖励领取其他错误:', res)
         break
       }

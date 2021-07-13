@@ -3,13 +3,15 @@
  * export CFD_LOOP_DELAY=20000  // 捡气球间隔时间，单位毫秒
  */
 
-import {format} from 'date-fns';
-import axios from 'axios';
-import USER_AGENT from './TS_USER_AGENTS';
-import * as dotenv from 'dotenv';
+import {format} from 'date-fns'
+import axios from 'axios'
+import USER_AGENT from './TS_USER_AGENTS'
+import * as dotenv from 'dotenv'
 
 const CryptoJS = require('crypto-js')
-
+const crypto = require('crypto')
+const fs = require('fs')
+const notify = require('./sendNotify')
 dotenv.config()
 
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
@@ -20,6 +22,34 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 !(async () => {
   await requestAlgo();
   await requireConfig();
+
+  let filename: string | undefined = __filename.split('/').pop()
+  let stream = fs.createReadStream(filename);
+  let fsHash = crypto.createHash('md5');
+
+  stream.on('data', (d: any) => {
+    fsHash.update(d);
+  });
+
+  stream.on('end', () => {
+    let md5 = fsHash.digest('hex');
+    console.log(`${filename}的MD5是:`, md5);
+    if (process.env.cmd_ql === 'ql') {
+      filename = filename.replace('JDHelloWorld_jd_scripts_', '')
+    }
+    axios.get('https://api.sharecode.ga/api/md5?filename=' + filename)
+      .then(res => {
+        console.log('local: ', md5)
+        console.log('remote:', res.data)
+        if (md5 !== res.data) {
+          notify.sendNotify("Warning", `${filename}\nMD5校验失败！你的脚本疑似被篡改！`)
+        } else {
+          console.log('MD5校验通过！')
+        }
+      }).catch(e => {
+
+    })
+  });
 
   while (1) {
     try {
@@ -38,11 +68,15 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         }
         console.log('今日热气球:', res.dwTodaySpeedPeople, '/', 20)
         let shell: any = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-        for (let s of shell.Data.NormShell) {
-          for (let j = 0; j < s.dwNum; j++) {
-            res = await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
-            console.log('捡贝壳:', res.Data.strFirstDesc)
-            await wait(500)
+        if (shell.Data.hasOwnProperty('NormShell')) {
+          for (let s of shell.Data.NormShell) {
+            for (let j = 0; j < s.dwNum; j++) {
+              res = await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
+              if (res.iRet !== 0)
+                break
+              console.log('捡贝壳:', res.Data.strFirstDesc)
+              await wait(500)
+            }
           }
         }
       }
@@ -50,8 +84,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log(e)
       break
     }
-    let t: number = process.env.CFD_LOOP_DELAY ? parseInt(process.env.CFD_LOOP_DELAY) : getRandomNumberByRange(10, 25)
-    console.log('sleep...', t)
+    let t: number = process.env.CFD_LOOP_DELAY ? parseInt(process.env.CFD_LOOP_DELAY) : getRandomNumberByRange(10000, 25000)
     await wait(t)
   }
 })()
@@ -172,9 +205,8 @@ function getQueryString(url: string, name: string) {
 function wait(t: number) {
   return new Promise<void>(resolve => {
     setTimeout(() => {
-      console.log('sleep end')
       resolve()
-    }, t * 1000)
+    }, t)
   })
 }
 
