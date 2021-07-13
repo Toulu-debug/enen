@@ -42,6 +42,18 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     console.log('现有草:', food);
     console.log('金币:', coins);
 
+    // 签到
+    res = await api('queryservice/GetSignInfo', 'channel,sceneid')
+    for (let day of res.data.signlist) {
+      if (day.fortoday && !day.hasdone) {
+        res = await api('operservice/GetSignReward', 'channel,currdate,sceneid', {currdate: res.data.currdate})
+        if(res.ret===0){
+          console.log('签到成功!')
+        }
+        break
+      }
+    }
+
     let taskRetCode: number = 0;
     while (taskRetCode === 0) {
       taskRetCode = await getTask();
@@ -133,7 +145,8 @@ interface Params {
   type?: string,
   taskId?: number
   configExtra?: string,
-  sharekey?: string
+  sharekey?: string,
+  currdate?: string
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
