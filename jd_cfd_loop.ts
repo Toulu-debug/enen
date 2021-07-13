@@ -1,15 +1,20 @@
 /**
  * 财富岛热气球挂后台
+ * export CFD_LOOP_DELAY=20000  // 捡气球间隔时间，单位毫秒
  */
 
 import {format} from 'date-fns';
 import axios from 'axios';
 import USER_AGENT from './TS_USER_AGENTS';
+import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
 
+dotenv.config()
+
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
 let cookie: string = '', cookiesArr: Array<string> = [], res: any = '';
+process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.CFD_LOOP_DELAY)) : console.log('设置延迟:10000~25000随机')
 
 let UserName: string, index: number, isLogin: boolean, nickName: string
 !(async () => {
@@ -35,7 +40,9 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         let shell: any = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strZone')
         for (let s of shell.Data.NormShell) {
           for (let j = 0; j < s.dwNum; j++) {
-            await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
+            res = await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
+            console.log('捡贝壳:', res.Data.strFirstDesc)
+            await wait(500)
           }
         }
       }
@@ -43,7 +50,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log(e)
       break
     }
-    let t: number = getRandomNumberByRange(10, 25)
+    let t: number = process.env.CFD_LOOP_DELAY ? parseInt(process.env.CFD_LOOP_DELAY) : getRandomNumberByRange(10, 25)
     console.log('sleep...', t)
     await wait(t)
   }
@@ -70,7 +77,6 @@ function speedUp(stk: string, dwType?: number) {
     } catch (e) {
       reject(e)
     }
-
   })
 }
 

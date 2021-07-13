@@ -94,6 +94,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         await wait(1500)
       } catch (e) {
         console.log('Error:', e)
+        break
       }
     }
     await wait(2000)
@@ -106,6 +107,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         await wait(1500)
       } catch (e) {
         console.log('Error:', e)
+        break
       }
     }
   }
