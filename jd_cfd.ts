@@ -39,12 +39,15 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     nickName = '';
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
-    await makeShareCodes();
+    try {
+      await makeShareCodes();
+    } catch (e) {
+      console.log(e)
+    }
 
-    // 任务1
+    // 任务➡️
     let tasks: any
-    /*
-     tasks= await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     for (let t of tasks.Data.TaskList) {
       if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
         res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
@@ -54,22 +57,9 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         await wait(1000)
       }
     }
-     */
-
-
-    // res = await api('story/SpecialUserOper',
-    //   '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType',
-    //   {strStoryId: 'stroy_1626065998453014_1', dwType: '2', triggerType: 0, ddwTriggerDay: 1626019200})
-    // console.log('船到:', res)
-    // await wait(31000)
-    // res = await api('story/SpecialUserOper',
-    //   '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType',
-    //   {strStoryId: 'stroy_1626065998453014_1', dwType: '3', triggerType: 0, ddwTriggerDay: 1626019200})
-    // console.log('下船:', res)
 
     // 导游
     res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-
     if (!res.TourGuideList) {
       console.log('手动雇佣4个试用导游')
     } else {
@@ -83,6 +73,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       }
     }
 
+    // 任务⬇️
     tasks = await mainTask('GetUserTaskStatusList', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: 0});
     for (let t of tasks.data.userTaskStatusList) {
       if (t.dateType === 2) {
@@ -123,14 +114,25 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
 
   // 获取随机助力码
   if (CFD_HELP_HW === 'true') {
-    shareCodes = [
-      ...shareCodes,
-    ]
+    try {
+      let {data} = await axios.get("https://api.sharecode.ga/api/HW_CODES")
+      shareCodes = [
+        ...shareCodes,
+        ...data.jxcfd
+      ]
+      console.log('获取HelloWorld助力码成功')
+    } catch (e) {
+      console.log('获取HelloWorld助力码出错')
+    }
   }
   if (CFD_HELP_POOL === 'true') {
-    let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20')
-    console.log('获取到20个随机助力码:', data.data)
-    shareCodes = [...shareCodes, ...data.data]
+    try {
+      let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20')
+      console.log('获取到20个随机助力码:', data.data)
+      shareCodes = [...shareCodes, ...data.data]
+    } catch (e) {
+      console.log('获取助力池失败')
+    }
   } else {
     console.log('你的设置是不帮助助力池！')
   }
@@ -139,7 +141,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       cookie = cookiesArr[i]
       console.log('去助力:', shareCodes[j])
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
-      console.log(res)
+      console.log('助力:', res)
       if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
         break
       }
@@ -216,7 +218,7 @@ function mainTask(fn: string, stk: string, params: Params = {}) {
 }
 
 function makeShareCodes() {
-  return new Promise<void>(async resolve => {
+  return new Promise<void>(async (resolve, reject) => {
     let {data} = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
       headers: {
         "cookie": cookie,
@@ -239,7 +241,7 @@ function makeShareCodes() {
         resolve()
       })
       .catch(e => {
-        console.log(e)
+        reject('访问助力池出错')
       })
   })
 }
