@@ -612,6 +612,7 @@ function userInfo() {
               $.unActive = true;//标记是否开启了京喜活动或者选购了商品进行生产
               $.encryptPin = '';
               $.shelvesList = [];
+              $.nickName = data.user.nickname || $.UserName; // 昵称或pin码
               if (data.factoryList && data.productionList) {
                 const production = data.productionList[0];
                 const factory = data.factoryList[0];
