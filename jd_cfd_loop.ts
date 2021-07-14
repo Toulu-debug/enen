@@ -18,7 +18,7 @@ let appId: number = 10028, fingerprint: string | number, token: string, enCryptM
 let cookie: string = '', cookiesArr: Array<string> = [], res: any = '';
 process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.CFD_LOOP_DELAY)) : console.log('设置延迟:10000~25000随机')
 
-let UserName: string, index: number, isLogin: boolean, nickName: string
+let UserName: string, index: number;
 !(async () => {
   await requestAlgo();
   await requireConfig();
@@ -46,23 +46,24 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         } else {
           console.log('MD5校验通过！')
         }
-      }).catch(e => {
+      }).catch(() => {
 
     })
   });
 
   while (1) {
-    try {
-      for (let i = 0; i < cookiesArr.length; i++) {
-        cookie = cookiesArr[i];
-        UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-        index = i + 1;
-        let {isLogin, nickName}: any = await TotalBean(cookie)
-        if (!isLogin) {
-          notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
-          continue
-        }
-        console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+
+    for (let i = 0; i < cookiesArr.length; i++) {
+      cookie = cookiesArr[i];
+      UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+      index = i + 1;
+      let {isLogin, nickName}: any = await TotalBean(cookie)
+      if (!isLogin) {
+        notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
+        continue
+      }
+      console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+      try {
 
         res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
         if (res.iRet !== 0) {
@@ -84,10 +85,9 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
             }
           }
         }
+      } catch (e) {
+        console.log(e)
       }
-    } catch (e) {
-      console.log(e)
-      break
     }
     let t: number = process.env.CFD_LOOP_DELAY ? parseInt(process.env.CFD_LOOP_DELAY) : getRandomNumberByRange(10000, 25000)
     await wait(t)
@@ -113,7 +113,7 @@ function speedUp(stk: string, dwType?: number) {
       })
       resolve(data)
     } catch (e) {
-      reject(e)
+      reject(502)
     }
   })
 }
