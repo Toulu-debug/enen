@@ -3,8 +3,8 @@
  * 包含雇佣导游，建议每小时1次
  *
  * 此版本暂定默认帮助HelloWorld，帮助助力池
- * export CFD_HELP_HW = true    // 帮助HelloWorld
- * export CFD_HELP_POOL = true  // 帮助助力池
+ * export HELP_HW = true    // 帮助HelloWorld
+ * export HELP_POOL = true  // 帮助助力池
  *
  * 使用jd_env_copy.js同步js环境变量到ts
  * 使用jd_ts_test.ts测试环境变量
@@ -18,22 +18,21 @@ import * as dotenv from 'dotenv';
 import {getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
 
 const CryptoJS = require('crypto-js')
-
+const notify = require('./sendNotify')
 dotenv.config()
 let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
 let cookie: string = '', cookiesArr: string[] = [], res: any = '', shareCodes: string[] = [];
 
-let CFD_HELP_HW: string = process.env.CFD_HELP_HW ? process.env.CFD_HELP_HW : "true";
-console.log('帮助HelloWorld:', CFD_HELP_HW)
-let CFD_HELP_POOL: string = process.env.CFD_HELP_POOL ? process.env.CFD_HELP_POOL : "true";
-console.log('帮助助力池:', CFD_HELP_POOL)
+let HELP_HW: string = process.env.HELP_HW ? process.env.HELP_HW : "true";
+console.log('帮助HelloWorld:', HELP_HW)
+let HELP_POOL: string = process.env.HELP_POOL ? process.env.HELP_POOL : "true";
+console.log('帮助助力池:', HELP_POOL)
 
 
 let UserName: string, index: number, isLogin: boolean, nickName: string
 !(async () => {
   await requestAlgo();
   await requireConfig();
-
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -100,6 +99,22 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log('可以倒垃圾')
     }
 
+    // 船来了
+    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
+    if (res.StoryInfo.StoryList) {
+      if (res.StoryInfo.StoryList[0].Special) {
+        console.log(`船来了，乘客是${res.StoryInfo.StoryList[0].Special.strName}`)
+        let shipRes: any = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '2', triggerType: 0, ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
+        console.log(shipRes)
+        console.log('正在下船，等待30s')
+        await wait(30000)
+        shipRes = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '3', triggerType: 0, ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
+        if (shipRes.iRet === 0)
+          console.log('船客接待成功')
+        else
+          console.log('船客接待失败', shipRes)
+      }
+    }
 
     // 任务➡️
     let tasks: any
@@ -172,7 +187,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
   }
 
   // 获取随机助力码
-  if (CFD_HELP_HW === 'true') {
+  if (HELP_HW === 'true') {
     try {
       let {data} = await axios.get("https://api.sharecode.ga/api/HW_CODES")
       shareCodes = [
@@ -184,7 +199,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       console.log('获取HelloWorld助力码出错')
     }
   }
-  if (CFD_HELP_POOL === 'true') {
+  if (HELP_POOL === 'true') {
     try {
       let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20')
       console.log('获取到20个随机助力码:', data.data)
@@ -198,7 +213,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
   for (let i = 0; i < cookiesArr.length; i++) {
     for (let j = 0; j < shareCodes.length; j++) {
       cookie = cookiesArr[i]
-      console.log('去助力:', shareCodes[j])
+      console.log(`账号${i + 1}去助力:`, shareCodes[j])
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
       console.log('助力:', res)
       if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
