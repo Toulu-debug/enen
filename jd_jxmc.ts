@@ -6,9 +6,10 @@
  */
 
 import {format} from 'date-fns';
-import {writeFileSync} from 'fs'
 import axios from 'axios';
 import USER_AGENT from './TS_USER_AGENTS';
+import {getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
+import {Md5} from "ts-md5";
 
 const CryptoJS = require('crypto-js')
 
@@ -36,12 +37,24 @@ console.log('帮助助力池:', HELP_POOL)
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
-    let food: number = homePageInfo.data.materialinfo[0].value;
+    let food: number = 0
+    try {
+      food = homePageInfo.data.materialinfo[0].value;
+    } catch (e) {
+      console.log('未开通？黑号？')
+      continue
+    }
     let petid: number = homePageInfo.data.petinfo[0].petid;
     let coins = homePageInfo.data.coins;
-    shareCodes.push(homePageInfo.data.sharekey)
-    console.log('助力码：', homePageInfo.data.sharekey)
-    console.log('pet id：提交尼玛的pet id，上面助力码不认识中文？')
+
+    console.log('助力码：', homePageInfo.data.sharekey);
+    shareCodes.push(homePageInfo.data.sharekey);
+    try {
+      await makeShareCodes(homePageInfo.data.sharekey);
+    } catch (e) {
+      console.log(e)
+    }
+
     console.log('现有草:', food);
     console.log('金币:', coins);
 
@@ -53,6 +66,8 @@ console.log('帮助助力池:', HELP_POOL)
           res = await api('operservice/GetSignReward', 'channel,currdate,sceneid', {currdate: res.data.currdate})
           if (res.ret === 0) {
             console.log('签到成功!')
+          } else {
+            console.log(res)
           }
           break
         }
@@ -271,6 +286,26 @@ function taskAPI(fn: string, stk: string, params: Params = {}) {
       }
     })
     resolve(data)
+  })
+}
+
+function makeShareCodes(code: string) {
+  return new Promise(async (resolve, reject) => {
+    let bean: string = await getBeanShareCode(cookie)
+    let farm: string = await getFarmShareCode(cookie)
+    let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
+    pin = Md5.hashStr(pin)
+    await axios.get(`https://api.sharecode.ga/api/autoInsert?db=jxmc&code=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+      .then(res => {
+        if (res.data.code === 200)
+          console.log('已自动提交助力码')
+        else
+          console.log('提交失败！已提交farm的cookie才可提交cfd')
+        resolve(200)
+      })
+      .catch(e => {
+        reject('访问助力池出错')
+      })
   })
 }
 

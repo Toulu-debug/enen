@@ -72,8 +72,10 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
           for (let s of shell.Data.NormShell) {
             for (let j = 0; j < s.dwNum; j++) {
               res = await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
-              if (res.iRet !== 0)
+              if (res.iRet !== 0){
+                console.log(res)
                 break
+              }
               console.log('捡贝壳:', res.Data.strFirstDesc)
               await wait(500)
             }
