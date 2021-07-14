@@ -12,10 +12,9 @@
 
 import {format} from 'date-fns';
 import axios from 'axios';
-import USER_AGENT from './TS_USER_AGENTS';
+import USER_AGENT, {TotalBean, getBeanShareCode, getFarmShareCode} from './TS_USER_AGENTS';
 import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
-import {getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
 
 const CryptoJS = require('crypto-js')
 const notify = require('./sendNotify')
@@ -29,7 +28,7 @@ let HELP_POOL: string = process.env.HELP_POOL ? process.env.HELP_POOL : "true";
 console.log('帮助助力池:', HELP_POOL)
 
 
-let UserName: string, index: number, isLogin: boolean, nickName: string
+let UserName: string, index: number;
 !(async () => {
   await requestAlgo();
   await requireConfig();
@@ -37,8 +36,11 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
-    isLogin = true;
-    nickName = '';
+    let {isLogin, nickName}: any = await TotalBean(cookie)
+    if (!isLogin) {
+      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
+      continue
+    }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     try {
@@ -71,6 +73,28 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
       }
     }
 
+    // 船来了
+    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
+    if (res.StoryInfo.StoryList) {
+      console.log(JSON.stringify(res))
+      if (res.StoryInfo.StoryList[0].Special) {
+        console.log(`船来了，乘客是${res.StoryInfo.StoryList[0].Special.strName}`)
+        let shipRes: any = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '2', triggerType: 0, ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
+        console.log(shipRes)
+        console.log('正在下船，等待30s')
+        await wait(30000)
+        shipRes = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '3', triggerType: 0, ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
+        if (shipRes.iRet === 0)
+          console.log('船客接待成功')
+        else
+          console.log('船客接待失败', shipRes)
+      }
+
+      if (res.StoryInfo.StoryList[0].Collector) {
+        console.log('收藏家出现')
+      }
+    }
+
     // 清空背包
     res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let bags: number[] = []
@@ -96,24 +120,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
     // 垃圾🚮
     res = await api('story/QueryRubbishInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     if (res.Data.StoryInfo.StoryList.length !== 0) {
-      console.log('可以倒垃圾')
-    }
-
-    // 船来了
-    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'undefined'})
-    if (res.StoryInfo.StoryList) {
-      if (res.StoryInfo.StoryList[0].Special) {
-        console.log(`船来了，乘客是${res.StoryInfo.StoryList[0].Special.strName}`)
-        let shipRes: any = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '2', triggerType: 0, ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
-        console.log(shipRes)
-        console.log('正在下船，等待30s')
-        await wait(30000)
-        shipRes = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '3', triggerType: 0, ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
-        if (shipRes.iRet === 0)
-          console.log('船客接待成功')
-        else
-          console.log('船客接待失败', shipRes)
-      }
+      await api('story/RubbishOper','')
     }
 
     // 任务➡️
@@ -316,7 +323,8 @@ function makeShareCodes() {
           console.log('提交失败！已提交farm和bean的cookie才可提交cfd')
         resolve()
       })
-      .catch(e => {
+      .catch((e) => {
+        console.log(e)
         reject('访问助力池出错')
       })
   })

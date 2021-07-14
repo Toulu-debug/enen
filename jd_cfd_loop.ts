@@ -5,7 +5,7 @@
 
 import {format} from 'date-fns'
 import axios from 'axios'
-import USER_AGENT from './TS_USER_AGENTS'
+import USER_AGENT, {TotalBean} from './TS_USER_AGENTS'
 import * as dotenv from 'dotenv'
 
 const CryptoJS = require('crypto-js')
@@ -57,8 +57,11 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
         cookie = cookiesArr[i];
         UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
         index = i + 1;
-        isLogin = true;
-        nickName = '';
+        let {isLogin, nickName}: any = await TotalBean(cookie)
+        if (!isLogin) {
+          notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
+          continue
+        }
         console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
         res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
@@ -72,7 +75,7 @@ let UserName: string, index: number, isLogin: boolean, nickName: string
           for (let s of shell.Data.NormShell) {
             for (let j = 0; j < s.dwNum; j++) {
               res = await speedUp('_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', s.dwType)
-              if (res.iRet !== 0){
+              if (res.iRet !== 0) {
                 console.log(res)
                 break
               }

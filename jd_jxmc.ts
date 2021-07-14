@@ -7,16 +7,16 @@
 
 import {format} from 'date-fns';
 import axios from 'axios';
-import USER_AGENT from './TS_USER_AGENTS';
-import {getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
+import USER_AGENT, {TotalBean, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
 import {Md5} from "ts-md5";
 
 const CryptoJS = require('crypto-js')
+const notify = require('./sendNotify')
 
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
 let cookie: string = '', cookiesArr: Array<string> = [], res: any = '', shareCodes: string[] = [];
 let homePageInfo: any;
-let UserName: string, index: number, isLogin: boolean, nickName: string
+let UserName: string, index: number;
 
 let HELP_HW: string = process.env.HELP_HW ? process.env.HELP_HW : "true";
 console.log('帮助HelloWorld:', HELP_HW)
@@ -31,9 +31,11 @@ console.log('帮助助力池:', HELP_POOL)
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
-    isLogin = true;
-    nickName = '';
-    await TotalBean();
+    let {isLogin, nickName}: any = await TotalBean(cookie)
+    if (!isLogin) {
+      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
+      continue
+    }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
@@ -231,7 +233,7 @@ function api(fn: string, stk: string, params: Params = {}) {
 function getTask() {
   return new Promise<number>(async resolve => {
     let tasks: any = await taskAPI('GetUserTaskStatusList', 'bizCode,dateType,source')
-    let doTaskRes: any = {ret: 1}, code: number = 1
+    let doTaskRes: any = {ret: 1};
     for (let t of tasks.data.userTaskStatusList) {
       if ((t.dateType === 1 || t.dateType === 2) && t.completedTimes == t.targetTimes && t.awardStatus === 2) {
         // 成就任务
@@ -303,7 +305,7 @@ function makeShareCodes(code: string) {
           console.log('提交失败！已提交farm的cookie才可提交cfd')
         resolve(200)
       })
-      .catch(e => {
+      .catch(() => {
         reject('访问助力池出错')
       })
   })
@@ -379,38 +381,6 @@ function requireConfig() {
     })
     console.log(`共${cookiesArr.length}个京东账号\n`)
     resolve()
-  })
-}
-
-function TotalBean() {
-  return new Promise<void>(async resolve => {
-    axios.get('https://me-api.jd.com/user_new/info/GetJDUserInfoUnion', {
-      headers: {
-        Host: "me-api.jd.com",
-        Connection: "keep-alive",
-        Cookie: cookie,
-        "User-Agent": USER_AGENT,
-        "Accept-Language": "zh-cn",
-        "Referer": "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&",
-        "Accept-Encoding": "gzip, deflate, br"
-      }
-    }).then(res => {
-      if (res.data) {
-        let data = res.data
-        if (data['retcode'] === "1001") {
-          isLogin = false; //cookie过期
-          return;
-        }
-        if (data['retcode'] === "0" && data['data'] && data.data.hasOwnProperty("userInfo")) {
-          nickName = data.data.userInfo.baseInfo.nickname;
-        }
-      } else {
-        console.log('京东服务器返回空数据');
-      }
-    }).catch(e => {
-      console.log('Error:', e)
-    })
-    resolve();
   })
 }
 

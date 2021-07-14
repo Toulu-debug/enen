@@ -81,8 +81,47 @@ async function getFarmShareCode(cookie: string) {
     return ''
 }
 
+function TotalBean(cookie: string) {
+  let totalBean = {
+    isLogin: true,
+    nickName: ''
+  }
+  return new Promise(resolve => {
+    axios.get('https://me-api.jd.com/user_new/info/GetJDUserInfoUnion', {
+      headers: {
+        Host: "me-api.jd.com",
+        Connection: "keep-alive",
+        Cookie: cookie,
+        "User-Agent": USER_AGENT,
+        "Accept-Language": "zh-cn",
+        "Referer": "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&",
+        "Accept-Encoding": "gzip, deflate, br"
+      }
+    }).then(res => {
+      if (res.data) {
+        let data = res.data
+        if (data['retcode'] === "1001") {
+          totalBean.isLogin = false; //cookie过期
+        }
+        if (data['retcode'] === "0" && data['data'] && data.data.hasOwnProperty("userInfo")) {
+          totalBean.isLogin = true
+          totalBean.nickName = data.data.userInfo.baseInfo.nickname;
+        }
+        resolve(totalBean)
+      } else {
+        console.log('京东服务器返回空数据');
+        resolve(totalBean)
+      }
+    }).catch(e => {
+      console.log('Error:', e)
+      resolve(totalBean)
+    })
+  })
+}
+
 export default USER_AGENT
 export {
+  TotalBean,
   getBeanShareCode,
   getFarmShareCode,
 }
