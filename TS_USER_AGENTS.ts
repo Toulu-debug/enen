@@ -58,7 +58,7 @@ async function getBeanShareCode(cookie: string) {
         "User-Agent": USER_AGENT
       }
     })
-  if (data.data.jwordShareInfo.shareUrl)
+  if (data.data?.jwordShareInfo?.shareUrl)
     return data.data.jwordShareInfo.shareUrl.split('Uuid=')![1]
   else
     return ''
