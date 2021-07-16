@@ -257,7 +257,7 @@ let UserName: string, index: number;
   // 获取随机助力码
   if (HELP_HW === 'true') {
     try {
-      let {data} = await axios.get("https://api.sharecode.ga/api/HW_CODES")
+      let {data} = await axios.get("https://api.sharecode.ga/api/HW_CODES", {timeout: 3000})
       shareCodes = [
         ...shareCodes,
         ...data.jxcfd
@@ -269,7 +269,7 @@ let UserName: string, index: number;
   }
   if (HELP_POOL === 'true') {
     try {
-      let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20')
+      let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20', {timeout: 3000})
       console.log('获取到20个随机助力码:', data.data)
       shareCodes = [...shareCodes, ...data.data]
     } catch (e) {
@@ -352,7 +352,7 @@ function makeShareCodes() {
     shareCodes.push(res.strMyShareId)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    axios.get(`https://api.sharecode.ga/api/autoInsert?db=jxcfd&code=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    axios.get(`https://api.sharecode.ga/api/autoInsert?db=jxcfd&code=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 3000})
       .then(res => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')

@@ -1379,7 +1379,7 @@ function readShareCode() {
   return new Promise(async resolve => {
     $.get({
       url: `https://api.sharecode.ga/api/jxfactory/${randomCount}`,
-      'timeout': 10000
+      'timeout': 3000
     }, (err, resp, data) => {
       try {
         if (err) {

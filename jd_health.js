@@ -259,9 +259,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `http://api.sharecode.ga/api/health/${randomCount}`,
-      'timeout': 10000
-    }, (err, resp, data) => {
+      url: `https://api.sharecode.ga/api/health/${randomCount}`, 'timeout': 3000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
