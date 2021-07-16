@@ -119,9 +119,25 @@ function TotalBean(cookie: string) {
   })
 }
 
+function requireConfig() {
+  let cookiesArr: string[] = [];
+  return new Promise(resolve => {
+    console.log('开始获取配置文件\n')
+    const jdCookieNode = require('./jdCookie.js');
+    Object.keys(jdCookieNode).forEach((item) => {
+      if (jdCookieNode[item]) {
+        cookiesArr.push(jdCookieNode[item])
+      }
+    })
+    console.log(`共${cookiesArr.length}个京东账号\n`)
+    resolve(cookiesArr)
+  })
+}
+
 export default USER_AGENT
 export {
   TotalBean,
   getBeanShareCode,
   getFarmShareCode,
+  requireConfig
 }
