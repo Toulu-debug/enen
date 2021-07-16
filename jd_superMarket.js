@@ -2092,7 +2092,7 @@ function _618(_0xce999c, _0x1f93d4, _0xa95934 = _0x2e68('5d', 'THJ&')) {
           'origin': _0x57dca3[_0x2e68('6e', 'Z#H#')],
           'user-agent': 'jdltapp;iPhone;3.5.0;14.2;network/wifi;hasUPPay/0;pushNoticeIsOpen/0;lang/zh_CN;model/iPhone10,2;hasOCPay/0;appBuild/1066;supportBestPay/0;pv/7.0;apprpd/;Mozilla/5.0\x20(iPhone;\x20CPU\x20iPhone\x20OS\x2014_2\x20like\x20Mac\x20OS\x20X)\x20AppleWebKit/605.1.15\x20(KHTML,\x20like\x20Gecko)\x20Mobile/15E148;supportJDSHWK/1',
           'accept-language': _0x2e68('6f', 'THJ&'),
-          'referer': 'https://618redpacket.jd.com/?activityId=DA4SkG7NXupA9sksI00L0g&redEnvelopeId=' + _0xce999c + _0x2e68('70', 'Opjc') + _0x1f93d4 + '&helpType=1&lng=&lat=&sid=',
+          'referer': 'https://618redpacket.jd.com/?activityId=yMVR-_QKRd2Mq27xguJG-w&redEnvelopeId=' + _0xce999c + _0x2e68('70', 'Opjc') + _0x1f93d4 + '&helpType=1&lng=&lat=&sid=',
           'Cookie': cookie
         }
       }, (_0x33eaca, _0x4d59c3, _0x4c619c) => {

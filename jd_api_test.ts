@@ -36,7 +36,6 @@ const notify = require('./sendNotify')
     console.log('测试失败，请重试，或更换设备dns。')
     await notify.sendNotify("API访问失败！\n请检查网络或更换DNS","手动测试：\nhttps://api.sharecode.ga/api/version","","你好，世界！")
   }
-  
 })()
 
 function getRandomNumberByRange(start: number, end: number): number {
