@@ -120,7 +120,7 @@ function TotalBean(cookie: string) {
 }
 
 function requireConfig() {
-  let cookiesArr: string[] = [];
+  let cookiesArr: string[] = []
   return new Promise(resolve => {
     console.log('开始获取配置文件\n')
     const jdCookieNode = require('./jdCookie.js');
@@ -134,10 +134,20 @@ function requireConfig() {
   })
 }
 
+function wait(t: number) {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve()
+    }, t)
+  })
+}
+
 export default USER_AGENT
 export {
   TotalBean,
   getBeanShareCode,
   getFarmShareCode,
-  requireConfig
+  requireConfig,
+  wait,
+  getRandomNumberByRange
 }
