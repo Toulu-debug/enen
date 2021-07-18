@@ -9,7 +9,7 @@
 import {format} from 'date-fns';
 import axios from 'axios';
 import USER_AGENT, {requireConfig, TotalBean} from './TS_USER_AGENTS';
-import jxtoken from './tools/jxtoken'
+import jxtoken from './jdJxToken'
 import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
