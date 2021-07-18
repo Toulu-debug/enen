@@ -12,7 +12,7 @@ import {Md5} from "ts-md5";
 
 const CryptoJS = require('crypto-js')
 const notify = require('./sendNotify')
-const A = require('./jd_jxmc_token')
+const A = require('./jd_jxmcToken')
 
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
 let cookie: string = '', res: any = '', shareCodes: string[] = [];
