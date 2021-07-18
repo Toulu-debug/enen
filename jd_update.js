@@ -5,16 +5,18 @@
 
 const exec = require('child_process').exec;
 
-exec("cd /ql/repo/JDHelloWorld_jd_scripts; git fetch --all; git reset --hard origin/main; git pull", (error, stdout, stderr) => {
-  console.log(1, error)
-  console.log(2, stdout.trim())
-  console.log(3, stderr)
+if(process.env.PWD==='/ql/scripts'){
+  exec("cd /ql/repo/JDHelloWorld_jd_scripts")
+}
+
+exec("git fetch --all; git reset --hard origin/main; git pull", (error, stdout, stderr) => {
+  console.log(stdout.trim())
 })
 
-if (__dirname.indexOf('/ql/') > -1) {
-  exec('ql repo https://github.com/JDHelloWorld/jd_scripts.git "jd_|jx_|getJDCookie" "activity|backUp|Coupon|enen" "^jd[^_]|USER"', (error, stdout, stderr) => {
-    console.log(1, error)
-    console.log(2, stdout.trim())
-    console.log(3, stderr)
-  })
+if(process.env.PWD==='/ql/scripts') {
+  if (__dirname.indexOf('/ql/') > -1) {
+    exec('ql repo https://github.com/JDHelloWorld/jd_scripts.git "jd_|jx_|getCookie" "activity|backUp|Coupon|enen" "^jd[^_]|USER|tools"', (error, stdout, stderr) => {
+      console.log(stdout.trim())
+    })
+  }
 }

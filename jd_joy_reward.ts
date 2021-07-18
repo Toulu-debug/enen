@@ -1,11 +1,10 @@
 /**
- *
- * Running time limit:
- * s >= 58 or s <= 30  => exchange()
- * s > 30 and s < 58  =>  wait...
- *
+ * 注意：
+ * 脚本不做等待限制
+ * cron触发后会立刻执行兑换
  */
 import axios from 'axios';
+import {format} from 'date-fns';
 import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as fs from 'fs';
 
@@ -77,16 +76,15 @@ function init() {
 }
 
 function exchange(beanId: number) {
-  console.log('exchange()')
   return new Promise<void>(async resolve => {
     while (1) {
-      let s: number = new Date().getSeconds();
-      if (s >= 58 || s <= 30) {
+      if (new Date().getSeconds() < 15) {
         break
       } else {
-        await wait(500)
+        await $.wait(100)
       }
     }
+    console.log('exchange()', format(new Date(), 'hh:mm:ss:SSS'))
     let {data} = await axios.post(`https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=qRKHmL4sna8ZOP9F&validate=${validate}`,
       JSON.stringify({"buyParam": {"orderSource": 'pet', "saleInfoId": beanId}, "deviceInfo": {}}), {
         headers: {
