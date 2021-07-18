@@ -157,6 +157,31 @@ if (process.env.PUSH_PLUS_USER) {
 //==========================云端环境变量的判断与接收=========================
 
 /**
+ * 
+ * 账号备注功能
+ * 如需使用此功能，在/config下创建文件remarks.json
+ * 格式如下 { "pt_pin1": "备注名称1", "pt_pin2": "备注名称2", ... }
+ * 
+ * @param {string} txt 
+ * @returns 
+ */
+async function addRemarks(txt) {
+  try {
+    const remarksPath = '/config/remarks.json';
+    require.resolve(remarksPath);
+    const remarks = require(remarksPath);
+    Object.keys(remarks).forEach(key => {
+      // console.log(key);
+      txt = txt.replace(new RegExp(key, 'g'), remarks[key]);
+    });
+  } catch (error) {
+    console.log('没有remarks.json文件，忽略备注配置。')
+  }
+
+  return txt;
+}
+
+/**
  * sendNotify 推送通知功能
  * @param text 通知头
  * @param desp 通知体
@@ -165,6 +190,9 @@ if (process.env.PUSH_PLUS_USER) {
  * @returns {Promise<unknown>}
  */
 async function sendNotify(text, desp, params = {}, author = '\n\n仅供用于学习') {
+  text = await addRemarks(text);
+  desp = await addRemarks(desp);
+  
   //提供6种通知
   desp += author;//增加作者信息，防止被贩卖等
   await Promise.all([
