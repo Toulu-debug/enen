@@ -159,7 +159,7 @@ if (process.env.PUSH_PLUS_USER) {
 /**
  * 
  * 账号备注功能
- * 如需使用此功能，在/config下创建文件remarks.json
+ * 如需使用此功能，在/jd/config下创建文件remarks.json
  * 格式如下 { "pt_pin1": "备注名称1", "pt_pin2": "备注名称2", ... }
  * 
  * @param {string} txt 
@@ -167,7 +167,7 @@ if (process.env.PUSH_PLUS_USER) {
  */
 async function addRemarks(txt) {
   try {
-    const remarksPath = '/config/remarks.json';
+    const remarksPath = '../config/remarks.json';
     require.resolve(remarksPath);
     const remarks = require(remarksPath);
     Object.keys(remarks).forEach(key => {
