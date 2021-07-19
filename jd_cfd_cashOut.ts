@@ -4,11 +4,13 @@
  *
  * 顺序、数量必须与cookie一致
  * export CFD_CASH_TOKEN='[{"strPgtimestamp":"你的值","strPhoneID":"你的值","strPgUUNum":"你的值"},{"strPgtimestamp":"你的值","strPhoneID":"你的值","strPgUUNum":"你的值"}]'
+ *
+ * to be continued
  */
 
 import {format} from 'date-fns';
 import axios from 'axios';
-import USER_AGENT, {requireConfig, TotalBean} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import jxtoken from './jdJxToken'
 import * as dotenv from 'dotenv';
 
@@ -36,7 +38,19 @@ interface Params {
   ddwPaperMoney?: number,
   strPgtimestamp?: string,
   strPgUUNum?: string,
-  strPhoneID?: string
+  strPhoneID?: string,
+  strBuildIndex?: string,
+  dwType?: string,
+  dwFirst?: number,
+  __t?: number,
+  strBT?: string,
+  dwIdentityType?: number,
+  strBussKey?: string,
+  strMyShareId?: string,
+  ddwCount?: number,
+  taskId?: number,
+  ddwConsumeCoin?: number,
+  dwIsFree?: number,
 }
 
 !(async () => {
@@ -56,10 +70,69 @@ interface Params {
       console.log('token数量不足')
       break
     }
+
+    // TODO 激活资格
+    for (let j = 0; j < 2; j++) {
+      for (let b of ['food', 'fun', 'shop', 'sea']) {
+        res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
+        console.log(`${b}收金币:`, res.ddwCoin)
+        await wait(500)
+      }
+    }
+
+    while (1) {
+      res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
+      console.log('今日热气球:', res.dwTodaySpeedPeople)
+      if (res.dwTodaySpeedPeople >= 20)
+        break
+      await wait(300)
+    }
+
+    res = await api('user/ComposeGameState', '', {dwFirst: 1})
+    let strDT: string = res.strDT, strMyShareId: string = res.strMyShareId
+    res = await api('user/RealTmReport', '', {dwIdentityType: 0, strBussKey: 'composegame', strMyShareId: strMyShareId, ddwCount: 5})
+    await wait(1000)
+    res = await api('user/ComposeGameAddProcess', '__t,strBT,strZone', {__t: Date.now(), strBT: strDT})
+
+    res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    if (!res.TourGuideList) {
+      console.log('手动雇佣4个试用导游')
+    } else {
+      for (let e of res.TourGuideList) {
+        if (e.strBuildIndex !== 'food' && e.ddwRemainTm === 0) {
+          let employ: any = await api('user/EmployTourGuide', '_cfd_t,bizCode,ddwConsumeCoin,dwEnv,dwIsFree,ptag,source,strBuildIndex,strZone',
+            {ddwConsumeCoin: e.ddwCostCoin, dwIsFree: 0, strBuildIndex: e.strBuildIndex})
+          if (employ.iRet === 0)
+            console.log(`雇佣${e.strBuildIndex}导游成功`)
+          await wait(300)
+        }
+      }
+    }
+
+    // 任务➡️
+    let tasks: any
+    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    for (let t of tasks.Data.TaskList) {
+      if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
+        res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
+        if (res.ret === 0) {
+          console.log(`${t.strTaskName}领奖成功:`, res.data.prizeInfo)
+        }
+        await wait(300)
+      }
+    }
+
+    // 提现
+    console.log('开始提现：', format(new Date(), 'hh:mm:ss:SSS'))
+    res = await api('user/CashOutQuali',
+      '_cfd_t,bizCode,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
+      {strPgUUNum: CFD_CASH_TOKEN[i].strPgUUNum, strPgtimestamp: CFD_CASH_TOKEN[i].strPgtimestamp, strPhoneID: CFD_CASH_TOKEN[i].strPhoneID})
+    console.log('资格：', res)
+
     res = await api('user/CashOut',
       '_cfd_t,bizCode,ddwMoney,ddwPaperMoney,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: CFD_CASH_TOKEN[i].strPgUUNum, strPgtimestamp: CFD_CASH_TOKEN[i].strPgtimestamp, strPhoneID: CFD_CASH_TOKEN[i].strPhoneID})
-    console.log(res)
+    console.log('提现', res)
   }
 })()
 
@@ -87,6 +160,26 @@ function api(fn: string, stk: string, params: Params = {}) {
       }
     })
     resolve(data)
+  })
+}
+
+function speedUp(stk: string) {
+  return new Promise(async (resolve, reject) => {
+    let url: string = `https://m.jingxi.com/jxbfd/user/SpeedUp?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&strBuildIndex=food&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+    url += '&h5st=' + decrypt(stk, url)
+    try {
+      let {data} = await axios.get(url, {
+        headers: {
+          'Host': 'm.jingxi.com',
+          'Referer': 'https://st.jingxi.com/',
+          'User-Agent': USER_AGENT,
+          'Cookie': cookie
+        }
+      })
+      resolve(data)
+    } catch (e) {
+      reject(502)
+    }
   })
 }
 
