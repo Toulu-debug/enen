@@ -1,16 +1,15 @@
 /**
  * 注意：
- * 脚本不做等待限制
- * cron触发后会立刻执行兑换
+ * 0～15秒才会进行兑换
+ * 16～59秒会进入死循环等待
  */
 import axios from 'axios';
 import {format} from 'date-fns';
-import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, TotalBean, wait} from './test/TS_USER_AGENTS';
 import * as fs from 'fs';
 
 const notify = require('./sendNotify')
 
-let $: any = {};
 let cookie: string = '', validate: string = '', UserName: string, index: number;
 let target: number = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JOY_REWARD_NAME) : 500;
 
@@ -31,7 +30,7 @@ let target: number = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JO
       notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
       continue
     }
-    console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
+    console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     if (i < validate_arr.length)
       validate = validate_arr[i]
@@ -81,7 +80,7 @@ function exchange(beanId: number) {
       if (new Date().getSeconds() < 15) {
         break
       } else {
-        await $.wait(100)
+        await wait(100)
       }
     }
     console.log('exchange()', format(new Date(), 'hh:mm:ss:SSS'))
