@@ -40,8 +40,13 @@ console.log('帮助助力池:', HELP_POOL)
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
-    let lastgettime: number = homePageInfo.data.cow.lastgettime
-
+    let lastgettime: number
+    if (homePageInfo.data?.cow?.lastgettime) {
+      lastgettime = homePageInfo.data.cow.lastgettime
+    } else {
+      continue
+    }
+    
     let food: number = 0
     try {
       food = homePageInfo.data.materialinfo[0].value;
