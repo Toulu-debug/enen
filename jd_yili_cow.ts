@@ -33,8 +33,11 @@ async function main() {
       pin = res.data.secretPin
 
       res = await api('https://lzdz-isv.isvjcloud.com/wxActionCommon/getUserInfo', `pin=${encodeURIComponent(pin)}`)
-      uuid = res.data.id
-
+      if(res.data?.hasOwnProperty('id')){
+        uuid = res.data.id
+      }else{
+        continue
+      }
       res = await api('https://lzdz-isv.isvjcloud.com/dingzhi/yili/yangniu/activityContent', `activityId=dz2103100001340201&pin=${encodeURIComponent(pin)}&pinImg=null&nick=${cookie.match(/pt_pin=([^;]*)/)![1]}&cjyxPin=&cjhyPin=&shareUuid=`)
       actorUuid = res.data.actorUuid
       console.log('互助码：', actorUuid)
@@ -78,9 +81,10 @@ async function main() {
         res = await api('saveTask', `activityId=dz2103100001340201&actorUuid=${actorUuid}&pin=${encodeURIComponent(pin)}&taskType=${t.taskType}&taskValue=${t.taskValue ?? ''}`)
         if (res.result)
           console.log('任务完成：', res.data.milkCount)
-        else
+        else{
           console.log('任务失败：', res)
-
+          break
+        }
         await wait(2000)
       }
     } catch (e) {
