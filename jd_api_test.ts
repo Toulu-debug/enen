@@ -16,7 +16,7 @@ const notify = require('./sendNotify')
     let num: number = getRandomNumberByRange(5, 20)
     console.log(`本次随机选择${db}获取${num}个随机助力码`)
 
-    let {data} = await axios.get(`https://api.sharecode.ga/api/${db}/${num}`, {timeout: 3000})
+    let {data} = await axios.get(`https://api.sharecode.ga/api/${db}/${num}`, {timeout: 10000})
     console.log(JSON.stringify(data, null, '  '))
 
     if (data.code === 200) {
@@ -30,7 +30,7 @@ const notify = require('./sendNotify')
   }
 
   try{
-    let {data} = await axios.get(`https://api.sharecode.ga/api/version`, {timeout: 3000})
+    let {data} = await axios.get(`https://api.sharecode.ga/api/version`, {timeout: 10000})
     console.log(`当前版本：${data}`)
   }catch (e) {
     console.log('测试失败，请重试，或更换设备dns。')

@@ -558,7 +558,7 @@ async function distributeBeanActivity() {
         url: `http://go.chiang.fun/autocommit`,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ "act": "zuan", code }),
-        timeout: 30000
+        timeout: 10000
       }).then((resp) => {
         if (resp.statusCode === 200) {
           try {

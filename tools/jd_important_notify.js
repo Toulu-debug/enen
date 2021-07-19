@@ -31,7 +31,7 @@ if (process.env.TG_PROXY_HOST && process.env.TG_PROXY_PORT) {
 
 */
 
-axios.get("https://api.sharecode.ga/api/notify", {timeout: 3000})
+axios.get("https://api.sharecode.ga/api/notify", {timeout: 10000})
   .then(async (res) => {
     let obj = res.data
     if (obj.time !== lastPush) {
