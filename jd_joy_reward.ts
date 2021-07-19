@@ -5,7 +5,7 @@
  */
 import axios from 'axios';
 import {format} from 'date-fns';
-import USER_AGENT, {requireConfig, TotalBean, wait} from './test/TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as fs from 'fs';
 
 const notify = require('./sendNotify')
