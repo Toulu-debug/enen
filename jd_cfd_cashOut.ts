@@ -1,4 +1,5 @@
 /**
+ * 0～30秒开始执行，31～59秒死循环等待
  * 提现金额：0.1、0.5、1、2、10
  * 解锁提现方式：升级1个建筑，留金币够升级一个建筑
  * 自动模拟提现token，不需要抓包
@@ -34,6 +35,14 @@ interface Params {
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
     console.log(`\n开始【京东账号${index}】${UserName}\n`);
+
+    while (1) {
+      if (new Date().getSeconds() < 30) {
+        break
+      } else {
+        await wait(100)
+      }
+    }
 
     for (let b of ['food', 'fun', 'shop', 'sea']) {
       res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
