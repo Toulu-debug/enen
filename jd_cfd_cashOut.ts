@@ -1,17 +1,15 @@
 /**
  * 提现金额，可选0.1 0.5 1 2 10
  * export CFD_CASHOUT_MONEY=0.1
- *
- * 顺序、数量必须与cookie一致
- * export CFD_CASH_TOKEN='[{"strPgtimestamp":"你的值","strPhoneID":"你的值","strPgUUNum":"你的值"},{"strPgtimestamp":"你的值","strPhoneID":"你的值","strPgUUNum":"你的值"}]'
- *
- * to be continued
+ * 
+ * 解锁提现方式二选一：1.升级1个建筑（优先） 2.完成日常任务
+ * 自动模拟提现token，不需要抓包
  */
 
 import {format} from 'date-fns';
 import axios from 'axios';
+import {Md5} from 'ts-md5'
 import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
-import jxtoken from './jdJxToken'
 import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
@@ -21,17 +19,6 @@ let appId: number = 10028, fingerprint: string | number, token: string = '', enC
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
 let money: number = process.env.CFD_CASHOUT_MONEY ? parseFloat(process.env.CFD_CASHOUT_MONEY) * 100 : 10
-let CFD_CASH_TOKEN: any = process.env.CFD_CASH_TOKEN ?? []
-
-if (CFD_CASH_TOKEN.length === 0) {
-  jxtoken.map((value) => {
-    value.strPgtimestamp ? CFD_CASH_TOKEN.push(value) : ''
-  })
-} else {
-  CFD_CASH_TOKEN = JSON.parse(CFD_CASH_TOKEN)
-}
-
-console.log(CFD_CASH_TOKEN)
 
 interface Params {
   ddwMoney?: number,
@@ -51,6 +38,8 @@ interface Params {
   taskId?: number,
   ddwConsumeCoin?: number,
   dwIsFree?: number,
+  ddwCostCoin?: number,
+
 }
 
 !(async () => {
@@ -66,82 +55,124 @@ interface Params {
       continue
     }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
-    if (!CFD_CASH_TOKEN[i]) {
-      console.log('token数量不足')
-      break
-    }
+    let finish: Boolean = false;
 
-    // TODO 激活资格
-    for (let j = 0; j < 2; j++) {
-      for (let b of ['food', 'fun', 'shop', 'sea']) {
-        res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
-        console.log(`${b}收金币:`, res.ddwCoin)
-        await wait(500)
+    for (let b of ['food', 'fun', 'shop', 'sea']) {
+      res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
+      if (res.dwCanLvlUp === 1) {
+        res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
+        if (res.iRet === 0) {
+          console.log(`升级成功:`, res) // ddwSendRichValue
+          finish = true
+          break
+        }
       }
     }
 
-    while (1) {
-      res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
-      console.log('今日热气球:', res.dwTodaySpeedPeople)
-      if (res.dwTodaySpeedPeople >= 20)
-        break
-      await wait(300)
-    }
+    if (!finish) {
+      for (let j = 0; j < 2; j++) {
+        for (let b of ['food', 'fun', 'shop', 'sea']) {
+          res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
+          console.log(`${b}收金币:`, res.ddwCoin)
+          await wait(500)
+        }
+      }
 
-    res = await api('user/ComposeGameState', '', {dwFirst: 1})
-    let strDT: string = res.strDT, strMyShareId: string = res.strMyShareId
-    res = await api('user/RealTmReport', '', {dwIdentityType: 0, strBussKey: 'composegame', strMyShareId: strMyShareId, ddwCount: 5})
-    await wait(1000)
-    res = await api('user/ComposeGameAddProcess', '__t,strBT,strZone', {__t: Date.now(), strBT: strDT})
+      while (1) {
+        res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
+        console.log('今日热气球:', res.dwTodaySpeedPeople)
+        if (res.dwTodaySpeedPeople >= 20)
+          break
+        await wait(300)
+      }
 
-    res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    if (!res.TourGuideList) {
-      console.log('手动雇佣4个试用导游')
-    } else {
-      for (let e of res.TourGuideList) {
-        if (e.strBuildIndex !== 'food' && e.ddwRemainTm === 0) {
-          let employ: any = await api('user/EmployTourGuide', '_cfd_t,bizCode,ddwConsumeCoin,dwEnv,dwIsFree,ptag,source,strBuildIndex,strZone',
-            {ddwConsumeCoin: e.ddwCostCoin, dwIsFree: 0, strBuildIndex: e.strBuildIndex})
-          if (employ.iRet === 0)
-            console.log(`雇佣${e.strBuildIndex}导游成功`)
+      res = await api('user/ComposeGameState', '', {dwFirst: 1})
+      let strDT: string = res.strDT, strMyShareId: string = res.strMyShareId
+      res = await api('user/RealTmReport', '', {dwIdentityType: 0, strBussKey: 'composegame', strMyShareId: strMyShareId, ddwCount: 5})
+      await wait(1000)
+      res = await api('user/ComposeGameAddProcess', '__t,strBT,strZone', {__t: Date.now(), strBT: strDT})
+
+      res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      if (!res.TourGuideList) {
+        console.log('手动雇佣4个试用导游')
+      } else {
+        for (let e of res.TourGuideList) {
+          if (e.strBuildIndex !== 'food' && e.ddwRemainTm === 0) {
+            let employ: any = await api('user/EmployTourGuide', '_cfd_t,bizCode,ddwConsumeCoin,dwEnv,dwIsFree,ptag,source,strBuildIndex,strZone',
+              {ddwConsumeCoin: e.ddwCostCoin, dwIsFree: 0, strBuildIndex: e.strBuildIndex})
+            if (employ.iRet === 0)
+              console.log(`雇佣${e.strBuildIndex}导游成功`)
+            await wait(300)
+          }
+        }
+      }
+
+      // 任务➡️
+      let tasks: any
+      tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      for (let t of tasks.Data.TaskList) {
+        if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
+          res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
+          if (res.ret === 0) {
+            console.log(`${t.strTaskName}领奖成功:`, res.data.prizeInfo)
+          }
           await wait(300)
         }
       }
-    }
-
-    // 任务➡️
-    let tasks: any
-    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    for (let t of tasks.Data.TaskList) {
-      if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
-        res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
-        if (res.ret === 0) {
-          console.log(`${t.strTaskName}领奖成功:`, res.data.prizeInfo)
-        }
-        await wait(300)
-      }
+      res = await api('story/ActTaskAward', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      console.log('100财富任务完成：', res)
     }
 
     // 提现
     console.log('开始提现：', format(new Date(), 'hh:mm:ss:SSS'))
+    let token: any = await getJxToken(cookie)
+    console.log(token)
     res = await api('user/CashOutQuali',
       '_cfd_t,bizCode,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
-      {strPgUUNum: CFD_CASH_TOKEN[i].strPgUUNum, strPgtimestamp: CFD_CASH_TOKEN[i].strPgtimestamp, strPhoneID: CFD_CASH_TOKEN[i].strPhoneID})
-    console.log('资格：', res)
-
+      {strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
+    console.log('资格:', res)
+    await wait(2000)
     res = await api('user/CashOut',
       '_cfd_t,bizCode,ddwMoney,ddwPaperMoney,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
-      {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: CFD_CASH_TOKEN[i].strPgUUNum, strPgtimestamp: CFD_CASH_TOKEN[i].strPgtimestamp, strPhoneID: CFD_CASH_TOKEN[i].strPhoneID})
-    console.log('提现', res)
+      {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
+    console.log('提现:', res)
+    break
   }
 })()
 
+function getJxToken(cookie: string) {
+  function generateStr(input: number) {
+    let src = 'abcdefghijklmnopqrstuvwxyz1234567890';
+    let res = '';
+    for (let i = 0; i < input; i++) {
+      res += src[Math.floor(src.length * Math.random())];
+    }
+    return res;
+  }
+
+  return new Promise(resolve => {
+    let phoneId = generateStr(40);
+    let timestamp = Date.now().toString();
+    if (!cookie['match'](/pt_pin=([^; ]+)(?=;?)/)) {
+      console.log('此账号cookie填写不规范,你的pt_pin=xxx后面没分号(;)\n');
+      resolve({});
+    }
+    let nickname = cookie.match(/pt_pin=([^;]*)/)![1];
+    let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy');
+    resolve({
+      'strPgtimestamp': timestamp,
+      'strPhoneID': phoneId,
+      'strPgUUNum': jstoken
+    })
+  });
+}
+
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async resolve => {
-    let url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+    let url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=138631.26.55&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
     if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
       console.log('api2')
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfddch&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfddch&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=138631.26.55&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     }
     if (Object.keys(params).length !== 0) {
       let key: (keyof Params)
@@ -153,10 +184,10 @@ function api(fn: string, stk: string, params: Params = {}) {
     url += '&h5st=' + decrypt(stk, url)
     let {data} = await axios.get(url, {
       headers: {
-        'Host': 'm.jingxi.com',
-        'Referer': 'https://st.jingxi.com/',
-        'User-Agent': USER_AGENT,
-        'Cookie': cookie
+        Cookie: cookie,
+        Referer: "https://st.jingxi.com/fortune_island/index.html?ptag=138631.26.55",
+        Host: "m.jingxi.com",
+        "User-Agent": `jdpingou`,
       }
     })
     resolve(data)
