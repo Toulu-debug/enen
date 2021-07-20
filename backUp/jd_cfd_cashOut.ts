@@ -1,13 +1,15 @@
 /**
- * 提现金额：0.1、0.5、1、2、10
- * 解锁提现方式：升级1个建筑，留金币够升级一个建筑
+ * 提现金额，可选0.1 0.5 1 2 10
+ * export CFD_CASHOUT_MONEY=0.1
+ * 
+ * 解锁提现方式二选一：1.升级1个建筑（优先） 2.完成日常任务
  * 自动模拟提现token，不需要抓包
  */
 
 import {format} from 'date-fns';
 import axios from 'axios';
 import {Md5} from 'ts-md5'
-import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
@@ -16,6 +18,8 @@ dotenv.config()
 let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
+let money: number = process.env.CFD_CASHOUT_MONEY ? parseFloat(process.env.CFD_CASHOUT_MONEY) * 100 : 10
+
 interface Params {
   ddwMoney?: number,
   ddwPaperMoney?: number,
@@ -23,7 +27,19 @@ interface Params {
   strPgUUNum?: string,
   strPhoneID?: string,
   strBuildIndex?: string,
+  dwType?: string,
+  dwFirst?: number,
+  __t?: number,
+  strBT?: string,
+  dwIdentityType?: number,
+  strBussKey?: string,
+  strMyShareId?: string,
+  ddwCount?: number,
+  taskId?: number,
+  ddwConsumeCoin?: number,
+  dwIsFree?: number,
   ddwCostCoin?: number,
+
 }
 
 !(async () => {
@@ -33,7 +49,13 @@ interface Params {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    let {isLogin, nickName}: any = await TotalBean(cookie)
+    if (!isLogin) {
+      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
+      continue
+    }
+    console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+    let finish: Boolean = false;
 
     for (let b of ['food', 'fun', 'shop', 'sea']) {
       res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
@@ -41,37 +63,75 @@ interface Params {
         res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
         if (res.iRet === 0) {
           console.log(`升级成功:`, res) // ddwSendRichValue
+          finish = true
           break
         }
       }
     }
 
+    if (!finish) {
+      for (let j = 0; j < 2; j++) {
+        for (let b of ['food', 'fun', 'shop', 'sea']) {
+          res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
+          console.log(`${b}收金币:`, res.ddwCoin)
+          await wait(500)
+        }
+      }
+
+      while (1) {
+        res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
+        console.log('今日热气球:', res.dwTodaySpeedPeople)
+        if (res.dwTodaySpeedPeople >= 20)
+          break
+        await wait(300)
+      }
+
+      res = await api('user/ComposeGameState', '', {dwFirst: 1})
+      let strDT: string = res.strDT, strMyShareId: string = res.strMyShareId
+      res = await api('user/RealTmReport', '', {dwIdentityType: 0, strBussKey: 'composegame', strMyShareId: strMyShareId, ddwCount: 5})
+      await wait(1000)
+      res = await api('user/ComposeGameAddProcess', '__t,strBT,strZone', {__t: Date.now(), strBT: strDT})
+
+      res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      if (!res.TourGuideList) {
+        console.log('手动雇佣4个试用导游')
+      } else {
+        for (let e of res.TourGuideList) {
+          if (e.strBuildIndex !== 'food' && e.ddwRemainTm === 0) {
+            let employ: any = await api('user/EmployTourGuide', '_cfd_t,bizCode,ddwConsumeCoin,dwEnv,dwIsFree,ptag,source,strBuildIndex,strZone',
+              {ddwConsumeCoin: e.ddwCostCoin, dwIsFree: 0, strBuildIndex: e.strBuildIndex})
+            if (employ.iRet === 0)
+              console.log(`雇佣${e.strBuildIndex}导游成功`)
+            await wait(300)
+          }
+        }
+      }
+
+      // 任务➡️
+      let tasks: any
+      tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      for (let t of tasks.Data.TaskList) {
+        if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
+          res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
+          if (res.ret === 0) {
+            console.log(`${t.strTaskName}领奖成功:`, res.data.prizeInfo)
+          }
+          await wait(300)
+        }
+      }
+      res = await api('story/ActTaskAward', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      console.log('100财富任务完成：', res)
+    }
+
     // 提现
-    console.log('解锁：', format(new Date(), 'hh:mm:ss:SSS'))
+    console.log('开始提现：', format(new Date(), 'hh:mm:ss:SSS'))
     let token: any = await getJxToken(cookie)
+    console.log(token)
     res = await api('user/CashOutQuali',
       '_cfd_t,bizCode,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
     console.log('资格:', res)
     await wait(2000)
-
-    console.log('提现：', format(new Date(), 'hh:mm:ss:SSS'))
-    let money: number = 10
-    // @github/Aaron-lv
-    switch (new Date().getHours()) {
-      case 0:
-        money = 100
-        break
-      case 12:
-        money = 50
-        break
-      default:
-        money = 10
-        break
-    }
-
-    money = process.env.CFD_CASHOUT_MONEY ? parseFloat(process.env.CFD_CASHOUT_MONEY) * 100 : money
-    console.log('本次计划提现：', money)
     res = await api('user/CashOut',
       '_cfd_t,bizCode,ddwMoney,ddwPaperMoney,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
@@ -130,6 +190,26 @@ function api(fn: string, stk: string, params: Params = {}) {
       }
     })
     resolve(data)
+  })
+}
+
+function speedUp(stk: string) {
+  return new Promise(async (resolve, reject) => {
+    let url: string = `https://m.jingxi.com/jxbfd/user/SpeedUp?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&strBuildIndex=food&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+    url += '&h5st=' + decrypt(stk, url)
+    try {
+      let {data} = await axios.get(url, {
+        headers: {
+          'Host': 'm.jingxi.com',
+          'Referer': 'https://st.jingxi.com/',
+          'User-Agent': USER_AGENT,
+          'Cookie': cookie
+        }
+      })
+      resolve(data)
+    } catch (e) {
+      reject(502)
+    }
   })
 }
 

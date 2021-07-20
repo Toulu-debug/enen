@@ -254,7 +254,9 @@ let UserName: string, index: number;
     for (let b of ['food', 'fun', 'shop', 'sea']) {
       res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
       console.log(`${b}升级需要:`, res.ddwNextLvlCostCoin)
+      /*
       await wait(1000)
+      // 在提现时升级
       if (res.dwCanLvlUp === 1) {
         res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
         if (res.iRet === 0) {
@@ -262,6 +264,7 @@ let UserName: string, index: number;
           await wait(2000)
         }
       }
+      */
       res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
       console.log(`${b}收金币:`, res.ddwCoin)
       await wait(1000)
