@@ -37,7 +37,7 @@ let UserName: string, index: number;
     if (filename.indexOf('JDHelloWorld_jd_scripts_') > -1) {
       filename = filename.replace('JDHelloWorld_jd_scripts_', '')
     }
-    axios.get('https://api.sharecode.ga/api/md5?filename=' + filename)
+    axios.get('https://api.sharecode.ga/api/md5?filename=' + filename, {timeout: 10000})
       .then(res => {
         console.log('local: ', md5)
         console.log('remote:', res.data)
