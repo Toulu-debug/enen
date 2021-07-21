@@ -14,6 +14,10 @@ const timeout = 15000;//超时时间(单位毫秒)
 //此处填你申请的SCKEY.
 //(环境变量名 PUSH_KEY)
 let SCKEY = '';
+// 自建serverchan 环境变量名 PUSH_KEY_WECOM
+let SCKEY_WECOM = '';
+// 自建serverchan 环境变量名 PUSH_KEY_WECOM_URL
+let SCKEY_WECOM_URL = '';
 
 // =======================================Bark App通知设置区域===========================================
 //此处填你BarkAPP的信息(IP/设备码，例如：https://api.day.app/XXXXXXXX)
@@ -84,6 +88,14 @@ process.env.go_cqhttp_method ? go_cqhttp_method = process.env.go_cqhttp_method :
 //==========================云端环境变量的判断与接收=========================
 if (process.env.PUSH_KEY) {
   SCKEY = process.env.PUSH_KEY;
+}
+
+if (process.env.PUSH_KEY_WECOM) {
+  SCKEY_WECOM = process.env.PUSH_KEY_WECOM;
+}
+
+if (process.env.PUSH_KEY_WECOM_URL) {
+  SCKEY_WECOM_URL = process.env.PUSH_KEY_WECOM_URL;
 }
 
 if (process.env.QQ_SKEY) {
@@ -180,6 +192,7 @@ async function sendNotify(text, desp, params = {}, author = '\n\n仅供用于学
   }
   await Promise.all([
     serverNotify(text, desp),//微信server酱
+    serverWecomNotify(text, desp), // 自建server酱推送
     pushPlusNotify(text, desp)//pushplus(推送加)
   ])
   //由于上述两种微信通知需点击进去才能查看到详情，故text(标题内容)携带了账号序号以及昵称信息，方便不点击也可知道是哪个京东哪个活动
@@ -270,6 +283,51 @@ function serverNotify(text, desp, time = 2100) {
       }, time)
     } else {
       console.log('\n\n您未提供server酱的SCKEY，取消微信推送消息通知🚫\n');
+      resolve()
+    }
+  })
+}
+
+function serverWecomNotify(text, desp, time = 2100) {
+  return new Promise(resolve => {
+    if (SCKEY_WECOM && SCKEY_WECOM_URL) {
+      //微信server酱推送通知一个\n不会换行，需要两个\n才能换行，故做此替换
+      desp = desp.replace(/[\n\r]/g, '\n\n');
+      const options = {
+        url: SCKEY_WECOM_URL,
+        body: `sendkey=` + SCKEY_WECOM + `&text=${text}&desp=${desp}`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        timeout
+      }
+      setTimeout(() => {
+        $.post(options, (err, resp, data) => {
+          try {
+            if (err) {
+              console.log('发送通知调用API失败！！\n')
+              console.log(err);
+            } else {
+              data = JSON.parse(data);
+              //server酱和Server酱·Turbo版的返回json格式不太一样
+              if (data.errno === 0 || data.data.errno === 0) {
+                console.log('server酱发送通知消息成功🎉\n')
+              } else if (data.errno === 1024) {
+                // 一分钟内发送相同的内容会触发
+                console.log(`server酱发送通知消息异常: ${data.errmsg}\n`)
+              } else {
+                console.log(`server酱发送通知消息异常\n${JSON.stringify(data)}`)
+              }
+            }
+          } catch (e) {
+            $.logErr(e, resp);
+          } finally {
+            resolve(data);
+          }
+        })
+      }, time)
+    } else {
+      console.log('\n\n您未提供自建server酱的SCKEY，取消推送自建server酱消息通知🚫\n');
       resolve()
     }
   })
