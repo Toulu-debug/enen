@@ -38,6 +38,9 @@ async function main() {
       }else{
         continue
       }
+
+      res = await api('https://lzdz-isv.isvjcloud.com/common/accessLogWithAD',`venderId=1000013402&code=99&pin=${encodeURIComponent(pin)}&activityId=dz2103100001340201&pageUrl=https%3A%2F%2Flzdz-isv.isvjcloud.com%2Fdingzhi%2Fyili%2Fyangniu%2Factivity%2F4827909%3FactivityId%3Ddz2103100001340201%26shareUuid%3Db44243656a694b6f94bb30a4a5f2a45d%26adsource%3Dziying%26shareuserid4minipg%3D5Iufa9rY657S3OP3PLSpK07oeVP9kq2pYSH90mYt4m3fwcJlClpxrfmVYaGKuquQkdK3rLBQpEQH9V4tdrrh0w%3D%3D%26shopid%3D1000013402%26lng%3D114.062604%26lat%3D29.541501%26sid%3D6e9bfee3838075a72533536815d8f3ew%26un_area%3D4_48201_54794_0&subType=app&adSource=ziying`)
+
       res = await api('https://lzdz-isv.isvjcloud.com/dingzhi/yili/yangniu/activityContent', `activityId=dz2103100001340201&pin=${encodeURIComponent(pin)}&pinImg=null&nick=${cookie.match(/pt_pin=([^;]*)/)![1]}&cjyxPin=&cjhyPin=&shareUuid=`)
       actorUuid = res.data.actorUuid
       console.log('互助码：', actorUuid)
@@ -90,6 +93,8 @@ async function main() {
     } catch (e) {
       console.log(e)
     }
+
+    break
   }
 }
 
