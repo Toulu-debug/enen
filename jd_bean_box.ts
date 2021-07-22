@@ -18,10 +18,18 @@ let cookie: string = '', res: any = '', UserName: string, index: number, id: str
     }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
-    res = await api('beanTaskList', {"viewChannel": "AppHome"})
-
     for (let j = 0; j < 3; j++) {
+      console.log(`Round:${j + 1}`)
+      res = await api('beanTaskList', {"viewChannel": "AppHome"})
       try {
+        if (!res.data.viewAppHome.takenTask) {
+          let homeRes: any = await api('beanHomeIconDoTask', {"flag": "0", "viewChannel": "AppHome"})
+          console.log(homeRes.data.remindMsg)
+        }
+        if (!res.data.viewAppHome.doneTask) {
+          let homeRes: any = await api('beanHomeIconDoTask', {"flag": "1", "viewChannel": "AppHome"})
+          console.log(homeRes.data.remindMsg)
+        }
         for (let t of res.data.taskInfos) {
           if (t.status === 1) {
             console.log(t.taskName)
