@@ -1,10 +1,17 @@
+/**
+ * 推送CK，默认否
+ * export PUSH_COOKIE=true
+ */
 import axios from 'axios'
-import USER_AGENT from './TS_USER_AGENTS'
+// import USER_AGENT from './TS_USER_AGENTS'
 
+const USER_AGENT = 'jdapp;android;10.0.5;11;0393465333165363-5333430323261366;network/wifi;model/M2102K1C;osVer/30;appBuild/88681;partner/lc001;eufv/1;jdSupportDarkMode/0;Mozilla/5.0 (Linux; Android 11; M2102K1C Build/RKQ1.201112.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045534 Mobile Safari/537.36'
 const qrcode = require('qrcode-terminal')
+const notify = require('./sendNotify')
+let PUSH_COOKIE = process.env.PUSH_COOKIE ?? false
 
 !(async () => {
-  console.log('支持异网')
+  console.log('可异地')
   let config: any = {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -70,6 +77,8 @@ const qrcode = require('qrcode-terminal')
       cookies = setCookie.match(/(pt_key=\S*)/)![1] + setCookie.match(/(pt_pin=\S*)/)![1]
       console.log(cookies)
       console.log('\n哪个死妈东西说扫了此脚本被偷ck的？100行不到的代码你告诉我哪里是泄漏你ck的？')
+      if (PUSH_COOKIE)
+        await notify.sendNotify('Cookie', cookies+'\n\n哪个死妈东西说扫了此脚本被偷ck的？100行不到的代码你告诉我哪里是泄漏你ck的？', '','\n\n你好，世界！')
       break
     } else if (code === 21) {
       console.log('二维码失效')

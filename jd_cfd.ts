@@ -12,14 +12,7 @@
 
 import {format} from 'date-fns';
 import axios from 'axios';
-import USER_AGENT, {
-  requireConfig,
-  TotalBean,
-  getBeanShareCode,
-  getFarmShareCode,
-  getRandomNumberByRange,
-  wait
-} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, wait} from './TS_USER_AGENTS';
 import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
 
@@ -104,7 +97,8 @@ let UserName: string, index: number;
         strPhoneID: token.strPhoneID,
         strPgUUNum: token.strPgUUNum
       })
-    console.log('离线收益：',res.Business.ddwCoin)
+    console.log('离线收益：', res.Business.ddwCoin)
+    await wait(2000)
 
     // 珍珠
     res = await api('user/ComposeGameState', '', {dwFirst: 1})
@@ -126,6 +120,8 @@ let UserName: string, index: number;
       console.log('游戏完成，等待3s')
       await wait(3000)
     }
+    await wait(2000)
+
     // 珍珠领奖
     res = await api('user/ComposeGameState', '', {dwFirst: 1})
     for (let stage of res.stagelist) {
@@ -134,11 +130,11 @@ let UserName: string, index: number;
           __t: Date.now(),
           dwCurStageEndCnt: stage.dwCurStageEndCnt
         })
-        console.log(awardRes)
         console.log('珍珠领奖：', awardRes.ddwCoin, awardRes.addMonety)
         await wait(3000)
       }
     }
+    await wait(2000)
 
     // 签到 助力奖励
     res = await api('story/GetTakeAggrPage', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -169,6 +165,7 @@ let UserName: string, index: number;
         }
       }
     }
+    await wait(2000)
 
     // 船来了
     res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {
@@ -177,7 +174,6 @@ let UserName: string, index: number;
       strMarkList: 'undefined'
     })
     if (res.StoryInfo.StoryList) {
-      console.log(JSON.stringify(res))
       if (res.StoryInfo.StoryList[0].Special) {
         console.log(`船来了，乘客是${res.StoryInfo.StoryList[0].Special.strName}`)
         let shipRes: any = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {
@@ -186,7 +182,6 @@ let UserName: string, index: number;
           triggerType: 0,
           ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay
         })
-        console.log(shipRes)
         console.log('正在下船，等待30s')
         await wait(30000)
         shipRes = await api('story/SpecialUserOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone,triggerType', {
@@ -210,7 +205,9 @@ let UserName: string, index: number;
         // isCollector = true
       }
     }
+    await wait(2000)
 
+    /*
     // 清空背包
     res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let bags: number[] = []
@@ -231,13 +228,13 @@ let UserName: string, index: number;
         {dwSceneId: isCollector ? '2' : '1', strTypeCnt: strTypeCnt})
       console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
     }
+     */
+    await wait(2000)
 
     // 垃圾🚮
     res = await api('story/QueryRubbishInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     if (res.Data.StoryInfo.StoryList.length !== 0) {
       console.log('有垃圾')
-      console.log('TODO 倒垃圾翻车了')
-      /*
       await api('story/RubbishOper', '_cfd_t,bizCode,dwEnv,dwRewardType,dwType,ptag,source,strZone', {
         dwType: '1',
         dwRewardType: 0
@@ -253,9 +250,8 @@ let UserName: string, index: number;
         // console.log('垃圾分类：', res.Data.RubbishGame.AllRubbish.ddwCoin)
         await wait(1500)
       }
-
-       */
     }
+    await wait(2000)
 
     // 任务➡️
     let tasks: any
@@ -269,6 +265,7 @@ let UserName: string, index: number;
         await wait(1000)
       }
     }
+    await wait(2000)
 
     // 导游
     res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -287,6 +284,7 @@ let UserName: string, index: number;
         }
       }
     }
+    await wait(2000)
 
     // 任务⬇️
     tasks = await mainTask('GetUserTaskStatusList', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: 0});
@@ -312,6 +310,7 @@ let UserName: string, index: number;
         }
       }
     }
+    await wait(2000)
 
     for (let b of ['food', 'fun', 'shop', 'sea']) {
       res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
