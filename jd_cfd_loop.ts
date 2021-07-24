@@ -15,7 +15,7 @@ const notify = require('./sendNotify')
 dotenv.config()
 
 let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
-let cookie: string = '', res: any = '';
+let cookie: string = '', res: any = '', balloon: boolean = false;
 process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.CFD_LOOP_DELAY)) : console.log('设置延迟:10000~25000随机')
 
 let UserName: string, index: number;
@@ -52,6 +52,7 @@ let UserName: string, index: number;
   });
 
   while (1) {
+
     for (let i = 0; i < cookiesArr.length; i++) {
       cookie = cookiesArr[i];
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -63,11 +64,17 @@ let UserName: string, index: number;
       }
       console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
       try {
-        res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
-        if (res.iRet === 0)
-          console.log('今日热气球:', res.dwTodaySpeedPeople ?? 500)
-        else
-          console.log(res)
+        if (!balloon) {
+          res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
+          if (res.iRet !== 0) {
+            console.log('手动建造4个房子')
+            continue
+          }
+          console.log('今日热气球:', res.dwTodaySpeedPeople)
+          if (res.dwTodaySpeedPeople === 500) {
+            balloon = true
+          }
+        }
 
         let shell: any = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strZone')
         if (shell.Data.hasOwnProperty('NormShell')) {

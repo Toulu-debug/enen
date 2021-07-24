@@ -12,7 +12,6 @@ import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS';
 import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
-const notify = require('./sendNotify')
 dotenv.config()
 let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
 let cookie: string = '', res: any = '', UserName: string, index: number;
@@ -44,13 +43,16 @@ interface Params {
       }
     }
 
-    for (let b of ['food', 'fun', 'shop', 'sea']) {
-      res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
-      if (res.dwCanLvlUp === 1) {
-        res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
-        if (res.iRet === 0) {
-          console.log(`升级成功:`, res) // ddwSendRichValue
-          break
+    // 只在00:00:xx和12:00:xx升级建筑
+    if ((new Date().getHours() === 0 && (new Date().getMinutes() === 0)) || (new Date().getHours() === 12 && new Date().getMinutes() === 0)) {
+      for (let b of ['food', 'fun', 'shop', 'sea']) {
+        res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
+        if (res.dwCanLvlUp === 1) {
+          res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
+          if (res.iRet === 0) {
+            console.log(`升级成功:`, res)
+            break
+          }
         }
       }
     }
@@ -62,29 +64,26 @@ interface Params {
       '_cfd_t,bizCode,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
     console.log('资格:', res)
-    await wait(2000)
-
+    await wait(4000)
     console.log('提现：', format(new Date(), 'hh:mm:ss:SSS'))
-    let money: number = 10
-    // @github/Aaron-lv
-    switch (new Date().getHours()) {
-      case 0:
-        money = 100
-        break
-      case 12:
-        money = 50
-        break
-      default:
-        money = 10
-        break
-    }
-
+    let money: number = 100
     money = process.env.CFD_CASHOUT_MONEY ? parseFloat(process.env.CFD_CASHOUT_MONEY) * 100 : money
-    console.log('本次计划提现：', money)
+
+    money = new Date().getHours() >= 12 ? 50 : money
+
+    console.log('本次计划提现：', money / 100)
+    res = await api('user/CashOut', '_cfd_t,bizCode,ddwMoney,ddwPaperMoney,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
+      {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
+    console.log('提现:', res)
+
+    /*
+    await wait(3000)
+    money = 10
     res = await api('user/CashOut',
       '_cfd_t,bizCode,ddwMoney,ddwPaperMoney,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
     console.log('提现:', res)
+     */
   }
 })()
 
