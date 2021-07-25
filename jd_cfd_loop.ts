@@ -94,7 +94,7 @@ let UserName: string, index: number;
         console.log(e)
       }
     }
-    let t: number = process.env.CFD_LOOP_DELAY ? parseInt(process.env.CFD_LOOP_DELAY) : getRandomNumberByRange(1000 * 10, 1000 * 30)
+    let t: number = process.env.CFD_LOOP_DELAY ? parseInt(process.env.CFD_LOOP_DELAY) : getRandomNumberByRange(1000 * 30, 1000 * 60)
     await wait(t)
   }
 })()
