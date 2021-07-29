@@ -3,7 +3,7 @@ import {httpsOverHttp} from 'tunnel'
 import {readFileSync, writeFileSync, unlinkSync} from "fs";
 import {execSync} from "child_process";
 import {requireConfig} from "./TS_USER_AGENTS";
-import {TotalBean} from "../TS_USER_AGENTS";
+import {TotalBean} from "./TS_USER_AGENTS";
 
 const notify = require('./sendNotify')
 
