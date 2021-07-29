@@ -24,7 +24,7 @@ let UserName: string, index: number;
   let cookiesArr: any = await requireConfig();
 
   let filename: string = __filename.split('/').pop()!
-  let stream = fs.createReadStream(filename);
+  let stream = fs.createReadStream(__filename);
   let fsHash = crypto.createHash('md5');
 
   stream.on('data', (d: any) => {
