@@ -179,6 +179,14 @@ async function sendNotify(text, desp, params = {}, author = '\n\n仅供用于学
   desp += author;//增加作者信息，防止被贩卖等
   let remarks = '';
   try {
+    const notifySkipList = process.env.NOTIFY_SKIP_LIST ? process.env.NOTIFY_SKIP_LIST.split('&') : [];
+    const titleIndex = notifySkipList.findIndex((item) => item === text);
+
+    if (titleIndex !== -1) {
+      console.log(`${text} 在推送黑名单中，已跳过推送`);
+      return;
+    }
+    
     fs.accessSync('./tools/account.json')
     remarks = JSON.parse(fs.readFileSync('./tools/account.json').toString())
   } catch (e) {
