@@ -1,5 +1,4 @@
 import axios from "axios";
-import {httpsOverHttp} from 'tunnel'
 import {readFileSync, writeFileSync, unlinkSync} from "fs";
 import {execSync} from "child_process";
 import {requireConfig} from "./TS_USER_AGENTS";
@@ -7,7 +6,7 @@ import {TotalBean} from "./TS_USER_AGENTS";
 
 const notify = require('./sendNotify')
 
-let cookie: string = '', UserName: string, index: number;
+let cookie: string = '', UserName: string, index: number, message: string = '';
 
 async function main() {
   let cookiesArr: any = await requireConfig();
@@ -22,15 +21,7 @@ async function main() {
     }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
-    const tunnelProxy = httpsOverHttp({
-      proxy: {
-        host: '127.0.0.1',
-        port: parseInt('1080'),
-      },
-    });
-
     let data: any;
-
     try {
       data = await axios.get('https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js', {timeout: 5000})
       data = data.data
@@ -42,19 +33,19 @@ async function main() {
         data = '非脚本问题！网络错误，访问github失败'
       }
     }
-    console.log(data)
     if (data.indexOf('京东多合一签到脚本') > -1) {
       data = data.replace("var Key = ''", `var Key = '${cookie}'`)
-      writeFileSync('./sign.js', data)
+      writeFileSync('./sign.js', data, 'utf-8')
       execSync('node ./sign.js>>./sign.log')
-      let msg = readFileSync('./sign.log')
+      data = readFileSync('./sign.log', 'utf-8')
+      message += data.replace(/(\n京东现金[\S|\s]*^)【签到/mg, '【签到')
       unlinkSync('./sign.js')
       unlinkSync('./sign.log')
-      await notify.sendNotify(`多合一签到  ${UserName}`, msg, '', '\n\n你好，世界！')
     } else {
       await notify.sendNotify(`多合一签到  ${UserName}`, data, '', '\n\n你好，世界！')
     }
   }
+  await notify.sendNotify('JD签到All in One',message,'','\n\n你好，世界！')
 }
 
 main().then()
