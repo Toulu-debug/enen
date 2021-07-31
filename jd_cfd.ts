@@ -196,19 +196,40 @@ let UserName: string, index: number;
           console.log('船客接待失败', shipRes)
       }
 
+      isCollector = false
       if (res.StoryInfo.StoryList[0].Collector) {
         console.log('收藏家出现')
         // TODO 背包满了再卖给收破烂的
-        // res = await api('story/CollectorOper', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,strStoryId,dwType,ddwTriggerDay', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '2', ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
-        // console.log(res)
-        // await wait(1000)
-        // isCollector = true
+        res = await api('story/CollectorOper', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,strStoryId,dwType,ddwTriggerDay', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '2', ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
+        console.log(res)
+        await wait(1000)
+        isCollector = true
+        // 清空背包
+        res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+        let bags: number[] = []
+        for (let s of res.Data.Office) {
+          bags.push(s.dwType)
+          bags.push(s.dwCount)
+        }
+        await wait(1000)
+        let strTypeCnt: string = ''
+        for (let n = 0; n < bags.length; n++) {
+          if (n % 2 === 0)
+            strTypeCnt += `${bags[n]}:`
+          else
+            strTypeCnt += `${bags[n]}|`
+        }
+        if (bags.length !== 0) {
+          res = await api('story/sellgoods', '_cfd_t,bizCode,dwEnv,dwSceneId,ptag,source,strTypeCnt,strZone',
+            {dwSceneId: isCollector ? '2' : '1', strTypeCnt: strTypeCnt})
+          console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
+        }
       }
+      await wait(2000)
     }
-    await wait(2000)
 
-    /*
     // 清空背包
+    /*
     res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let bags: number[] = []
     for (let s of res.Data.Office) {
@@ -228,8 +249,8 @@ let UserName: string, index: number;
         {dwSceneId: isCollector ? '2' : '1', strTypeCnt: strTypeCnt})
       console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
     }
+    
      */
-    await wait(2000)
 
     // 垃圾🚮
     res = await api('story/QueryRubbishInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -246,8 +267,7 @@ let UserName: string, index: number;
           dwRewardType: 0,
           dwRubbishId: j
         })
-        console.log(res.Data)
-        // console.log('垃圾分类：', res.Data.RubbishGame.AllRubbish.ddwCoin)
+        console.log('垃圾分类：', res.Data.RubbishGame.AllRubbish.ddwCoin)
         await wait(1500)
       }
     }
@@ -255,6 +275,14 @@ let UserName: string, index: number;
 
     // 任务➡️
     let tasks: any
+    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    let t0: any = tasks.Data.TaskList[0]
+    if (t0.strTaskName === '浏览1次爆款活动' && t0.dwCompleteNum === 0) {
+      res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t0.ddwTaskId})
+      if (res.ret === 0) {
+        console.log('浏览1次爆款活动，任务完成')
+      }
+    }
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     for (let t of tasks.Data.TaskList) {
       if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
@@ -266,6 +294,13 @@ let UserName: string, index: number;
       }
     }
     await wait(2000)
+
+    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    if (tasks.Data.dwStatus === 3) {
+      res = await api('story/ActTaskAward', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      console.log('100财富任务完成：', res)
+      await wait(2000)
+    }
 
     // 导游
     res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -312,24 +347,8 @@ let UserName: string, index: number;
     }
     await wait(2000)
 
-    for (let b of ['food', 'fun', 'shop', 'sea']) {
-      res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
-      console.log(`${b}升级需要:`, res.ddwNextLvlCostCoin)
-      /*
-      await wait(1000)
-      // 在提现时升级
-      if (res.dwCanLvlUp === 1) {
-        res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
-        if (res.iRet === 0) {
-          console.log(`升级成功`)
-          await wait(2000)
-        }
-      }
-      */
-      res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {
-        strBuildIndex: b,
-        dwType: '1'
-      })
+    for (let b of ['fun', 'shop', 'sea', 'food']) {
+      res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
       console.log(`${b}收金币:`, res.ddwCoin)
       await wait(1000)
     }
