@@ -19,7 +19,7 @@
  */
 
 const $ = new Env('嗯嗯');
-const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
+const jdCookieNode = $.isNode() ? require('../jdCookie.js') : '';
 let cookiesArr = [], cookie = '', message;
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
