@@ -229,7 +229,6 @@ let UserName: string, index: number;
     }
 
     // 清空背包
-    /*
     res = await api('story/querystorageroom', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let bags: number[] = []
     for (let s of res.Data.Office) {
@@ -249,8 +248,6 @@ let UserName: string, index: number;
         {dwSceneId: isCollector ? '2' : '1', strTypeCnt: strTypeCnt})
       console.log('卖贝壳收入:', res.Data.ddwCoin, res.Data.ddwMoney)
     }
-    
-     */
 
     // 垃圾🚮
     res = await api('story/QueryRubbishInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -267,7 +264,6 @@ let UserName: string, index: number;
           dwRewardType: 0,
           dwRubbishId: j
         })
-        console.log('垃圾分类：', res.Data.RubbishGame.AllRubbish.ddwCoin)
         await wait(1500)
       }
     }
