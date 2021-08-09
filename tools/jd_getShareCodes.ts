@@ -14,7 +14,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number;
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
     res = await api()
-    console.log('互助码：', res.data.shareId)
+    console.log('carnivalcity:', res.data.shareId)
   }
 })()
 
