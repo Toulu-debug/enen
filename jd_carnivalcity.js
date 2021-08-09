@@ -517,6 +517,7 @@ async function doHelp() {
   console.log(`\n开始助力好友`);
   for (let i in $.newShareCodes) {
     let item = $.newShareCodes[i]
+    console.log('好友助力码：', item)
     if (!item) continue;
     const helpRes = await toHelp(item.trim());
     if (helpRes.data.status === 5) {
