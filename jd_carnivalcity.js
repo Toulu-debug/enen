@@ -1,6 +1,3 @@
-/**
- * cron: 0 0-18/6 * * *
- */
 const $ = new Env('京东手机狂欢城');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const md5 = require('md5');
@@ -87,7 +84,7 @@ async function JD818() {
     await supportList();//助力情况
     await getHelp();//获取邀请码
     if ($.blockAccount) return
-    await indexInfo(true);//获取任务
+    // await indexInfo(true);//获取任务
     await doHotProducttask();//做热销产品任务
     await doBrandTask();//做品牌手机任务
     await doBrowseshopTask();//逛好货街，做任务
@@ -436,7 +433,7 @@ function check() {
             }
           }
           if (str.length > 0) {
-            const url = 'https://api.m.jd.com/api/#/integralDetail';
+            const url = 'https://carnivalcity.m.jd.com/#/integralDetail';
             $.msg($.name, '', `京东账号 ${$.index} ${$.nickName || $.UserName}\n积分抽奖获得：${str}\n兑换地址：${url}`, {'open-url': url});
             if ($.isNode()) await notify.sendNotify($.name, `京东账号 ${$.index} ${$.nickName || $.UserName}\n积分抽奖获得：${str}\n兑换地址：${url}`);
           }
@@ -496,7 +493,7 @@ function myRank() {
 //领取往期奖励API
 function saveJbean(date) {
   return new Promise(resolve => {
-    const body = "date=" + date;
+    const body = {"date":`${date}`};
     const options = taskPostUrl('/khc/rank/getRankJingBean', body)
     $.post(options, (err, resp, data) => {
       try {
@@ -675,7 +672,7 @@ function getHelp() {
             $.temp.push(data.data.shareId);
           } else {
             console.log(`获取邀请码失败：${JSON.stringify(data)}`);
-            if (data.code === 1002 || data.code === 1001) $.blockAccount = true;
+            if (data.code === 1002) $.blockAccount = true;
           }
         }
       } catch (e) {
@@ -848,9 +845,9 @@ function taskPostUrl(a, t = {}) {
 
 async function showMsg() {
   if ($.beans) {
-    allMessage += `京东账号${$.index} ${$.nickName || $.UserName}\n本次运行获得：${$.beans}京豆\n${message}活动地址：https://carnivalcity.m.jd.com/#/home?shareId=ddd345fb-57bb-4ece-968b-7bf4c92be7cc&t=${Date.now()}${$.index !== cookiesArr.length ? '\n\n' : ''}`
+    allMessage += `京东账号${$.index} ${$.nickName || $.UserName}\n本次运行获得：${$.beans}京豆\n${message}活动地址：https://carnivalcity.m.jd.com${$.index !== cookiesArr.length ? '\n\n' : ''}`
   }
-  $.msg($.name, `京东账号${$.index} ${$.nickName || $.UserName}`, `${message}具体详情点击弹窗跳转后即可查看`, {"open-url": "https://carnivalcity.m.jd.com/#/home?shareId=ddd345fb-57bb-4ece-968b-7bf4c92be7cc&t=" + Date.now()});
+  $.msg($.name, `京东账号${$.index} ${$.nickName || $.UserName}`, `${message}具体详情点击弹窗跳转后即可查看`, {"open-url": "https://carnivalcity.m.jd.com"});
 }
 
 function getUA() {
