@@ -1,3 +1,6 @@
+/**
+ * cron: 0 9,12 * * *
+ */
 import axios from 'axios';
 import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as dotenv from 'dotenv';
