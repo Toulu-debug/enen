@@ -115,32 +115,36 @@ console.log('帮助助力池:', HELP_POOL)
     }
     await wait(2000)
     while (food >= 10) {
-      res = await api('operservice/Feed', 'channel,sceneid')
-      if (res.ret === 0) {
-        food -= 10
-        console.log('剩余草:', res.data.newnum)
-      } else if (res.ret === 2020) {
-        if (res.data.maintaskId === 'pause') {
-          console.log('收🥚')
-          res = await api('operservice/GetSelfResult', 'channel,itemid,sceneid,type', {petid: petid, type: '11'})
-          if (res.ret === 0) {
-            console.log('收🥚成功:', res.data.newnum)
+      try {
+        res = await api('operservice/Feed', 'channel,sceneid')
+        if (res.ret === 0) {
+          food -= 10
+          console.log('剩余草:', res.data.newnum)
+        } else if (res.ret === 2020) {
+          if (res.data.maintaskId === 'pause') {
+            console.log('收🥚')
+            res = await api('operservice/GetSelfResult', 'channel,itemid,sceneid,type', {petid: petid, type: '11'})
+            if (res.ret === 0) {
+              console.log('收🥚成功:', res.data.newnum)
+            }
           }
+        } else {
+          console.log(res)
+          break
         }
-      } else {
-        console.log(res)
+        await wait(4000)
+      } catch (e) {
         break
       }
-      await wait(4000)
     }
     await wait(2000)
 
     while (1) {
       try {
         res = await api('operservice/Action', 'channel,sceneid,type', {type: '2'})
-        if (res.data.addcoins === 0) break
+        if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('锄草:', res.data.addcoins)
-        await wait(1500)
+        await wait(2500)
       } catch (e) {
         console.log('Error:', e)
         break
@@ -151,9 +155,9 @@ console.log('帮助助力池:', HELP_POOL)
     while (1) {
       try {
         res = await api('operservice/Action', 'channel,sceneid,type', {type: '1', petid: petid})
-        if (res.data.addcoins === 0) break
+        if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
-        await wait(1500)
+        await wait(2500)
       } catch (e) {
         console.log('Error:', e)
         break
@@ -201,7 +205,7 @@ console.log('帮助助力池:', HELP_POOL)
       } else {
         console.log(res)
       }
-      await wait(1000)
+      await wait(4000)
     }
   }
 })()
@@ -219,7 +223,7 @@ interface Params {
 
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async (resolve, reject) => {
-    let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
+    let url = `https://m.jingxi.com/jxmc/${fn}?activeid=jxmc_active_0001&channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
     if (Object.keys(params).length !== 0) {
       let key: (keyof Params)
       for (key in params) {
@@ -267,7 +271,6 @@ function getTask() {
       if (t.dateType === 2 && t.completedTimes < t.targetTimes && t.awardStatus === 2 && t.taskType === 2) {
         console.log('可做每日任务:', t.taskName, t.taskId)
         doTaskRes = await taskAPI('DoTask', 'bizCode,configExtra,source,taskId', {taskId: t.taskId, configExtra: ''})
-        console.log(doTaskRes)
         if (doTaskRes.ret === 0) {
           console.log('任务完成')
           await wait(5000)
