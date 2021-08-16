@@ -1,4 +1,10 @@
 import axios from "axios";
+import {format} from 'date-fns';
+import * as dotenv from "dotenv";
+
+const CryptoJS = require('crypto-js')
+dotenv.config()
+let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
 
 const USER_AGENTS: Array<string> = [
   "jdapp;android;10.0.2;10;network/wifi;Mozilla/5.0 (Linux; Android 10; ONEPLUS A5010 Build/QKQ1.191014.012; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045230 Mobile Safari/537.36",
@@ -38,6 +44,8 @@ const USER_AGENTS: Array<string> = [
   "jdapp;android;10.0.2;10;network/wifi;Mozilla/5.0 (Linux; Android 10; MI 8 Build/QKQ1.190828.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045227 Mobile Safari/537.36",
   "jdapp;iPhone;10.0.2;14.1;network/wifi;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1",
 ]
+
+const jd_joy_invokeKey = "value1"
 
 function getRandomNumberByRange(start: number, end: number) {
   return Math.floor(Math.random() * (end - start) + start)
@@ -142,6 +150,82 @@ function wait(t: number) {
   })
 }
 
+async function requestAlgo() {
+
+  fingerprint = await generateFp();
+  return new Promise<void>(async resolve => {
+    let {data} = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
+      "version": "1.0",
+      "fp": fingerprint,
+      "appId": appId,
+      "timestamp": Date.now(),
+      "platform": "web",
+      "expandParams": ""
+    }, {
+      "headers": {
+        'Authority': 'cactus.jd.com',
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'User-Agent': USER_AGENT,
+        'Content-Type': 'application/json',
+        'Origin': 'https://st.jingxi.com',
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://st.jingxi.com/',
+        'Accept-Language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7'
+      },
+    })
+    if (data['status'] === 200) {
+      token = data.data.result.tk;
+      console.log('token:', token)
+      let enCryptMethodJDString = data.data.result.algo;
+      if (enCryptMethodJDString) enCryptMethodJD = new Function(`return ${enCryptMethodJDString}`)();
+    } else {
+      console.log(`fp: ${fingerprint}`)
+      console.log('request_algo 签名参数API请求失败:')
+    }
+    resolve()
+  })
+}
+
+function generateFp() {
+  let e = "0123456789";
+  let a = 13;
+  let i = '';
+  for (; a--;)
+    i += e[Math.random() * e.length | 0];
+  return (i + Date.now()).slice(0, 16)
+}
+
+function getQueryString(url: string, name: string) {
+  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+  let r = url.split('?')[1].match(reg);
+  if (r != null) return unescape(r[2]);
+  return '';
+}
+
+function decrypt(stk: string, url: string) {
+  const timestamp = (format(new Date(), 'yyyyMMddhhmmssSSS'))
+  let hash1: string;
+  if (fingerprint && token && enCryptMethodJD) {
+    hash1 = enCryptMethodJD(token, fingerprint.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex);
+  } else {
+    const random = '5gkjB6SpmC9s';
+    token = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`;
+    fingerprint = 9686767825751161;
+    const str = `${token}${fingerprint}${timestamp}${appId}${random}`;
+    hash1 = CryptoJS.SHA512(str, token).toString(CryptoJS.enc.Hex);
+  }
+  let st: string = '';
+  stk.split(',').map((item, index) => {
+    st += `${item}:${getQueryString(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`;
+  })
+  const hash2 = CryptoJS.HmacSHA256(st, hash1.toString()).toString(CryptoJS.enc.Hex);
+  return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fingerprint.toString()), "".concat(appId.toString()), "".concat(token), "".concat(hash2)].join(";"))
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -149,5 +233,8 @@ export {
   getFarmShareCode,
   requireConfig,
   wait,
-  getRandomNumberByRange
+  getRandomNumberByRange,
+  jd_joy_invokeKey,
+  requestAlgo,
+  decrypt
 }
