@@ -60,7 +60,7 @@ let target: number = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JO
 
 function init() {
   return new Promise(async resolve => {
-    let {data} = await axios.get(`https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=qRKHmL4sna8ZOP9F&validate=${validate}`, {
+    let {data} = await axios.get(`https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&validate=${validate}`, {
       headers: {
         'Host': 'jdjoy.jd.com',
         'content-type': 'application/json',
@@ -84,7 +84,7 @@ function exchange(beanId: number) {
       }
     }
     console.log('exchange()', format(new Date(), 'hh:mm:ss:SSS'))
-    let {data} = await axios.post(`https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=qRKHmL4sna8ZOP9F&validate=${validate}`,
+    let {data} = await axios.post(`https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&validate=${validate}`,
       JSON.stringify({"buyParam": {"orderSource": 'pet', "saleInfoId": beanId}, "deviceInfo": {}}), {
         headers: {
           "Host": "jdjoy.jd.com",
