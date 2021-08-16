@@ -34,7 +34,7 @@ async function main() {
       }
     }
     if (data.indexOf('京东多合一签到脚本') > -1) {
-      data = data.replace("var Key = ''", `var Key = '${cookie}'`)
+      data = data.replace("var Key = ''", `var Key = '${cookie}'`).replace(/qRKHmL4sna8ZOP9F/g,"ztmFUCxcPMNyUq0P")
       writeFileSync('./sign.js', data, 'utf-8')
       execSync('node ./sign.js>>./sign.log')
       data = readFileSync('./sign.log', 'utf-8')
