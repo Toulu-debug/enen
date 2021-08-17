@@ -1,15 +1,11 @@
-import {format} from 'date-fns';
 import axios from 'axios';
-import {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, wait} from './TS_USER_AGENTS';
-import {Md5} from 'ts-md5'
+import {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as dotenv from 'dotenv';
 
-const CryptoJS = require('crypto-js')
 const notify = require('./sendNotify')
 const USER_AGENT = 'jdpingou'
 dotenv.config()
-let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
-let cookie: string = '', res: any = '', factoryId: number;
+let cookie: string = '', res: any = '';
 
 let UserName: string, index: number;
 !(async () => {
@@ -27,7 +23,6 @@ let UserName: string, index: number;
 
     for (let k = 0; k < 10; k++) {
       res = await getTask()
-      console.log(JSON.stringify(res))
       for (let t of res.data.taskConfig) {
         if (t.itemCount !== t.finishCount) {
           let body = {
@@ -41,10 +36,11 @@ let UserName: string, index: number;
           res = await api("getReward", body)
           console.log(res)
 
-          await wait(t.viewTime)
+          await wait(t.viewTime * 1000)
           break
         }
       }
+      await wait(3000)
     }
 
     res = await getTask()
