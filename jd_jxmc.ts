@@ -5,20 +5,22 @@
  * export HELP_POOL=true   // 默认帮助助力池
  */
 
-import {format} from 'date-fns';
 import axios from 'axios';
-import USER_AGENT, {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, wait, requestAlgo, decrypt} from './TS_USER_AGENTS';
+import {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, wait, requestAlgo, decrypt, getJxToken} from './TS_USER_AGENTS';
 import {Md5} from "ts-md5";
+import {accessSync} from "fs";
 
-const CryptoJS = require('crypto-js')
 const notify = require('./sendNotify')
-const A = require('./tools/jd_jxmcToken')
 
-let appId: number = 10028, fingerprint: string | number, token: string, enCryptMethodJD: any;
-let cookie: string = '', res: any = '', shareCodes: string[] = [];
-let homePageInfo: any;
-let UserName: string, index: number;
+let A: any;
+try {
+  accessSync('./tools/jd_jxmcToken.js')
+  A = require('./tools/jd_jxmcToken')
+} catch (e) {
+  A = require('./jd_jxmcToken')
+}
 
+let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, activeid: string = '', jxToken: any, UserName: string, index: number;
 let HELP_HW: string = process.env.HELP_HW ? process.env.HELP_HW : "true";
 console.log('帮助HelloWorld:', HELP_HW)
 let HELP_POOL: string = process.env.HELP_POOL ? process.env.HELP_POOL : "true";
@@ -34,12 +36,14 @@ console.log('帮助助力池:', HELP_POOL)
     index = i + 1;
     let {isLogin, nickName}: any = await TotalBean(cookie)
     if (!isLogin) {
-      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
+      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}:${nickName || UserName}`)
       continue
     }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
-    homePageInfo = await api('queryservice/GetHomePageInfo', 'channel,isgift,sceneid', {isgift: 0})
+    jxToken = getJxToken(cookie)
+    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isquerypicksite,sceneid', {isgift: 0, isquerypicksite: 0})
+    activeid = homePageInfo.data.activeid
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
       lastgettime = homePageInfo.data.cow.lastgettime
@@ -57,7 +61,7 @@ console.log('帮助助力池:', HELP_POOL)
     let petid: number = homePageInfo.data.petinfo[0].petid;
     let coins = homePageInfo.data.coins;
 
-    console.log('助力码：', homePageInfo.data.sharekey);
+    console.log('助力码:', homePageInfo.data.sharekey);
     shareCodes.push(homePageInfo.data.sharekey);
     try {
       await makeShareCodes(homePageInfo.data.sharekey);
@@ -69,12 +73,12 @@ console.log('帮助助力池:', HELP_POOL)
     console.log('金币:', coins);
 
     // 收牛牛
-    res = await api('operservice/GetCoin', 'channel,sceneid,token', {token: A(lastgettime)})
+    res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: A(lastgettime)})
     if (res.ret === 0)
-      console.log('收牛牛：', res.data.addcoin)
+      console.log('收牛牛:', res.data.addcoin)
 
     // 签到
-    res = await api('queryservice/GetSignInfo', 'channel,sceneid')
+    res = await api('queryservice/GetSignInfo', 'activeid,activekey,channel,sceneid')
     if (res.data.signlist) {
       for (let day of res.data.signlist) {
         if (day.fortoday && !day.hasdone) {
@@ -101,8 +105,9 @@ console.log('帮助助力池:', HELP_POOL)
         break
       }
     }
+
     while (coins >= 5000 && food <= 500) {
-      res = await api('operservice/Buy', 'channel,sceneid,type', {type: '1'})
+      res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
         console.log('买草成功:', res.data.newnum)
         coins -= 5000
@@ -114,9 +119,10 @@ console.log('帮助助力池:', HELP_POOL)
       await wait(4000)
     }
     await wait(2000)
+
     while (food >= 10) {
       try {
-        res = await api('operservice/Feed', 'channel,sceneid')
+        res = await api('operservice/Feed', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
         if (res.ret === 0) {
           food -= 10
           console.log('剩余草:', res.data.newnum)
@@ -132,7 +138,7 @@ console.log('帮助助力池:', HELP_POOL)
           console.log(res)
           break
         }
-        await wait(4000)
+        await wait(5000)
       } catch (e) {
         break
       }
@@ -141,10 +147,15 @@ console.log('帮助助力池:', HELP_POOL)
 
     while (1) {
       try {
-        res = await api('operservice/Action', 'channel,sceneid,type', {type: '2'})
+        res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '2'})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('锄草:', res.data.addcoins)
         await wait(2500)
+        if (res.data.surprise) {
+          res = await api("operservice/GetSelfResult", "activeid,activekey,channel,sceneid,type", {type: '14'})
+          console.log('锄草奖励:', res.data.prizepool)
+          await wait(1000)
+        }
       } catch (e) {
         console.log('Error:', e)
         break
@@ -154,7 +165,7 @@ console.log('帮助助力池:', HELP_POOL)
 
     while (1) {
       try {
-        res = await api('operservice/Action', 'channel,sceneid,type', {type: '1', petid: petid})
+        res = await api('operservice/Action', 'activeid,activekey,channel,petid,sceneid,type', {type: '1', petid: petid})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
         await wait(2500)
@@ -179,8 +190,7 @@ console.log('帮助助力池:', HELP_POOL)
       console.log('获取HelloWorld助力码出错')
     }
   }
-
-
+  */
   if (HELP_POOL === 'true') {
     try {
       let {data} = await axios.get('https://api.sharecode.ga/api/jxmc/6', {timeout: 10000})
@@ -200,18 +210,19 @@ console.log('帮助助力池:', HELP_POOL)
       if (res.data.result === 1) {
         console.log('不助力自己')
       } else if (res.ret === 0) {
-        console.log('助力结果：', res)
-        console.log('助力成功，获得：', res.data.addcoins)
+        console.log('助力结果:', res)
+        console.log('助力成功，获得:', res.data.addcoins)
       } else {
         console.log(res)
       }
       await wait(4000)
     }
-  }*/
+  }
 })()
 
 interface Params {
   isgift?: number,
+  isquerypicksite?: number,
   petid?: number,
   type?: string,
   taskId?: number
@@ -223,7 +234,7 @@ interface Params {
 
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async (resolve, reject) => {
-    let url = `https://m.jingxi.com/jxmc/${fn}?activeid=jxmc_active_0001&channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
+    let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=${activeid}&activekey=null&jxmc_jstoken=${jxToken.strPgUUNum}&timestamp=${Date.now()}&phoneid=${jxToken.strPhoneID}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     if (Object.keys(params).length !== 0) {
       let key: (keyof Params)
       for (key in params) {
