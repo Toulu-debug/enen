@@ -1,6 +1,7 @@
 import axios from "axios";
 import {format} from 'date-fns';
 import * as dotenv from "dotenv";
+import {Md5} from "ts-md5";
 
 const CryptoJS = require('crypto-js')
 dotenv.config()
@@ -226,6 +227,27 @@ function decrypt(stk: string, url: string) {
   return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fingerprint.toString()), "".concat(appId.toString()), "".concat(token), "".concat(hash2)].join(";"))
 }
 
+function getJxToken(cookie: string) {
+  function generateStr(input: number) {
+    let src = 'abcdefghijklmnopqrstuvwxyz1234567890';
+    let res = '';
+    for (let i = 0; i < input; i++) {
+      res += src[Math.floor(src.length * Math.random())];
+    }
+    return res;
+  }
+
+  let phoneId = generateStr(40);
+  let timestamp = Date.now().toString();
+  let nickname = cookie.match(/pt_pin=([^;]*)/)![1];
+  let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy');
+  return {
+    'strPgtimestamp': timestamp,
+    'strPhoneID': phoneId,
+    'strPgUUNum': jstoken
+  }
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -236,5 +258,6 @@ export {
   getRandomNumberByRange,
   jd_joy_invokeKey,
   requestAlgo,
-  decrypt
+  decrypt,
+  getJxToken
 }
