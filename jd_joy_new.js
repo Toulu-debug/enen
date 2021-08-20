@@ -21,7 +21,7 @@ const vm = require('vm');
 const PNG = require('png-js');
 const UA = require('./USER_AGENTS.js').USER_AGENT;
 const fs = require("fs");
-
+const md5 = require('md5')
 
 Math.avg = function average() {
   var sum = 0;
@@ -560,9 +560,13 @@ $.post = injectToRequest($.post.bind($))
 
 function getFollowChannels() {
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.get({
       url: `https://jdjoy.jd.com/common/pet/getFollowChannels?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        lkt: lkt,
+        lks: lks,
         'Host': 'api.m.jd.com',
         'accept': '*/*',
         'content-type': 'application/x-www-form-urlencoded',
@@ -579,17 +583,19 @@ function getFollowChannels() {
 
 function taskList() {
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.get({
       url: `https://jdjoy.jd.com/common/pet/getPetTaskConfig?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        lkt: lkt,
+        lks: lks,
+        'Origin': 'https://h5.m.jd.com',
         'Host': 'jdjoy.jd.com',
-        'accept': '*/*',
-        'content-type': 'application/json',
-        'origin': 'https://h5.m.jd.com',
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-        'referer': 'https://h5.m.jd.com/',
-        'accept-language': 'zh-cn',
-        'cookie': cookie
+        'Content-Type': 'application/json',
+        'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+        'User-Agent': 'jdapp;iPhone;10.1.0;12.4.1;fc13275e23b2613e6aae772533ca6f349d2e0a86;network/wifi;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;model/iPhone11,6;addressid/589374288;appBuild/167774;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
+        'Cookie': cookie
       }
     }, (err, resp, data) => {
       try {
@@ -608,9 +614,13 @@ function taskList() {
 
 function beforeTask(fn, shopId) {
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.get({
       url: `https://jdjoy.jd.com/common/pet/icon/click?iconCode=${fn}&linkAddr=${shopId}&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        lkt: lkt,
+        lks: lks,
         'Accept': '*/*',
         'Connection': 'keep-alive',
         'Content-Type': 'application/json',
@@ -630,9 +640,13 @@ function beforeTask(fn, shopId) {
 
 function followShop(shopId) {
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.post({
       url: `https://jdjoy.jd.com/common/pet/followShop?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        lkt: lkt,
+        lks: lks,
         'User-Agent': 'jdapp;iPhone;10.0.6;12.4.1;fc13275e23b2613e6aae772533ca6f349d2e0a86;network/wifi;ADID/C51FD279-5C69-4F94-B1C5-890BC8EB501F;model/iPhone11,6;addressid/589374288;appBuild/167724;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1',
         'Accept-Language': 'zh-cn',
         'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html?babelChannel=ttt12&lng=0.000000&lat=0.000000&sid=87e644ae51ba60e68519b73d1518893w&un_area=12_904_3373_62101',
@@ -653,9 +667,13 @@ function followShop(shopId) {
 
 function doTask(body, fnId = 'scan') {
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.post({
       url: `https://jdjoy.jd.com/common/pet/${fnId}?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        'lkt': lkt,
+        'lks': lks,
         'Host': 'jdjoy.jd.com',
         'accept': '*/*',
         'content-type': fnId === 'followGood' || fnId === 'followShop' ? 'application/x-www-form-urlencoded' : 'application/json',
@@ -686,9 +704,13 @@ function doTask(body, fnId = 'scan') {
 function feed() {
   let feedNum = process.env.feedNum ? process.env.feedNum : 80
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.post({
       url: `https://jdjoy.jd.com/common/pet/enterRoom/h5?invitePin=&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        'lkt': lkt,
+        'lks': lks,
         'Host': 'jdjoy.jd.com',
         'accept': '*/*',
         'content-type': 'application/json',
@@ -707,9 +729,13 @@ function feed() {
         resolve();
       } else {
         console.log('开始喂食......')
+        let lkt = new Date().getTime()
+        let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
         $.get({
           url: `https://jdjoy.jd.com/common/pet/feed?feedCount=${feedNum}&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
           headers: {
+            'lkt': lkt,
+            'lks': lks,
             'Host': 'jdjoy.jd.com',
             'accept': '*/*',
             'content-type': 'application/x-www-form-urlencoded',
@@ -736,9 +762,13 @@ function feed() {
 
 function award(taskType) {
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.get({
       url: `https://jdjoy.jd.com/common/pet/getFood?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&taskType=${taskType}`,
       headers: {
+        'lkt': lkt,
+        'lks': lks,
         'Host': 'jdjoy.jd.com',
         'accept': '*/*',
         'content-type': 'application/x-www-form-urlencoded',
@@ -751,9 +781,8 @@ function award(taskType) {
       },
     }, (err, resp, data) => {
       try {
-        console.log('领取奖励', data)
         data = JSON.parse(data);
-        data.errorCode === 'received' ? console.log(`\t任务成功！获得${data.data}狗粮`) : console.log('\t任务失败', JSON.stringify(data))
+        data.errorCode === 'received' ? console.log('任务完成:', data.data) : console.log('\t任务失败:', data)
       } catch (e) {
         $.logErr(e);
       } finally {
@@ -766,9 +795,13 @@ function award(taskType) {
 function run(fn = 'match') {
   let level = process.env.JD_JOY_teamLevel ? process.env.JD_JOY_teamLevel : 2
   return new Promise(resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.get({
       url: `https://jdjoy.jd.com/common/pet/combat/${fn}?teamLevel=${level}&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P`,
       headers: {
+        'lkt': lkt,
+        'lks': lks,
         'Host': 'jdjoy.jd.com',
         'sec-fetch-mode': 'cors',
         'origin': 'https://h5.m.jd.com',
@@ -816,63 +849,85 @@ function run(fn = 'match') {
 
 function getFriends() {
   return new Promise((resolve) => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     $.post({
       url: 'https://jdjoy.jd.com/common/pet/enterRoom/h5?invitePin=&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P',
       headers: {
+        'lkt': lkt,
+        'lks': lks,
         'Host': 'jdjoy.jd.com',
         'Content-Type': 'application/json',
         'X-Requested-With': 'com.jingdong.app.mall',
         'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html?babelChannel=ttt12&sid=445902658831621c5acf782ec27ce21w&un_area=12_904_3373_62101',
         'Origin': 'https://h5.m.jd.com',
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+        'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
         'Cookie': cookie
       },
       body: JSON.stringify({})
     }, async (err, resp, data) => {
-      await $.wait(1000)
-      $.get({
-        url: 'https://jdjoy.jd.com/common/pet/h5/getFriends?itemsPerPage=20&currentPage=1&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P',
-        headers: {
-          'Host': 'jdjoy.jd.com',
-          'Accept': '*/*',
-          'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
-          "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-          'cookie': cookie
+      let flag = true
+      for (let k = 0; k < 20; k++) {
+        if (flag) {
+          await $.wait(1000)
+        } else {
+          console.log('无法获取好友列表')
+          break
         }
-      }, async (err, resp, data) => {
-        data = JSON.parse(data)
-        for (let f of data.datas) {
-          if (f.stealStatus === 'can_steal') {
-            console.log('可偷:', f.friendPin)
-            $.get({
-              url: `https://jdjoy.jd.com/common/pet/enterFriendRoom?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&friendPin=${encodeURIComponent(f.friendPin)}`,
-              headers: {
-                'Host': 'jdjoy.jd.com',
-                'Accept': '*/*',
-                'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
-                "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-                'cookie': cookie
-              }
-            }, (err, resp, data) => {
-              $.get({
-                url: `https://jdjoy.jd.com/common/pet/getRandomFood?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&friendPin=${encodeURIComponent(f.friendPin)}`,
-                headers: {
-                  'Host': 'jdjoy.jd.com',
-                  'Accept': '*/*',
-                  'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
-                  "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-                  'cookie': cookie
-                }
-              }, (err, resp, data) => {
-                data = JSON.parse(data)
-                console.log('偷狗粮:', data.errorCode, data.data)
-              })
-            })
+        $.get({
+          url: 'https://jdjoy.jd.com/common/pet/h5/getFriends?itemsPerPage=20&currentPage=1&reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P',
+          headers: {
+            'Host': 'jdjoy.jd.com',
+            'Accept': '*/*',
+            'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+            "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+            'cookie': cookie
           }
-          await $.wait(1500)
-        }
-        resolve();
-      })
+        }, async (err, resp, data) => {
+          data = JSON.parse(data)
+          if (data.datas) {
+            for (let f of data.datas) {
+              if (f.stealStatus === 'can_steal') {
+                console.log('可偷:', f.friendPin)
+                let lkt = new Date().getTime()
+                let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
+                $.get({
+                  url: `https://jdjoy.jd.com/common/pet/enterFriendRoom?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&friendPin=${encodeURIComponent(f.friendPin)}`,
+                  headers: {
+                    'lkt': lkt,
+                    'lks': lks,
+                    'Host': 'jdjoy.jd.com',
+                    'Accept': '*/*',
+                    'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+                    "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+                    'cookie': cookie
+                  }
+                }, (err, resp, data) => {
+                  let lkt = new Date().getTime()
+                  let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
+                  $.get({
+                    url: `https://jdjoy.jd.com/common/pet/getRandomFood?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&friendPin=${encodeURIComponent(f.friendPin)}`,
+                    headers: {
+                      'lkt': lkt,
+                      'lks': lks,
+                      'Host': 'jdjoy.jd.com',
+                      'Accept': '*/*',
+                      'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+                      "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+                      'cookie': cookie
+                    }
+                  }, (err, resp, data) => {
+                    data = JSON.parse(data)
+                    console.log('偷狗粮:', data.errorCode, data.data)
+                  })
+                })
+              }
+              await $.wait(1500)
+            }
+          }
+        })
+      }
+      resolve();
     })
   })
 }

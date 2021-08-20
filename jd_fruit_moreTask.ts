@@ -1,3 +1,7 @@
+/**
+ * 农场补充任务
+ * cron: 0 11,12 * * *
+ */
 import axios from 'axios';
 import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as dotenv from 'dotenv';
