@@ -116,7 +116,7 @@ console.log('帮助助力池:', HELP_POOL)
         console.log(res)
         break
       }
-      await wait(4000)
+      await wait(5000)
     }
     await wait(2000)
 
@@ -150,11 +150,11 @@ console.log('帮助助力池:', HELP_POOL)
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '2'})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('锄草:', res.data.addcoins)
-        await wait(2500)
+        await wait(3000)
         if (res.data.surprise) {
           res = await api("operservice/GetSelfResult", "activeid,activekey,channel,sceneid,type", {type: '14'})
           console.log('锄草奖励:', res.data.prizepool)
-          await wait(1000)
+          await wait(2000)
         }
       } catch (e) {
         console.log('Error:', e)
@@ -168,7 +168,7 @@ console.log('帮助助力池:', HELP_POOL)
         res = await api('operservice/Action', 'activeid,activekey,channel,petid,sceneid,type', {type: '1', petid: petid})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
-        await wait(2500)
+        await wait(3000)
       } catch (e) {
         console.log('Error:', e)
         break
@@ -205,17 +205,16 @@ console.log('帮助助力池:', HELP_POOL)
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     for (let j = 0; j < shareCodes.length; j++) {
-      console.log(`账号${i + 1}去助力${shareCodes[j]}`)
-      res = await api('operservice/EnrollFriend', 'channel,sceneid,sharekey', {sharekey: shareCodes[j]})
-      if (res.data.result === 1) {
-        console.log('不助力自己')
-      } else if (res.ret === 0) {
-        console.log('助力结果:', res)
-        console.log('助力成功，获得:', res.data.addcoins)
-      } else {
-        console.log(res)
+      if (i !== j) {
+        console.log(`账号${i + 1}去助力${shareCodes[j]}`)
+        res = await api('operservice/EnrollFriend', 'channel,sceneid,sharekey', {sharekey: shareCodes[j]})
+        if (res.ret === 0) {
+          console.log('助力成功，获得:', res.data.addcoins)
+        } else {
+          console.log('助力失败：', res)
+        }
+        await wait(4000)
       }
-      await wait(4000)
     }
   }
 })()
