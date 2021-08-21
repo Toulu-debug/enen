@@ -8,7 +8,7 @@ import {format} from 'date-fns';
 import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS';
 import * as fs from 'fs';
 
-const notify = require('./sendNotify')
+const notify = require('./sendNotify'), md5 = require('md5')
 
 let cookie: string = '', validate: string = '', UserName: string, index: number;
 let target: number = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JOY_REWARD_NAME) : 500;
@@ -60,8 +60,12 @@ let target: number = process.env.JD_JOY_REWARD_NAME ? parseInt(process.env.JD_JO
 
 function init() {
   return new Promise(async resolve => {
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     let {data} = await axios.get(`https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&validate=${validate}`, {
       headers: {
+        'lkt': lkt,
+        'lks': lks,
         'Host': 'jdjoy.jd.com',
         'content-type': 'application/json',
         'origin': 'https://h5.m.jd.com',
@@ -84,9 +88,13 @@ function exchange(beanId: number) {
       }
     }
     console.log('exchange()', format(new Date(), 'hh:mm:ss:SSS'))
+    let lkt = new Date().getTime()
+    let lks = md5('' + 'ztmFUCxcPMNyUq0P' + lkt).toString()
     let {data} = await axios.post(`https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=ztmFUCxcPMNyUq0P&validate=${validate}`,
       JSON.stringify({"buyParam": {"orderSource": 'pet', "saleInfoId": beanId}, "deviceInfo": {}}), {
         headers: {
+          'lkt': lkt,
+          'lks': lks,
           "Host": "jdjoy.jd.com",
           "Accept-Language": "zh-cn",
           "Content-Type": "application/json",
