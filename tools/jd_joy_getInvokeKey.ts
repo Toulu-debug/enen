@@ -6,7 +6,7 @@ import axios from "axios";
   res = await api(file)
   file = 'https:' + res.match(/src="([^"]*)/)[1]
   res = await api(file)
-  file = res.match(/h=n\(90\),v="([^"]*)/)[1]
+  file = res.match(/h=n\(\d+\),v="([^"]*)/)[1]
   console.log('invokeKey:', file)
 })()
 
