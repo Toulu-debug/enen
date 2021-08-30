@@ -124,13 +124,13 @@ async function jdPet() {
       }, (err, resp, data) => {
         if (err) {
           console.log('上报失败', err)
-          runTimesErr += `${$.userName}:${err}\n`
+          runTimesErr += `${$.UserName}:${err}\n`
         } else {
           if (data === '1' || data === '0') {
             console.log('上报成功')
           } else {
             console.log('上报失败', data)
-            runTimesErr += `${$.userName}:${data}\n`
+            runTimesErr += `${$.UserName}:${data}\n`
           }
         }
       })

@@ -1722,6 +1722,9 @@ if ($.isNode()) {
   if ($.isNode() && allMessage) {
     await notify.sendNotify(`${$.name}`, `${allMessage}`, {url: jxOpenUrl})
   }
+  if (runTimesErrNotify === 'true' && runTimesErr) {
+    await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
+  }
 })()
 
 async function jdDreamFactory() {
@@ -2239,13 +2242,13 @@ function userInfo() {
                 }, (err, resp, data) => {
                   if (err) {
                     console.log('上报失败', err)
-                    runTimesErr += `${$.userName}:${err}\n`
+                    runTimesErr += `${$.UserName}:${err}\n`
                   } else {
                     if (data === '1' || data === '0') {
                       console.log('上报成功')
                     } else {
                       console.log('上报失败', data)
-                      runTimesErr += `${$.userName}:${data}\n`
+                      runTimesErr += `${$.UserName}:${data}\n`
                     }
                   }
                 })
