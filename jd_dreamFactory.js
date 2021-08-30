@@ -1650,7 +1650,7 @@ const jxOpenUrl = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%2
 let cookiesArr = [], cookie = '', message = '', allMessage = '';
 const inviteCodes = [''];
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
-let runTimesErr = '', runTimesErrNotify = process.env.runTimesErrNotify ?? "false";
+let runTimesErr = '', runTimesErrNotify = $.isNode() ? (process.env.runTimesErrNotify ? process.env.runTimesErrNotify : 'false') : 'false';
 $.tuanIds = [];
 $.appId = 10001;
 if ($.isNode()) {

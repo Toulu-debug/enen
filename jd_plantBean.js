@@ -30,7 +30,7 @@ console.log('\n====================Hello World====================\n')
 //Node.js用户请在jdCookie.js处填写京东ck;
 //ios等软件用户直接用NobyDa的jd cookie
 let jdNotify = true;//是否开启静默运行。默认true开启
-let runTimesErr = '', runTimesErrNotify = process.env.runTimesErrNotify ?? "false";
+let runTimesErr = '', runTimesErrNotify = $.isNode() ? (process.env.runTimesErrNotify ? process.env.runTimesErrNotify : 'false') : 'false';
 let cookiesArr = [], cookie = '', jdPlantBeanShareArr = [], isBox = false, notify, newShareCodes, option, message,subTitle;
 //京东接口地址
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
