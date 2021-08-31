@@ -22,20 +22,21 @@ let cookie: string = '', UserName: string, index: number, errMsg: string = '';
 })()
 
 async function api(index: number, cookie: string, username: string) {
-  let {data} = await axios.get(`https://wq.jd.com/user/info/QueryJDUserInfo?sceneid=80027&_=${Date.now()}&sceneval=2`, {
+  let {data} = await axios.get(`https://me-api.jd.com/user_new/info/GetJDUserInfoUnion`, {
     headers: {
-      "Accept": "application/json,text/plain, */*",
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Cookie": cookie,
-      "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-      "User-Agent": USER_AGENT
+      Host: "me-api.jd.com",
+      Connection: "keep-alive",
+      Cookie: cookie,
+      "User-Agent": USER_AGENT,
+      "Accept-Language": "zh-cn",
+      "Referer": "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&",
+      "Accept-Encoding": "gzip, deflate, br"
     }
   })
-  if (data.retcode === 0) {
+  if (data.retcode === '0') {
     console.log(index, '✅', username)
   } else {
     console.log(index, '❌', username)
     errMsg += `${index} ${username}\n`
   }
-  // console.log(data.base.jdNum)
 }
