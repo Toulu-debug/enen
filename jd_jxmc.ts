@@ -100,7 +100,7 @@ console.log('帮助助力池:', HELP_POOL)
       taskRetCode = await getTask();
       console.log('taskRetCode:', taskRetCode)
       if (taskRetCode === 0) {
-        await wait(4000);
+        await wait(5000);
       } else {
         break
       }
@@ -118,7 +118,7 @@ console.log('帮助助力池:', HELP_POOL)
       }
       await wait(5000)
     }
-    await wait(2000)
+    await wait(4000)
 
     while (food >= 10) {
       try {
@@ -138,37 +138,37 @@ console.log('帮助助力池:', HELP_POOL)
           console.log(res)
           break
         }
-        await wait(5000)
+        await wait(6000)
       } catch (e) {
         break
       }
     }
-    await wait(2000)
+    await wait(3000)
 
     while (1) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '2'})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('锄草:', res.data.addcoins)
-        await wait(3000)
+        await wait(4000)
         if (res.data.surprise) {
           res = await api("operservice/GetSelfResult", "activeid,activekey,channel,sceneid,type", {type: '14'})
           console.log('锄草奖励:', res.data.prizepool)
-          await wait(2000)
+          await wait(4000)
         }
       } catch (e) {
         console.log('Error:', e)
         break
       }
     }
-    await wait(2000)
+    await wait(3000)
 
     while (1) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,petid,sceneid,type', {type: '1', petid: petid})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
-        await wait(3000)
+        await wait(5000)
       } catch (e) {
         console.log('Error:', e)
         break

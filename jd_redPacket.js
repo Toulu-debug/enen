@@ -155,7 +155,6 @@ const JD_API_HOST = _0x5c3d('13', 'oaTe');
       $[_0x5c3d('1f', '@YZ@')] = _0xd83cb6 + 0x1;
       $[_0x5c3d('20', 'QeIx')] = !![];
       $[_0x5c3d('21', 'QeIx')] = '';
-      await TotalBean();
       console[_0x5c3d('22', 'I($f')](_0x5c3d('23', 'm0Q1') + $[_0x5c3d('24', 'pqb(')] + '】' + ($[_0x5c3d('25', 'qi!x')] || $['UserName']) + '****\x0a');
       if (!$[_0x5c3d('26', 'wc[h')]) {
         $['msg']($[_0x5c3d('27', '$[C2')], _0x5c3d('28', 'lR53'), _0x5c3d('29', 'GEp&') + $[_0x5c3d('2a', 'Jnb7')] + '\x20' + ($['nickName'] || $['UserName']) + _0x5c3d('2b', ']loZ'), {'open-url': 'https://bean.m.jd.com/bean/signIndex.action'});
@@ -1399,49 +1398,6 @@ function taskUrl(_0x175cd6, _0x300a9f) {
     }
   };
 };_0xode = 'jsjiami.com.v6';
-
-
-function TotalBean() {
-  return new Promise(async resolve => {
-    const options = {
-      url: "https://me-api.jd.com/user_new/info/GetJDUserInfoUnion",
-      headers: {
-        Host: "me-api.jd.com",
-        Accept: "*/*",
-        Connection: "keep-alive",
-        Cookie: cookie,
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-        "Accept-Language": "zh-cn",
-        "Referer": "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&",
-        "Accept-Encoding": "gzip, deflate, br"
-      }
-    }
-    $.get(options, (err, resp, data) => {
-      try {
-        if (err) {
-          $.logErr(err)
-        } else {
-          if (data) {
-            data = JSON.parse(data);
-            if (data['retcode'] === "1001") {
-              $.isLogin = false; //cookie过期
-              return;
-            }
-            if (data['retcode'] === "0" && data.data && data.data.hasOwnProperty("userInfo")) {
-              $.nickName = data.data.userInfo.baseInfo.nickname;
-            }
-          } else {
-            $.log('京东服务器返回空数据');
-          }
-        }
-      } catch (e) {
-        $.logErr(e)
-      } finally {
-        resolve();
-      }
-    })
-  })
-}
 
 function jsonParse(str) {
   if (typeof str == "string") {

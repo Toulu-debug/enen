@@ -48,6 +48,14 @@ const USER_AGENTS: Array<string> = [
 
 const jd_joy_invokeKey = "value1"
 
+function TotalBean(cookie: string) {
+  return {
+    cookie: cookie,
+    isLogin: true,
+    nickName: ''
+  }
+}
+
 function getRandomNumberByRange(start: number, end: number) {
   return Math.floor(Math.random() * (end - start) + start)
 }
@@ -90,44 +98,6 @@ async function getFarmShareCode(cookie: string) {
     return ''
 }
 
-function TotalBean(cookie: string) {
-  let totalBean = {
-    isLogin: true,
-    nickName: ''
-  }
-  return new Promise(resolve => {
-    axios.get('https://me-api.jd.com/user_new/info/GetJDUserInfoUnion', {
-      headers: {
-        Host: "me-api.jd.com",
-        Connection: "keep-alive",
-        Cookie: cookie,
-        "User-Agent": USER_AGENT,
-        "Accept-Language": "zh-cn",
-        "Referer": "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&",
-        "Accept-Encoding": "gzip, deflate, br"
-      }
-    }).then(res => {
-      if (res.data) {
-        let data = res.data
-        if (data['retcode'] === "1001") {
-          totalBean.isLogin = false; //cookie过期
-        }
-        if (data['retcode'] === "0" && data['data'] && data.data.hasOwnProperty("userInfo")) {
-          totalBean.isLogin = true
-          totalBean.nickName = data.data.userInfo.baseInfo.nickname;
-        }
-        resolve(totalBean)
-      } else {
-        console.log('京东服务器返回空数据');
-        resolve(totalBean)
-      }
-    }).catch(e => {
-      console.log('Error:', e)
-      resolve(totalBean)
-    })
-  })
-}
-
 function requireConfig() {
   let cookiesArr: string[] = []
   return new Promise(resolve => {
@@ -152,7 +122,6 @@ function wait(t: number) {
 }
 
 async function requestAlgo() {
-
   fingerprint = await generateFp();
   return new Promise<void>(async resolve => {
     let {data} = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
