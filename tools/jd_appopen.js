@@ -4,7 +4,7 @@
 在脚本日志查看值
 
 [MITM]
-hostname = draw.jdfcloud.com
+hostname = api.m.jd.com
 
 ===========Surge=================
 [Script]
