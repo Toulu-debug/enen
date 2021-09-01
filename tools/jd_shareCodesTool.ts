@@ -1,5 +1,12 @@
 import axios from "axios";
-import USER_AGENT, {decrypt} from "../TS_USER_AGENTS";
+let USER_AGENT:string = '', decrypt:any ='';
+try{
+  USER_AGENT = require('../TS_USER_AGENTS').USER_AGENT
+  decrypt = require('../TS_USER_AGENTS').decrypt
+}catch (e) {
+  USER_AGENT = require('./TS_USER_AGENTS').USER_AGENT
+  decrypt = require('./TS_USER_AGENTS').decrypt
+}
 
 async function bean(cookie: string) {
   let {data} = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${escape(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
