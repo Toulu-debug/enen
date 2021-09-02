@@ -67,7 +67,7 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
       $.superShakeBeanNum = 0;
       $.moFangBeanNum = 0;
       $.isLogin = true;
-      $.nickName = '';
+      $.nickName = $.UserName;
       message = ''
       console.log(`\n********开始【京东账号${$.index}】${$.nickName || $.UserName}*****\n`);
       await clubLottery();

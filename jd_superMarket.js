@@ -50,7 +50,7 @@ let shareCodes = []
       $.coinerr = "";
       $.blueCionTimes = 0;
       $.isLogin = true;
-      $.nickName = '';
+      $.nickName = $.UserName;
       console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
       message = '';
       subTitle = '';

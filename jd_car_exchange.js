@@ -56,7 +56,7 @@ const JD_API_HOST = 'https://car-member.jd.com/api/';
         $.index = i + 1;
         console.log(`*********京东账号${$.index} ${$.UserName}*********`)
         $.isLogin = true;
-        $.nickName = '';
+        $.nickName = $.UserName;
         message = '';
         await jdCar();
       }

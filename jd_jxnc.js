@@ -77,7 +77,7 @@ let assistUserShareCode = 0; // 随机助力用户 share code
       $.UserName = decodeURIComponent(currentCookie.match(/pt_pin=([^; ]+)(?=;?)/) && currentCookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
       $.index = i + 1;
       $.isLogin = true;
-      $.nickName = '';
+      $.nickName = $.UserName;
       $.log(`\n************* 检查【京东账号${$.index}】${$.UserName} cookie 是否有效 *************`);
       $.log(`开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
       if (currentCookie.includes("pt_pin")) await getJxToken()

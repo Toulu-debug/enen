@@ -52,7 +52,7 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
       $.index = i + 1;
       $.isLogin = true;
       $.beans = 0
-      $.nickName = '';
+      $.nickName = $.UserName;
       message = '';
       console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
       await main()
