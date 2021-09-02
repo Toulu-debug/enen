@@ -34,8 +34,8 @@ let cookiesArr = [], cookie = '', jdPetShareArr = [], isBox = false, notify, new
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
 let shareCodes = ['']
 let message = '', subTitle = '', option = {};
-let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-let runTimesErr = '', runTimesErrNotify = $.isNode() ? (process.env.runTimesErrNotify ? process.env.runTimesErrNotify : 'false') : 'false';
+let jdNotify = false, runTimesErr = '';//是否关闭通知，false打开通知推送，true关闭通知推送
+
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
 let goodsUrl = '', taskInfoKey = [];
 let randomCount = $.isNode() ? 20 : 5;
@@ -65,7 +65,7 @@ let randomCount = $.isNode() ? 20 : 5;
   if ($.isNode() && allMessage && $.ctrTemp) {
     await notify.sendNotify(`${$.name}`, `${allMessage}`)
   }
-  if (runTimesErrNotify === 'true' && runTimesErr) {
+  if (runTimesErr) {
     await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
   }
 })()
