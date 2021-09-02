@@ -104,6 +104,18 @@ let UserName: string, index: number;
 
     // 升级建筑
     while (1){
+      res = await api('user/QueryUserInfo',
+      '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
+      {
+        ddwTaskId: '',
+        strShareId: '',
+        strMarkList: 'guider_step,collect_coin_auth,guider_medal,guider_over_flag,build_food_full,build_sea_full,build_shop_full,build_fun_full,medal_guider_show,guide_guider_show,guide_receive_vistor,daily_task,guider_daily_task',
+        strPgtimestamp: token.strPgtimestamp,
+        strPhoneID: token.strPhoneID,
+        strPgUUNum: token.strPgUUNum
+      })
+      wallet = res.ddwCoinBalance
+      console.log('金币余额:', wallet)
       let build: string = '', minLV: number = 99999
       for (let b of ['food', 'fun', 'shop', 'sea']) {
         res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
