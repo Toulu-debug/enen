@@ -60,7 +60,7 @@ const JD_API_HOST = `https://api.m.jd.com/api?appid=jdsupermarket`;
       $.title = '';
       //console.log($.coincount);
       $.isLogin = true;
-      $.nickName = '';
+      $.nickName = $.UserName;
       // await TotalBean();
       console.log(`\n****开始【京东账号${$.index}】${$.nickName || $.UserName}****\n`);
       // console.log(`目前暂无兑换酒类的奖品功能，即使输入酒类名称，脚本也会提示下架\n`)

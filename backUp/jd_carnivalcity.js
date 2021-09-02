@@ -36,7 +36,7 @@ let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 
       $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
       $.index = i + 1;
       $.isLogin = true;
-      $.nickName = '';
+      $.nickName = $.UserName;
       $.jingBeanNum = 0;//累计获得京豆
       $.integralCount = 0;//累计获得积分
       $.integer = 0;//当天获得积分

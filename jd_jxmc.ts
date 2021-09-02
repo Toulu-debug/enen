@@ -12,14 +12,7 @@ import {accessSync} from "fs";
 
 const notify = require('./sendNotify')
 
-let A: any;
-try {
-  accessSync('./tools/jd_jxmcToken.js')
-  A = require('./tools/jd_jxmcToken')
-} catch (e) {
-  A = require('./jd_jxmcToken')
-}
-
+let A: any = require('./utils/jd_jxmcToken')
 let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, activeid: string = '', jxToken: any, UserName: string, index: number;
 let HELP_HW: string = process.env.HELP_HW ? process.env.HELP_HW : "true";
 console.log('帮助HelloWorld:', HELP_HW)

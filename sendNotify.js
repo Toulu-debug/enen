@@ -179,8 +179,8 @@ async function sendNotify(text, desp, params = {}, author = '\n\n仅供用于学
   desp += author;//增加作者信息，防止被贩卖等
   let remarks = '';
   try {
-    fs.accessSync('./tools/account.json')
-    remarks = JSON.parse(fs.readFileSync('./tools/account.json').toString())
+    fs.accessSync('./utils/account.json')
+    remarks = JSON.parse(fs.readFileSync('./utils/account.json').toString())
   } catch (e) {
   }
   if (remarks) {

@@ -6,13 +6,7 @@
 
 import axios from 'axios';
 import {requireConfig, wait, requestAlgo, decrypt} from './TS_USER_AGENTS';
-
-let jxfactory: any;
-try {
-  jxfactory = require('../tools/jd_shareCodesTool').jxfactory
-} catch (e) {
-  jxfactory = require('./JDHelloWorld_jd_scripts_jd_shareCodesTool').jxfactory
-}
+import {jxfactory} from "./utils/shareCodesTool";
 
 let cookie: string = '', res: any = '', UserName: string, index: number;
 let shareCodes: string[] = [], shareCodesInternal: string[] = [];

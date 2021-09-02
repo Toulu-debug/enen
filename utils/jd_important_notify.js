@@ -6,7 +6,7 @@
 const fs = require('fs')
 const axios = require('axios')
 // const tunnel = require('tunnel')
-const notify = require('./sendNotify')
+const notify = require('../sendNotify')
 
 try {
   fs.accessSync('./notify.log', fs.constants.R_OK | fs.constants.W_OK)

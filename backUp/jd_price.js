@@ -66,7 +66,7 @@ if ($.isNode()) {
       );
       $.index = i + 1;
       $.isLogin = false;
-      $.nickName = '';
+      $.nickName = $.UserName;
       await totalBean();
       if (!$.isLogin) {
         $.msg(

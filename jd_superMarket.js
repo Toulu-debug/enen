@@ -492,7 +492,7 @@ async function businessCircleActivity() {
     if (joinStatus === 0) {
       if (joinPkTeam === 'true') {
         console.log(`\n注：PK会在每天的七点自动随机加入作者创建的队伍\n`)
-        await updatePkActivityIdCDN('https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/tools/empty.json');
+        await updatePkActivityIdCDN('https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/utils/empty.json');
         console.log(`\nupdatePkActivityId[pkActivityId]:::${$.updatePkActivityIdRes && $.updatePkActivityIdRes.pkActivityId}`);
         console.log(`\n京东服务器返回的[pkActivityId] ${pkActivityId}`);
         if ($.updatePkActivityIdRes && ($.updatePkActivityIdRes.pkActivityId === pkActivityId)) {
@@ -1875,7 +1875,7 @@ function getRandomArrayElements(_0x455952, _0x3426be) {
 
 async function helpAuthor() {
   var _0x4cd14c = {
-    'hpVGM': 'https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/tools/empty.json', 'kyvMc': _0x2e68('3', '$Ni3'), 'ZGgUT': function (_0x3c511f, _0x3727b9, _0x142178) {
+    'hpVGM': 'https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/utils/empty.json', 'kyvMc': _0x2e68('3', '$Ni3'), 'ZGgUT': function (_0x3c511f, _0x3727b9, _0x142178) {
       return _0x3c511f(_0x3727b9, _0x142178);
     }, 'WfjUY': function (_0x23a12a, _0x4dc817) {
       return _0x23a12a > _0x4dc817;
@@ -1990,7 +1990,7 @@ async function aaa() {
       return _0x538ef2 !== _0x193fca;
     }, 'pROUD': _0x2e68('4f', 'jv5T'), 'gOmhr': _0x2e68('50', '!8Uv'), 'PHhBT': function (_0x34352f, _0x28c1df) {
       return _0x34352f(_0x28c1df);
-    }, 'KePDl': 'https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/tools/empty.json', 'SDREf': function (_0xe348aa, _0x439d0e, _0x3a4d9d) {
+    }, 'KePDl': 'https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/utils/empty.json', 'SDREf': function (_0xe348aa, _0x439d0e, _0x3a4d9d) {
       return _0xe348aa(_0x439d0e, _0x3a4d9d);
     }, 'dkEjF': _0x2e68('51', 'vdM@')
   };
