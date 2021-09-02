@@ -3,7 +3,7 @@
  */
 
 import {requireConfig, TotalBean} from "./TS_USER_AGENTS";
-import {bean, farm, pet, factory, sgmh, jxfactory, cash, carnivalcity} from "./tools/shareCodesTool";
+import {bean, farm, pet, factory, sgmh, jxfactory, cash, carnivalcity} from "./tools/jd_shareCodesTool";
 
 const notify = require('./sendNotify')
 let cookie: string = '', UserName: string, index: number;
