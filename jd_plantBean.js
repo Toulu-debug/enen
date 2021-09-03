@@ -68,7 +68,7 @@ let randomCount = $.isNode() ? 20 : 5;
   if ($.isNode() && allMessage) {
     await notify.sendNotify(`${$.name}`, `${allMessage}`)
   }
-  if (runTimesErrNotify === 'true' && runTimesErr) {
+  if (runTimesErr) {
     await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
   }
 })()
