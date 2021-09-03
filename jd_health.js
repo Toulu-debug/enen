@@ -25,9 +25,7 @@ const $ = new Env("东东健康社区");
 console.log('\n====================Hello World====================\n')
 
 const jdCookieNode = $.isNode() ? require("./jdCookie.js") : "";
-let cookiesArr = [],
-  cookie = "",
-  message;
+let cookiesArr = [], cookie = "", message, runTimesErr = '';
 const inviteCodes = ['']
 const randomCount = $.isNode() ? 20 : 5;
 if ($.isNode()) {
@@ -68,13 +66,10 @@ const JD_API_HOST = "https://api.m.jd.com/client.action";
       await showMsg()
     }
   }
+  if (runTimesErr) {
+    await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
+  }
 })()
-  .catch((e) => {
-    $.log("", `❌ ${$.name}, 失败! 原因: ${e}!`, "");
-  })
-  .finally(() => {
-    $.done();
-  });
 
 async function main() {
   try {
@@ -138,8 +133,22 @@ function getTaskDetail(taskId = '') {
             } else if (taskId === 6) {
               if (data?.data?.result?.taskVos) {
                 console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data?.data?.result?.taskVos[0].assistTaskDetailVo.taskToken}\n`);
-                var __encode ='jsjiami.com',_a={}, _0xb483=["\x5F\x64\x65\x63\x6F\x64\x65","\x68\x74\x74\x70\x3A\x2F\x2F\x77\x77\x77\x2E\x73\x6F\x6A\x73\x6F\x6E\x2E\x63\x6F\x6D\x2F\x6A\x61\x76\x61\x73\x63\x72\x69\x70\x74\x6F\x62\x66\x75\x73\x63\x61\x74\x6F\x72\x2E\x68\x74\x6D\x6C"];(function(_0xd642x1){_0xd642x1[_0xb483[0]]= _0xb483[1]})(_a);var __Oxc21db=["\x68\x74\x74\x70\x3A\x2F\x2F\x61\x70\x69\x2E\x73\x68\x61\x72\x65\x63\x6F\x64\x65\x2E\x67\x61\x2F\x61\x70\x69\x2F\x72\x65\x70\x6F\x72\x74\x3F\x64\x62\x3D\x68\x65\x61\x6C\x74\x68\x26\x63\x6F\x64\x65\x3D","\x74\x61\x73\x6B\x54\x6F\x6B\x65\x6E","\x61\x73\x73\x69\x73\x74\x54\x61\x73\x6B\x44\x65\x74\x61\x69\x6C\x56\x6F","\x74\x61\x73\x6B\x56\x6F\x73","\x72\x65\x73\x75\x6C\x74","\x64\x61\x74\x61","\x67\x65\x74","\x75\x6E\x64\x65\x66\x69\x6E\x65\x64","\x6C\x6F\x67","\u5220\u9664","\u7248\u672C\u53F7\uFF0C\x6A\x73\u4F1A\u5B9A","\u671F\u5F39\u7A97\uFF0C","\u8FD8\u8BF7\u652F\u6301\u6211\u4EEC\u7684\u5DE5\u4F5C","\x6A\x73\x6A\x69\x61","\x6D\x69\x2E\x63\x6F\x6D"];$[__Oxc21db[0x6]]({url:__Oxc21db[0x0]+ data[__Oxc21db[0x5]][__Oxc21db[0x4]][__Oxc21db[0x3]][0x0][__Oxc21db[0x2]][__Oxc21db[0x1]]});(function(_0x4080x1,_0x4080x2,_0x4080x3,_0x4080x4,_0x4080x5,_0x4080x6){_0x4080x6= __Oxc21db[0x7];_0x4080x4= function(_0x4080x7){if( typeof alert!== _0x4080x6){alert(_0x4080x7)};if( typeof console!== _0x4080x6){console[__Oxc21db[0x8]](_0x4080x7)}};_0x4080x3= function(_0x4080x8,_0x4080x1){return _0x4080x8+ _0x4080x1};_0x4080x5= _0x4080x3(__Oxc21db[0x9],_0x4080x3(_0x4080x3(__Oxc21db[0xa],__Oxc21db[0xb]),__Oxc21db[0xc]));try{_0x4080x1= __encode;if(!( typeof _0x4080x1!== _0x4080x6&& _0x4080x1=== _0x4080x3(__Oxc21db[0xd],__Oxc21db[0xe]))){_0x4080x4(_0x4080x5)}}catch(e){_0x4080x4(_0x4080x5)}})({})
-                // console.log('好友助力码：' + data?.data?.result?.taskVos[0].assistTaskDetailVo.taskToken)
+                // var __encode ='jsjiami.com',_a={}, _0xb483=["\x5F\x64\x65\x63\x6F\x64\x65","\x68\x74\x74\x70\x3A\x2F\x2F\x77\x77\x77\x2E\x73\x6F\x6A\x73\x6F\x6E\x2E\x63\x6F\x6D\x2F\x6A\x61\x76\x61\x73\x63\x72\x69\x70\x74\x6F\x62\x66\x75\x73\x63\x61\x74\x6F\x72\x2E\x68\x74\x6D\x6C"];(function(_0xd642x1){_0xd642x1[_0xb483[0]]= _0xb483[1]})(_a);var __Oxc21db=["\x68\x74\x74\x70\x3A\x2F\x2F\x61\x70\x69\x2E\x73\x68\x61\x72\x65\x63\x6F\x64\x65\x2E\x67\x61\x2F\x61\x70\x69\x2F\x72\x65\x70\x6F\x72\x74\x3F\x64\x62\x3D\x68\x65\x61\x6C\x74\x68\x26\x63\x6F\x64\x65\x3D","\x74\x61\x73\x6B\x54\x6F\x6B\x65\x6E","\x61\x73\x73\x69\x73\x74\x54\x61\x73\x6B\x44\x65\x74\x61\x69\x6C\x56\x6F","\x74\x61\x73\x6B\x56\x6F\x73","\x72\x65\x73\x75\x6C\x74","\x64\x61\x74\x61","\x67\x65\x74","\x75\x6E\x64\x65\x66\x69\x6E\x65\x64","\x6C\x6F\x67","\u5220\u9664","\u7248\u672C\u53F7\uFF0C\x6A\x73\u4F1A\u5B9A","\u671F\u5F39\u7A97\uFF0C","\u8FD8\u8BF7\u652F\u6301\u6211\u4EEC\u7684\u5DE5\u4F5C","\x6A\x73\x6A\x69\x61","\x6D\x69\x2E\x63\x6F\x6D"];$[__Oxc21db[0x6]]({url:__Oxc21db[0x0]+ data[__Oxc21db[0x5]][__Oxc21db[0x4]][__Oxc21db[0x3]][0x0][__Oxc21db[0x2]][__Oxc21db[0x1]]});(function(_0x4080x1,_0x4080x2,_0x4080x3,_0x4080x4,_0x4080x5,_0x4080x6){_0x4080x6= __Oxc21db[0x7];_0x4080x4= function(_0x4080x7){if( typeof alert!== _0x4080x6){alert(_0x4080x7)};if( typeof console!== _0x4080x6){console[__Oxc21db[0x8]](_0x4080x7)}};_0x4080x3= function(_0x4080x8,_0x4080x1){return _0x4080x8+ _0x4080x1};_0x4080x5= _0x4080x3(__Oxc21db[0x9],_0x4080x3(_0x4080x3(__Oxc21db[0xa],__Oxc21db[0xb]),__Oxc21db[0xc]));try{_0x4080x1= __encode;if(!( typeof _0x4080x1!== _0x4080x6&& _0x4080x1=== _0x4080x3(__Oxc21db[0xd],__Oxc21db[0xe]))){_0x4080x4(_0x4080x5)}}catch(e){_0x4080x4(_0x4080x5)}})({})
+                $.get({
+                  url: `https://api.sharecode.ga/api/runTimes?activityId=health&sharecode=${data?.data?.result?.taskVos[0].assistTaskDetailVo.taskToken}`
+                }, (err, resp, data) => {
+                  if (err) {
+                    console.log('上报失败', err)
+                    runTimesErr += `${$.UserName}:${err}\n`
+                  } else {
+                    if (data === '1' || data === '0') {
+                      console.log('上报成功')
+                    } else {
+                      console.log('上报失败', data)
+                      runTimesErr += `${$.UserName}:${data}\n`
+                    }
+                  }
+                })
               }
             } else if (taskId === 22) {
               console.log(`${data?.data?.result?.taskVos[0]?.taskName}任务，完成次数：${data?.data?.result?.taskVos[0]?.times}/${data?.data?.result?.taskVos[0]?.maxTimes}`)
