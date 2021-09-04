@@ -3,7 +3,7 @@
  */
 
 import {requireConfig} from "./TS_USER_AGENTS";
-import {bean, farm, pet, factory, sgmh, jxfactory, cash} from "./utils/shareCodesTool";
+import {bean, farm, pet, factory, sgmh, jxfactory, cash, health} from "./utils/shareCodesTool";
 
 let cookie: string = '', UserName: string, index: number;
 
@@ -17,6 +17,7 @@ let cookie: string = '', UserName: string, index: number;
 
     console.log('种豆得豆:', await bean(cookie))
     console.log('东东农场:', await farm(cookie))
+    console.log('京东健康:', await health(cookie))
     console.log('东东萌宠:', await pet(cookie))
     console.log('东东工厂:', await factory(cookie))
     console.log('京喜工厂:', await jxfactory(cookie))

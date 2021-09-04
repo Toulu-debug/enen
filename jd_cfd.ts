@@ -10,16 +10,13 @@
  * 使用jd_ts_test.ts测试环境变量
  */
 
-import {format} from 'date-fns';
 import axios from 'axios';
-import USER_AGENT, {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, wait} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, wait, requestAlgo, decrypt, getJxToken} from './TS_USER_AGENTS';
 import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
 
-const CryptoJS = require('crypto-js')
 const notify = require('./sendNotify')
 dotenv.config()
-let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
 let cookie: string = '', res: any = '', shareCodes: string[] = [], isCollector: Boolean = false;
 
 let HELP_HW: string = process.env.HELP_HW ? process.env.HELP_HW : "true";
@@ -97,24 +94,22 @@ let UserName: string, index: number;
         strPhoneID: token.strPhoneID,
         strPgUUNum: token.strPgUUNum
       })
-    let wallet: number = res.ddwCoinBalance
-    console.log('金币余额:', wallet)
     console.log('离线收益:', res.Business.ddwCoin)
     await wait(2000)
 
     // 升级建筑
-    while (1){
+    while (1) {
       res = await api('user/QueryUserInfo',
-      '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
-      {
-        ddwTaskId: '',
-        strShareId: '',
-        strMarkList: 'guider_step,collect_coin_auth,guider_medal,guider_over_flag,build_food_full,build_sea_full,build_shop_full,build_fun_full,medal_guider_show,guide_guider_show,guide_receive_vistor,daily_task,guider_daily_task',
-        strPgtimestamp: token.strPgtimestamp,
-        strPhoneID: token.strPhoneID,
-        strPgUUNum: token.strPgUUNum
-      })
-      wallet = res.ddwCoinBalance
+        '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
+        {
+          ddwTaskId: '',
+          strShareId: '',
+          strMarkList: 'guider_step,collect_coin_auth,guider_medal,guider_over_flag,build_food_full,build_sea_full,build_shop_full,build_fun_full,medal_guider_show,guide_guider_show,guide_receive_vistor,daily_task,guider_daily_task',
+          strPgtimestamp: token.strPgtimestamp,
+          strPhoneID: token.strPhoneID,
+          strPgUUNum: token.strPgUUNum
+        })
+      let wallet: number = res.ddwCoinBalance
       console.log('金币余额:', wallet)
       let build: string = '', minLV: number = 99999
       for (let b of ['food', 'fun', 'shop', 'sea']) {
@@ -137,7 +132,7 @@ let UserName: string, index: number;
           console.log(`升级成功`)
           await wait(2000)
         }
-      }else{
+      } else {
         break
       }
       await wait(3000)
@@ -191,22 +186,30 @@ let UserName: string, index: number;
       await wait(1000)
     }
     if (res.Data.Sign.dwTodayStatus === 0) {
+      console.log('今日未签到')
       for (let sign of res.Data.Sign.SignList) {
         if (sign.dwDayId === res.Data.Sign.dwTodayId) {
           res = await api('story/RewardSign',
-            '_cfd_t,bizCode,ddwCoin,ddwMoney,dwEnv,dwPrizeLv,dwPrizeType,ptag,source,strPrizePool,strZone',
+            '_cfd_t,bizCode,ddwCoin,ddwMoney,dwEnv,dwPrizeLv,dwPrizeType,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strPrizePool,strZone',
             {
               ddwCoin: sign.ddwCoin,
               ddwMoney: sign.ddwMoney,
               dwPrizeLv: sign.dwBingoLevel,
               dwPrizeType: sign.dwPrizeType,
-              strPrizePool: sign.strPrizePool
+              strPrizePool: sign.strPrizePool,
+              strPgtimestamp: token.strPgtimestamp,
+              strPhoneID: token.strPhoneID,
+              strPgUUNum: token.strPgUUNum
             })
           if (res.iRet === 0)
             console.log('签到成功：', res.Data.ddwCoin, res.Data.ddwMoney, res.Data.strPrizePool)
+          else
+            console.log('签到失败：', res)
           break
         }
       }
+    } else {
+      console.log('今日已经签到')
     }
     await wait(2000)
 
@@ -315,31 +318,43 @@ let UserName: string, index: number;
     // 任务➡️
     let tasks: any
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    let t0: any = tasks.Data.TaskList[0]
-    if (t0.strTaskName === '浏览1次爆款活动' && t0.dwCompleteNum === 0) {
-      res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t0.ddwTaskId})
-      if (res.ret === 0) {
-        console.log('浏览1次爆款活动，任务完成')
+    await wait(2000)
+    for (let t of tasks.Data.TaskList) {
+      if ((t.dwOrderId === 1 || t.dwOrderId === 2) && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '热气球接待20位游客') {
+        console.log('开始任务:', t.strTaskName)
+        res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
+        await wait(t.dwLookTime * 1000)
+        if (res.ret === 0) {
+          console.log('任务完成')
+        } else {
+          console.log('任务失败', res)
+        }
       }
     }
+
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    await wait(2000)
     for (let t of tasks.Data.TaskList) {
       if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
-        res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
-        if (res.ret === 0) {
-          console.log(`${t.strTaskName}领奖成功:`, res.data.prizeInfo)
-        }
+        res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
         await wait(1000)
+        if (res.ret === 0) {
+          console.log(`领奖成功:`, JSON.parse(res.data.prizeInfo.trim()).ddwCoin)
+        } else {
+          console.log('领奖失败', res)
+        }
+      }
+    }
+
+    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    await wait(2000)
+    if (tasks.Data.dwStatus === 3) {
+      res = await api('story/ActTaskAward', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+      if (res.ret === 0) {
+        console.log('100财富任务完成')
       }
     }
     await wait(2000)
-
-    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    if (tasks.Data.dwStatus === 3) {
-      res = await api('story/ActTaskAward', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-      console.log('100财富任务完成：', res)
-      await wait(2000)
-    }
 
     // 导游
     res = await api('user/EmployTourGuideInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
@@ -435,7 +450,6 @@ function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async resolve => {
     let url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
     if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
-      console.log('api2')
       url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfddch&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     }
     if (Object.keys(params).length !== 0) {
@@ -507,107 +521,4 @@ function makeShareCodes() {
         reject('访问助力池出错')
       })
   })
-}
-
-async function requestAlgo() {
-  fingerprint = await generateFp();
-  return new Promise<void>(async resolve => {
-    let {data} = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
-      "version": "1.0",
-      "fp": fingerprint,
-      "appId": appId,
-      "timestamp": Date.now(),
-      "platform": "web",
-      "expandParams": ""
-    }, {
-      "headers": {
-        'Authority': 'cactus.jd.com',
-        'Pragma': 'no-cache',
-        'Cache-Control': 'no-cache',
-        'Accept': 'application/json',
-        'User-Agent': USER_AGENT,
-        'Content-Type': 'application/json',
-        'Origin': 'https://st.jingxi.com',
-        'Sec-Fetch-Site': 'cross-site',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Dest': 'empty',
-        'Referer': 'https://st.jingxi.com/',
-        'Accept-Language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7'
-      },
-    })
-    if (data['status'] === 200) {
-      token = data.data.result.tk;
-      console.log('token:', token)
-      let enCryptMethodJDString = data.data.result.algo;
-      if (enCryptMethodJDString) enCryptMethodJD = new Function(`return ${enCryptMethodJDString}`)();
-    } else {
-      console.log(`fp: ${fingerprint}`)
-      console.log('request_algo 签名参数API请求失败:')
-    }
-    resolve()
-  })
-}
-
-function decrypt(stk: string, url: string) {
-  const timestamp = (format(new Date(), 'yyyyMMddhhmmssSSS'))
-  let hash1: string;
-  if (fingerprint && token && enCryptMethodJD) {
-    hash1 = enCryptMethodJD(token, fingerprint.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex);
-  } else {
-    const random = '5gkjB6SpmC9s';
-    token = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`;
-    fingerprint = 9686767825751161;
-    // $.fingerprint = 7811850938414161;
-    const str = `${token}${fingerprint}${timestamp}${appId}${random}`;
-    hash1 = CryptoJS.SHA512(str, token).toString(CryptoJS.enc.Hex);
-  }
-  let st: string = '';
-  stk.split(',').map((item, index) => {
-    st += `${item}:${getQueryString(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`;
-  })
-  const hash2 = CryptoJS.HmacSHA256(st, hash1.toString()).toString(CryptoJS.enc.Hex);
-  return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fingerprint.toString()), "".concat(appId.toString()), "".concat(token), "".concat(hash2)].join(";"))
-}
-
-function generateFp() {
-  let e = "0123456789";
-  let a = 13;
-  let i = '';
-  for (; a--;)
-    i += e[Math.random() * e.length | 0];
-  return (i + Date.now()).slice(0, 16)
-}
-
-function getQueryString(url: string, name: string) {
-  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-  let r = url.split('?')[1].match(reg);
-  if (r != null) return unescape(r[2]);
-  return '';
-}
-
-function getJxToken(cookie: string) {
-  function generateStr(input: number) {
-    let src = 'abcdefghijklmnopqrstuvwxyz1234567890';
-    let res = '';
-    for (let i = 0; i < input; i++) {
-      res += src[Math.floor(src.length * Math.random())];
-    }
-    return res;
-  }
-
-  return new Promise(resolve => {
-    let phoneId = generateStr(40);
-    let timestamp = Date.now().toString();
-    if (!cookie['match'](/pt_pin=([^; ]+)(?=;?)/)) {
-      console.log('此账号cookie填写不规范,你的pt_pin=xxx后面没分号(;)\n');
-      resolve({});
-    }
-    let nickname = cookie.match(/pt_pin=([^;]*)/)![1];
-    let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy');
-    resolve({
-      'strPgtimestamp': timestamp,
-      'strPhoneID': phoneId,
-      'strPgUUNum': jstoken
-    })
-  });
 }
