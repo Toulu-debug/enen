@@ -6,38 +6,47 @@
  */
 
 import axios from 'axios';
-const notify = require('./sendNotify')
+import {format} from 'date-fns';
+import {wait} from "./TS_USER_AGENTS";
 
 !(async () => {
-  console.log(`==================脚本执行- 北京时间(UTC+8)：${new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000).toLocaleString()}=====================\n`)
-  try {
-    let cars: string[] = ['bean', 'farm', 'health', 'jxfactory', 'pet'];
-    let db: string = cars[getRandomNumberByRange(0, 5)]
-    let num: number = getRandomNumberByRange(5, 20)
-    console.log(`本次随机选择${db}获取${num}个随机助力码`)
+  console.log(`\n==================脚本执行- 北京时间(UTC+8)：${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}\n\n`)
 
-    let {data} = await axios.get(`https://api.sharecode.ga/api/${db}/${num}`, {timeout: 10000})
-    console.log(JSON.stringify(data, null, '  '))
+  let cars: string[] = ['bean', 'farm', 'health', 'jxfactory', 'pet'];
+  let db: string = cars[getRandomNumberByRange(0, 5)];
+  let num: number = getRandomNumberByRange(5, 20);
+  console.log(`本次随机选择${db}获取${num}个随机助力码`);
+  await car(db, num);
 
-    if (data.code === 200) {
-      if (data.data.length === num) {
-        console.log(`成功获取${num}个`)
-      }
-    }
-  } catch (e) {
-    console.log('测试失败，请重试，或更换设备dns。')
-    await notify.sendNotify("API访问失败！\n请检查网络或更换DNS","手动测试：\nhttps://api.sharecode.ga/api/bean/10","","你好，世界！")
-  }
-
-  try{
-    let {data} = await axios.get(`https://api.sharecode.ga/api/version`, {timeout: 10000})
-    console.log(`当前版本：${data}`)
-  }catch (e) {
-    console.log('测试失败，请重试，或更换设备dns。')
-    await notify.sendNotify("API访问失败！\n请检查网络或更换DNS","手动测试：\nhttps://api.sharecode.ga/api/version","","你好，世界！")
+  let times = getRandomNumberByRange(3, 6);
+  console.log(`开始测试${times}次上报`);
+  for (let i = 0; i < times; i++) {
+    console.log(`第${i + 1}次:`, await runTimes())
+    await wait(Math.floor(getRandomNumberByRange(1, 5)) * 1000)
   }
 })()
 
 function getRandomNumberByRange(start: number, end: number): number {
-  return Math.floor(Math.random() * (end - start) + start)
+  return Math.floor(Math.random() * (end - start) + start);
+}
+
+async function car(db: string, num: number) {
+  try {
+    let {data} = await axios.get(`https://api.sharecode.ga/api/${db}/${num}`, {
+      timeout: 3000
+    });
+    console.log('获取助力池成功')
+    console.log(data)
+  } catch (e: any) {
+    console.log(`获取助力池失败: ${e.response.status} ${e.response.statusText}`);
+  }
+}
+
+async function runTimes() {
+  try {
+    let {data} = await axios.get("https://api.sharecode.ga/api/runTimes?activityId=bean&sharecode=123", {timeout: 3000})
+    return '成功'
+  } catch (e: any) {
+    return `${e.response.status} ${e.response.statusText}`
+  }
 }
