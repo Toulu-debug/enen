@@ -85,7 +85,7 @@ async function jdFruit() {
             runTimesErr += `${$.UserName}:${e}\n`
           }
         }
-        await $.wait(3000)
+        await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
       }
 
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
@@ -139,7 +139,6 @@ function runTimes() {
       if (err) {
         console.log('上报失败', err)
         reject(err)
-        // runTimesErr += `${$.UserName}:${err}\n`
       } else {
         if (data === '1' || data === '0') {
           console.log('上报成功')

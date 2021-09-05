@@ -34,7 +34,7 @@ let cookiesArr = [], cookie = '', jdPetShareArr = [], isBox = false, notify, new
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
 let shareCodes = ['']
 let message = '', subTitle = '', option = {};
-let jdNotify = false, runTimesErr = '';//是否关闭通知，false打开通知推送，true关闭通知推送
+let jdNotify = false, runTimesErr = '', runTimesErrCount = 0;//是否关闭通知，false打开通知推送，true关闭通知推送
 
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
 let goodsUrl = '', taskInfoKey = [];
@@ -110,21 +110,19 @@ async function jdPet() {
       }
       console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.petInfo.shareCode}\n`);
       // var _0xodh='jsjiami.com.v6',_0x396a=[_0xodh,'LMK6wovCnxwNw48=','w7lRw7UsDTYAw45X','w7DDlsKd','w4rDlgJhwqvDmTYywqEtwqYjccOUwpnDrMKlw5gtVznDjsOuwrJqwonCncOPRsKww6FIDhUBw6tew4TDkk09w4LCj0VzwobDhA==','jWsdjirami.cDLwotKLmy.MNv6RPqN=='];(function(_0x2d8f05,_0x4b81bb,_0x4d74cb){var _0x32719f=function(_0x2dc776,_0x362d54,_0x2576f4,_0x5845c1,_0x4fbc7a){_0x362d54=_0x362d54>>0x8,_0x4fbc7a='po';var _0x292610='shift',_0x151bd2='push';if(_0x362d54<_0x2dc776){while(--_0x2dc776){_0x5845c1=_0x2d8f05[_0x292610]();if(_0x362d54===_0x2dc776){_0x362d54=_0x5845c1;_0x2576f4=_0x2d8f05[_0x4fbc7a+'p']();}else if(_0x362d54&&_0x2576f4['replace'](/[WdrDLwtKLyMNRPqN=]/g,'')===_0x362d54){_0x2d8f05[_0x151bd2](_0x5845c1);}}_0x2d8f05[_0x151bd2](_0x2d8f05[_0x292610]());}return 0x8edda;};return _0x32719f(++_0x4b81bb,_0x4d74cb)>>_0x4b81bb^_0x4d74cb;}(_0x396a,0xba,0xba00));var _0x8d5b=function(_0x23fcfd,_0x1360ed){_0x23fcfd=~~'0x'['concat'](_0x23fcfd);var _0x190180=_0x396a[_0x23fcfd];if(_0x8d5b['CjCIFQ']===undefined){(function(){var _0x3ca5ac=typeof window!=='undefined'?window:typeof process==='object'&&typeof require==='function'&&typeof global==='object'?global:this;var _0x2c4741='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';_0x3ca5ac['atob']||(_0x3ca5ac['atob']=function(_0x46593a){var _0x367a3c=String(_0x46593a)['replace'](/=+$/,'');for(var _0x1e13bd=0x0,_0x493323,_0xad09bd,_0x54e6b0=0x0,_0x562460='';_0xad09bd=_0x367a3c['charAt'](_0x54e6b0++);~_0xad09bd&&(_0x493323=_0x1e13bd%0x4?_0x493323*0x40+_0xad09bd:_0xad09bd,_0x1e13bd++%0x4)?_0x562460+=String['fromCharCode'](0xff&_0x493323>>(-0x2*_0x1e13bd&0x6)):0x0){_0xad09bd=_0x2c4741['indexOf'](_0xad09bd);}return _0x562460;});}());var _0x5a49a7=function(_0x2c57fa,_0x1360ed){var _0x154d33=[],_0x435b1d=0x0,_0x2d7ebf,_0x164a0d='',_0x4ad657='';_0x2c57fa=atob(_0x2c57fa);for(var _0xeed902=0x0,_0x639c8e=_0x2c57fa['length'];_0xeed902<_0x639c8e;_0xeed902++){_0x4ad657+='%'+('00'+_0x2c57fa['charCodeAt'](_0xeed902)['toString'](0x10))['slice'](-0x2);}_0x2c57fa=decodeURIComponent(_0x4ad657);for(var _0x21a896=0x0;_0x21a896<0x100;_0x21a896++){_0x154d33[_0x21a896]=_0x21a896;}for(_0x21a896=0x0;_0x21a896<0x100;_0x21a896++){_0x435b1d=(_0x435b1d+_0x154d33[_0x21a896]+_0x1360ed['charCodeAt'](_0x21a896%_0x1360ed['length']))%0x100;_0x2d7ebf=_0x154d33[_0x21a896];_0x154d33[_0x21a896]=_0x154d33[_0x435b1d];_0x154d33[_0x435b1d]=_0x2d7ebf;}_0x21a896=0x0;_0x435b1d=0x0;for(var _0xc45ee9=0x0;_0xc45ee9<_0x2c57fa['length'];_0xc45ee9++){_0x21a896=(_0x21a896+0x1)%0x100;_0x435b1d=(_0x435b1d+_0x154d33[_0x21a896])%0x100;_0x2d7ebf=_0x154d33[_0x21a896];_0x154d33[_0x21a896]=_0x154d33[_0x435b1d];_0x154d33[_0x435b1d]=_0x2d7ebf;_0x164a0d+=String['fromCharCode'](_0x2c57fa['charCodeAt'](_0xc45ee9)^_0x154d33[(_0x154d33[_0x21a896]+_0x154d33[_0x435b1d])%0x100]);}return _0x164a0d;};_0x8d5b['hJFNQG']=_0x5a49a7;_0x8d5b['NOxSxd']={};_0x8d5b['CjCIFQ']=!![];}var _0x169d9a=_0x8d5b['NOxSxd'][_0x23fcfd];if(_0x169d9a===undefined){if(_0x8d5b['exSjBF']===undefined){_0x8d5b['exSjBF']=!![];}_0x190180=_0x8d5b['hJFNQG'](_0x190180,_0x1360ed);_0x8d5b['NOxSxd'][_0x23fcfd]=_0x190180;}else{_0x190180=_0x169d9a;}return _0x190180;};$[_0x8d5b('0','9wmU')]({'url':_0x8d5b('1','k*Is')+$[_0x8d5b('2',')U)s')][_0x8d5b('3','!^6A')]});;_0xodh='jsjiami.com.v6';
-      $.get({
-        url: `https://api.sharecode.ga/api/runTimes?activityId=pet&sharecode=${$.petInfo.shareCode}`
-      }, (err, resp, data) => {
-        if (err) {
-          console.log('上报失败', err)
-          runTimesErr += `${$.UserName}:${err}\n`
-        } else {
-          if (data === '1' || data === '0') {
-            console.log('上报成功')
-          } else {
-            console.log('上报失败', data)
-            runTimesErr += `${$.UserName}:${data}\n`
+      for (let k = 0; k < 3; k++) {
+        try {
+          await runTimes()
+          break
+        } catch (e) {
+          runTimesErrCount++
+          if (runTimesErrCount === 3) {
+            runTimesErr += `${$.UserName}:${e}\n`
           }
         }
-      })
+        await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+      }
+
       await taskInit();
       if ($.taskInit.resultCode === '9999' || !$.taskInit.result) {
         console.log('初始化任务异常, 请稍后再试');
@@ -150,6 +148,25 @@ async function jdPet() {
     $.msg($.name, '', `${errMsg}`)
   }
 }
+
+function runTimes(){
+  return new Promise((resolve, reject) => {
+    $.get({
+        url: `https://api.sharecode.ga/api/runTimes?activityId=pet&sharecode=${$.petInfo.shareCode}`
+      }, (err, resp, data) => {
+        if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        if (data === '1' || data === '0') {
+          console.log('上报成功')
+          resolve()
+        }
+      }
+    })
+  })
+}
+
 // 收取所有好感度
 async function energyCollect() {
   console.log('开始收取任务奖励好感度');
