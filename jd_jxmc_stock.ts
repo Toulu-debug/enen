@@ -72,7 +72,7 @@ let cookie: string = '', res: any = '', UserName: string;
     }
   }
   if (message) {
-    await notify.sendNotify('京喜牧场兑换', message, '', '\n\n你好，世界！')
+    await notify.sendNotify('京喜牧场兑换', message)
   }
   console.log(exist)
 })()
