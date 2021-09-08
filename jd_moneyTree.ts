@@ -166,7 +166,6 @@ let cookie: string = '', res: any = '', UserName: string, index: number;
       }
       await wait(3000)
     }
-    break
   }
 })()
 
