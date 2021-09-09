@@ -176,6 +176,14 @@ function getQueryString(url: string, name: string) {
   return '';
 }
 
+function h5st(url: string, stk: string, params: object) {
+  for (const [key, val] of Object.entries(params)) {
+    url += `&${key}=${val}`
+  }
+  url += '&h5st=' + decrypt(stk, url)
+  return url
+}
+
 function decrypt(stk: string, url: string) {
   const timestamp = (format(new Date(), 'yyyyMMddhhmmssSSS'))
   let hash1: string;
@@ -227,6 +235,7 @@ export {
   getRandomNumberByRange,
   jd_joy_invokeKey,
   requestAlgo,
+  h5st,
   decrypt,
   getJxToken
 }
