@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import {Md5} from "ts-md5";
 
 const CryptoJS = require('crypto-js')
+const util = require('util')
 dotenv.config()
 let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
 
@@ -113,13 +114,7 @@ function requireConfig() {
   })
 }
 
-function wait(t: number) {
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      resolve()
-    }, t)
-  })
-}
+const wait = util.promisify(setTimeout)
 
 async function requestAlgo() {
   fingerprint = await generateFp();
@@ -176,14 +171,6 @@ function getQueryString(url: string, name: string) {
   return '';
 }
 
-function h5st(url: string, stk: string, params: object) {
-  for (const [key, val] of Object.entries(params)) {
-    url += `&${key}=${val}`
-  }
-  url += '&h5st=' + decrypt(stk, url)
-  return url
-}
-
 function decrypt(stk: string, url: string) {
   const timestamp = (format(new Date(), 'yyyyMMddhhmmssSSS'))
   let hash1: string;
@@ -202,6 +189,14 @@ function decrypt(stk: string, url: string) {
   })
   const hash2 = CryptoJS.HmacSHA256(st, hash1.toString()).toString(CryptoJS.enc.Hex);
   return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fingerprint.toString()), "".concat(appId.toString()), "".concat(token), "".concat(hash2)].join(";"))
+}
+
+function h5st(url: string, stk: string, params: object) {
+  for (const [key, val] of Object.entries(params)) {
+    url += `&${key}=${val}`
+  }
+  url += '&h5st=' + decrypt(stk, url)
+  return url
 }
 
 function getJxToken(cookie: string) {
@@ -235,7 +230,7 @@ export {
   getRandomNumberByRange,
   jd_joy_invokeKey,
   requestAlgo,
-  h5st,
   decrypt,
-  getJxToken
+  getJxToken,
+  h5st
 }
