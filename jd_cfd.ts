@@ -11,18 +11,13 @@
  */
 
 import axios from 'axios';
-import USER_AGENT, {requireConfig, TotalBean, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, getJxToken} from './TS_USER_AGENTS';
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, getJxToken} from './TS_USER_AGENTS';
 import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
+import {rejects} from "assert";
 
-const notify = require('./sendNotify')
 dotenv.config()
-let cookie: string = '', res: any = '', shareCodes: string[] = [], isCollector: Boolean = false;
-
-let HELP_HW: string = process.env.HELP_HW ? process.env.HELP_HW : "true";
-console.log('帮助HelloWorld:', HELP_HW)
-let HELP_POOL: string = process.env.HELP_POOL ? process.env.HELP_POOL : "true";
-console.log('帮助助力池:', HELP_POOL)
+let cookie: string = '', res: any = '', shareCodes: string[] = [], isCollector: Boolean = false, USER_AGENT = 'jdpingou;android;4.13.0;10;b21fede89fb4bc77;network/wifi;model/M2004J7AC;appBuild/17690;partner/xiaomi;;session/704;aid/b21fede89fb4bc77;oaid/dcb5f3e835497cc3;pap/JA2019_3111789;brand/Xiaomi;eu/8313831616035373;fv/7333732616631643;Mozilla/5.0 (Linux; Android 10; M2004J7AC Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.120 Mobile Safari/537.36', token: any = {};
 
 interface Params {
   strBuildIndex?: string,
@@ -60,6 +55,7 @@ interface Params {
   strPhoneID?: string,
   strPgUUNum?: string,
   showAreaTaskFlag?: number,
+  strVersion?: string,
 }
 
 let UserName: string, index: number;
@@ -70,21 +66,15 @@ let UserName: string, index: number;
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
-    let {isLogin, nickName}: any = await TotalBean(cookie)
-    if (!isLogin) {
-      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
-      continue
-    }
-    console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+    console.log(`\n开始【京东账号${index}】${UserName}\n`);
 
+    token = getJxToken(cookie)
     try {
       await makeShareCodes();
     } catch (e) {
       console.log(e)
     }
-    let token: any = getJxToken(cookie)
 
-    /*
     // 离线
     res = await api('user/QueryUserInfo',
       '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
@@ -98,6 +88,16 @@ let UserName: string, index: number;
       })
     console.log('离线收益:', res.Business.ddwCoin)
     await wait(2000)
+
+    // 任务⬇️
+    console.log('任务列表开始')
+    for (let j = 0; j < 30; j++) {
+      if (await task() === 0) {
+        break
+      }
+      await wait(3000)
+    }
+    console.log('任务列表结束')
 
     // 升级建筑
     while (1) {
@@ -139,7 +139,6 @@ let UserName: string, index: number;
       }
       await wait(3000)
     }
-    */
 
     // 珍珠
     /*
@@ -218,10 +217,14 @@ let UserName: string, index: number;
     }
     await wait(2000)
 
-    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {
+    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strVersion,strZone', {
       ddwTaskId: '',
       strShareId: '',
-      strMarkList: 'undefined'
+      strMarkList: 'guider_step,collect_coin_auth,guider_medal,guider_over_flag,build_food_full,build_sea_full,build_shop_full,build_fun_full,medal_guider_show,guide_guider_show,guide_receive_vistor,daily_task,guider_daily_task,cfd_has_show_selef_point',
+      strPgUUNum: token.strPgUUNum,
+      strPgtimestamp: token.strPgtimestamp,
+      strPhoneID: token.strPhoneID,
+      strVersion: '1.0.1'
     })
     await wait(5000)
     if (res.StoryInfo.StoryList) {
@@ -355,8 +358,8 @@ let UserName: string, index: number;
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     await wait(2000)
     for (let t of tasks.Data.TaskList) {
-      if ((t.dwOrderId === 1 || t.dwOrderId === 2) && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '热气球接待20位游客') {
-        console.log('开始任务:', t.strTaskName)
+      if ([1, 2].indexOf(t.dwOrderId) > -1 && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '热气球接待20位游客') {
+        console.log('开始任务➡️:', t.strTaskName)
         res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
         await wait(t.dwLookTime * 1000)
         if (res.ret === 0) {
@@ -410,19 +413,6 @@ let UserName: string, index: number;
     }
     await wait(2000)
 
-    // 任务⬇️
-    console.log('开始任务列表');
-    while (1) {
-      try {
-        await wait(5000)
-        await task();
-      } catch (e) {
-        console.log(e)
-        break
-      }
-      console.log('wait...')
-    }
-    console.log('结束任务列表')
 
     for (let b of ['fun', 'shop', 'sea', 'food']) {
       res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
@@ -432,7 +422,6 @@ let UserName: string, index: number;
   }
 
   // 获取随机助力码
-  /*
   try {
     let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20', {timeout: 10000})
     console.log('获取到20个随机助力码:', data.data)
@@ -453,81 +442,77 @@ let UserName: string, index: number;
       await wait(3000)
     }
   }
-
-   */
 })()
 
 function api(fn: string, stk: string, params: Params = {}) {
-  let url: string = '';
-  if (['GetUserTaskStatusList', 'Award', 'DoTask'].indexOf(fn) > -1)
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
-  else
-    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
-  url = h5st(url, stk, params)
-
-  return new Promise(async resolve => {
-    try {
-      let {data} = await axios.get(url, {
-        headers: {
-          'Host': 'm.jingxi.com',
-          'Referer': 'https://st.jingxi.com/',
-          'User-Agent': USER_AGENT,
-          'Cookie': cookie
-        }
-      })
-      resolve(data)
-    } catch (e) {
-      resolve(e)
-    }
+  return new Promise((resolve, reject) => {
+    let url: string = '';
+    if (['GetUserTaskStatusList', 'Award', 'DoTask'].indexOf(fn) > -1)
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&showAreaTaskFlag=0&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+    else
+      url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+    url = h5st(url, stk, params, 10032)
+    axios.get(url, {
+      headers: {
+        'Host': 'm.jingxi.com',
+        'Referer': 'https://st.jingxi.com/',
+        'User-Agent': USER_AGENT,
+        'Cookie': cookie
+      }
+    }).then(res => {
+      resolve(res.data)
+    }).catch(e => {
+      reject(e)
+    })
   })
 }
 
-function task() {
-  return new Promise(async (resolve, reject) => {
-    res = await api('GetUserTaskStatusList', '_cfd_t,bizCode,dwEnv,ptag,showAreaTaskFlag,source,strZone,taskId', {taskId: 0, showAreaTaskFlag: 0});
-    await wait(2000)
-    for (let t of res.data.userTaskStatusList) {
-      if (t.dateType === 2) {
-        // 每日任务
-        if (t.awardStatus === 2 && t.completedTimes === t.targetTimes) {
-          console.log(1, t.taskName)
-          res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId})
-          if (res.ret === 0) {
-            console.log(`${t.taskName}领奖成功:`, res.data.prizeInfo)
-            resolve(0)
-          } else {
-            console.log('领奖失败')
-            reject(res)
-          }
-        } else if (t.awardStatus === 2 && t.completedTimes < t.targetTimes && ([1, 2, 3, 4, 5].includes(t.orderId))) {
-          console.log('做任务:', t.taskId, t.taskName, t.completedTimes, t.targetTimes)
-          res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {
-            taskId: t.taskId,
-            configExtra: ''
-          })
-          await wait(5000)
-          if (res.ret === 0) {
-            console.log('任务完成')
-            resolve(0)
-          } else {
-            console.log('任务失败')
-            reject(res)
-          }
-        }
+async function task() {
+  console.log('刷新任务列表')
+  res = await api('GetUserTaskStatusList', '_cfd_t,bizCode,dwEnv,ptag,showAreaTaskFlag,source,strZone,taskId', {taskId: 0, showAreaTaskFlag: 0});
+  await wait(2000)
+  for (let t of res.data.userTaskStatusList) {
+    if (t.awardStatus === 2 && t.completedTimes === t.targetTimes) {
+      console.log('可领奖:', t.taskName)
+      res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId})
+      await wait(2000)
+      if (res.ret === 0) {
+        res = JSON.parse(res.data.prizeInfo)
+        console.log(`领奖成功:`, res.ddwCoin, res.ddwMoney)
+        return 1
+      } else {
+        console.log('领奖失败:', res)
+        return 0
       }
     }
-    reject('end')
-  })
+    if (t.dateType === 2 && t.awardStatus === 2 && t.completedTimes < t.targetTimes && t.taskCaller === 1) {
+      console.log('做任务:', t.taskId, t.taskName, t.completedTimes, t.targetTimes)
+      res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId, configExtra: ''})
+      await wait(5000)
+      if (res.ret === 0) {
+        console.log('任务完成')
+        return 1
+      } else {
+        console.log('任务失败')
+        return 0
+      }
+    }
+  }
+  return 0
 }
 
 function makeShareCodes() {
   return new Promise<void>(async (resolve, reject) => {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
-    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strShareId,strZone', {
+    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strVersion,strZone', {
       ddwTaskId: '',
       strShareId: '',
-      strMarkList: 'undefined'
+      strMarkList: 'undefined',
+      strPgUUNum: token.strPgUUNum,
+      strPgtimestamp: token.strPgtimestamp,
+      strPhoneID: token.strPhoneID,
+      strVersion: '1.0.1'
     })
     console.log('助力码:', res.strMyShareId)
     shareCodes.push(res.strMyShareId)

@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, requestAlgo, decrypt} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, requestAlgo, decrypt, h5st} from './TS_USER_AGENTS'
 import * as dotenv from 'dotenv'
 
 const crypto = require('crypto')
@@ -97,19 +97,18 @@ function speedUp(stk: string, dwType?: number) {
       url = `https://m.jingxi.com/jxbfd/story/queryshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=_cfd_t%2CbizCode%2CdwEnv%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2`
     if (stk === '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone')
       url = `https://m.jingxi.com/jxbfd/story/pickshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&dwType=${dwType}&_stk=_cfd_t%2CbizCode%2CdwEnv%2CdwType%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2`
-    url += '&h5st=' + decrypt(stk, url)
-    try {
-      let {data} = await axios.get(url, {
-        headers: {
-          'Host': 'm.jingxi.com',
-          'Referer': 'https://st.jingxi.com/',
-          'User-Agent': USER_AGENT,
-          'Cookie': cookie
-        }
-      })
-      resolve(data)
-    } catch (e) {
-      reject(502)
-    }
+    url = h5st(url, stk, {})
+    axios.get(url, {
+      headers: {
+        'Host': 'm.jingxi.com',
+        'Referer': 'https://st.jingxi.com/',
+        'User-Agent': USER_AGENT,
+        'Cookie': cookie
+      }
+    }).then(res => {
+      resolve(res.data)
+    }).catch(e => {
+      reject(e.data)
+    })
   })
 }

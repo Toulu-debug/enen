@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios';
-import {requireConfig, requestAlgo, decrypt, getJxToken, wait, getRandomNumberByRange} from './TS_USER_AGENTS';
+import {requireConfig, requestAlgo, decrypt, getJxToken, wait, getRandomNumberByRange, h5st} from './TS_USER_AGENTS';
 import {readFileSync, writeFileSync, accessSync} from "fs";
 
 const notify = require('./sendNotify')
@@ -89,14 +89,8 @@ interface Params {
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async (resolve, reject) => {
     let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
-    if (Object.keys(params).length !== 0) {
-      let key: (keyof Params)
-      for (key in params) {
-        if (params.hasOwnProperty(key))
-          url += `&${key}=${params[key]}`
-      }
-    }
-    url += '&h5st=' + decrypt(stk, url)
+
+    url = h5st(url, stk, {})
     try {
       let {data} = await axios.get(url, {
         headers: {
