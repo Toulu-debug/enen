@@ -58,6 +58,7 @@ let randomCount = $.isNode() ? 20 : 5;
       goodsUrl = '';
       taskInfoKey = [];
       option = {};
+      runTimesErrCount = 0;
       await shareCodesFormat();
       await jdPet();
     }
@@ -152,7 +153,7 @@ async function jdPet() {
 function runTimes(){
   return new Promise((resolve, reject) => {
     $.get({
-        url: `https://api.sharecode.ga/api/runTimes?activityId=pet&sharecode=${$.petInfo.shareCode}`
+        url: `https://api.jdsharecode.xyz/api/runTimes?activityId=pet&sharecode=${$.petInfo.shareCode}`
       }, (err, resp, data) => {
         if (err) {
         console.log('上报失败', err)
@@ -473,7 +474,7 @@ async function showMsg() {
 }
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `https://api.sharecode.ga/api/pet/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
+    $.get({url: `https://api.jdsharecode.xyz/api/pet/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)

@@ -82,8 +82,7 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
       if (await getTask() === 0) {
         break
       }
-      console.log('wait...')
-      await wait(2000)
+      await wait(3000)
     }
     console.log('任务列表结束')
 
@@ -108,15 +107,20 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
           food -= 10
           console.log('剩余草:', res.data.newnum)
         } else if (res.ret === 2020) {
-          if (res.data.maintaskId === 'pause') {
+          if (res.data.maintaskId === 'pause' || res.data.maintaskId === 'E-1') {
             console.log('收🥚')
             res = await api('operservice/GetSelfResult', 'channel,itemid,sceneid,type', {petid: petid, type: '11'})
             if (res.ret === 0) {
               console.log('收🥚成功:', res.data.newnum)
+            } else {
+              console.log('收🥚失败:', res)
             }
           }
+        } else if (res.ret === 2005) {
+          console.log('今天吃撑了')
+          break
         } else {
-          console.log(res)
+          console.log('Feed未知错误:', res)
           break
         }
         await wait(6000)
@@ -161,7 +165,7 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
   }
 
   try {
-    let {data} = await axios.get('https://api.sharecode.ga/api/jxmc/30', {timeout: 10000})
+    let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
     console.log('获取到30个随机助力码:', data.data)
     shareCodes = [...shareCodes, ...data.data]
   } catch (e) {
@@ -175,6 +179,7 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
         console.log(`账号${i + 1}去助力${shareCodes[j]}`)
         res = await api('operservice/EnrollFriend', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: shareCodes[j]})
         if (res.ret === 0) {
+          console.log(res)
           console.log('助力成功，获得:', res.data.addcoins)
         } else {
           console.log('助力失败：', res)
@@ -257,7 +262,7 @@ function makeShareCodes(code: string) {
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    await axios.get(`https://api.sharecode.ga/api/autoInsert?db=jxmc&code=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert?db=jxmc&code=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
       .then(res => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')

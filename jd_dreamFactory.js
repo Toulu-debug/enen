@@ -1647,7 +1647,7 @@ let notifyLevel = $.isNode() ? process.env.JXGC_NOTIFY_LEVEL || 2 : 2;
 const randomCount = $.isNode() ? 20 : 5;
 let tuanActiveId = ``, hasSend = false;
 const jxOpenUrl = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://wqsd.jd.com/pingou/dream_factory/index.html%22%20%7D`;
-let cookiesArr = [], cookie = '', message = '', allMessage = '', runTimesErr = '';
+let cookiesArr = [], cookie = '', message = '', allMessage = '', runTimesErr = '', runTimesErrCount = 0;
 const inviteCodes = [''];
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 $.tuanIds = [];
@@ -1694,6 +1694,7 @@ if ($.isNode()) {
         }
         continue
       }
+      runTimesErrCount = 0
       await jdDreamFactory()
     }
   }
@@ -2317,7 +2318,7 @@ function userInfo() {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://api.sharecode.ga/api/runTimes?activityId=jxfactory&sharecode=${$.encryptPin}`
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=jxfactory&sharecode=${$.encryptPin}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)
@@ -3008,7 +3009,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `https://api.sharecode.ga/api/jxfactory/${randomCount}`,
+      url: `https://api.jdsharecode.xyz/api/jxfactory/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {

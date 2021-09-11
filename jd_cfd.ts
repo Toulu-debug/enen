@@ -377,7 +377,7 @@ let UserName: string, index: number;
         res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
         await wait(1000)
         if (res.ret === 0) {
-          console.log(`领奖成功:`, JSON.parse(res.data.prizeInfo.trim()).ddwCoin)
+          console.log(`领奖成功:`, res)
         } else {
           console.log('领奖失败', res)
         }
@@ -423,7 +423,7 @@ let UserName: string, index: number;
 
   // 获取随机助力码
   try {
-    let {data} = await axios.get('https://api.sharecode.ga/api/jxcfd/20', {timeout: 10000})
+    let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxcfd/20', {timeout: 10000})
     console.log('获取到20个随机助力码:', data.data)
     shareCodes = [...shareCodes, ...data.data]
   } catch (e) {
@@ -435,8 +435,12 @@ let UserName: string, index: number;
       cookie = cookiesArr[i]
       console.log(`账号${i + 1}去助力:`, shareCodes[j])
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
-      console.log('助力:', res)
-      if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
+      if (res.iRet === 0) {
+        console.log('助力成功:', res.Data.GuestPrizeInfo.strPrizeName)
+      } else if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
+        break
+      } else {
+        console.log('助力未知错误：', res)
         break
       }
       await wait(3000)
@@ -518,7 +522,7 @@ function makeShareCodes() {
     shareCodes.push(res.strMyShareId)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    axios.get(`https://api.sharecode.ga/api/autoInsert?db=jxcfd&code=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    axios.get(`https://api.jdsharecode.xyz/api/autoInsert?db=jxcfd&code=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
       .then(res => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')

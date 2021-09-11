@@ -1,5 +1,5 @@
 import axios from "axios";
-import USER_AGENT, {decrypt} from "../TS_USER_AGENTS";
+import USER_AGENT, {h5st} from "../TS_USER_AGENTS";
 
 async function bean(cookie: string) {
   let {data} = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${escape(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
@@ -96,7 +96,7 @@ async function sgmh(cookie: string) {
 
 async function jxfactory(cookie: string) {
   let url: string = `https://m.jingxi.com/newtasksys/newtasksys_front/GetUserTaskStatusList?source=dreamfactory&bizCode=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent('_time,bizCode,source')}&_ste=1&_=${Date.now()}&sceneval=2`
-  url += '&h5st=' + decrypt('_time,bizCode,source', url)
+  url = h5st(url, '_time,bizCode,source', {}, 10001)
   let {data} = await axios.get(url, {
     headers: {
       'Referer': 'https://actst.jingxi.com/pingou/dream_factory/index.html',
