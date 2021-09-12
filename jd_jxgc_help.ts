@@ -1,9 +1,6 @@
-/**
- * 这是一个只会助力的脚本，因为没打工仔了。
- * 先内部，再助力池。
- * cron: 0 * * * *
- */
-
+/*
+cron "30 * * * *"
+*/
 import axios from 'axios';
 import {requireConfig, wait, requestAlgo, decrypt, h5st} from './TS_USER_AGENTS';
 import {jxfactory} from "./utils/shareCodesTool";
