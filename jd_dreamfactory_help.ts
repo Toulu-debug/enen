@@ -1,7 +1,7 @@
 /**
  * 这是一个只会助力的脚本，因为没打工仔了。
  * 先内部，再助力池。
- * cron: 0,30 21-23 * * *
+ * cron: 0 * * * *
  */
 
 import axios from 'axios';
@@ -67,7 +67,7 @@ interface Params {
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async (resolve, reject) => {
     let url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
-    url = h5st(url, stk, params)
+    url = h5st(url, stk, params, 10001)
     try {
       let {data} = await axios.get(url, {
         headers: {
