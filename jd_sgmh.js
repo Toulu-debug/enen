@@ -69,8 +69,13 @@ const JD_API_HOST = `https://api.m.jd.com/client.action`;
     }
   }
 })()
-  .catch((e) => $.logErr(e))
-  .finally(() => $.done())
+  .catch((e) => {
+    $.log("", `❌ ${$.name}, 失败! 原因: ${e}!`, "");
+  })
+  .finally(() => {
+    $.done();
+  });
+
 //获取活动信息
 function interact_template_getHomeData(timeout = 0) {
   return new Promise((resolve) => {

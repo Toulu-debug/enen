@@ -71,6 +71,12 @@ const JD_API_HOST = "https://api.m.jd.com/client.action";
     await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
   }
 })()
+  .catch((e) => {
+    $.log("", `❌ ${$.name}, 失败! 原因: ${e}!`, "");
+  })
+  .finally(() => {
+    $.done();
+  });
 
 async function main() {
   try {
@@ -183,6 +189,24 @@ function getTaskDetail(taskId = '') {
           resolve()
         }
       })
+  })
+}
+
+function runTimes() {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=health&sharecode=${$.code}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        if (data === '1' || data === '0') {
+          console.log('上报成功')
+          resolve()
+        }
+      }
+    })
   })
 }
 
