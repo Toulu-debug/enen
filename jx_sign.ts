@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios';
-import {requireConfig, TotalBean, wait, requestAlgo, decrypt} from './TS_USER_AGENTS';
+import {requireConfig, TotalBean, wait, requestAlgo, decrypt, h5st} from './TS_USER_AGENTS';
 
 let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = require('./sendNotify'), UserName: string, index: number;
 
@@ -58,14 +58,7 @@ interface Params {
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async (resolve, reject) => {
     let url = `https://m.jingxi.com/fanxiantask/signhb/${fn}?_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBKB&g_ty=ls`
-    if (Object.keys(params).length !== 0) {
-      let key: (keyof Params)
-      for (key in params) {
-        if (params.hasOwnProperty(key))
-          url += `&${key}=${params[key]}`
-      }
-    }
-    url += '&h5st=' + decrypt(stk, url)
+    url = h5st(url, stk, params, 10038)
     if (fn.match(/(dotask|bxdraw)/)) {
       url = fn
     }
