@@ -56,6 +56,7 @@ interface Params {
   strPgUUNum?: string,
   showAreaTaskFlag?: number,
   strVersion?: string,
+  strIndex?: string
 }
 
 let UserName: string, index: number;
@@ -88,6 +89,17 @@ let UserName: string, index: number;
       })
     console.log('离线收益:', res.Business.ddwCoin)
     await wait(2000)
+
+    // 寻宝
+    for (let xb of res.XbStatus.XBDetail) {
+      res = await api('user/TreasureHunt', '_cfd_t,bizCode,dwEnv,ptag,source,strIndex,strZone', {strIndex: xb.strIndex})
+      if (res.iRet === 0) {
+        console.log('发现宝物:', res.AwardInfo.ddwValue)
+      } else {
+        console.log('寻宝失败:', res)
+      }
+      await wait(2000)
+    }
 
     // 任务⬇️
     console.log('任务列表开始')
@@ -360,7 +372,7 @@ let UserName: string, index: number;
     for (let t of tasks.Data.TaskList) {
       if ([1, 2].indexOf(t.dwOrderId) > -1 && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '热气球接待20位游客') {
         console.log('开始任务➡️:', t.strTaskName)
-        res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
+        res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId, configExtra: ''})
         await wait(t.dwLookTime * 1000)
         if (res.ret === 0) {
           console.log('任务完成')
@@ -377,7 +389,7 @@ let UserName: string, index: number;
         res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
         await wait(1000)
         if (res.ret === 0) {
-          console.log(`领奖成功:`, res)
+          console.log(`领奖成功:`, JSON.parse(res.data.prizeInfo.trim()).ddwCoin)
         } else {
           console.log('领奖失败', res)
         }
@@ -413,7 +425,6 @@ let UserName: string, index: number;
     }
     await wait(2000)
 
-
     for (let b of ['fun', 'shop', 'sea', 'food']) {
       res = await api('user/CollectCoin', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b, dwType: '1'})
       console.log(`${b}收金币:`, res.ddwCoin)
@@ -439,9 +450,8 @@ let UserName: string, index: number;
         console.log('助力成功:', res.Data.GuestPrizeInfo.strPrizeName)
       } else if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
         break
-      } else {
-        console.log('助力未知错误：', res)
-        break
+      } else if (res.iRet === 2191) {
+        console.log('已助力')
       }
       await wait(3000)
     }
@@ -451,8 +461,8 @@ let UserName: string, index: number;
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise((resolve, reject) => {
     let url: string = '';
-    if (['GetUserTaskStatusList', 'Award', 'DoTask'].indexOf(fn) > -1)
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&showAreaTaskFlag=0&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+    if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn))
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfddch&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&showAreaTaskFlag=0&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     else
       url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
     url = h5st(url, stk, params, 10032)

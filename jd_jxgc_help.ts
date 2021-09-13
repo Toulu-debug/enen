@@ -1,12 +1,17 @@
 /**
-* cron: 30 * * * *
-*/
+ * cron: 5 * * * *
+ * 是否帮助HW.TS，默认true
+ * export HELP_HW=false
+ */
+
 import axios from 'axios';
-import {requireConfig, wait, requestAlgo, decrypt, h5st} from './TS_USER_AGENTS';
+import {requireConfig, wait, requestAlgo, h5st} from './TS_USER_AGENTS';
 import {jxfactory} from "./utils/shareCodesTool";
 
 let cookie: string = '', res: any = '', UserName: string, index: number;
-let shareCodes: string[] = [], shareCodesInternal: string[] = [];
+let shareCodes: string[] = [], shareCodesInternal: string[] = [], empCookie: string[] = [], HELP_HW: string = process.env.HELP_HW ?? "true";
+let HW_CODE = ['INcGtFWIUwvLFFvpQtKFCQ==', 'AZV37CNsgm_Q9Xid7tt-eA==', 'K6AGuw2dq_U2kEpg4mTmHQ==', 'c3anbYUBmLe9Qh1TIM4dEg==', 'zfzxrqaM7n3s4FhUZQmA8Q=='];
+console.log('帮助HelloWorld:', HELP_HW)
 
 interface Params {
   name?: string,
@@ -28,11 +33,15 @@ interface Params {
 
     res = await api('friend/QueryFriendList', '_time,zone')
     console.log('收到助力:', res.data.hireListToday.length, '/', res.data.hireNumMax)
+    if (res.data.assistListToday.length !== 3) {
+      // 只要有剩余助力的
+      empCookie.push(cookie)
+    }
   }
 
-  console.log('内部助力码:', shareCodesInternal)
+  console.log('\n内部助力码:', shareCodesInternal, '\n')
 
-  for (let emp of cookiesArr) {
+  for (let emp of empCookie) {
     cookie = emp
     let empName: string = decodeURIComponent(emp.match(/pt_pin=([^;]*)/)![1])
     let sharecode = await jxfactory(emp)
@@ -85,8 +94,12 @@ async function getShareCodes() {
   try {
     let {data} = await axios.get("https://api.jdsharecode.xyz/api/jxfactory/30")
     console.log(`从助力池获取到30个:${JSON.stringify(data.data)}`)
-    shareCodes = [...shareCodesInternal, ...data.data]
+    HELP_HW === 'true'
+      ? shareCodes = [...shareCodesInternal, ...HW_CODE, ...data.data]
+      : shareCodes = [...shareCodesInternal, ...data.data]
   } catch (e) {
-    shareCodes = [...shareCodesInternal]
+    HELP_HW === 'true'
+      ? shareCodes = [...shareCodesInternal, ...HW_CODE]
+      : shareCodes = [...shareCodesInternal]
   }
 }

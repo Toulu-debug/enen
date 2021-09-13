@@ -1676,7 +1676,6 @@ if ($.isNode()) {
       cookie = cookiesArr[i];
       $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
       $.index = i + 1;
-      $.isLogin = true;
       $.nickName = $.UserName;
       message = '';
       $.ele = 0;
@@ -1686,14 +1685,6 @@ if ($.isNode()) {
       $.canHelpFlag = true;//能否助力朋友(招工)
       $.tuanNum = 0;//成团人数
       console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-      if (!$.isLogin) {
-        $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
-
-        if ($.isNode()) {
-          await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-        }
-        continue
-      }
       runTimesErrCount = 0
       await jdDreamFactory()
     }
@@ -1730,11 +1721,11 @@ if ($.isNode()) {
 async function jdDreamFactory() {
   try {
     await userInfo();
-    await QueryFriendList();//查询今日招工情况以及剩余助力次数
-    // await joinLeaderTuan();//参团
-    await helpFriends();
+    // await QueryFriendList();//查询今日招工情况以及剩余助力次数
+    await joinLeaderTuan();//参团
+    // await helpFriends();
     if (!$.unActive) return
-    // await collectElectricity()
+    await collectElectricity()
     await getUserElectricity();
     await taskList();
     await investElectric();
@@ -1802,10 +1793,6 @@ function getActiveId(url = 'https://wqsd.jd.com/pingou/dream_factory/index.html'
 // 收取发电机的电力
 function collectElectricity(facId = $.factoryId, help = false, master) {
   return new Promise(async resolve => {
-    // let url = `/dreamfactory/generator/CollectCurrentElectricity?zone=dream_factory&apptoken=&pgtimestamp=&phoneID=&factoryid=${facId}&doubleflag=1&sceneval=2&g_login_type=1`;
-    // if (help && master) {
-    //   url = `/dreamfactory/generator/CollectCurrentElectricity?zone=dream_factory&factoryid=${facId}&master=${master}&sceneval=2&g_login_type=1`;
-    // }
     let body = `factoryid=${facId}&apptoken=&pgtimestamp=&phoneID=&doubleflag=1`;
     if (help && master) {
       body += `factoryid=${facId}&master=${master}`;
@@ -2221,89 +2208,85 @@ function userInfo() {
           console.log(`${JSON.stringify(err)}`)
           console.log(`${$.name} API请求失败，请检查网路重试`)
         } else {
-          if (safeGet(data)) {
-            data = JSON.parse(data);
-            if (data['ret'] === 0) {
-              data = data['data'];
-              $.unActive = true;//标记是否开启了京喜活动或者选购了商品进行生产
-              $.encryptPin = '';
-              $.shelvesList = [];
-              $.nickName = data.user.nickname || $.UserName; // 昵称或pin码
-              if (data.factoryList && data.productionList) {
-                const production = data.productionList[0];
-                const factory = data.factoryList[0];
-                const productionStage = data.productionStage;
-                $.factoryId = factory.factoryId;//工厂ID
-                $.productionId = production.productionId;//商品ID
-                $.commodityDimId = production.commodityDimId;
-                $.encryptPin = data.user.encryptPin;
-                for (let k = 0; k < 3; k++) {
-                  try {
-                    await runTimes()
-                    break
-                  } catch (e) {
-                    runTimesErrCount++
-                    if (runTimesErrCount === 3) {
-                      runTimesErr += `${$.UserName}:${e}\n`
-                    }
+          data = JSON.parse(data);
+          if (data['ret'] === 0) {
+            data = data['data'];
+            $.unActive = true;//标记是否开启了京喜活动或者选购了商品进行生产
+            $.encryptPin = '';
+            $.shelvesList = [];
+            $.nickName = data.user.nickname || $.UserName; // 昵称或pin码
+            if (data.factoryList && data.productionList) {
+              const production = data.productionList[0];
+              const factory = data.factoryList[0];
+              const productionStage = data.productionStage;
+              $.factoryId = factory.factoryId;//工厂ID
+              $.productionId = production.productionId;//商品ID
+              $.commodityDimId = production.commodityDimId;
+              $.encryptPin = data.user.encryptPin;
+              for (let k = 0; k < 3; k++) {
+                try {
+                  await runTimes()
+                  console.log('ok')
+                  break
+                } catch (e) {
+                  runTimesErrCount++
+                  if (runTimesErrCount === 3) {
+                    runTimesErr += `${$.UserName}:${e}\n`
                   }
-                  await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
                 }
+                await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+              }
 
-                await GetCommodityDetails();//获取已选购的商品信息
-                if (productionStage['productionStageAwardStatus'] === 1) {
-                  $.log(`可以开红包了\n`);
-                  await DrawProductionStagePrize();//领取红包
-                } else {
-                  $.log(`再加${productionStage['productionStageProgress']}电力可开红包\n`)
-                }
-                console.log(`当前电力：${data.user.electric}`)
-                console.log(`当前等级：${data.user.currentLevel}`)
-                console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data.user.encryptPin}`);
-                console.log(`已投入电力：${production.investedElectric}`);
-                console.log(`所需电力：${production.needElectric}`);
-                console.log(`生产进度：${((production.investedElectric / production.needElectric) * 100).toFixed(2)}%`);
-                message += `【京东账号${$.index}】${$.nickName}\n`
-                message += `【生产商品】${$.productName}\n`;
-                message += `【当前等级】${data.user.userIdentity} ${data.user.currentLevel}\n`;
-                message += `【生产进度】${((production.investedElectric / production.needElectric) * 100).toFixed(2)}%\n`;
-                if (production.investedElectric >= production.needElectric) {
-                  if (production['exchangeStatus'] === 1) $.log(`\n\n可以兑换商品了`)
-                  if (production['exchangeStatus'] === 3) {
-                    $.log(`\n\n商品兑换已超时`)
-                    if (new Date().getHours() === 9) {
-                      $.msg($.name, '', `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}兑换已超时，请选择新商品进行制造`)
-                      if (`${notifyLevel}` === '3' || `${notifyLevel}` === '2') allMessage += `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}兑换已超时，请选择新商品进行制造${$.index !== cookiesArr.length ? '\n\n' : ''}`;
-                    }
+              await GetCommodityDetails();//获取已选购的商品信息
+              if (productionStage['productionStageAwardStatus'] === 1) {
+                $.log(`可以开红包了\n`);
+                await DrawProductionStagePrize();//领取红包
+              } else {
+                $.log(`再加${productionStage['productionStageProgress']}电力可开红包\n`)
+              }
+              console.log(`当前电力：${data.user.electric}`)
+              console.log(`当前等级：${data.user.currentLevel}`)
+              console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data.user.encryptPin}`);
+              console.log(`已投入电力：${production.investedElectric}`);
+              console.log(`所需电力：${production.needElectric}`);
+              console.log(`生产进度：${((production.investedElectric / production.needElectric) * 100).toFixed(2)}%`);
+              message += `【京东账号${$.index}】${$.nickName}\n`
+              message += `【生产商品】${$.productName}\n`;
+              message += `【当前等级】${data.user.userIdentity} ${data.user.currentLevel}\n`;
+              message += `【生产进度】${((production.investedElectric / production.needElectric) * 100).toFixed(2)}%\n`;
+              if (production.investedElectric >= production.needElectric) {
+                if (production['exchangeStatus'] === 1) $.log(`\n\n可以兑换商品了`)
+                if (production['exchangeStatus'] === 3) {
+                  $.log(`\n\n商品兑换已超时`)
+                  if (new Date().getHours() === 9) {
+                    $.msg($.name, '', `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}兑换已超时，请选择新商品进行制造`)
+                    if (`${notifyLevel}` === '3' || `${notifyLevel}` === '2') allMessage += `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}兑换已超时，请选择新商品进行制造${$.index !== cookiesArr.length ? '\n\n' : ''}`;
                   }
-                  // await exchangeProNotify()
-                } else {
-                  console.log(`\n\n预计最快还需 【${((production.needElectric - production.investedElectric) / (2 * 60 * 60 * 24)).toFixed(2)}天】生产完毕\n\n`)
-                }
-                if (production.status === 3) {
-                  $.log(`\n\n商品生产已失效`)
-                  $.msg($.name, '', `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}\n【超时未完成】已失效，请选择新商品进行制造`)
-                  if ($.isNode() && (`${notifyLevel}` === '3' || `${notifyLevel}` === '2')) allMessage += `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}\n【超时未完成】已失效，请选择新商品进行制造${$.index !== cookiesArr.length ? '\n\n' : ''}`;
                 }
               } else {
-                $.unActive = false;//标记是否开启了京喜活动或者选购了商品进行生产
-                if (!data.factoryList) {
-                  console.log(`【提示】京东账号${$.index}[${$.nickName}]京喜工厂活动未开始\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 开启活动\n`);
-                  // $.msg($.name, '【提示】', `京东账号${$.index}[${$.nickName}]京喜工厂活动未开始\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 开启活动`);
-                } else if (data.factoryList && !data.productionList) {
-                  console.log(`【提示】京东账号${$.index}[${$.nickName}]京喜工厂未选购商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选购\n`)
-                  let nowTimes = new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000);
-                  if (nowTimes.getHours() === 12) {
-                    //如按每小时运行一次，则此处将一天12点推送1次提醒
-                    $.msg($.name, '提醒⏰', `京东账号${$.index}[${$.nickName}]京喜工厂未选择商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选择商品`);
-                    // if ($.isNode()) await notify.sendNotify(`${$.name} - 京东账号${$.index} - ${$.nickName}`, `京东账号${$.index}[${$.nickName}]京喜工厂未选择商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选择商品`)
-                    if ($.isNode() && `${notifyLevel}` === '3') allMessage += `京东账号${$.index}[${$.nickName}]京喜工厂未选择商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选择商品${$.index !== cookiesArr.length ? '\n\n' : ''}`
-                  }
-                }
+                console.log(`\n\n预计最快还需 【${((production.needElectric - production.investedElectric) / (2 * 60 * 60 * 24)).toFixed(2)}天】生产完毕\n\n`)
+              }
+              if (production.status === 3) {
+                $.log(`\n\n商品生产已失效`)
+                $.msg($.name, '', `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}\n【超时未完成】已失效，请选择新商品进行制造`)
+                if ($.isNode() && (`${notifyLevel}` === '3' || `${notifyLevel}` === '2')) allMessage += `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}\n【超时未完成】已失效，请选择新商品进行制造${$.index !== cookiesArr.length ? '\n\n' : ''}`;
               }
             } else {
-              console.log(`GetUserInfo异常：${JSON.stringify(data)}`)
+              $.unActive = false;//标记是否开启了京喜活动或者选购了商品进行生产
+              if (!data.factoryList) {
+                console.log(`【提示】京东账号${$.index}[${$.nickName}]京喜工厂活动未开始\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 开启活动\n`);
+              } else if (data.factoryList && !data.productionList) {
+                console.log(`【提示】京东账号${$.index}[${$.nickName}]京喜工厂未选购商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选购\n`)
+                let nowTimes = new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000);
+                if (nowTimes.getHours() === 12) {
+                  //如按每小时运行一次，则此处将一天12点推送1次提醒
+                  $.msg($.name, '提醒⏰', `京东账号${$.index}[${$.nickName}]京喜工厂未选择商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选择商品`);
+                  if ($.isNode() && `${notifyLevel}` === '3') allMessage += `京东账号${$.index}[${$.nickName}]京喜工厂未选择商品\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 选择商品${$.index !== cookiesArr.length ? '\n\n' : ''}`
+                }
+              }
             }
+          } else {
+            console.log(`GetUserInfo异常：${JSON.stringify(data)}`)
           }
         }
       } catch (e) {
@@ -2406,14 +2389,6 @@ function DrawProductionStagePrize() {
           console.log(`${$.name} API请求失败，请检查网路重试`)
         } else {
           console.log(`开幸运红包：${data}`);
-          // if (safeGet(data)) {
-          //   data = JSON.parse(data);
-          //   if (data['ret'] === 0) {
-          //
-          //   } else {
-          //     console.log(`异常：${JSON.stringify(data)}`)
-          //   }
-          // }
         }
       } catch (e) {
         $.logErr(e, resp)
@@ -2590,7 +2565,6 @@ function getFriendList(sort = 0) {
 
 function getFactoryIdByPin(pin) {
   return new Promise((resolve, reject) => {
-    // const url = `/dreamfactory/userinfo/GetUserInfoByPin?zone=dream_factory&pin=${pin}&sceneval=2`;
     $.get(taskurl('userinfo/GetUserInfoByPin', `pin=${pin}`), (err, resp, data) => {
       try {
         if (err) {
@@ -2601,8 +2575,6 @@ function getFactoryIdByPin(pin) {
             data = JSON.parse(data);
             if (data['ret'] === 0) {
               if (data.data.factoryList) {
-                //做此判断,有时候返回factoryList为null
-                // resolve(data['data']['factoryList'][0]['factoryId'])
                 $.stealFactoryId = data['data']['factoryList'][0]['factoryId'];
               }
             } else {
@@ -3036,7 +3008,6 @@ function readShareCode() {
 //格式化助力码
 function shareCodesFormat() {
   return new Promise(async resolve => {
-    // console.log(`第${$.index}个京东账号的助力码:::${$.shareCodesArr[$.index - 1]}`)
     $.newShareCodes = [];
     if ($.shareCodesArr[$.index - 1]) {
       $.newShareCodes = $.shareCodesArr[$.index - 1].split('@');
@@ -3056,30 +3027,7 @@ function shareCodesFormat() {
 
 function requireConfig() {
   return new Promise(async resolve => {
-    // tuanActiveId = $.isNode() ? (process.env.TUAN_ACTIVEID || tuanActiveId) : ($.getdata('tuanActiveId') || tuanActiveId);
-    // if (!tuanActiveId) {
-    //   await updateTuanIdsCDN('https://raw.githubusercontent.com/Aaron-lv/updateTeam/master/shareCodes/jd_updateFactoryTuanId.json');
-    //   if ($.tuanConfigs && $.tuanConfigs['tuanActiveId']) {
-    //     tuanActiveId = $.tuanConfigs['tuanActiveId'];
-    //     console.log(`拼团活动ID: 获取成功 ${tuanActiveId}\n`)
-    //   } else {
-    //     if (!$.tuanConfigs) {
-    //       $.http.get({url: 'https://purge.jsdelivr.net/gh/Aaron-lv/updateTeam@master/shareCodes/jd_updateFactoryTuanId.json'}).then((resp) => {}).catch((e) => $.log('刷新CDN异常', e));
-    //       await $.wait(1000)
-    //       await updateTuanIdsCDN('https://cdn.jsdelivr.net/gh/Aaron-lv/updateTeam@master/shareCodes/jd_updateFactoryTuanId.json');
-    //       if ($.tuanConfigs && $.tuanConfigs['tuanActiveId']) {
-    //         tuanActiveId = $.tuanConfigs['tuanActiveId'];
-    //         console.log(`拼团活动ID: 获取成功 ${tuanActiveId}\n`)
-    //       } else {
-    //         console.log(`拼团活动ID：获取失败，将采取脚本内置活动ID\n`)
-    //       }
-    //     }
-    //   }
-    // } else {
-    //   console.log(`自定义拼团活动ID: 获取成功 ${tuanActiveId}`)
-    // }
     console.log(`开始获取${$.name}配置文件\n`);
-    //Node.js用户请在jdCookie.js处填写京东ck;
     const shareCodes = $.isNode() ? require('./jdDreamFactoryShareCodes.js') : '';
     console.log(`共${cookiesArr.length}个京东账号\n`);
     $.shareCodesArr = [];
@@ -3093,7 +3041,6 @@ function requireConfig() {
       if ($.getdata('jd_jxFactory')) $.shareCodesArr = $.getdata('jd_jxFactory').split('\n').filter(item => item !== "" && item !== null && item !== undefined);
       console.log(`\nBoxJs设置的${$.name}好友邀请码:${$.getdata('jd_jxFactory')}\n`);
     }
-    // console.log(`\n种豆得豆助力码::${JSON.stringify($.shareCodesArr)}`);
     console.log(`您提供了${$.shareCodesArr.length}个账号的${$.name}助力码\n`);
     resolve()
   })
@@ -3205,51 +3152,39 @@ Date.prototype.Format = function (fmt) {
   return d;
 }
 
-async function requestAlgo() {
-  $.fingerprint = await generateFp();
-  const options = {
-    "url": `https://cactus.jd.com/request_algo?g_ty=ajax`,
-    "headers": {
-      'Authority': 'cactus.jd.com',
-      'Pragma': 'no-cache',
-      'Cache-Control': 'no-cache',
-      'Accept': 'application/json',
-      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-      'Content-Type': 'application/json',
-      'Origin': 'https://st.jingxi.com',
-      'Sec-Fetch-Site': 'cross-site',
-      'Sec-Fetch-Mode': 'cors',
-      'Sec-Fetch-Dest': 'empty',
-      'Referer': 'https://st.jingxi.com/',
-      'Accept-Language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7'
-    },
-    'body': JSON.stringify({
-      "version": "1.0",
-      "fp": $.fingerprint,
-      "appId": $.appId.toString(),
-      "timestamp": Date.now(),
-      "platform": "web",
-      "expandParams": ""
-    })
-  }
-  new Promise(async resolve => {
-    $.post(options, (err, resp, data) => {
+function requestAlgo() {
+  $.fingerprint = generateFp();
+  return new Promise(resolve => {
+    $.post({
+      "url": `https://cactus.jd.com/request_algo?g_ty=ajax`,
+      "headers": {
+        'Authority': 'cactus.jd.com',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+        'Content-Type': 'application/json',
+        'Origin': 'https://st.jingxi.com',
+        'Referer': 'https://st.jingxi.com/',
+      },
+      'body': JSON.stringify({
+        "version": "1.0",
+        "fp": $.fingerprint,
+        "appId": $.appId.toString(),
+        "timestamp": Date.now(),
+        "platform": "web",
+        "expandParams": ""
+      })
+    }, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
           console.log(`request_algo 签名参数API请求失败，请检查网路重试`)
         } else {
           if (data) {
-            // console.log(data);
             data = JSON.parse(data);
             if (data['status'] === 200) {
               $.token = data.data.result.tk;
               let enCryptMethodJDString = data.data.result.algo;
               if (enCryptMethodJDString) $.enCryptMethodJD = new Function(`return ${enCryptMethodJDString}`)();
               console.log(`获取签名参数成功！`)
-              console.log(`fp: ${$.fingerprint}`)
-              console.log(`token: ${$.token}`)
-              console.log(`enCryptMethodJD: ${enCryptMethodJDString}`)
             } else {
               console.log(`fp: ${$.fingerprint}`)
               console.log('request_algo 签名参数API请求失败:')
