@@ -1,13 +1,10 @@
 /**
- * export jd_cfd_hb=100
- *
  * 我就是看看，不抢
  */
-import axios from 'axios';
-import USER_AGENT, {requireConfig, requestAlgo, decrypt, wait} from './TS_USER_AGENTS';
-import * as dotenv from 'dotenv';
 
-dotenv.config()
+import axios from 'axios';
+import USER_AGENT, {requireConfig, requestAlgo, wait, h5st} from './TS_USER_AGENTS';
+
 let cookie: string = '', cookiesArr: any, res: any = '';
 
 !(async () => {
@@ -15,15 +12,21 @@ let cookie: string = '', cookiesArr: any, res: any = '';
   cookiesArr = await requireConfig();
   cookie = cookiesArr[0]
   res = await api('user/ExchangeState', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone', {dwType: '2'})
-  while(1) {
-    if (new Date().getSeconds() < 15)
+  while (1) {
+    if (new Date().getSeconds() < 61)
       break
     else
-      await wait(50)
+      await wait(1000)
   }
+  const PrettyTable = require('prettytable');
+  const pt = new PrettyTable();
+  const title = ['Value', 'Status', 'Stock']
+  let datas = []
   for (let t of res.hongbao) {
-    console.log(t.strPrizeName, 'state:', t.dwState, 'num:', t.dwStockNum)
+    datas.push([t.strPrizeName.replace('元', ''), t.dwState ? 'True' : 'False', t.dwStockNum])
   }
+  pt.create(title, datas)
+  pt.print();
 })()
 
 interface Params {
@@ -31,24 +34,20 @@ interface Params {
 }
 
 function api(fn: string, stk: string, params: Params = {}) {
-  return new Promise(async resolve => {
+  return new Promise((resolve, reject) => {
     let url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
-    if (Object.keys(params).length !== 0) {
-      let key: (keyof Params)
-      for (key in params) {
-        if (params.hasOwnProperty(key))
-          url += `&${key}=${params[key]}`
-      }
-    }
-    url += '&h5st=' + decrypt(stk, url)
-    let {data} = await axios.get(url, {
+    url = h5st(url, stk, params, 10032)
+    axios.get(url, {
       headers: {
         'Host': 'm.jingxi.com',
         'Referer': 'https://st.jingxi.com/',
         'User-Agent': USER_AGENT,
         'Cookie': cookie
       }
+    }).then(res => {
+      resolve(res.data)
+    }).catch(e => {
+      reject(e)
     })
-    resolve(data)
   })
 }
