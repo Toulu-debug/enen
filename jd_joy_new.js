@@ -552,9 +552,9 @@ $.post = injectToRequest($.post.bind($))
 function getFollowChannels() {
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.get({
-      url: `https://jdjoy.jd.com/common/pet/getFollowChannels?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/getFollowChannels?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         lkt: lkt,
         lks: lks,
@@ -575,9 +575,9 @@ function getFollowChannels() {
 function taskList() {
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.get({
-      url: `https://jdjoy.jd.com/common/pet/getPetTaskConfig?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/getPetTaskConfig?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         lkt: lkt,
         lks: lks,
@@ -606,9 +606,9 @@ function taskList() {
 function beforeTask(fn, shopId) {
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.get({
-      url: `https://jdjoy.jd.com/common/pet/icon/click?iconCode=${fn}&linkAddr=${shopId}&reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/icon/click?iconCode=${fn}&linkAddr=${shopId}&reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         lkt: lkt,
         lks: lks,
@@ -632,9 +632,9 @@ function beforeTask(fn, shopId) {
 function followShop(shopId) {
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.post({
-      url: `https://jdjoy.jd.com/common/pet/followShop?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/followShop?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         lkt: lkt,
         lks: lks,
@@ -659,9 +659,9 @@ function followShop(shopId) {
 function doTask(body, fnId = 'scan') {
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.post({
-      url: `https://jdjoy.jd.com/common/pet/${fnId}?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/${fnId}?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         'lkt': lkt,
         'lks': lks,
@@ -696,9 +696,9 @@ function feed() {
   let feedNum = process.env.feedNum ? process.env.feedNum : 80
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.post({
-      url: `https://jdjoy.jd.com/common/pet/enterRoom/h5?invitePin=&reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/enterRoom/h5?invitePin=&reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         'lkt': lkt,
         'lks': lks,
@@ -721,9 +721,9 @@ function feed() {
       } else {
         console.log('开始喂食......')
         let lkt = new Date().getTime()
-        let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+        let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
         $.get({
-          url: `https://jdjoy.jd.com/common/pet/feed?feedCount=${feedNum}&reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+          url: `https://jdjoy.jd.com/common/pet/feed?feedCount=${feedNum}&reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
           headers: {
             'lkt': lkt,
             'lks': lks,
@@ -754,9 +754,9 @@ function feed() {
 function award(taskType) {
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.get({
-      url: `https://jdjoy.jd.com/common/pet/getFood?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&taskType=${taskType}`,
+      url: `https://jdjoy.jd.com/common/pet/getFood?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ&taskType=${taskType}`,
       headers: {
         'lkt': lkt,
         'lks': lks,
@@ -787,9 +787,9 @@ function run(fn = 'match') {
   let level = process.env.JD_JOY_teamLevel ? process.env.JD_JOY_teamLevel : 2
   return new Promise(resolve => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.get({
-      url: `https://jdjoy.jd.com/common/pet/combat/${fn}?teamLevel=${level}&reqSource=h5&invokeKey=RtKLB8euDo7KwsO0`,
+      url: `https://jdjoy.jd.com/common/pet/combat/${fn}?teamLevel=${level}&reqSource=h5&invokeKey=JL1VTNRadM68cIMQ`,
       headers: {
         'lkt': lkt,
         'lks': lks,
@@ -841,9 +841,9 @@ function run(fn = 'match') {
 function getFriends() {
   return new Promise((resolve) => {
     let lkt = new Date().getTime()
-    let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+    let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
     $.post({
-      url: 'https://jdjoy.jd.com/common/pet/enterRoom/h5?invitePin=&reqSource=h5&invokeKey=RtKLB8euDo7KwsO0',
+      url: 'https://jdjoy.jd.com/common/pet/enterRoom/h5?invitePin=&reqSource=h5&invokeKey=JL1VTNRadM68cIMQ',
       headers: {
         'lkt': lkt,
         'lks': lks,
@@ -866,7 +866,7 @@ function getFriends() {
           break
         }
         $.get({
-          url: 'https://jdjoy.jd.com/common/pet/h5/getFriends?itemsPerPage=20&currentPage=1&reqSource=h5&invokeKey=RtKLB8euDo7KwsO0',
+          url: 'https://jdjoy.jd.com/common/pet/h5/getFriends?itemsPerPage=20&currentPage=1&reqSource=h5&invokeKey=JL1VTNRadM68cIMQ',
           headers: {
             'Host': 'jdjoy.jd.com',
             'Accept': '*/*',
@@ -881,9 +881,9 @@ function getFriends() {
               if (f.stealStatus === 'can_steal') {
                 console.log('可偷:', f.friendPin)
                 let lkt = new Date().getTime()
-                let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+                let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
                 $.get({
-                  url: `https://jdjoy.jd.com/common/pet/enterFriendRoom?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&friendPin=${encodeURIComponent(f.friendPin)}`,
+                  url: `https://jdjoy.jd.com/common/pet/enterFriendRoom?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ&friendPin=${encodeURIComponent(f.friendPin)}`,
                   headers: {
                     'lkt': lkt,
                     'lks': lks,
@@ -895,9 +895,9 @@ function getFriends() {
                   }
                 }, (err, resp, data) => {
                   let lkt = new Date().getTime()
-                  let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
+                  let lks = md5('' + 'JL1VTNRadM68cIMQ' + lkt).toString()
                   $.get({
-                    url: `https://jdjoy.jd.com/common/pet/getRandomFood?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&friendPin=${encodeURIComponent(f.friendPin)}`,
+                    url: `https://jdjoy.jd.com/common/pet/getRandomFood?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ&friendPin=${encodeURIComponent(f.friendPin)}`,
                     headers: {
                       'lkt': lkt,
                       'lks': lks,
