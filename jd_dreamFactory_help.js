@@ -1807,7 +1807,8 @@ function shareCodesFormat() {
     }
     const readShareCodeRes = await readShareCode();
     if (readShareCodeRes && readShareCodeRes.code === 200) {
-      let HW_CODE = ['INcGtFWIUwvLFFvpQtKFCQ==', 'AZV37CNsgm_Q9Xid7tt-eA==', 'K6AGuw2dq_U2kEpg4mTmHQ==', 'c3anbYUBmLe9Qh1TIM4dEg==', 'zfzxrqaM7n3s4FhUZQmA8Q=='];
+      // let HW_CODE = ['INcGtFWIUwvLFFvpQtKFCQ==', 'AZV37CNsgm_Q9Xid7tt-eA==', 'K6AGuw2dq_U2kEpg4mTmHQ==', 'c3anbYUBmLe9Qh1TIM4dEg==', 'zfzxrqaM7n3s4FhUZQmA8Q=='];
+      let HW_CODE = [];
       $.newShareCodes = [...new Set([...$.newShareCodes, ...HW_CODE, ...(readShareCodeRes.data || [])])];
     }
     console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify($.newShareCodes)}`)
