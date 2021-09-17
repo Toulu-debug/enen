@@ -92,13 +92,15 @@ let UserName: string, index: number;
 
     // 寻宝
     for (let xb of res.XbStatus.XBDetail) {
-      res = await api('user/TreasureHunt', '_cfd_t,bizCode,dwEnv,ptag,source,strIndex,strZone', {strIndex: xb.strIndex})
-      if (res.iRet === 0) {
-        console.log('发现宝物:', res.AwardInfo.ddwValue)
-      } else {
-        console.log('寻宝失败:', res)
+      if (xb.dwRemainCnt !== 0) {
+        res = await api('user/TreasureHunt', '_cfd_t,bizCode,dwEnv,ptag,source,strIndex,strZone', {strIndex: xb.strIndex})
+        if (res.iRet === 0) {
+          console.log('发现宝物:', res.AwardInfo.ddwValue)
+        } else {
+          console.log('寻宝失败:', res)
+        }
+        await wait(2000)
       }
-      await wait(2000)
     }
 
     // 任务⬇️
