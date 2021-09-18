@@ -89,8 +89,11 @@ async function api(fn: string, body: string = '') {
   }
   let data: any = {}
   if (body) {
-    data = await axios.post(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, body, {headers})
-
+    try {
+      data = await axios.post(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, body, {headers})
+    } catch (e) {
+      return
+    }
   } else {
     data = await axios.get(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, {headers})
   }
