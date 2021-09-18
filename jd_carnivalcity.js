@@ -1,3 +1,19 @@
+/*
+京东手机狂欢城
+脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
+===================quantumultx================
+[task_local]
+#京东手机狂欢城
+0 0-18/6 * * * https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, tag=京东手机狂欢城, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
+=====================Loon================
+[Script]
+cron "0 0-18/6 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, tag=京东手机狂欢城
+====================Surge================
+京东手机狂欢城 = type=cron,cronexp=0 0-18/6 * * *,wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js
+============小火箭=========
+京东手机狂欢城 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, cronexpr="0 0-18/6 * * *", timeout=3600, enable=true
+*/
+
 const $ = new Env('京东手机狂欢城');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const md5 = require('md5');
@@ -16,7 +32,7 @@ if ($.isNode()) {
 let inviteCodes = [];
 $.shareCodesArr = [];
 const JD_API_HOST = 'https://api.m.jd.com/api';
-const activeEndTime = '2021/08/28 00:00:00+08:00';//活动结束时间
+const activeEndTime = '2021/10/02 00:00:00+08:00';//活动结束时间
 let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000;
 !(async () => {
   if (!cookiesArr[0]) {
@@ -81,8 +97,8 @@ let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 
 async function JD818() {
   try {
     await indexInfo();//获取任务
-    await supportList();//助力情况
-    await getHelp();//获取邀请码
+    // await supportList();//助力情况
+    // await getHelp();//获取邀请码
     if ($.blockAccount) return
     // await indexInfo(true);//获取任务
     await doHotProducttask();//做热销产品任务
@@ -829,15 +845,12 @@ function taskPostUrl(a, t = {}) {
     url: `${JD_API_HOST}`,
     body: `appid=guardian-starjd&functionId=carnivalcity_jd_prod&body=${body}&t=${Date.now()}&loginType=2`,
     headers: {
-      "Accept": "application/json, text/plain, */*",
-      "Accept-Encoding": "gzip, deflate, br",
-      "Accept-Language": "zh-cn",
-      "Connection": "keep-alive",
+      "Host": "api.m.jd.com",
       "Content-Type": "application/x-www-form-urlencoded",
       "Origin": "https://carnivalcity.m.jd.com",
+      "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
       "Referer": "https://carnivalcity.m.jd.com/",
-      "Cookie": cookie,
-      "User-Agent": $.UA,
+      "Cookie": cookie
     }
   }
 }
