@@ -74,7 +74,7 @@ let tokenKey: string = '', token: string = '', bearer: string = '';
       console.log(`${UserName}去助力${share.taskToken}`)
       res = await api('do_assist_task', `taskToken=${share.taskToken}&inviter_id=${share.inviter_id}`)
       await wait(2000)
-      console.log('助力结果：', 2)
+      console.log('助力结果：', res)
     }
   }
 })()

@@ -58,6 +58,7 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
     res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: A(lastgettime)})
     if (res.ret === 0)
       console.log('收牛牛:', res.data.addcoin)
+    await wait(1000)
 
     // 签到
     res = await api('queryservice/GetSignInfo', 'activeid,activekey,channel,sceneid')
@@ -71,10 +72,22 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
             console.log(res)
           }
           break
+        } else {
+          console.log('今天已签到')
+          break
         }
       }
     } else {
       console.log('没有获取到签到信息！')
+    }
+
+    // 登录领白菜
+    res = await api('queryservice/GetVisitBackInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+    if (res.iscandraw === 1) {
+      res = await api('operservice/GetVisitBackCabbage', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+      if (res.ret === 0) {
+        console.log('登录领白菜：', res.data.drawnum)
+      }
     }
 
     console.log('任务列表开始')
@@ -239,7 +252,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
     url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_ste=1&sceneval=2&_stk=${encodeURIComponent(stk)}`
   else
-    url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=${activeid}&activekey=null&jxmc_jstoken=${jxToken.strPgUUNum}&timestamp=${jxToken.strPgtimestamp}&phoneid=${jxToken.strPhoneID}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+    url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=${activeid}&activekey=null&jxmc_jstoken=${jxToken.strPgUUNum}&timestamp=${jxToken.strPgtimestamp}&phoneid=${jxToken.strPhoneID}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   url = h5st(url, stk, params, 10028)
   try {
     let {data} = await axios.get(url, {
@@ -250,10 +263,16 @@ async function api(fn: string, stk: string, params: Params = {}) {
         'Referer': 'https://st.jingxi.com/',
       }
     })
+    if (typeof data === 'string')
+      return JSON.parse(data.replace(/jsonpCBK.?\(/, '').split('\n')[0])
     return data
   } catch (e) {
     return {}
   }
+}
+
+function randomWord() {
+  return String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))
 }
 
 function makeShareCodes(code: string) {
@@ -262,7 +281,7 @@ function makeShareCodes(code: string) {
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert?db=jxmc&code=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
       .then(res => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')
