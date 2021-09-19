@@ -1582,24 +1582,14 @@ cron "20 0-23/3 * * *" script-path=jd_jxmc.js,tag=京喜牧场
   }, t
 });
 const $ = new Env('京喜牧场');
-const jdCookieNode = $.isNode() ? require('../test/jdCookie.js') : '';
 $.inviteCodeList = [];
 let cookiesArr = [];
-let UA, token
+let UA
 $.appId = 10028;
-$.helpCkList = [];
-if ($.isNode()) {
-  Object.keys(jdCookieNode).forEach((item) => {
-    cookiesArr.push(jdCookieNode[item])
-  })
-  if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {
-  };
-} else {
-  cookiesArr = [$.getdata("CookieJD"), $.getdata("CookieJD2"), ...$.toObj($.getdata("CookiesJD") || "[]").map((item) => item.cookie)].filter((item) => !!item);
-}
+
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 
-async function getHbToken(cookie) {
+async function getToken(cookie) {
   await requestAlgo();
   $.cookie = cookie
   $.UserName = decodeURIComponent($.cookie.match(/pt_pin=([^; ]+)(?=;?)/) && $.cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]);
@@ -2192,5 +2182,5 @@ function Env(t, e) {
 }
 
 module.exports = {
-  getHbToken
+  getToken
 }
