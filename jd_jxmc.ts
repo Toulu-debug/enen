@@ -66,7 +66,6 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [];
     } catch (e) {
 
     }
-    continue
 
     // 收牛牛
     res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: A(lastgettime)})
