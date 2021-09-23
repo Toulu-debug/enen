@@ -23,15 +23,13 @@ Date.prototype.Format = function (fmt) {
   return d;
 }
 const fs = require('fs');
-let path = ''
-__dirname.indexOf('tools')>-1 ? path = '..':path='.';
 const $ = new Env('京喜工厂可生产');
 console.log('\n====================Hello World====================\n')
 $.appId = 10001;
-const jdCookieNode = $.isNode() ? require(`${path}/jdCookie.js`) : '';
+const jdCookieNode = $.isNode() ? require(`../jdCookie.js`) : '';
 let cookiesArr = [], cookie = '', message = '';
 let products = ['调味盒', '太阳镜', '洗碗手套3双', '尤克里里', '恒温吹风机']
-let notify = $.isNode() ? require(`${path}/sendNotify`) : '';
+let notify = $.isNode() ? require(`../sendNotify`) : '';
 
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
@@ -71,7 +69,7 @@ function main() {
       headers: {
         'Host': 'wq.jd.com',
         'accept': '*/*',
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require(`${path}/USER_AGENTS`).USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require(`../USER_AGENTS`).USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
         'accept-language': 'zh-cn',
         'referer': 'https://wqsd.jd.com/pingou/dream_factory/index.html',
         'cookie': cookie
