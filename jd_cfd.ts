@@ -41,7 +41,7 @@ interface Params {
   dwPrizeLv?: number,
   dwPrizeType?: number,
   strPrizePool?: string,
-  dwFirst?: number,
+  dwFirst?: any,
   dwIdentityType?: number,
   strBussKey?: string,
   strMyShareId?: string,
@@ -87,7 +87,6 @@ let UserName: string, index: number;
         strPhoneID: token.strPhoneID,
         strPgUUNum: token.strPgUUNum
       })
-    console.log('离线收益:', res.Business.ddwCoin)
     await wait(2000)
 
     // 寻宝
@@ -98,20 +97,21 @@ let UserName: string, index: number;
           console.log('发现宝物:', res.AwardInfo.ddwValue)
         } else {
           console.log('寻宝失败:', res)
+          break
         }
         await wait(2000)
       }
     }
 
     // 任务⬇️
-    console.log('任务列表开始')
+    console.log('底部任务列表开始')
     for (let j = 0; j < 30; j++) {
       if (await task() === 0) {
         break
       }
       await wait(3000)
     }
-    console.log('任务列表结束')
+    console.log('底部任务列表结束')
 
     // 升级建筑
     while (1) {
@@ -243,6 +243,7 @@ let UserName: string, index: number;
     await wait(5000)
     if (res.StoryInfo.StoryList) {
       // 美人鱼
+      /*
       if (res.StoryInfo.StoryList[0].Mermaid) {
         console.log(`发现美人鱼🧜‍♀️`)
         let MermaidRes: any = await api('story/MermaidOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone', {
@@ -270,7 +271,9 @@ let UserName: string, index: number;
         if (MermaidRes.iRet === 0)
           console.log('获得金币:', MermaidRes.Data.ddwCoin)
       }
+
       await wait(2000)
+       */
 
       if (res.StoryInfo.StoryList[0].Special) {
         console.log(`船来了，乘客是${res.StoryInfo.StoryList[0].Special.strName}`)
@@ -374,7 +377,7 @@ let UserName: string, index: number;
     for (let t of tasks.Data.TaskList) {
       if ([1, 2].indexOf(t.dwOrderId) > -1 && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '热气球接待20位游客') {
         console.log('开始任务➡️:', t.strTaskName)
-        res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId, configExtra: ''})
+        res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId, configExtra: ''}, 'right')
         await wait(t.dwLookTime * 1000)
         if (res.ret === 0) {
           console.log('任务完成')
@@ -388,10 +391,10 @@ let UserName: string, index: number;
     await wait(2000)
     for (let t of tasks.Data.TaskList) {
       if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
-        res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId})
+        res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId}, 'right')
         await wait(1000)
         if (res.ret === 0) {
-          console.log(`领奖成功:`, JSON.parse(res.data.prizeInfo.trim()).ddwCoin)
+          console.log(`领奖成功:`, res)
         } else {
           console.log('领奖失败', res)
         }
@@ -460,13 +463,15 @@ let UserName: string, index: number;
   }
 })()
 
-function api(fn: string, stk: string, params: Params = {}) {
+function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
   return new Promise((resolve, reject) => {
     let url: string = '';
-    if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn))
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&showAreaTaskFlag=0&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
-    else
+    if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
+      let bizCode: string = taskPosition === 'right' ? 'jxbfddch' : 'jxbfd'
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&showAreaTaskFlag=0&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+    } else {
       url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+    }
     url = h5st(url, stk, params, 10032)
     axios.get(url, {
       headers: {

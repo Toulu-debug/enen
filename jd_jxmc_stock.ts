@@ -5,10 +5,10 @@
  */
 
 import axios from 'axios';
-import {requireConfig, requestAlgo, decrypt, getJxToken, wait, getRandomNumberByRange, h5st} from './TS_USER_AGENTS';
+import {requireConfig, requestAlgo, wait, getRandomNumberByRange, h5st} from './TS_USER_AGENTS';
 import {readFileSync, writeFileSync, accessSync} from "fs";
 
-const notify = require('./sendNotify')
+const notify = require('./sendNotify'), jxmcToken = require('./utils/jd_jxmc.js').getToken;
 let cookie: string = '', res: any = '', UserName: string;
 
 !(async () => {
@@ -21,17 +21,22 @@ let cookie: string = '', res: any = '', UserName: string;
   } catch (e) {
     writeFileSync('./jxmc_stock.json', '{}', 'utf-8')
   }
-  let exist: any = JSON.parse(readFileSync('./jxmc_stock.json', 'utf-8'))
-  let items: string = '', message: string = '', token = getJxToken(cookie);
+  let exist: any = readFileSync('./jxmc_stock.json', 'utf-8')
+  try {
+    exist = JSON.parse(exist)
+  } catch (e) {
+    exist = {}
+  }
+  let items: string = '', message: string = '', token = await jxmcToken(cookie);
+
   res = await api('queryservice/GetGoodsListV2',
     'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp', {
       activeid: 'jxmc_active_0001',
       activekey: 'null',
-      jxmc_jstoken: token.strPgUUNum,
-      timestamp: token.strPgtimestamp,
-      phoneid: token.strPhoneID
+      jxmc_jstoken: token.farm_jstoken,
+      timestamp: token.timestamp,
+      phoneid: token.phoneid
     })
-
   await wait(2000);
 
   for (let good of res.data.goodslist) {
@@ -59,7 +64,6 @@ let cookie: string = '', res: any = '', UserName: string;
       res = await getEgg(items)
       await wait(1000)
       for (let t of res.result) {
-        console.log(t.prizes[0].Name)
         exist[t.active].name = t.prizes[0].Name
       }
       items = ''
@@ -71,10 +75,10 @@ let cookie: string = '', res: any = '', UserName: string;
       message += exist[j].name + '\t' + exist[j].egg + '\n'
     }
   }
+  console.log(message)
   if (message) {
     await notify.sendNotify('京喜牧场兑换', message)
   }
-  console.log(exist)
 })()
 
 interface Params {
@@ -89,8 +93,7 @@ interface Params {
 function api(fn: string, stk: string, params: Params = {}) {
   return new Promise(async (resolve, reject) => {
     let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
-
-    url = h5st(url, stk, {})
+    url = h5st(url, stk, params, 10028)
     try {
       let {data} = await axios.get(url, {
         headers: {
