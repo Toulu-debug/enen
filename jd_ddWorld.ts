@@ -54,28 +54,12 @@ let tokenKey: string = '', token: string = '', bearer: string = '';
   console.log('内部助力码：', shareCodesInternal)
 
   for (let i = 0; i < cookiesArr.length; i++) {
-    try {
-      let {data} = await axios.get('https://api.jdsharecode.xyz/api/ddworld/30', {timeout: 10000})
-      console.log('获取到30个随机助力码:', data.data)
-      let others = []
-      for (let code of data.data) {
-        others.push({
-          taskToken: code.split(',')[0],
-          inviter_id: code.split(',')[1]
-        })
-      }
-      shareCodes = [...shareCodesInternal, ...others]
-    } catch (e) {
-      console.log('获取助力池失败')
-    }
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    for (let share of shareCodes) {
-      console.log(`${UserName}去助力${share.taskToken}`)
-      res = await api('do_assist_task', `taskToken=${share.taskToken}&inviter_id=${share.inviter_id}`)
-      await wait(2000)
-      console.log('助力结果：', res)
-    }
+    console.log(`${UserName}去助力${shareCodesInternal[0].taskToken}`)
+    res = await api('do_assist_task', `taskToken=${shareCodesInternal[0].taskToken}&inviter_id=${shareCodesInternal[0].inviter_id}`)
+    await wait(2000)
+    console.log('助力结果：', res)
   }
 })()
 

@@ -1,7 +1,7 @@
 /*
 女装盲盒
-活动时间：2021-9-6至2021-9-30
-活动地址：https://anmp.jd.com/babelDiy/Zeus/2z9yVc6pg2Rixp4zdMEGi7GBBUqP/index.html
+活动时间：2021-10-1至2021-10-31
+活动地址：https://anmp.jd.com/babelDiy/Zeus/h5Mn8HfcGehjosBJWQJj4mzFWrF/index.html
 活动入口：京东app-女装馆-赢京豆
 已支持IOS双京东账号,Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
@@ -42,8 +42,8 @@ if ($.isNode()) {
     return;
   }
   console.log('女装盲盒\n' +
-      '活动时间：2021-9-6至2021-9-30\n' +
-      '活动地址：https://anmp.jd.com/babelDiy/Zeus/2z9yVc6pg2Rixp4zdMEGi7GBBUqP/index.html\n' +
+      '活动时间：2021-10-1至2021-10-31\n' +
+      '活动地址：https://anmp.jd.com/babelDiy/Zeus/h5Mn8HfcGehjosBJWQJj4mzFWrF/index.html\n' +
       '活动入口：京东app-女装馆-赢京豆');
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
@@ -66,7 +66,7 @@ if ($.isNode()) {
         continue
       }
       try {
-        await jdMh('https://anmp.jd.com/babelDiy/Zeus/2z9yVc6pg2Rixp4zdMEGi7GBBUqP/index.html')
+        await jdMh('https://anmp.jd.com/babelDiy/Zeus/h5Mn8HfcGehjosBJWQJj4mzFWrF/index.html')
       } catch (e) {
         $.logErr(e)
       }
@@ -106,7 +106,7 @@ function showMsg() {
   })
 }
 
-function getInfo(url = 'https://anmp.jd.com/babelDiy/Zeus/2z9yVc6pg2Rixp4zdMEGi7GBBUqP/index.html?wxAppName=jd') {
+function getInfo(url = 'https://anmp.jd.com/babelDiy/Zeus/h5Mn8HfcGehjosBJWQJj4mzFWrF/index.html?wxAppName=jd') {
   console.log(`url:${url}`)
   return new Promise(resolve => {
     $.get({
@@ -214,7 +214,7 @@ function taskUrl(function_id, body = '') {
       'Content-Type': 'application/json;charset=utf-8',
       'Origin': 'wq.jd.com',
       "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-      'Referer': `https://anmp.jd.com/babelDiy/Zeus/2z9yVc6pg2Rixp4zdMEGi7GBBUqP/index.html?wxAppName=jd`,
+      'Referer': `https://anmp.jd.com/babelDiy/Zeus/h5Mn8HfcGehjosBJWQJj4mzFWrF/index.html?wxAppName=jd`,
       'Cookie': cookie
     }
   }
