@@ -196,13 +196,13 @@ let UserName: string, index: number;
           await wait(1000)
         }
       }
-    }
-    // 珍珠奖励
-    res = await api(`user/ComposePearlAddProcess`, '__t,strBT,strLT,strZone', {__t: Date.now(), strBT: strDT, strLT: strLT})
-    if (res.iRet === 0) {
-      console.log(`合成成功：获得${res.ddwAwardHb / 100}红包，当前有${res.dwCurProgress}珍珠，${res.ddwVirHb / 100}红包`)
-    } else {
-      console.log('合成失败：', res)
+      // 珍珠奖励
+      res = await api(`user/ComposePearlAddProcess`, '__t,strBT,strLT,strZone', {__t: Date.now(), strBT: strDT, strLT: strLT})
+      if (res.iRet === 0) {
+        console.log(`合成成功：获得${res.ddwAwardHb / 100}红包，当前有${res.dwCurProgress}珍珠，${res.ddwVirHb / 100}红包`)
+      } else {
+        console.log('合成失败：', res)
+      }
     }
 
     // 签到 助力奖励
