@@ -1,6 +1,6 @@
 /**
  * 京喜牧场
- * 买、喂、收蛋、锄草、挑逗
+ * cron: 10 0,12,18 * * *
  */
 
 import axios from 'axios';
@@ -9,11 +9,9 @@ import {Md5} from "ts-md5";
 
 const cow = require('./utils/jd_jxmc.js').cow;
 const token = require('./utils/jd_jxmc.js').token;
-// @ts-ignore
-const UA = `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
-// let A: any = require('./utils/jd_jxmcToken')
+const UA = `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random() * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
 let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, activeid: string = 'null', activekey: string = 'null', jxToken: any, UserName: string, index: number;
-let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [];
+let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodesHb_HW: string[] = [];
 
 !(async () => {
   await requestAlgo();
@@ -66,20 +64,15 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [];
     console.log('金币:', coins);
 
     // 红包
-    /*
     res = await api('operservice/GetInviteStatus', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
     console.log('红包助力:', res.data.sharekey)
     shareCodesHbInterval.push(res.data.sharekey)
     try {
       await makeShareCodesHb(res.data.sharekey)
     } catch (e) {
-
     }
 
-     */
-
     // 收牛牛
-    // res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: A(lastgettime)})
     let cowToken = await cow(lastgettime);
     console.log(cowToken)
     res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: cowToken})
@@ -203,13 +196,6 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [];
     }
   }
 
-  /*
-  let shareCodesHb_HW = [
-    'g_eiitD1h9-a-PX-GytKiCP4Y59In6jxprR7viqVfh8ny3766iM6kmfUHnkkg8xgaN5HxYdq8Ds-io4ORkZbiVnhSljL8sCwamjwQBNfd0o',
-    'g_eiitD1h9-a-PX-GytKiCP4Y59In6jxprR7viqVfh8ny3766iM6kmfUHnkkg8xgeZ2fIAA_0jvCD_W5TxNBIRJ_i6lfKteh51A348HRPTR1r5k5FVxp1B2J-MnrUC-C',
-    'g_eiitD1h9-a-PX-GytKiCP4Y59In6jxprR7viqVfh8ny3766iM6kmfUHnkkg8xgpHua7jaAt-HZD11K068JlgdbUgeduz_qVXFMjglZemMCdK44R-qdhbYF6-hLeY2d',
-    'g_eiitD1h9-a-PX-GytKiCP4Y59In6jxprR7viqVfh8ny3766iM6kmfUHnkkg8xgEY75l_w8OoY3CyYtV0WDxReCAtM0E81vOJwXkkqAY-sc-bmgUMDCqkfCPfba7C04'
-  ]
   try {
     let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/30', {timeout: 10000})
     console.log('获取到30个随机红包码:', data.data)
@@ -221,7 +207,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [];
 
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
-    jxToken = await jxmcToken(cookie);
+    jxToken = await token(cookie);
     for (let j = 0; j < shareCodesHb.length; j++) {
       if (i !== j) {
         console.log(`账号${i + 1}去助力${shareCodesHb[j]}`)
@@ -232,12 +218,10 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [];
         } else {
           console.log('助力失败：', JSON.stringify(res))
         }
-        await wait(1000)
+        await wait(8000)
       }
     }
   }
-
-   */
 
   try {
     let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
@@ -285,8 +269,6 @@ interface Params {
 async function getTask() {
   console.log('刷新任务列表')
   res = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '', showAreaTaskFlag: 0, jxpp_wxapp_type: 7})
-  console.log(JSON.stringify(res))
-
   for (let t of res.data.userTaskStatusList) {
     if (t.completedTimes == t.targetTimes && t.awardStatus === 2) {
       res = await api('Award', 'bizCode,source,taskId', {taskId: t.taskId})
@@ -381,7 +363,6 @@ function makeShareCodesHb(code: string) {
         resolve(200)
       })
       .catch((e) => {
-        console.log(e)
         reject('访问助力池出错')
       })
   })
