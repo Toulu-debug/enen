@@ -44,7 +44,7 @@ function api(fn: string, stk: string, params: Params = {}) {
         'User-Agent': USER_AGENT,
         'Cookie': cookie
       }
-    }).then(res => {
+    }).then((res: any) => {
       resolve(res.data)
     }).catch(e => {
       reject(e)

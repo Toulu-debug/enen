@@ -167,7 +167,7 @@ function init() {
         'User-Agent': USER_AGENT,
         'Cookie': 'IsvToken=' + token
       }
-    }).then(res => {
+    }).then((res: any) => {
       reloadCookie(res.headers['set-cookie'])
       resolve();
     })

@@ -149,7 +149,7 @@ function init() {
         'X-Requested-With': 'com.jingdong.app.mall',
         'Cookie': 'IsvToken=' + token
       }
-    }).then(res => {
+    }).then((res: any) => {
       reloadCookie(res.headers['set-cookie'])
       resolve();
     })

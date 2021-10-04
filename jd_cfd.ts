@@ -490,7 +490,7 @@ function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
         'User-Agent': USER_AGENT,
         'Cookie': cookie
       }
-    }).then(res => {
+    }).then((res: any) => {
       resolve(res.data)
     }).catch(e => {
       reject(e)
@@ -551,7 +551,7 @@ function makeShareCodes() {
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
     axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxcfd?sharecode=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-      .then(res => {
+      .then((res: any) => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')
         else

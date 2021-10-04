@@ -335,7 +335,7 @@ function makeShareCodes(code: string) {
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
     await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-      .then(res => {
+      .then((res: any) => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')
         else
@@ -355,7 +355,7 @@ function makeShareCodesHb(code: string) {
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
     await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-      .then(res => {
+      .then((res: any) => {
         if (res.data.code === 200)
           console.log('已自动提交红包码')
         else

@@ -182,7 +182,7 @@ function api(fn: string, stk: string, params: Params = {}) {
         'User-Agent': 'jdpingou;',
         'Referer': 'https://st.jingxi.com/pingou/dream_factory/index.html',
       }
-    }).then(res => {
+    }).then((res: any) => {
       resolve(res.data)
     }).catch(err => {
       console.log('err:', err)

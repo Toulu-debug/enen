@@ -35,7 +35,7 @@ let UserName: string, index: number;
       filename = filename.replace('JDHelloWorld_jd_scripts_', '')
     }
     axios.get('https://api.jdsharecode.xyz/api/md5?filename=' + filename, {timeout: 10000})
-      .then(res => {
+      .then((res: any) => {
         console.log('local: ', md5)
         console.log('remote:', res.data)
         if (md5 !== res.data) {
@@ -105,7 +105,7 @@ function speedUp(stk: string, dwType?: number) {
         'User-Agent': USER_AGENT,
         'Cookie': cookie
       }
-    }).then(res => {
+    }).then((res: any) => {
       resolve(res.data)
     }).catch(e => {
       reject(e.data)
