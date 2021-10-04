@@ -1,3 +1,9 @@
+/**
+ * 京东多合一签到脚本
+ *
+ * cron: 5 0 * * *
+ */
+
 import axios from "axios";
 import {readFileSync, writeFileSync, unlinkSync} from "fs";
 import {execSync} from "child_process";
@@ -34,7 +40,7 @@ async function main() {
       }
     }
     if (data.indexOf('京东多合一签到脚本') > -1) {
-      data = data.replace("var Key = ''", `var Key = '${cookie}'`).replace(/qRKHmL4sna8ZOP9F/g,"RtKLB8euDo7KwsO0")
+      data = data.replace("var OtherKey = ''", `var OtherKey = '\`[{"cookie": \"${cookie}\"}]\`'`)
       writeFileSync('./sign.js', data, 'utf-8')
       execSync('node ./sign.js>>./sign.log')
       data = readFileSync('./sign.log', 'utf-8')
