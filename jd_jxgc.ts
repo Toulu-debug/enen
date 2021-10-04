@@ -1,13 +1,14 @@
 /**
-* TODO
-* 团
-* 
-* cron: 30 * * * *
-*/
+ * TODO
+ * 团
+ *
+ * cron: 30 * * * *
+ */
 
 import {format} from 'date-fns';
 import axios from "axios";
 import {h5st, requireConfig, requestAlgo, wait} from "./TS_USER_AGENTS";
+import {sendNotify} from './sendNotify';
 
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
@@ -57,6 +58,12 @@ interface Params {
     await wait(1000)
     try {
       productionId = res.data.productionList[0].productionId
+      let investedElectric: number = res.data.productionList[0].investedElectric, needElectric: number = res.data.productionList[0].needElectric, progress: string = (investedElectric / needElectric * 100).toFixed(2)
+      console.log('生产进度:', progress)
+      if (progress === '100.00') {
+        sendNotify("京喜工厂生产完成", `账号${index} ${UserName}`)
+        continue
+      }
     } catch (e) {
       console.log('当前没有产品在生产')
       continue
@@ -84,8 +91,8 @@ interface Params {
         '_time,apptoken,doubleflag,factoryid,pgtimestamp,phoneID,zone',
         {apptoken: '', pgtimestamp: '', phoneID: '', factoryid: factoryId, doubleflag: flag, timeStamp: 'undefined'})
       res.ret === 0
-        ? console.log('发电机收取成功：', res.data.CollectElectricity)
-        : console.log('发电机收取失败：', res)
+        ? console.log('发电机收取成功:', res.data.CollectElectricity)
+        : console.log('发电机收取失败:', res)
     }
     await wait(2000)
 
@@ -93,9 +100,9 @@ interface Params {
     for (let j = 0; j < 3; j++) {
       res = await api('userinfo/InvestElectric', '_time,productionId,zone', {productionId: productionId})
       if (res.ret === 0) {
-        console.log('投入电力：', res.data.investElectric)
+        console.log('投入电力:', res.data.investElectric)
       } else {
-        console.log(res.msg)
+        console.log('投入电力失败:', res)
         break
       }
       await wait(3000)
@@ -108,7 +115,7 @@ interface Params {
         res = await api('friend/HireAward', '_time,date,type,zone', {date: t.date})
         await wait(1000)
         if (res.ret === 0)
-          console.log('收取气泡成功：', t.electricityQuantity)
+          console.log('收取气泡成功:', t.electricityQuantity)
       }
     }
 
