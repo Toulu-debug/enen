@@ -65,7 +65,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number, shareCo
 })()
 
 async function api(params: any) {
-  let {data} = await axios.post("https://api.m.jd.com/client.action", params, {
+  let {data}: any = await axios.post("https://api.m.jd.com/client.action", params, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'User-Agent': USER_AGENT,

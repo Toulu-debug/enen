@@ -31,7 +31,7 @@ let server: string = ''
 })()
 
 async function set(task: any, bearer: string, cron: string) {
-  let {data} = await axios.put(`http://${server}/api/crons?t=${Date.now()}`, JSON.stringify({
+  let {data}: any = await axios.put(`http://${server}/api/crons?t=${Date.now()}`, JSON.stringify({
     "name": task.name, "command": task.command, "schedule": cron, "_id": task._id
   }), {
     headers: {
@@ -48,7 +48,7 @@ async function set(task: any, bearer: string, cron: string) {
 }
 
 async function get(name: string, bearer: string) {
-  let {data} = await axios.get(`http://${server}/api/crons?searchValue=&t=${Date.now()}`, {
+  let {data}: any = await axios.get(`http://${server}/api/crons?searchValue=&t=${Date.now()}`, {
     headers: {
       'Authorization': `Bearer ${bearer}`,
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36',

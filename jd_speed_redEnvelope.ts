@@ -58,7 +58,7 @@ interface userInfo {
 
 function makeShareCodes() {
   return new Promise<void>(async resolve => {
-    let {data} = await axios.get(`https://api.m.jd.com/?functionId=redEnvelopeInteractHome&body={%22linkId%22:%22yMVR-_QKRd2Mq27xguJG-w%22,%22redEnvelopeId%22:%22%22,%22inviter%22:%22%22,%22helpType%22:%22%22}&t=${Date.now()}&appid=activities_platform&clientVersion=3.5.8`, {
+    let {data}: any = await axios.get(`https://api.m.jd.com/?functionId=redEnvelopeInteractHome&body={%22linkId%22:%22yMVR-_QKRd2Mq27xguJG-w%22,%22redEnvelopeId%22:%22%22,%22inviter%22:%22%22,%22helpType%22:%22%22}&t=${Date.now()}&appid=activities_platform&clientVersion=3.5.8`, {
       headers: {
         'host': 'api.m.jd.com',
         'Origin': 'https://618redpacket.jd.com',
@@ -79,7 +79,7 @@ function makeShareCodes() {
 
 function help(redEnvelopeId: string, inviter: string) {
   return new Promise<void>(async resolve => {
-    let {data} = await axios.get(`https://api.m.jd.com/?functionId=redEnvelopeInteractHome&body={%22linkId%22:%22yMVR-_QKRd2Mq27xguJG-w%22,%22redEnvelopeId%22:%22${redEnvelopeId}%22,%22inviter%22:%22${inviter}%22,%22helpType%22:%221%22}&t=${Date.now()}&appid=activities_platform&clientVersion=3.5.8`, {
+    let {data}: any = await axios.get(`https://api.m.jd.com/?functionId=redEnvelopeInteractHome&body={%22linkId%22:%22yMVR-_QKRd2Mq27xguJG-w%22,%22redEnvelopeId%22:%22${redEnvelopeId}%22,%22inviter%22:%22${inviter}%22,%22helpType%22:%221%22}&t=${Date.now()}&appid=activities_platform&clientVersion=3.5.8`, {
       headers: {
         'host': 'api.m.jd.com',
         'Origin': 'https://618redpacket.jd.com',

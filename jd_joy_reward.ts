@@ -62,7 +62,7 @@ function init() {
   return new Promise(async resolve => {
     let lkt = new Date().getTime()
     let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
-    let {data} = await axios.get(`https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&validate=${validate}`, {
+    let {data}: any = await axios.get(`https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&validate=${validate}`, {
       headers: {
         'lkt': lkt,
         'lks': lks,
@@ -90,7 +90,7 @@ function exchange(beanId: number) {
     console.log('exchange()', format(new Date(), 'hh:mm:ss:SSS'))
     let lkt = new Date().getTime()
     let lks = md5('' + 'RtKLB8euDo7KwsO0' + lkt).toString()
-    let {data} = await axios.post(`https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&validate=${validate}`,
+    let {data}: any = await axios.post(`https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=RtKLB8euDo7KwsO0&validate=${validate}`,
       JSON.stringify({"buyParam": {"orderSource": 'pet', "saleInfoId": beanId}, "deviceInfo": {}}), {
         headers: {
           'lkt': lkt,

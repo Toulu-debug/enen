@@ -65,7 +65,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number, id: str
 
 function api(fn: string, body: any) {
   return new Promise(async resolve => {
-    let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=ld&client=m&uuid=${id}&openudid=${id}`, {
+    let {data}: any = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=ld&client=m&uuid=${id}&openudid=${id}`, {
       headers: {
         'User-Agent': USER_AGENT,
         'Host': 'api.m.jd.com',

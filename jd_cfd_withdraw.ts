@@ -118,7 +118,7 @@ function api(fn: string, stk: string, params: Params = {}) {
       }
     }
     url += '&h5st=' + decrypt(stk, url)
-    let {data} = await axios.get(url, {
+    let {data}: any = await axios.get(url, {
       headers: {
         Cookie: cookie,
         Referer: "https://st.jingxi.com/fortune_island/index.html?ptag=138631.26.55",
@@ -133,7 +133,7 @@ function api(fn: string, stk: string, params: Params = {}) {
 async function requestAlgo() {
   fingerprint = await generateFp();
   return new Promise<void>(async resolve => {
-    let {data} = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
+    let {data}: any = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
       "version": "1.0",
       "fp": fingerprint,
       "appId": appId,

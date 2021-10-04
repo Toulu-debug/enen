@@ -50,7 +50,7 @@ let UserName: string, index: number;
 })()
 
 async function api(fn: string, body: any) {
-  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${escape(JSON.stringify(body))}&appid=wh5`, {
+  let {data}: any = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${escape(JSON.stringify(body))}&appid=wh5`, {
     headers: {
       'Referer': 'https://carry.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html',
       'Connection': 'keep-alive',

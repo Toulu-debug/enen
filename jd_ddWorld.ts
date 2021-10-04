@@ -85,7 +85,7 @@ async function api(fn: string, body: string = '') {
 }
 
 async function getIsvToken() {
-  let {data} = await axios.post(`https://api.m.jd.com/client.action?functionId=genToken`,
+  let {data}: any = await axios.post(`https://api.m.jd.com/client.action?functionId=genToken`,
     `body=%7B%22to%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%2Fdd-world%2Fload_app%2Fload_app.html%22%2C%22action%22%3A%22to%22%7D&uuid=4ccb375c539fd92bade&client=apple&clientVersion=10.0.10&st=1631884082694&sv=111&sign=1a49fd69e7d3c18cad91cc00ed40d327`, {
       headers: {
         'Host': 'api.m.jd.com',
@@ -102,7 +102,7 @@ async function getIsvToken() {
 }
 
 async function getIsvToken2() {
-  let {data} = await axios.post("https://api.m.jd.com/client.action?functionId=isvObfuscator",
+  let {data}: any = await axios.post("https://api.m.jd.com/client.action?functionId=isvObfuscator",
     `body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0`, {
       headers: {
         'Host': 'api.m.jd.com',
@@ -119,7 +119,7 @@ async function getIsvToken2() {
 }
 
 async function getToken() {
-  let {data} = await axios.post('https://ddsj-dz.isvjcloud.com/dd-api/jd-user-info',
+  let {data}: any = await axios.post('https://ddsj-dz.isvjcloud.com/dd-api/jd-user-info',
     `token=${token}&source=01`, {
       headers: {
         'Host': 'ddsj-dz.isvjcloud.com',

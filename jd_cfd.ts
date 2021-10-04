@@ -449,7 +449,7 @@ let UserName: string, index: number;
 
   // 获取随机助力码
   try {
-    let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxcfd/20', {timeout: 10000})
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxcfd/20', {timeout: 10000})
     console.log('获取到20个随机助力码:', data.data)
     shareCodes = [...shareCodes, ...data.data]
   } catch (e) {

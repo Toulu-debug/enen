@@ -118,7 +118,7 @@ function mission(fn: string, goodsNumId: number, missionType: string) {
     Object.assign(body.params.admJson, {goodsNumId: goodsNumId})
   }
   return new Promise(async resolve => {
-    let {data} = await axios.post(`https://jinggengjcq-isv.isvjcloud.com/dm/front/foodRunning/complete/mission?open_id=&mix_nick=&bizExtString=&user_id=10299171`,
+    let {data}: any = await axios.post(`https://jinggengjcq-isv.isvjcloud.com/dm/front/foodRunning/complete/mission?open_id=&mix_nick=&bizExtString=&user_id=10299171`,
       JSON.stringify(body), {
         headers: {
           'Origin': 'https://jinggengjcq-isv.isvjcloud.com',
@@ -135,7 +135,7 @@ function mission(fn: string, goodsNumId: number, missionType: string) {
 
 function api(fn: string) {
   return new Promise(async resolve => {
-    let {data} = await axios.post(`https://jinggengjcq-isv.isvjcloud.com/dm/front/foodRunning/${fn}?open_id=&mix_nick=&bizExtString=&user_id=10299171`,
+    let {data}: any = await axios.post(`https://jinggengjcq-isv.isvjcloud.com/dm/front/foodRunning/${fn}?open_id=&mix_nick=&bizExtString=&user_id=10299171`,
       JSON.stringify({
         "jsonRpc": "2.0",
         "params": {
@@ -172,7 +172,7 @@ function api(fn: string) {
 
 function getIsvToken2() {
   return new Promise<void>(async resolve => {
-    let {data} = await axios.post("https://api.m.jd.com/client.action?functionId=isvObfuscator&clientVersion=10.0.2&client=android&uuid=818aa057737ba6a4&st=1623934998790&sign=e571148c8dfb456a1795d249c6aa3956&sv=100", 'body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A//xinruidddj-isv.isvjcloud.com%22%7D', {
+    let {data}: any = await axios.post("https://api.m.jd.com/client.action?functionId=isvObfuscator&clientVersion=10.0.2&client=android&uuid=818aa057737ba6a4&st=1623934998790&sign=e571148c8dfb456a1795d249c6aa3956&sv=100", 'body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A//xinruidddj-isv.isvjcloud.com%22%7D', {
       headers: {
         'Host': 'api.m.jd.com',
         'user-agent': USER_AGENT,

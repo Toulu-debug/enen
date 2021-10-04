@@ -63,7 +63,7 @@ function api(fn: string, stk: string, params: Params = {}) {
       url = fn
     }
     try {
-      let {data} = await axios.get(url, {
+      let {data}: any = await axios.get(url, {
         headers: {
           'Host': 'm.jingxi.com',
           'User-Agent': USER_AGENT,

@@ -197,7 +197,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   }
 
   try {
-    let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/30', {timeout: 10000})
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/30', {timeout: 10000})
     console.log('获取到30个随机红包码:', data.data)
     shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW, ...data.data]
   } catch (e) {
@@ -224,7 +224,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   }
 
   try {
-    let {data} = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
     console.log('获取到30个随机助力码:', data.data)
     shareCodes = [...shareCodes, ...data.data]
   } catch (e) {
@@ -308,7 +308,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
     url = h5st(url, stk, params, 10028) + `&_=${Date.now() + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
   }
   try {
-    let {data} = await axios.get(url, {
+    let {data}: any = await axios.get(url, {
       headers: {
         'User-Agent': UA,
         'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',

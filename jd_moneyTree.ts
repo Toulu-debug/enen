@@ -175,7 +175,7 @@ async function api(fn: string, body: any) {
   } else {
     body = encodeURIComponent(JSON.stringify(body))
   }
-  let {data} = await axios.post(`https://ms.jr.jd.com/gw/generic/uc/h5/m/${fn}?_=${Date.now() * 1000}`,
+  let {data}: any = await axios.post(`https://ms.jr.jd.com/gw/generic/uc/h5/m/${fn}?_=${Date.now() * 1000}`,
     `reqData=${body}`,
     {
       headers: {
@@ -193,7 +193,7 @@ async function api(fn: string, body: any) {
 
 async function mission(fn: string, reqData: string, referer: string) {
   let url = 'https://ms.jr.jd.com/gw/generic/mission/h5/m/' + fn + '?reqData=' + reqData
-  let {data} = await axios.get(url, {
+  let {data}: any = await axios.get(url, {
     headers: {
       'Host': 'ms.jr.jd.com',
       'Origin': referer.split('.com/')[0] + '.com',

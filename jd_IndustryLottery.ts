@@ -53,7 +53,7 @@ let UserName: string, index: number;
 })()
 
 async function api(fn: string, body: any) {
-  let {data} = await axios.post(`https://jdjoy.jd.com/module/task/draw/${fn}`, body, {
+  let {data}: any = await axios.post(`https://jdjoy.jd.com/module/task/draw/${fn}`, body, {
     headers: {
       'Host': 'jdjoy.jd.com',
       'Referer': 'https://prodev.m.jd.com/mall/active/ebLz35DwiVumB6pcrGkqmnhCgmC/index.html',
@@ -67,14 +67,14 @@ async function api(fn: string, body: any) {
 }
 
 async function getTask() {
-  let {data} = await axios.get("https://jdjoy.jd.com/module/task/draw/get?configCode=e1a458713a854e2abb1db2772e540532&unionCardCode=", {
+  let {data}: any = await axios.get("https://jdjoy.jd.com/module/task/draw/get?configCode=e1a458713a854e2abb1db2772e540532&unionCardCode=", {
     headers: {'user-agent': USER_AGENT, 'cookie': cookie}
   })
   return data
 }
 
 async function join() {
-  let {data} = await axios.get("https://jdjoy.jd.com/module/task/draw/join?configCode=e1a458713a854e2abb1db2772e540532&fp=&eid=", {
+  let {data}: any = await axios.get("https://jdjoy.jd.com/module/task/draw/join?configCode=e1a458713a854e2abb1db2772e540532&fp=&eid=", {
     headers: {'user-agent': USER_AGENT, 'cookie': cookie}
   })
   console.log(`抽中：${data.data.rewardName}`)

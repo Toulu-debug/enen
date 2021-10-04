@@ -62,7 +62,7 @@ function getRandomNumberByRange(start: number, end: number) {
 let USER_AGENT = USER_AGENTS[getRandomNumberByRange(0, USER_AGENTS.length)];
 
 async function getBeanShareCode(cookie: string) {
-  let {data} = await axios.post('https://api.m.jd.com/client.action',
+  let {data}: any = await axios.post('https://api.m.jd.com/client.action',
     `functionId=plantBeanIndex&body=${escape(
       JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""})
     )}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
@@ -81,7 +81,7 @@ async function getBeanShareCode(cookie: string) {
 }
 
 async function getFarmShareCode(cookie: string) {
-  let {data} = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
+  let {data}: any = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
     headers: {
       "cookie": cookie,
       "origin": "https://home.m.jd.com",
@@ -121,7 +121,7 @@ function wait(timeout: number) {
 async function requestAlgo(appId = 10032) {
   fingerprint = generateFp();
   return new Promise<void>(async resolve => {
-    let {data} = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
+    let {data}: any = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
       "version": "1.0",
       "fp": fingerprint,
       "appId": appId,

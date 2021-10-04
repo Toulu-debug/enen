@@ -95,7 +95,7 @@ function api(fn: string, stk: string, params: Params = {}) {
     let url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`
     url = h5st(url, stk, params, 10028)
     try {
-      let {data} = await axios.get(url, {
+      let {data}: any = await axios.get(url, {
         headers: {
           'Cookie': cookie,
           'Host': 'm.jingxi.com',
@@ -114,7 +114,7 @@ function getEgg(items: string) {
   items = items.substr(0, items.length - 1)
   let rnd = "abcdefhijkmnprstwxyz".charAt(Math.floor(Math.random() * 4)).toUpperCase();
   return new Promise(async resolve => {
-    let {data} = await axios.get(`https://m.jingxi.com/active/queryprizedetails?actives=${items}&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${rnd}&g_ty=ls`, {
+    let {data}: any = await axios.get(`https://m.jingxi.com/active/queryprizedetails?actives=${items}&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${rnd}&g_ty=ls`, {
       headers: {
         'Cookie': cookie,
         'Host': 'm.jingxi.com',

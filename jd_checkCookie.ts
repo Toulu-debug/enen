@@ -1,6 +1,6 @@
 /**
- * 检测cookie是否有效
- * cron: 0 * * * *
+ * 每天检测cookie是否有效
+ * cron: 10 * * * *
  */
 import axios from "axios";
 import USER_AGENT, {requireConfig} from "./TS_USER_AGENTS";
@@ -22,7 +22,7 @@ let cookie: string = '', UserName: string, index: number, errMsg: string = '';
 })()
 
 async function api(index: number, cookie: string, username: string) {
-  let {data} = await axios.get(`https://me-api.jd.com/user_new/info/GetJDUserInfoUnion`, {
+  let {data}: any = await axios.get(`https://me-api.jd.com/user_new/info/GetJDUserInfoUnion`, {
     headers: {
       Host: "me-api.jd.com",
       Connection: "keep-alive",

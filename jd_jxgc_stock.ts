@@ -45,7 +45,7 @@ let cookie: string = '', res: any = '', UserName: string, message: string = '';
 async function api() {
   let url: string = `https://wq.jd.com/dreamfactory/diminfo/GetCommodityList?zone=dream_factory&flag=2&pageNo=1&pageSize=12&_time=${Date.now()}&_stk=_time%2Cflag%2CpageNo%2CpageSize%2Czone&_ste=1&_=${Date.now()}&sceneval=2`
   url = h5st(url, '_time,flag,pageNo,pageSize,zone', {}, 10001)
-  let {data} = await axios.get(url, {
+  let {data}: any = await axios.get(url, {
     headers: {
       'Host': 'wq.jd.com',
       "User-Agent": USER_AGENT,

@@ -32,7 +32,7 @@ function getRandomNumberByRange(start: number, end: number): number {
 
 async function car(db: string, num: number) {
   try {
-    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/${db}/${num}`, {
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/${db}/${num}`, {
       timeout: 10000
     });
     console.log('获取助力池成功')
@@ -44,7 +44,7 @@ async function car(db: string, num: number) {
 
 async function runTimes() {
   try {
-    let {data} = await axios.get("https://api.jdsharecode.xyz/api/runTimes?activityId=bean&sharecode=123", {timeout: 10000})
+    let {data}: any = await axios.get("https://api.jdsharecode.xyz/api/runTimes?activityId=bean&sharecode=123", {timeout: 10000})
     return '成功'
   } catch (e: any) {
     return `${e}`
