@@ -89,7 +89,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
   }`
   url = h5st(url, stk, params, 10010)
   try {
-    let {data}: any: any = await axios.get(url, {
+    let {data}: any = await axios.get(url, {
       headers: {
         'User-Agent': UA,
         'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',
