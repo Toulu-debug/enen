@@ -197,15 +197,22 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   }
 
   try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/30', {timeout: 10000})
-    console.log('获取到30个随机红包码:', data.data)
-    shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW, ...data.data]
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
+    shareCodesHb_HW = data['jxmchb'] || []
   } catch (e) {
-    console.log('获取助力池失败')
-    shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW]
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
+    // 获取随机红包码
+    try {
+      let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/20', {timeout: 10000})
+      console.log('获取到20个随机红包码:', data.data)
+      shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW, ...data.data]
+    } catch (e) {
+      console.log('获取助力池失败')
+      shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW]
+    }
+
     cookie = cookiesArr[i]
     jxToken = await token(cookie);
     for (let j = 0; j < shareCodesHb.length; j++) {
@@ -223,15 +230,16 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
     }
   }
 
-  try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
-    console.log('获取到30个随机助力码:', data.data)
-    shareCodes = [...shareCodes, ...data.data]
-  } catch (e) {
-    console.log('获取助力池失败')
-  }
-
   for (let i = 0; i < cookiesArr.length; i++) {
+    // 获取随机助力码
+    try {
+      let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
+      console.log('获取到30个随机助力码:', data.data)
+      shareCodes = [...shareCodes, ...data.data]
+    } catch (e) {
+      console.log('获取助力池失败')
+    }
+
     cookie = cookiesArr[i]
     jxToken = await token(cookie);
     for (let j = 0; j < shareCodes.length; j++) {
@@ -322,10 +330,6 @@ async function api(fn: string, stk: string, params: Params = {}) {
   } catch (e) {
     return {}
   }
-}
-
-function randomWord() {
-  return String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))
 }
 
 function makeShareCodes(code: string) {

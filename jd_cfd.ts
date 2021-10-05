@@ -16,7 +16,7 @@ import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
 
 dotenv.config()
-let cookie: string = '', res: any = '', shareCodes: string[] = [], isCollector: Boolean = false, USER_AGENT = 'jdpingou;android;4.13.0;10;b21fede89fb4bc77;network/wifi;model/M2004J7AC;appBuild/17690;partner/xiaomi;;session/704;aid/b21fede89fb4bc77;oaid/dcb5f3e835497cc3;pap/JA2019_3111789;brand/Xiaomi;eu/8313831616035373;fv/7333732616631643;Mozilla/5.0 (Linux; Android 10; M2004J7AC Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.120 Mobile Safari/537.36', token: any = {};
+let cookie: string = '', res: any = '', shareCodes: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = [], isCollector: Boolean = false, USER_AGENT = 'jdpingou;android;4.13.0;10;b21fede89fb4bc77;network/wifi;model/M2004J7AC;appBuild/17690;partner/xiaomi;;session/704;aid/b21fede89fb4bc77;oaid/dcb5f3e835497cc3;pap/JA2019_3111789;brand/Xiaomi;eu/8313831616035373;fv/7333732616631643;Mozilla/5.0 (Linux; Android 10; M2004J7AC Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.120 Mobile Safari/537.36', token: any = {};
 
 interface Params {
   strBuildIndex?: string,
@@ -447,16 +447,23 @@ let UserName: string, index: number;
     }
   }
 
-  // 获取随机助力码
   try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxcfd/20', {timeout: 10000})
-    console.log('获取到20个随机助力码:', data.data)
-    shareCodes = [...shareCodes, ...data.data]
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
+    shareCodesHW = data['jxcfd'] || []
   } catch (e) {
-    console.log('获取助力池失败')
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
+    // 获取随机助力码
+    try {
+      let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxcfd/20', {timeout: 10000})
+      console.log('获取到20个随机助力码:', data.data)
+      shareCodes = [...shareCodesSelf, ...shareCodesHW, ...data.data]
+    } catch (e) {
+      console.log('获取助力池失败')
+      shareCodes = [...shareCodesSelf, ...shareCodesHW]
+    }
+
     for (let j = 0; j < shareCodes.length; j++) {
       cookie = cookiesArr[i]
       console.log(`账号${i + 1}去助力:`, shareCodes[j])
@@ -547,7 +554,7 @@ function makeShareCodes() {
       strVersion: '1.0.1'
     })
     console.log('助力码:', res.strMyShareId)
-    shareCodes.push(res.strMyShareId)
+    shareCodesSelf.push(res.strMyShareId)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
     axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxcfd?sharecode=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
