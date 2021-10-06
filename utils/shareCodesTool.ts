@@ -2,7 +2,7 @@ import axios from "axios";
 import USER_AGENT, {h5st} from "../TS_USER_AGENTS";
 
 async function bean(cookie: string) {
-  let {data} = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${escape(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
+  let {data}: any = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${escape(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
     headers: {
       Cookie: cookie,
       Host: "api.m.jd.com",
@@ -16,7 +16,7 @@ async function bean(cookie: string) {
 }
 
 async function farm(cookie: string) {
-  let {data} = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
+  let {data}: any = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
     headers: {
       "cookie": cookie,
       "origin": "https://home.m.jd.com",
@@ -29,7 +29,7 @@ async function farm(cookie: string) {
 }
 
 async function health(cookie: string) {
-  let {data} = await axios.get(`https://api.m.jd.com/client.action/client.action?functionId=jdhealth_getTaskDetail&body=${escape(JSON.stringify({"buildingId": "", taskId: 6, "channelId": 1}))}&client=wh5&clientVersion=1.0.0`, {
+  let {data}: any = await axios.get(`https://api.m.jd.com/client.action/client.action?functionId=jdhealth_getTaskDetail&body=${escape(JSON.stringify({"buildingId": "", taskId: 6, "channelId": 1}))}&client=wh5&clientVersion=1.0.0`, {
     headers: {
       "Cookie": cookie,
       "origin": "https://h5.m.jd.com",
@@ -42,7 +42,7 @@ async function health(cookie: string) {
 }
 
 async function pet(cookie: string) {
-  let {data} = await axios.post(`https://api.m.jd.com/client.action?functionId=initPetTown`,
+  let {data}: any = await axios.post(`https://api.m.jd.com/client.action?functionId=initPetTown`,
     `body=${escape(JSON.stringify({version: 2, channel: "app"}))}&appid=wh5&loginWQBiz=pet-town&clientVersion=9.0.4`, {
       headers: {
         'Cookie': cookie,
@@ -55,7 +55,7 @@ async function pet(cookie: string) {
 }
 
 async function factory(cookie: string) {
-  let {data} = await axios.post(`https://api.m.jd.com/client.action?functionId=jdfactory_getTaskDetail`,
+  let {data}: any = await axios.post(`https://api.m.jd.com/client.action?functionId=jdfactory_getTaskDetail`,
     `functionId=jdfactory_getTaskDetail&body=${escape(JSON.stringify({}))}&client=wh5&clientVersion=9.1.0`, {
       headers: {
         Cookie: cookie,
@@ -75,7 +75,7 @@ async function factory(cookie: string) {
 }
 
 async function sgmh(cookie: string) {
-  let {data} = await axios.post(`https://api.m.jd.com/client.action`,
+  let {data}: any = await axios.post(`https://api.m.jd.com/client.action`,
     `functionId=interact_template_getHomeData&body={"appId":"1EFRXxg","taskToken":""}&client=wh5&clientVersion=1.0.0`, {
       headers: {
         'Origin': `https://h5.m.jd.com`,
@@ -97,7 +97,7 @@ async function sgmh(cookie: string) {
 async function jxfactory(cookie: string) {
   let url: string = `https://m.jingxi.com/newtasksys/newtasksys_front/GetUserTaskStatusList?source=dreamfactory&bizCode=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent('_time,bizCode,source')}&_ste=1&_=${Date.now()}&sceneval=2`
   url = h5st(url, '_time,bizCode,source', {}, 10001)
-  let {data} = await axios.get(url, {
+  let {data}: any = await axios.get(url, {
     headers: {
       'Referer': 'https://actst.jingxi.com/pingou/dream_factory/index.html',
       'User-Agent': USER_AGENT,
@@ -109,7 +109,7 @@ async function jxfactory(cookie: string) {
 }
 
 async function cash(cookie: string) {
-  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=cash_mob_home&body=${escape(JSON.stringify({}))}&appid=CashRewardMiniH5Env&appid=9.1.0`, {
+  let {data}: any = await axios.get(`https://api.m.jd.com/client.action?functionId=cash_mob_home&body=${escape(JSON.stringify({}))}&appid=CashRewardMiniH5Env&appid=9.1.0`, {
     headers: {
       'Cookie': cookie,
       'Host': 'api.m.jd.com',
