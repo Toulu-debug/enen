@@ -1,7 +1,8 @@
 import axios from "axios";
+import {Md5} from "ts-md5";
 import {format} from 'date-fns';
 import * as dotenv from "dotenv";
-import {Md5} from "ts-md5";
+import {accessSync, readFileSync} from "fs";
 
 const CryptoJS = require('crypto-js')
 dotenv.config()
@@ -222,6 +223,18 @@ function getJxToken(cookie: string) {
   }
 }
 
+function exceptCookie(filename: string = 'x.ts') {
+  let except: string[];
+  try {
+    accessSync('./utils/exceptCookie.json')
+    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString())[filename]
+  } catch (e: any) {
+    except = []
+  }
+  console.log('except:', except)
+  return except
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -233,5 +246,6 @@ export {
   requestAlgo,
   decrypt,
   getJxToken,
-  h5st
+  h5st,
+  exceptCookie
 }

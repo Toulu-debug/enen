@@ -7,8 +7,9 @@
 
 import {format} from 'date-fns';
 import axios from "axios";
-import {h5st, requireConfig, requestAlgo, wait} from "./TS_USER_AGENTS";
+import {h5st, requireConfig, requestAlgo, wait, exceptCookie} from "./TS_USER_AGENTS";
 import {sendNotify} from './sendNotify';
+import * as path from "path";
 
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
@@ -39,11 +40,17 @@ interface Params {
 !(async () => {
   await requestAlgo(10001)
   let cookiesArr: any = await requireConfig();
+  let except: string[] = exceptCookie(path.basename(__filename));
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
     console.log(`\n开始【京东账号${index}】${UserName}\n`);
+
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
 
     res = await api('userinfo/GetUserInfo', '_time,materialTuanId,materialTuanPin,needPickSiteInfo,pin,sharePin,shareType,source,zone', {
       pin: '',

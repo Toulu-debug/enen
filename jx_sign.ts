@@ -4,13 +4,16 @@
  */
 
 import axios from 'axios';
-import {requireConfig, TotalBean, wait, requestAlgo, decrypt, h5st} from './TS_USER_AGENTS';
+import * as path from "path";
+import {requireConfig, TotalBean, wait, requestAlgo, h5st, exceptCookie} from './TS_USER_AGENTS';
 
 let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = require('./sendNotify'), UserName: string, index: number;
 
 !(async () => {
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
+  let except: string[] = exceptCookie(path.basename(__filename));
+
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -22,29 +25,38 @@ let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = requir
     }
     console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
 
-    res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
-    for (let t of res.commontask) {
-      if (t.status === 1) {
-        console.log(t.taskname)
-        res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=${t.task}&signhb_source=5&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBKB&g_ty=ls`, '')
-        if (res.ret === 0) {
-          console.log('任务完成，获得：', res.sendhb)
-        } else {
-          console.log('任务失败：', res.errmsg)
-        }
-        await wait(2000)
-      }
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
     }
 
-    res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
-    if (res.baoxiang_left != 0) {
-      for (let t of res.baoxiang_stage) {
+    try {
+      res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
+      for (let t of res.commontask) {
         if (t.status === 1) {
-          res = await api(`https://m.jingxi.com/fanxiantask/signhb/bxdraw?_=${Date.now()}&sceneval=2`, '')
-          console.log('开宝箱，获得：', res.sendhb)
+          console.log(t.taskname)
+          res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=${t.task}&signhb_source=5&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBKB&g_ty=ls`, '')
+          if (res.ret === 0) {
+            console.log('任务完成，获得：', res.sendhb)
+          } else {
+            console.log('任务失败：', res.errmsg)
+          }
           await wait(2000)
         }
       }
+
+      res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
+      if (res.baoxiang_left != 0) {
+        for (let t of res.baoxiang_stage) {
+          if (t.status === 1) {
+            res = await api(`https://m.jingxi.com/fanxiantask/signhb/bxdraw?_=${Date.now()}&sceneval=2`, '')
+            console.log('开宝箱，获得：', res.sendhb)
+            await wait(2000)
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log(e)
     }
   }
 })()
@@ -78,7 +90,7 @@ function api(fn: string, stk: string, params: Params = {}) {
       } else {
         resolve(data)
       }
-    } catch (e) {
+    } catch (e: any) {
       reject(401)
     }
   })

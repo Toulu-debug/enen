@@ -6,11 +6,21 @@
 
 import {requireConfig, wait, h5st} from "./TS_USER_AGENTS";
 import axios from "axios";
+import * as path from 'path';
+import {accessSync, readFileSync} from "fs";
 
 let cookie: string = '', res: any = '', UserName: string, index: number, UA: string = '';
 let shareCodesInternal: string[] = [];
 
 !(async () => {
+  let except: string[];
+  try {
+    accessSync('./utils/exceptCookie.json')
+    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString())[path.basename(__filename)]
+  } catch (e) {
+    except = []
+  }
+
   let cookiesArr: any = await requireConfig();
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
@@ -18,8 +28,12 @@ let shareCodesInternal: string[] = [];
     index = i + 1;
     console.log(`\n开始【京东账号${index}】${UserName}\n`);
 
-    res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
 
+    res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
     await wait(10000)
     let strUserPin: string = res.Data.strUserPin
     console.log('助力码：', strUserPin)
