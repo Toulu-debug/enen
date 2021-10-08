@@ -53,7 +53,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
     let food: number = 0
     try {
       food = homePageInfo.data.materialinfo[0].value;
-    } catch (e) {
+    } catch (e: any) {
       console.log('未开通？黑号？')
       continue
     }
@@ -64,7 +64,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
     shareCodes.push(homePageInfo.data.sharekey);
     try {
       await makeShareCodes(homePageInfo.data.sharekey);
-    } catch (e) {
+    } catch (e: any) {
       console.log(e)
     }
 
@@ -77,7 +77,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
     shareCodesHbInterval.push(res.data.sharekey)
     try {
       await makeShareCodesHb(res.data.sharekey)
-    } catch (e) {
+    } catch (e: any) {
     }
 
     // 收牛牛
@@ -164,7 +164,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
           break
         }
         await wait(6000)
-      } catch (e) {
+      } catch (e: any) {
         break
       }
     }
@@ -181,7 +181,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
           console.log('锄草奖励:', res.data.prizepool)
           await wait(5000)
         }
-      } catch (e) {
+      } catch (e: any) {
         console.log('Error:', e)
         break
       }
@@ -197,7 +197,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
         await wait(5000)
-      } catch (e) {
+      } catch (e: any) {
         console.log('Error:', e)
         break
       }
@@ -207,7 +207,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   try {
     let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
     shareCodesHb_HW = data['jxmchb'] || []
-  } catch (e) {
+  } catch (e: any) {
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -216,7 +216,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
       let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/20', {timeout: 10000})
       console.log('获取到20个随机红包码:', data.data)
       shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW, ...data.data]
-    } catch (e) {
+    } catch (e: any) {
       console.log('获取助力池失败')
       shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW]
     }
@@ -244,7 +244,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
       let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
       console.log('获取到30个随机助力码:', data.data)
       shareCodes = [...shareCodes, ...data.data]
-    } catch (e) {
+    } catch (e: any) {
       console.log('获取助力池失败')
     }
 
@@ -335,7 +335,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
     if (typeof data === 'string')
       return JSON.parse(data.replace(/jsonpCBK.?\(/, '').split('\n')[0])
     return data
-  } catch (e) {
+  } catch (e: any) {
     return {}
   }
 }

@@ -224,10 +224,10 @@ function getJxToken(cookie: string) {
 }
 
 function exceptCookie(filename: string = 'x.ts') {
-  let except: string[];
+  let except: string[] = [];
   try {
     accessSync('./utils/exceptCookie.json')
-    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString())[filename]
+    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename]
   } catch (e: any) {
     except = []
   }
