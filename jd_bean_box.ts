@@ -80,11 +80,3 @@ async function getSign(fn: string, body: object) {
   else
     return {code: 500, data: {sign: ''}}
 }
-
-function randomString(e: number) {
-  e = e || 32;
-  let t = "abcdefhijkmnprstwxyz123456789", a = t.length, n = "";
-  for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a));
-  return n
-}
