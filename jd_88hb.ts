@@ -4,13 +4,14 @@
  * cron: 5 0,6,20 * * *
  */
 
-import {requireConfig, wait, h5st} from "./TS_USER_AGENTS";
+import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
 import axios from "axios";
 import * as path from 'path';
 import {accessSync, readFileSync} from "fs";
+import {Md5} from "ts-md5";
 
 let cookie: string = '', res: any = '', UserName: string, index: number, UA: string = '';
-let shareCodesInternal: string[] = [];
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [];
 
 !(async () => {
   let except: string[];
@@ -34,39 +35,36 @@ let shareCodesInternal: string[] = [];
     }
 
     res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
-    await wait(10000)
     let strUserPin: string = res.Data.strUserPin
     console.log('助力码：', strUserPin)
-    shareCodesInternal.push(strUserPin)
+    shareCodesSelf.push(strUserPin)
+    await makeShareCodes(strUserPin)
     await wait(2000)
-
     res = await api('JoinActive', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp')
-    if (res.iRet === 0) {
-      console.log('JoinActive: 成功')
-    } else {
-      console.log(JSON.stringify(res))
-    }
-    await wait(2000)
+    res.iRet === 0 ? console.log('JoinActive: 成功') : console.log('JoinActive:', res.sErrMsg)
+    await wait(1000)
   }
 
-  console.log('内部助力码：', shareCodesInternal)
-  await wait(2000)
-  res = await getCodes();
-  if (res.length !== 0) {
-    console.log('追加HW.ts助力码')
-    shareCodesInternal = [...shareCodesInternal, ...res]
-    console.log('助力排队：', shareCodesInternal)
-  }
-
+  console.log('内部助力码：', shareCodesSelf)
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
 
-    for (let j = 0; j < shareCodesInternal.length; j++) {
-      console.log(`账号${i + 1} ${UserName} 去助力 ${shareCodesInternal[j]}`)
-      res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {joinDate: '20211004', strPin: shareCodesInternal[j]})
+    await getCodesHW()
+    if (shareCodesHW.length !== 0) {
+      res = await getCodesPool()
+      shareCodes = [...new Set([...shareCodesSelf, ...shareCodesHW, ...res])]
+    } else {
+      shareCodes = shareCodesSelf
+    }
+    console.log('助力排队:', shareCodes)
+
+    for (let j = 0; j < shareCodes.length; j++) {
+      console.log(`账号${i + 1} ${UserName} 去助力 ${shareCodes[j]}`)
+      res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {joinDate: '20211004', strPin: shareCodes[j]})
       if (res.iRet === 0) {
         console.log('成功')
+        await wait(5000)
       } else if (res.iRet === 2015) {
         console.log('上限')
         break
@@ -75,8 +73,8 @@ let shareCodesInternal: string[] = [];
         break
       } else {
         console.log('其他错误:', res)
+        break
       }
-      await wait(5000)
     }
   }
 
@@ -94,9 +92,7 @@ let shareCodesInternal: string[] = [];
 
     for (let t of res.Data.gradeConfig) {
       if (dwHelpedTimes >= t.dwHelpTimes) {
-        res = await api('DoGradeDraw',
-          'activeId,channel,grade,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp',
-          {grade: t.dwGrade, strPin: strUserPin})
+        res = await api('DoGradeDraw', 'activeId,channel,grade,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {grade: t.dwGrade, strPin: strUserPin})
         if (res.iRet === 2018)
           console.log(`等级${t.dwGrade}红包已打开过`)
         else if (res.iRet === 0)
@@ -149,12 +145,39 @@ async function api(fn: string, stk: string, params: Params = {}) {
   }
 }
 
-async function getCodes() {
+async function getCodesHW() {
   try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 5000})
-    return data['88hb']
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
+    console.log('获取HW_CODES成功')
+    shareCodesHW = data['88hb']
   } catch (e: any) {
+    console.log('获取HW_CODES失败')
+  }
+}
+
+async function getCodesPool() {
+  try {
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/hb88/30', {timeout: 10000})
+    return data.data
+  } catch (e: any) {
+    console.log('获取助力池出错')
     return []
+  }
+}
+
+async function makeShareCodes(code: string) {
+  let bean: string = await getBeanShareCode(cookie)
+  let farm: string = await getFarmShareCode(cookie)
+  let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
+  pin = Md5.hashStr(pin)
+  try {
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/hb88?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    if (data.code === 200)
+      console.log('自动提交助力码成功')
+    else
+      console.log('自动提交助力码失败！已提交farm的cookie才可提交88hb')
+  } catch (e: any) {
+    console.log('自动提交助力码出错')
   }
 }
 
