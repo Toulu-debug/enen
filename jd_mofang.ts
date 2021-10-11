@@ -22,7 +22,6 @@ const DEBUG = false;
     let sign: string = res.result.taskConfig.projectId
     DEBUG ? console.log(JSON.stringify(res)) : ''
 
-    console.log('sing:', sign)
     res = await api(`functionId=queryInteractiveInfo&body=%7B%22encryptProjectId%22%3A%22${sign}%22%2C%22sourceCode%22%3A%22acexinpin0823%22%2C%22ext%22%3A%7B%7D%7D&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
     DEBUG ? console.log(JSON.stringify(res)) : ''
 
@@ -97,13 +96,14 @@ const DEBUG = false;
     await wait(2000)
   }
 
-  cookie = cookiesArr[1];
-  UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-  let code: any = shareCodeSelf[0]
-  console.log(`账号2 ${UserName} 去助力 ${code.itemId}`)
-  res = await api(`functionId=doInteractiveAssignment&body=%7B%22encryptProjectId%22%3A%22${code.encryptProjectId}%22%2C%22encryptAssignmentId%22%3A%22${code.encryptAssignmentId}%22%2C%22sourceCode%22%3A%22acexinpin0823%22%2C%22itemId%22%3A%22${code.itemId}%22%2C%22actionType%22%3A%22%22%2C%22completionFlag%22%3A%22%22%2C%22ext%22%3A%7B%7D%7D&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-  console.log('助力结果:', res)
-
+  if(shareCodeSelf[0]) {
+    cookie = cookiesArr[1];
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    let code: any = shareCodeSelf[0]
+    console.log(`账号2 ${UserName} 去助力 ${code.itemId}`)
+    res = await api(`functionId=doInteractiveAssignment&body=%7B%22encryptProjectId%22%3A%22${code.encryptProjectId}%22%2C%22encryptAssignmentId%22%3A%22${code.encryptAssignmentId}%22%2C%22sourceCode%22%3A%22acexinpin0823%22%2C%22itemId%22%3A%22${code.itemId}%22%2C%22actionType%22%3A%22%22%2C%22completionFlag%22%3A%22%22%2C%22ext%22%3A%7B%7D%7D&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+    console.log('助力结果:', res)
+  }
 })()
 
 async function api(params: any) {

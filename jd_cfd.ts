@@ -1,19 +1,17 @@
 /**
  * 京喜财富岛
  * 包含雇佣导游，建议每小时1次
- *
- * 此版本暂定默认帮助HelloWorld，帮助助力池
- * export HELP_HW = true    // 帮助HelloWorld
- * export HELP_POOL = true  // 帮助助力池
- *
  * 使用jd_env_copy.js同步js环境变量到ts
  * 使用jd_ts_test.ts测试环境变量
+ *
+ * cron: 0 * * * *
  */
 
 import axios from 'axios';
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange} from './TS_USER_AGENTS';
 import {Md5} from 'ts-md5'
 import * as dotenv from 'dotenv';
+import {getDate} from 'date-fns';
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange} from './TS_USER_AGENTS';
 
 dotenv.config()
 let cookie: string = '', res: any = '', shareCodes: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = [], isCollector: Boolean = false, USER_AGENT = 'jdpingou;android;4.13.0;10;b21fede89fb4bc77;network/wifi;model/M2004J7AC;appBuild/17690;partner/xiaomi;;session/704;aid/b21fede89fb4bc77;oaid/dcb5f3e835497cc3;pap/JA2019_3111789;brand/Xiaomi;eu/8313831616035373;fv/7333732616631643;Mozilla/5.0 (Linux; Android 10; M2004J7AC Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.120 Mobile Safari/537.36', token: any = {};
@@ -62,6 +60,10 @@ interface Params {
   size?: number,
   type?: number,
   strLT?: string,
+  dwQueryType?: number,
+  dwPageIndex?: number,
+  dwPageSize?: number,
+  dwProperty?: number,
 }
 
 let UserName: string, index: number;
@@ -80,6 +82,24 @@ let UserName: string, index: number;
     } catch (e) {
       console.log(e)
     }
+
+    // 当日累计获得财富
+    let todayMoney: number = 0, flag: boolean = true;
+    for (let dwPageIndex = 0; dwPageIndex < 5; dwPageIndex++) {
+      if (!flag) break
+      res = await api('user/GetMoneyDetail', '_cfd_t,bizCode,dwEnv,dwPageIndex,dwPageSize,dwProperty,dwQueryType,ptag,source,strZone',
+        {dwQueryType: 0, dwPageIndex: 1, dwPageSize: 10, dwProperty: 1})
+      await wait(1000)
+      for (let t of res?.Detail) {
+        if (getDate(t.ddwTime * 1000) === getDate(new Date())) {
+          todayMoney += t.ddwValue
+        } else {
+          flag = false
+          break
+        }
+      }
+    }
+    console.log('今日累计获得财富:', todayMoney)
 
     // 离线
     res = await api('user/QueryUserInfo',
