@@ -23,6 +23,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
   }
 
   let cookiesArr: any = await requireConfig();
+
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -47,16 +48,17 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
   }
 
   console.log('内部助力码：', shareCodesSelf)
+
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
 
     await getCodesHW()
+    shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     if (shareCodesHW.length !== 0) {
-      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
-    } else {
-      await getCodesHW_ghproxy()
-      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+      console.log('获取随机助力码')
+      res = await getCodesPool();
+      shareCodes = Array.from(new Set([...shareCodes, ...res]))
     }
     console.log('助力排队:', shareCodes)
 
@@ -86,11 +88,11 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     console.log(`\n开始【京东账号${index}】${UserName} 拆红包\n`);
 
     res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
-    let strUserPin: string = res.Data.strUserPin;
+    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes;
     await wait(2000)
 
     for (let t of res.Data.gradeConfig) {
-      if (res.Data.dwHelpedTimes >= t.dwHelpTimes) {
+      if (dwHelpedTimes >= t.dwHelpTimes) {
         res = await api('DoGradeDraw', 'activeId,channel,grade,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {grade: t.dwGrade, strPin: strUserPin})
         if (res.iRet === 2018)
           console.log(`等级${t.dwGrade}红包已打开过`)
@@ -147,20 +149,10 @@ async function api(fn: string, stk: string, params: Params = {}) {
 async function getCodesHW() {
   try {
     let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
-    console.log('获取HW_CODES成功')
+    console.log('获取HW_CODES成功(api)')
     shareCodesHW = data['88hb']
   } catch (e: any) {
-    console.log('获取HW_CODES失败')
-  }
-}
-
-async function getCodesHW_ghproxy() {
-  try {
-    let {data}: any = await axios.get('https://ghproxy.com/https://raw.githubusercontent.com/JDHelloWorld/jd_ShareCodes/main/jd_88hb.json', {timeout: 10000})
-    console.log('获取HW_CODES成功')
-    shareCodesHW = JSON.parse(data)
-  } catch (e: any) {
-    console.log('获取HW_CODES(ghproxy)失败')
+    console.log('获取HW_CODES失败(api)')
   }
 }
 

@@ -9,7 +9,7 @@ import {sendNotify} from './sendNotify';
 import {accessSync, readFileSync, writeFileSync} from "fs";
 import {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS";
 
-let cookie: string = '', UserName: string, index: number, allMessage: string = '', message: string = '';
+let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = '';
 
 !(async () => {
   let cookiesArr: any = await requireConfig();
@@ -32,15 +32,15 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
       continue
     }
 
-    let res: any = await getOrderList(), message = '';
+    message = ''
+    res = await getOrderList()
     for (let order of res.orderList) {
       let orderId: string = order['orderId'], title: string = order['productList'][0]['title'], t: string = order['progressInfo']['tip'], status: string = order['progressInfo']['content']
-      if (status.match(/(?=已签收|已取走)/)) continue
+      if (status.match(/(?=签收|已取走|已暂存)/)) continue
       console.log(title)
       console.log('\t', t, status)
       console.log()
       if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
-        console.log(orderId, '状态更新')
         message += `${title}\n${t}  ${status}\n\n`
       }
       orders[orderId] = {
