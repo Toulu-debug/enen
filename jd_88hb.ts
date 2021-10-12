@@ -1,7 +1,7 @@
 /**
  * 京喜app->领88元红包
  * 先内部，后助力HW.ts
- * cron: 5 0,6,20 * * *
+ * cron: 5 0,6,18 * * *
  */
 
 import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
@@ -35,7 +35,8 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     }
 
     res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
-    let strUserPin: string = res.Data.strUserPin
+    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes;
+    console.log('收到助力:', dwHelpedTimes)
     console.log('助力码：', strUserPin)
     shareCodesSelf.push(strUserPin)
     await makeShareCodes(strUserPin)
@@ -52,10 +53,10 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
 
     await getCodesHW()
     if (shareCodesHW.length !== 0) {
-      res = await getCodesPool()
-      shareCodes = [...new Set([...shareCodesSelf, ...shareCodesHW, ...res])]
+      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     } else {
-      shareCodes = shareCodesSelf
+      await getCodesHW_ghproxy()
+      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     }
     console.log('助力排队:', shareCodes)
 
@@ -64,7 +65,6 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
       res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {joinDate: '20211004', strPin: shareCodes[j]})
       if (res.iRet === 0) {
         console.log('成功')
-        await wait(5000)
       } else if (res.iRet === 2015) {
         console.log('上限')
         break
@@ -73,8 +73,8 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
         break
       } else {
         console.log('其他错误:', res)
-        break
       }
+      await wait(5000)
     }
   }
 
@@ -86,12 +86,11 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     console.log(`\n开始【京东账号${index}】${UserName} 拆红包\n`);
 
     res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
-    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes;
-    console.log('收到助力:', dwHelpedTimes)
+    let strUserPin: string = res.Data.strUserPin;
     await wait(2000)
 
     for (let t of res.Data.gradeConfig) {
-      if (dwHelpedTimes >= t.dwHelpTimes) {
+      if (res.Data.dwHelpedTimes >= t.dwHelpTimes) {
         res = await api('DoGradeDraw', 'activeId,channel,grade,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {grade: t.dwGrade, strPin: strUserPin})
         if (res.iRet === 2018)
           console.log(`等级${t.dwGrade}红包已打开过`)
@@ -152,6 +151,16 @@ async function getCodesHW() {
     shareCodesHW = data['88hb']
   } catch (e: any) {
     console.log('获取HW_CODES失败')
+  }
+}
+
+async function getCodesHW_ghproxy() {
+  try {
+    let {data}: any = await axios.get('https://ghproxy.com/https://raw.githubusercontent.com/JDHelloWorld/jd_ShareCodes/main/jd_88hb.json', {timeout: 10000})
+    console.log('获取HW_CODES成功')
+    shareCodesHW = JSON.parse(data)
+  } catch (e: any) {
+    console.log('获取HW_CODES(ghproxy)失败')
   }
 }
 
