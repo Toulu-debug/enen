@@ -10,8 +10,8 @@ import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5
 
 const cow = require('./utils/jd_jxmc.js').cow;
 const token = require('./utils/jd_jxmc.js').token;
-const UA = `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random() * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
-let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, activeid: string = 'null', activekey: string = 'null', jxToken: any, UserName: string, index: number;
+
+let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, jxToken: any, UserName: string, index: number;
 let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodesHb_HW: string[] = [];
 
 !(async () => {
@@ -40,8 +40,6 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
       isquerypicksite: 1,
       isqueryinviteicon: 1
     })
-    activeid = homePageInfo.data.activeid
-    activekey = homePageInfo.data.activekey || null
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
       lastgettime = homePageInfo.data.cow.lastgettime
@@ -315,18 +313,16 @@ async function getTask() {
 }
 
 async function api(fn: string, stk: string, params: Params = {}) {
-  let url: string = ''
+  let url: string;
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1`
-    url = h5st(url, stk, params, 10028) + '&sceneval=2&g_login_type=1&g_ty=ajax'
+    url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
   } else {
-    url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=${activeid}&activekey=${activekey}&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1`
-    url = h5st(url, stk, params, 10028) + `&_=${Date.now() + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now() + 2}&sceneval=2`, stk, params, 10028)
   }
   try {
     let {data}: any = await axios.get(url, {
       headers: {
-        'User-Agent': UA,
+        'User-Agent': 'jdpingou;',
         'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',
         'Host': 'm.jingxi.com',
         'Cookie': cookie
@@ -378,12 +374,4 @@ function makeShareCodesHb(code: string) {
         reject('访问助力池出错')
       })
   })
-}
-
-function randomString(e) {
-  e = e || 32;
-  let t = "0123456789abcdef", a = t.length, n = "";
-  for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a));
-  return n
 }

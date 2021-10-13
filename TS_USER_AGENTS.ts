@@ -227,12 +227,20 @@ function exceptCookie(filename: string = 'x.ts') {
   let except: string[] = [];
   try {
     accessSync('./utils/exceptCookie.json')
-    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename]
+    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename] || []
   } catch (e: any) {
     except = []
   }
   console.log('except:', except)
   return except
+}
+
+function randomString(e: number, word?: number) {
+  e = e || 32;
+  let t = word === 26 ? "012345678abcdefghijklmnopqrstuvwxyz" : "0123456789abcdef", a = t.length, n = "";
+  for (let i = 0; i < e; i++)
+    n += t.charAt(Math.floor(Math.random() * a));
+  return n
 }
 
 export default USER_AGENT
@@ -247,5 +255,6 @@ export {
   decrypt,
   getJxToken,
   h5st,
-  exceptCookie
+  exceptCookie,
+  randomString
 }

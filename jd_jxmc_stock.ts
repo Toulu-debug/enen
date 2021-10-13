@@ -8,7 +8,7 @@ import axios from 'axios';
 import {requireConfig, requestAlgo, wait, getRandomNumberByRange, h5st} from './TS_USER_AGENTS';
 import {readFileSync, writeFileSync, accessSync} from "fs";
 
-const notify = require('./sendNotify'), jxmcToken = require('./utils/jd_jxmc.js').getToken;
+const notify = require('./sendNotify'), jxmcToken = require('./utils/jd_jxmc.js').token;
 let cookie: string = '', res: any = '', UserName: string;
 
 !(async () => {
