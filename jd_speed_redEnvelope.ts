@@ -13,6 +13,7 @@ let shareCodesSelf: { redEnvelopeId: string, inviter: string }[] = [], shareCode
 !(async () => {
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
+  console.log('延迟10秒...')
   await wait(10 * 1000)
 
   for (let i = 0; i < cookiesArr.length; i++) {

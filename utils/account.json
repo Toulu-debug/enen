@@ -1,10 +1,11 @@
 [
   {
-    "pt_pin": "CK中pt_pin的值",
-    "remarks": "备注"
+    "pt_pin": "与jdCookie中pt_pin相同，禁止出现中文",
+    "remarks": "备注",
+    "wxpusher_uid": "uid"
   },
   {
-    "pt_pin": "jd_abcdef",
-    "remarks": "二奶"
+    "pt_pin": "jd_xxxx",
+    "remarks": "大师兄"
   }
 ]
