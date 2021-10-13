@@ -1,6 +1,5 @@
 /**
  * 极速版-发财大赢家
- * 助力顺序: 内部 -> HW.ts
  * cron : 0 0,8,20 * * *
  */
 
@@ -13,9 +12,7 @@ let shareCodesSelf: { redEnvelopeId: string, inviter: string }[] = [], shareCode
 !(async () => {
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
-  console.log('延迟10秒...')
-  await wait(10 * 1000)
-
+  await wait(30 * 1000)
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -38,14 +35,15 @@ let shareCodesSelf: { redEnvelopeId: string, inviter: string }[] = [], shareCode
   }
 
   console.log('内部助力码:', shareCodesSelf)
-  await getCodesHW();
-  shareCodes = [...shareCodesSelf, ...shareCodesHW]
-  // shareCodes = [...shareCodesSelf]
-  console.log('助力排队:', shareCodes)
 
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    await getCodesHW();
+    if (i === 0)
+      shareCodes = [...shareCodesHW, ...shareCodesSelf]
+    else
+      shareCodes = [...shareCodesSelf, ...shareCodesHW]
 
     for (let boss of shareCodes) {
       console.log(`账号${i + 1} ${UserName} 去助力 `, boss.redEnvelopeId)
