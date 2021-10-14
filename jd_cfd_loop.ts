@@ -1,10 +1,10 @@
 /**
  * 财富岛热气球挂后台
- * export CFD_LOOP_DELAY=20000  // 捡气球间隔时间，单位毫秒
+ * cron: 0 * * * *
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, requestAlgo, decrypt, h5st} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, requestAlgo, h5st} from './TS_USER_AGENTS'
 import * as dotenv from 'dotenv'
 
 const crypto = require('crypto')
@@ -20,7 +20,7 @@ let UserName: string, index: number;
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
 
-  let filename: string = __filename.split('/').pop()!
+  /*let filename: string = __filename.split('/').pop()!
   let stream = fs.createReadStream(filename);
   let fsHash = crypto.createHash('md5');
 
@@ -47,7 +47,7 @@ let UserName: string, index: number;
 
     })
   });
-
+*/
   while (1) {
     for (let i = 0; i < cookiesArr.length; i++) {
       cookie = cookiesArr[i];
@@ -66,7 +66,7 @@ let UserName: string, index: number;
             balloon = 500
           }
         }
-
+/*
         let shell: any = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strZone')
         if (shell.Data.hasOwnProperty('NormShell')) {
           for (let s of shell.Data.NormShell) {
@@ -81,6 +81,8 @@ let UserName: string, index: number;
             }
           }
         }
+
+ */
       } catch (e) {
         console.log(e)
       }
