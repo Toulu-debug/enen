@@ -25,7 +25,7 @@ const $ = new Env("东东健康社区");
 console.log('\n====================Hello World====================\n')
 
 const jdCookieNode = $.isNode() ? require("./jdCookie.js") : "";
-let cookiesArr = [], cookie = "", message, runTimesErr = '', runTimesErrCount = 0;
+let cookiesArr = [], cookie = "", message;
 const inviteCodes = ['']
 const randomCount = $.isNode() ? 20 : 5;
 if ($.isNode()) {
@@ -61,14 +61,10 @@ const JD_API_HOST = "https://api.m.jd.com/client.action";
       $.index = i + 1;
       message = "";
       console.log(`\n******开始【京东账号${$.index}】${$.UserName}*********\n`);
-      runTimesErrCount = 0;
       await shareCodesFormat()
       await main()
       await showMsg()
     }
-  }
-  if (runTimesErr) {
-    await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
   }
 })()
   .catch((e) => {
@@ -146,10 +142,6 @@ function getTaskDetail(taskId = '') {
                     await runTimes()
                     break
                   } catch (e) {
-                    runTimesErrCount++
-                    if (runTimesErrCount === 5) {
-                      runTimesErr += `${$.UserName}:${e}\n`
-                    }
                   }
                   await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
                 }

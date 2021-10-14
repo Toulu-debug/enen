@@ -1647,7 +1647,7 @@ let notifyLevel = $.isNode() ? process.env.JXGC_NOTIFY_LEVEL || 2 : 2;
 const randomCount = $.isNode() ? 20 : 5;
 let tuanActiveId = ``, hasSend = false;
 const jxOpenUrl = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://wqsd.jd.com/pingou/dream_factory/index.html%22%20%7D`;
-let cookiesArr = [], cookie = '', message = '', allMessage = '', runTimesErr = '', runTimesErrCount = 0;
+let cookiesArr = [], cookie = '', message = '', allMessage = '';
 const inviteCodes = [''];
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 $.tuanIds = [];
@@ -1685,7 +1685,6 @@ if ($.isNode()) {
       $.canHelpFlag = true;//能否助力朋友(招工)
       $.tuanNum = 0;//成团人数
       console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-      runTimesErrCount = 0
       await jdDreamFactory()
     }
   }
@@ -1712,9 +1711,6 @@ if ($.isNode()) {
   }
   if ($.isNode() && allMessage) {
     await notify.sendNotify(`${$.name}`, `${allMessage}`, {url: jxOpenUrl})
-  }
-  if (runTimesErr) {
-    await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
   }
 })()
 
@@ -2223,16 +2219,12 @@ function userInfo() {
               $.productionId = production.productionId;//商品ID
               $.commodityDimId = production.commodityDimId;
               $.encryptPin = data.user.encryptPin;
-              for (let k = 0; k < 3; k++) {
+              for (let k = 0; k < 5; k++) {
                 try {
                   await runTimes()
                   console.log('ok')
                   break
                 } catch (e) {
-                  runTimesErrCount++
-                  if (runTimesErrCount === 3) {
-                    runTimesErr += `${$.UserName}:${e}\n`
-                  }
                 }
                 await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
               }

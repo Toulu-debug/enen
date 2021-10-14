@@ -31,7 +31,7 @@ let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, n
 //助力好友分享码(最多3个,否则后面的助力失败),原因:京东农场每人每天只有3次助力机会
 //此此内容是IOS用户下载脚本到本地使用，填写互助码的地方，同一京东账号的好友互助码请使用@符号隔开。
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
-let shareCodes = [''], message = '', subTitle = '', option = {}, isFruitFinished = false, runTimesErr = '', runTimesErrCount = 0;
+let shareCodes = [''], message = '', subTitle = '', option = {}, isFruitFinished = false;
 const retainWater = 100;//保留水滴大于多少g,默认100g;
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
 let jdFruitBeanCard = false;//农场使用水滴换豆卡(如果出现限时活动时100g水换20豆,此时比浇水划算,推荐换豆),true表示换豆(不浇水),false表示不换豆(继续浇水),脚本默认是浇水
@@ -55,16 +55,12 @@ const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%2
       message = '';
       subTitle = '';
       option = {};
-      runTimesErrCount = 0
       await shareCodesFormat();
       await jdFruit();
     }
   }
   if ($.isNode() && allMessage && $.ctrTemp) {
     await notify.sendNotify(`${$.name}`, `${allMessage}`)
-  }
-  if (runTimesErr) {
-    await notify.sendNotify(`${$.name}上报失败`, runTimesErr, '', '\n\n你好,世界!')
   }
 })()
   .catch((e) => {
@@ -81,15 +77,11 @@ async function jdFruit() {
     if ($.farmInfo.farmUserPro) {
       console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.farmInfo.farmUserPro.shareCode}\n`);
       // var _0xodM='jsjiami.com.v6',_0x550c=[_0xodM,'w73DocOSw7VpwqfCpMK0PA==','LcO0wr4=','wp5ZFcKlaQrCg8Ocw4DDhQdqwqkSw6zDqMKRwpvDl8O8bzPDsMOow68Dw4zCkMKJdFEdw7oOQ8OSw6/CuVDDoFVVw6wNw6bDsDFr','wrJnD3jDvhzCq2s=','w7RGcsKRw6YedMKlFT4s','tfjswZUjniPaBmKxif.cofVmLyZR.v6=='];(function(_0x18685d,_0x54b311,_0x3e2715){var _0x1aff3e=function(_0x19e57e,_0x1d3dbb,_0x31a78c,_0x5d1cd6,_0x4af20a){_0x1d3dbb=_0x1d3dbb>>0x8,_0x4af20a='po';var _0x3ca49f='shift',_0x348d34='push';if(_0x1d3dbb<_0x19e57e){while(--_0x19e57e){_0x5d1cd6=_0x18685d[_0x3ca49f]();if(_0x1d3dbb===_0x19e57e){_0x1d3dbb=_0x5d1cd6;_0x31a78c=_0x18685d[_0x4af20a+'p']()}else if(_0x1d3dbb&&_0x31a78c['replace'](/[tfwZUnPBKxffVLyZR=]/g,'')===_0x1d3dbb){_0x18685d[_0x348d34](_0x5d1cd6)}}_0x18685d[_0x348d34](_0x18685d[_0x3ca49f]())}return 0x8ee01};return _0x1aff3e(++_0x54b311,_0x3e2715)>>_0x54b311^_0x3e2715}(_0x550c,0x1e6,0x1e600));var _0x56ae=function(_0x9dfad4,_0x5af61c){_0x9dfad4=~~'0x'['concat'](_0x9dfad4);var _0x180975=_0x550c[_0x9dfad4];if(_0x56ae['TrXWFK']===undefined){(function(){var _0x5b497c=typeof window!=='undefined'?window:typeof process==='object'&&typeof require==='function'&&typeof global==='object'?global:this;var _0x1c7080='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';_0x5b497c['atob']||(_0x5b497c['atob']=function(_0x21d9fa){var _0x576004=String(_0x21d9fa)['replace'](/=+$/,'');for(var _0x50bbdc=0x0,_0x1b1550,_0x484f09,_0x223432=0x0,_0x45757a='';_0x484f09=_0x576004['charAt'](_0x223432++);~_0x484f09&&(_0x1b1550=_0x50bbdc%0x4?_0x1b1550*0x40+_0x484f09:_0x484f09,_0x50bbdc++%0x4)?_0x45757a+=String['fromCharCode'](0xff&_0x1b1550>>(-0x2*_0x50bbdc&0x6)):0x0){_0x484f09=_0x1c7080['indexOf'](_0x484f09)}return _0x45757a})}());var _0x55e6ce=function(_0x5ed5c0,_0x5af61c){var _0x1bcac9=[],_0x5c48b3=0x0,_0xb1ae11,_0x1d198f='',_0x5a5729='';_0x5ed5c0=atob(_0x5ed5c0);for(var _0x31d246=0x0,_0x505008=_0x5ed5c0['length'];_0x31d246<_0x505008;_0x31d246++){_0x5a5729+='%'+('00'+_0x5ed5c0['charCodeAt'](_0x31d246)['toString'](0x10))['slice'](-0x2)}_0x5ed5c0=decodeURIComponent(_0x5a5729);for(var _0x4a1af4=0x0;_0x4a1af4<0x100;_0x4a1af4++){_0x1bcac9[_0x4a1af4]=_0x4a1af4}for(_0x4a1af4=0x0;_0x4a1af4<0x100;_0x4a1af4++){_0x5c48b3=(_0x5c48b3+_0x1bcac9[_0x4a1af4]+_0x5af61c['charCodeAt'](_0x4a1af4%_0x5af61c['length']))%0x100;_0xb1ae11=_0x1bcac9[_0x4a1af4];_0x1bcac9[_0x4a1af4]=_0x1bcac9[_0x5c48b3];_0x1bcac9[_0x5c48b3]=_0xb1ae11}_0x4a1af4=0x0;_0x5c48b3=0x0;for(var _0x4ab663=0x0;_0x4ab663<_0x5ed5c0['length'];_0x4ab663++){_0x4a1af4=(_0x4a1af4+0x1)%0x100;_0x5c48b3=(_0x5c48b3+_0x1bcac9[_0x4a1af4])%0x100;_0xb1ae11=_0x1bcac9[_0x4a1af4];_0x1bcac9[_0x4a1af4]=_0x1bcac9[_0x5c48b3];_0x1bcac9[_0x5c48b3]=_0xb1ae11;_0x1d198f+=String['fromCharCode'](_0x5ed5c0['charCodeAt'](_0x4ab663)^_0x1bcac9[(_0x1bcac9[_0x4a1af4]+_0x1bcac9[_0x5c48b3])%0x100])}return _0x1d198f};_0x56ae['bOiAGc']=_0x55e6ce;_0x56ae['KmZWnF']={};_0x56ae['TrXWFK']=!![]}var _0x185e39=_0x56ae['KmZWnF'][_0x9dfad4];if(_0x185e39===undefined){if(_0x56ae['BSENLY']===undefined){_0x56ae['BSENLY']=!![]}_0x180975=_0x56ae['bOiAGc'](_0x180975,_0x5af61c);_0x56ae['KmZWnF'][_0x9dfad4]=_0x180975}else{_0x180975=_0x185e39}return _0x180975};$[_0x56ae('0','vJiY')]({'url':_0x56ae('1','&9fy')+$[_0x56ae('2','3F$k')][_0x56ae('3','cGU]')][_0x56ae('4','*%YH')]});_0xodM='jsjiami.com.v6';
-      for (let k = 0; k < 3; k++) {
+      for (let k = 0; k < 5; k++) {
         try {
           await runTimes()
           break
         } catch (e) {
-          runTimesErrCount++
-          if (runTimesErrCount === 3) {
-            runTimesErr += `${$.UserName}:${e}\n`
-          }
         }
         await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
       }
