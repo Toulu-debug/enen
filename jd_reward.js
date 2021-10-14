@@ -147,11 +147,10 @@ function init() {
                                 'lkt': lkt,
                                 'lks': lks,
                                 'Host': 'jdjoy.jd.com',
-                                'content-type': 'application/json',
-                                'origin': 'https://h5.m.jd.com',
-                                "User-Agent": TS_USER_AGENTS_1["default"],
-                                'referer': 'https://jdjoy.jd.com/',
-                                'cookie': cookie
+                                'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html',
+                                'User-Agent': TS_USER_AGENTS_1["default"],
+                                'Origin': 'https://h5.m.jd.com',
+                                'Cookie': cookie
                             }
                         })];
                 case 1:
@@ -181,15 +180,15 @@ function exchange(beanId) {
                     lks = ts_md5_1.Md5.hashStr('' + 'JL1VTNRadM68cIMQ' + lkt);
                     return [4 /*yield*/, axios_1["default"].post("https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ&validate=" + validate, JSON.stringify({ "buyParam": { "orderSource": 'pet', "saleInfoId": beanId }, "deviceInfo": {} }), {
                             headers: {
-                                'lkt': lkt.toString(),
-                                'lks': lks,
                                 "Host": "jdjoy.jd.com",
-                                "Accept-Language": "zh-cn",
                                 "Content-Type": "application/json",
                                 "Origin": "https://jdjoy.jd.com",
+                                "reqSource": "h5",
                                 "User-Agent": TS_USER_AGENTS_1["default"],
                                 "Referer": "https://jdjoy.jd.com/pet/index",
-                                "Cookie": cookie
+                                "Cookie": cookie,
+                                'lkt': lkt.toString(),
+                                'lks': lks
                             }
                         })];
                 case 5:
