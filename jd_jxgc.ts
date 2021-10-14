@@ -15,6 +15,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number;
 
 
 interface Params {
+  bizCode?: string,
   name?: string,
   pin?: string,
   sharePin?: string,
@@ -34,7 +35,7 @@ interface Params {
   phoneID?: string,
   doubleflag?: number,
   timeStamp?: string,
-
+  showAreaTaskFlag?: number,
 }
 
 !(async () => {
@@ -138,14 +139,14 @@ interface Params {
 })()
 
 async function task() {
-  res = await api('GetUserTaskStatusList', '_time,bizCode,source')
+  res = await api('GetUserTaskStatusList', '_time,bizCode,showAreaTaskFlag,source', {showAreaTaskFlag: 1, bizCode: 'dream_factory'})
   console.log('GetUserTaskStatusList: 刷新任务列表')
   await wait(2000)
   for (let t of res.data.userTaskStatusList) {
     if (t.awardStatus === 2) {
       if (t.completedTimes >= t.targetTimes) {
         console.log('可领奖:', t.taskName)
-        res = await api('Award', '_time,bizCode,source,taskId', {taskId: t.taskId})
+        res = await api('Award', '_time,bizCode,source,taskId', {taskId: t.taskId, bizCode: t.bizCode})
         if (res.ret === 0) {
           console.log('领奖成功:', res.data.prizeInfo.trim() * 1)
           await wait(4000)
@@ -158,7 +159,7 @@ async function task() {
 
       if (t.dateType === 2 && t.completedTimes < t.targetTimes && [2, 6, 9].indexOf(t.taskType) > -1) {
         console.log('任务开始:', t.taskName)
-        res = await api('DoTask', '_time,bizCode,configExtra,source,taskId', {configExtra: '', taskId: t.taskId})
+        res = await api('DoTask', '_time,bizCode,configExtra,source,taskId', {configExtra: '', taskId: t.taskId, bizCode: t.bizCode})
         await wait(5000)
         if (res.ret === 0) {
           console.log('任务完成');
@@ -178,7 +179,7 @@ function api(fn: string, stk: string, params: Params = {}) {
   return new Promise((resolve, reject) => {
     let url: string = ''
     if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&bizCode=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     else
       url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     url = h5st(url, stk, params, 10001)
