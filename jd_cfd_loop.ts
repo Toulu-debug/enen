@@ -5,12 +5,6 @@
 
 import axios from 'axios'
 import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, requestAlgo, h5st} from './TS_USER_AGENTS'
-import * as dotenv from 'dotenv'
-
-const crypto = require('crypto')
-const fs = require('fs')
-const notify = require('./sendNotify')
-dotenv.config()
 
 let cookie: string = '', res: any = '', balloon: number = 1;
 process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.CFD_LOOP_DELAY)) : console.log('设置延迟:10000~25000随机')
@@ -20,34 +14,6 @@ let UserName: string, index: number;
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
 
-  /*let filename: string = __filename.split('/').pop()!
-  let stream = fs.createReadStream(filename);
-  let fsHash = crypto.createHash('md5');
-
-  stream.on('data', (d: any) => {
-    fsHash.update(d);
-  });
-
-  stream.on('end', () => {
-    let md5 = fsHash.digest('hex');
-    console.log(`${filename}的MD5是:`, md5);
-    if (filename.indexOf('JDHelloWorld_jd_scripts_') > -1) {
-      filename = filename.replace('JDHelloWorld_jd_scripts_', '')
-    }
-    axios.get('https://api.jdsharecode.xyz/api/md5?filename=' + filename, {timeout: 10000})
-      .then((res: any) => {
-        console.log('local: ', md5)
-        console.log('remote:', res.data)
-        if (md5 !== res.data) {
-          notify.sendNotify("Warning", `${filename}\nMD5校验失败！你的脚本疑似被篡改！`)
-        } else {
-          console.log('MD5校验通过！')
-        }
-      }).catch(() => {
-
-    })
-  });
-*/
   while (1) {
     for (let i = 0; i < cookiesArr.length; i++) {
       cookie = cookiesArr[i];

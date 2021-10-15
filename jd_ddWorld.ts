@@ -43,8 +43,7 @@ let tokenKey: string = '', token: string = '', bearer: string = '';
             inviter_id: res.openid
           })
           try {
-            // await axios.get('https://api.jdsharecode.xyz/api/autoInsert/ddworld?sharecode=' + encodeURIComponent(t.assistTaskDetailVo.taskToken + ',' + res.openid))
-            await axios.get('http://127.0.0.1:10001/api/autoInsert/ddworld?sharecode=' + encodeURIComponent(t.assistTaskDetailVo.taskToken + ',' + res.openid))
+            await axios.get(`http://127.0.0.1:10001/api/autoInsert/ddworld?sharecode=` + encodeURIComponent(t.assistTaskDetailVo.taskToken + ',' + res.openid))
           } catch (e) {
           }
         }

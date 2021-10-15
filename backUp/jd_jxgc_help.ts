@@ -90,7 +90,7 @@ function api(fn: string, stk: string, params: Params = {}) {
 
 async function getShareCodes() {
   try {
-    let {data}: any = await axios.get("https://api.jdsharecode.xyz/api/jxfactory/30")
+    let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}jxfactory/30`)
     console.log(`从助力池获取到30个:${JSON.stringify(data.data)}`)
     HELP_HW === 'true'
       ? shareCodes = [...shareCodesInternal, ...HW_CODE, ...data.data]

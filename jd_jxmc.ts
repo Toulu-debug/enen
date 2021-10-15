@@ -203,7 +203,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   }
 
   try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
+    let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}HW_CODES`, {timeout: 10000})
     shareCodesHb_HW = data['jxmchb'] || []
   } catch (e: any) {
   }
@@ -211,7 +211,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   for (let i = 0; i < cookiesArr.length; i++) {
     // 获取随机红包码
     try {
-      let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmchb/20', {timeout: 10000})
+      let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}jxmchb/20`, {timeout: 10000})
       console.log('获取到20个随机红包码:', data.data)
       shareCodesHb = [...shareCodesHbInterval, ...shareCodesHb_HW, ...data.data]
     } catch (e: any) {
@@ -239,7 +239,7 @@ let shareCodesHbInterval: string[] = [], shareCodesHb: string[] = [], shareCodes
   for (let i = 0; i < cookiesArr.length; i++) {
     // 获取随机助力码
     try {
-      let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/jxmc/30', {timeout: 10000})
+      let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}jxmc/30`, {timeout: 10000})
       console.log('获取到30个随机助力码:', data.data)
       shareCodes = [...shareCodes, ...data.data]
     } catch (e: any) {
@@ -342,7 +342,7 @@ function makeShareCodes(code: string) {
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    await axios.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
       .then((res: any) => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')
@@ -362,7 +362,7 @@ function makeShareCodesHb(code: string) {
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    await axios.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
       .then((res: any) => {
         if (res.data.code === 200)
           console.log('已自动提交红包码')

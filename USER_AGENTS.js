@@ -36,6 +36,7 @@ const USER_AGENTS = [
   "jdapp;android;10.0.2;10;network/wifi;Mozilla/5.0 (Linux; Android 10; MI 8 Build/QKQ1.190828.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045227 Mobile Safari/537.36",
   "jdapp;iPhone;10.0.2;14.1;network/wifi;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1",
 ]
+
 /**
  * 生成随机数字
  * @param {number} min 最小值（包含）
@@ -44,8 +45,15 @@ const USER_AGENTS = [
 function randomNumber(min = 0, max = 100) {
   return Math.min(Math.floor(min + Math.random() * (max - min)), max);
 }
+
 const USER_AGENT = USER_AGENTS[randomNumber(0, USER_AGENTS.length)];
 
+const hwApiPool = [
+  'http://146.56.110.223:10001/api/',
+  'https://api.jdsharecode.xyz/api/'
+]
+const hwApi = hwApiPool[randomNumber(0, hwApiPool.length)];
 module.exports = {
-  USER_AGENT
+  USER_AGENT,
+  hwApi
 }

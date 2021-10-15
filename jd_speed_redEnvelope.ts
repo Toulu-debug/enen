@@ -87,7 +87,7 @@ async function api(fn: string, params: object, stk: string = '') {
 
 async function getCodesHW() {
   try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES', {timeout: 10000})
+    let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}HW_CODES`, {timeout: 10000})
     console.log('获取HW_CODES成功(api)')
     shareCodesHW = data['fcdyj']
   } catch (e: any) {

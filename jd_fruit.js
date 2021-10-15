@@ -132,7 +132,7 @@ async function jdFruit() {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
+      url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)
@@ -1324,7 +1324,7 @@ function timeFormat(time) {
 
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `https://api.jdsharecode.xyz/api/farm/${randomCount}`, timeout: 10000}, (err, resp, data) => {
+    $.get({url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}farm/${randomCount}`, timeout: 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)

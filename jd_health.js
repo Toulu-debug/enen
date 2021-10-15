@@ -187,7 +187,7 @@ function getTaskDetail(taskId = '') {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=health&sharecode=${$.code}`
+      url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}runTimes?activityId=health&sharecode=${$.code}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)
@@ -205,7 +205,7 @@ function runTimes() {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=health&sharecode=${$.code}`
+      url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}runTimes?activityId=health&sharecode=${$.code}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)
@@ -301,7 +301,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `https://api.jdsharecode.xyz/api/health/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
+      url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}health/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
