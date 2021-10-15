@@ -4,11 +4,8 @@
  */
 
 import axios from 'axios';
-import * as dotenv from 'dotenv';
-import {sendNotify} from './sendNotify'
-import {requireConfig, wait} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS';
 
-dotenv.config()
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
 !(async () => {
@@ -18,6 +15,24 @@ let cookie: string = '', res: any = '', UserName: string, index: number;
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
     console.log(`\n开始【京东账号${index}】${UserName}\n`);
+
+    res = await initForTurntableFarm();
+    let times: number = res.remainLotteryTimes
+    console.log('剩余抽奖机会:', times)
+    for (let j = 0; j < times; j++) {
+      console.log('开始抽奖...')
+      res = await initForTurntableFarm(1)
+      if (res.code === '0') {
+        if (res.type === 'thanks') {
+          console.log('抽奖成功，获得：狗屁')
+        } else {
+          console.log('抽奖成功，获得:', res.type)
+        }
+      } else {
+        console.log('抽奖失败', res)
+      }
+      await wait(5000)
+    }
 
     for (let j = 0; j < 4; j++) {
       console.log(`Round:${j + 1}`)
@@ -79,4 +94,20 @@ async function getSign(fn: string, body: object) {
     return data
   else
     return {code: 500, data: {sign: ''}}
+}
+
+async function initForTurntableFarm(type: number = 0) {
+  let url = type === 0
+    ? 'https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body=%7B%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5'
+    : 'https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body=%7B%22type%22%3A1%2C%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5'
+  let {data} = await axios.get(url, {
+    headers: {
+      'Host': 'api.m.jd.com',
+      'Origin': 'https://h5.m.jd.com',
+      'User-Agent': USER_AGENT,
+      'Referer': 'https://h5.m.jd.com/',
+      'Cookie': cookie
+    }
+  })
+  return data
 }
