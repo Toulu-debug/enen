@@ -44,11 +44,11 @@ var validate_single_1 = require("./utils/validate_single");
 var TS_USER_AGENTS_1 = require("./TS_USER_AGENTS");
 var cookie, tasks, UserName, validate = '', message = '';
 !(function () { return __awaiter(void 0, void 0, void 0, function () {
-    var j, h, config, _i, config_1, bean, e_1;
+    var j, h, config, _i, config_1, bean, j, e_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                if (!process.argv[2]) return [3 /*break*/, 15];
+                if (!process.argv[2]) return [3 /*break*/, 17];
                 cookie = unescape(process.argv[2]);
                 if (!!validate) return [3 /*break*/, 2];
                 return [4 /*yield*/, getValidate()];
@@ -81,7 +81,7 @@ var cookie, tasks, UserName, validate = '', message = '';
                 config = void 0;
                 _a.label = 8;
             case 8:
-                _a.trys.push([8, 13, , 14]);
+                _a.trys.push([8, 15, , 16]);
                 if (h >= 0 && h < 8)
                     config = tasks.data['beanConfigs0'];
                 if (h >= 8 && h < 16)
@@ -91,33 +91,40 @@ var cookie, tasks, UserName, validate = '', message = '';
                 _i = 0, config_1 = config;
                 _a.label = 9;
             case 9:
-                if (!(_i < config_1.length)) return [3 /*break*/, 12];
+                if (!(_i < config_1.length)) return [3 /*break*/, 14];
                 bean = config_1[_i];
                 console.log(bean.id, bean.giftName, bean.leftStock);
-                if (!(bean.giftValue === 500)) return [3 /*break*/, 11];
-                return [4 /*yield*/, exchange(bean.id)];
+                if (!(bean.giftValue === 500)) return [3 /*break*/, 13];
+                j = 0;
+                _a.label = 10;
             case 10:
-                _a.sent();
-                _a.label = 11;
+                if (!(j < 5)) return [3 /*break*/, 13];
+                return [4 /*yield*/, exchange(bean.id)];
             case 11:
+                _a.sent();
+                _a.label = 12;
+            case 12:
+                j++;
+                return [3 /*break*/, 10];
+            case 13:
                 _i++;
                 return [3 /*break*/, 9];
-            case 12: return [3 /*break*/, 14];
-            case 13:
-                e_1 = _a.sent();
-                console.log('beanConfigs Error');
-                return [3 /*break*/, 14];
             case 14: return [3 /*break*/, 16];
             case 15:
-                console.log('未收到Cookie');
-                _a.label = 16;
-            case 16:
-                if (!message) return [3 /*break*/, 18];
-                return [4 /*yield*/, (0, sendNotify_1.sendNotify)('宠汪汪500', message)];
+                e_1 = _a.sent();
+                console.log('beanConfigs Error');
+                return [3 /*break*/, 16];
+            case 16: return [3 /*break*/, 18];
             case 17:
-                _a.sent();
+                console.log('未收到Cookie');
                 _a.label = 18;
-            case 18: return [2 /*return*/];
+            case 18:
+                if (!message) return [3 /*break*/, 20];
+                return [4 /*yield*/, (0, sendNotify_1.sendNotify)('宠汪汪500', message)];
+            case 19:
+                _a.sent();
+                _a.label = 20;
+            case 20: return [2 /*return*/];
         }
     });
 }); })();
@@ -167,7 +174,7 @@ function exchange(beanId) {
             switch (_a.label) {
                 case 0:
                     if (!1) return [3 /*break*/, 4];
-                    if (!(new Date().getSeconds() < 50)) return [3 /*break*/, 1];
+                    if (!(new Date().getSeconds() < 15)) return [3 /*break*/, 1];
                     return [3 /*break*/, 4];
                 case 1: return [4 /*yield*/, (0, TS_USER_AGENTS_1.wait)(100)];
                 case 2:
