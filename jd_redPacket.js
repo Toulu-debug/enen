@@ -300,8 +300,12 @@ function getShareCodes() {
         url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}redPacket/30`,
         timeout: 10000
       }, (err, resp, data) => {
-        data = $.toObj(data)
-        resolve(data.data)
+        if (!err) {
+          data = $.toObj(data)
+          resolve(data.data)
+        } else {
+          resolve([])
+        }
       })
     } catch (e) {
       resolve([])
