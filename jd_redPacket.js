@@ -8,16 +8,18 @@ Last Modified time: 2021-05-19 16:27:18
 ================QuantumultX==================
 [task_local]
 #京东全民开红包
-1 1,2,23 * * * https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js, tag=京东全民开红包, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jd_redPacket.png, enabled=true
+1 0,2,18 * * * https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js, tag=京东全民开红包, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jd_redPacket.png, enabled=true
 ===================Loon==============
 [Script]
-cron "1 1,2,23 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js, tag=京东全民开红包
+cron "1 0,2,18 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js, tag=京东全民开红包
 ===============Surge===============
 [Script]
-京东全民开红包 = type=cron,cronexp="1 1,2,23 * * *",wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js
+京东全民开红包 = type=cron,cronexp="1 0,2,18 * * *",wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js
 ====================================小火箭=============================
-京东全民开红包 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js, cronexpr="1 1,2,23 * * *", timeout=3600, enable=true
+京东全民开红包 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_redPacket.js, cronexpr="1 0,2,18 * * *", timeout=3600, enable=true
  */
+
+const tunnel = require("tunnel");
 const $ = new Env('京东全民开红包');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
@@ -66,6 +68,7 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
       await redPacket();
       await showMsg();
     }
+    await $.wait(2000)
   }
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
@@ -75,16 +78,27 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
     $.redPacketId = [...new Set($.redPacketId)];
     if (!isLoginInfo[$.UserName]) continue
     if (cookiesArr && cookiesArr.length >= 2) {
-      console.log(`\n\n自己账号内部互助`);
-      for (let j = 0; j < $.redPacketId.length && $.canHelp; j++) {
-        console.log(`账号 ${$.index} ${$.UserName} 开始给 ${$.redPacketId[j]} 进行助力`)
-        $.max = false;
-        await jinli_h5assist($.redPacketId[j]);
-        await $.wait(2000)
-        if ($.max) {
-          $.redPacketId.splice(j, 1)
-          j--
-          continue
+      if (i === 0) {
+        console.log('账号1 给助力池助力')
+        let codes = await getShareCodes();
+        console.log('从助力池随机获取30个:', codes)
+        for (let j = 0; j < codes.length && $.canHelp; j++) {
+          console.log(`账号 ${$.index} ${$.UserName} 开始给 ${codes[j]} 进行助力`)
+          await jinli_h5assist(codes[j]);
+          await $.wait(2000)
+        }
+      } else {
+        console.log(`\n\n自己账号内部互助`);
+        for (let j = 0; j < $.redPacketId.length && $.canHelp; j++) {
+          console.log(`账号 ${$.index} ${$.UserName} 开始给 ${$.redPacketId[j]} 进行助力`)
+          $.max = false;
+          await jinli_h5assist($.redPacketId[j]);
+          await $.wait(2000)
+          if ($.max) {
+            $.redPacketId.splice(j, 1)
+            j--
+            continue
+          }
         }
       }
     }
@@ -242,7 +256,10 @@ async function red() {
   } else if ($.h5activityIndex && $.h5activityIndex.data && ($.h5activityIndex.data.biz_code === 20001)) {
     //20001:红包活动正在进行，可拆
     const redPacketId = $.h5activityIndex.data.result.redpacketInfo.id;
-    if (redPacketId) $.redPacketId.push(redPacketId);
+    if (redPacketId) {
+      $.redPacketId.push(redPacketId)
+      await makeShareCodes(redPacketId)
+    }
     console.log(`\n\n当前待拆红包ID:${$.h5activityIndex.data.result.redpacketInfo.id}，进度：再邀${$.h5activityIndex.data.result.redpacketConfigFillRewardInfo[$.hasSendNumber].requireAssistNum - $.h5activityIndex.data.result.redpacketConfigFillRewardInfo[$.hasSendNumber].hasAssistNum}个好友，开第${$.hasSendNumber + 1}个红包。当前已拆红包：${$.hasSendNumber}个，剩余${$.h5activityIndex.data.result.remainRedpacketNumber}个红包待开，已有${$.assistants}好友助力\n\n`)
     console.log(`当前可拆红包个数：${$.waitOpenTimes}`)
     if ($.waitOpenTimes > 0) {
@@ -255,6 +272,43 @@ async function red() {
     console.log(`\n${$.h5activityIndex.data.biz_msg}\n`);
   }
 }
+
+function makeShareCodes(redPacketId) {
+  return new Promise(resolve => {
+    let pin = cookie.match(/pt_pin=([^;]*)/)[1]
+    pin = $.md5(pin)
+    try {
+      $.get({
+        url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}autoInsert/redPacket?sharecode=${redPacketId}&pin=${pin}`,
+        timeout: 10000
+      }, (err, resp, data) => {
+        data = $.toObj(data)
+        if (data.code === 200)
+          console.log('已自动提交助力码')
+      })
+    } catch (e) {
+    } finally {
+      resolve()
+    }
+  })
+}
+
+function getShareCodes() {
+  return new Promise(resolve => {
+    try {
+      $.get({
+        url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}redPacket/30`,
+        timeout: 10000
+      }, (err, resp, data) => {
+        data = $.toObj(data)
+        resolve(data.data)
+      })
+    } catch (e) {
+      resolve([])
+    }
+  })
+}
+
 
 //获取任务列表API
 function taskHomePage() {
