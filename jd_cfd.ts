@@ -535,7 +535,7 @@ async function task() {
   for (let t of res.data.userTaskStatusList) {
     if (t.awardStatus === 2 && t.completedTimes === t.targetTimes) {
       console.log('可领奖:', t.taskName)
-      res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId})
+      res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId, bizCode: t.bizCode})
       await wait(2000)
       if (res.ret === 0) {
         try {
