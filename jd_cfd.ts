@@ -9,12 +9,13 @@
 
 import axios from 'axios';
 import {Md5} from 'ts-md5'
-import * as dotenv from 'dotenv';
 import {getDate} from 'date-fns';
 import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange} from './TS_USER_AGENTS';
 
-dotenv.config()
-let cookie: string = '', res: any = '', shareCodes: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = [], isCollector: Boolean = false, USER_AGENT = 'jdpingou;android;4.13.0;10;b21fede89fb4bc77;network/wifi;model/M2004J7AC;appBuild/17690;partner/xiaomi;;session/704;aid/b21fede89fb4bc77;oaid/dcb5f3e835497cc3;pap/JA2019_3111789;brand/Xiaomi;eu/8313831616035373;fv/7333732616631643;Mozilla/5.0 (Linux; Android 10; M2004J7AC Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.120 Mobile Safari/537.36', token: any = {};
+const axi = axios.create({timeout: 10000})
+
+let cookie: string = '', res: any = '', UserName: string, index: number;
+let shareCodes: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = [], isCollector: Boolean = false, USER_AGENT = 'jdpingou;', token: any = {};
 
 interface Params {
   strBuildIndex?: string,
@@ -66,11 +67,11 @@ interface Params {
   dwProperty?: number,
 }
 
-let UserName: string, index: number;
 !(async () => {
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
   for (let i = 0; i < cookiesArr.length; i++) {
+    /*
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
@@ -197,7 +198,7 @@ let UserName: string, index: number;
       }
     }
     // 模拟合成
-    if (dwCurProgress < 8 && strDT) {
+    if (strDT) {
       console.log('继续合成')
       let RealTmReport: number = getRandomNumberByRange(10, 20)
       console.log('本次合成需要上报：', RealTmReport)
@@ -206,7 +207,7 @@ let UserName: string, index: number;
         if (res.iRet === 0)
           console.log(`游戏中途上报${j + 1}：OK`)
         await wait(2000)
-        if (getRandomNumberByRange(1, 4) === 2) {
+        if (getRandomNumberByRange(1, 6) === 2) {
           res = await api('user/ComposePearlAward', '__t,size,strBT,strZone,type', {__t: Date.now(), size: 1, strBT: strDT, type: 4})
           if (res.iRet === 0) {
             console.log(`上报得红包:${res.ddwAwardHb / 100}红包，当前有${res.ddwVirHb / 100}`)
@@ -465,19 +466,15 @@ let UserName: string, index: number;
       console.log(`${b}收金币:`, res.ddwCoin)
       await wait(1000)
     }
-  }
-
-  try {
-    let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}HW_CODES`, {timeout: 10000})
-    shareCodesHW = data['jxcfd'] || []
-  } catch (e) {
+    */
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
+    await getCodesHW();
     // 获取随机助力码
     try {
-      let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}jxcfd/20`, {timeout: 10000})
-      console.log('获取到20个随机助力码:', data.data)
+      let {data}: any = await axi.get(`${require('./USER_AGENTS').hwApi}jxcfd/30`, {timeout: 10000})
+      console.log('获取到30个随机助力码:', data.data)
       shareCodes = [...shareCodesSelf, ...shareCodesHW, ...data.data]
     } catch (e) {
       console.log('获取助力池失败')
@@ -494,6 +491,8 @@ let UserName: string, index: number;
         break
       } else if (res.iRet === 2191) {
         console.log('已助力')
+      } else {
+        console.log('其他错误:', res)
       }
       await wait(3000)
     }
@@ -577,7 +576,7 @@ function makeShareCodes() {
     shareCodesSelf.push(res.strMyShareId)
     let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
     pin = Md5.hashStr(pin)
-    axios.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxcfd?sharecode=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    axi.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxcfd?sharecode=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
       .then((res: any) => {
         if (res.data.code === 200)
           console.log('已自动提交助力码')
@@ -589,4 +588,12 @@ function makeShareCodes() {
         reject('访问助力池出错')
       })
   })
+}
+
+async function getCodesHW() {
+  try {
+    let {data}: any = await axi.get(`${require('./USER_AGENTS').hwApi}HW_CODES`, {timeout: 10000})
+    shareCodesHW = data['jxcfd'] || []
+  } catch (e) {
+  }
 }
