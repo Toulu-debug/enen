@@ -65,13 +65,13 @@ interface Params {
   dwPageIndex?: number,
   dwPageSize?: number,
   dwProperty?: number,
+  bizCode?: string,
 }
 
 !(async () => {
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
   for (let i = 0; i < cookiesArr.length; i++) {
-    /*
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
@@ -466,7 +466,6 @@ interface Params {
       console.log(`${b}收金币:`, res.ddwCoin)
       await wait(1000)
     }
-    */
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -501,10 +500,15 @@ interface Params {
 
 function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
   return new Promise((resolve, reject) => {
-    let url: string = '';
+    let url: string;
     if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
-      let bizCode: string = taskPosition === 'right' ? 'jxbfddch' : 'jxbfd'
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&showAreaTaskFlag=0&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+      let bizCode: string;
+      if (!params.bizCode) {
+        bizCode = taskPosition === 'right' ? 'jxbfddch' : 'jxbfd'
+      } else {
+        bizCode = params.bizCode
+      }
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
     } else {
       url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
     }
@@ -526,7 +530,7 @@ function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
 
 async function task() {
   console.log('刷新任务列表')
-  res = await api('GetUserTaskStatusList', '_cfd_t,bizCode,dwEnv,ptag,showAreaTaskFlag,source,strZone,taskId', {taskId: 0, showAreaTaskFlag: 0});
+  res = await api('GetUserTaskStatusList', '_cfd_t,bizCode,dwEnv,ptag,showAreaTaskFlag,source,strZone,taskId', {taskId: 0, showAreaTaskFlag: 1});
   await wait(2000)
   for (let t of res.data.userTaskStatusList) {
     if (t.awardStatus === 2 && t.completedTimes === t.targetTimes) {
@@ -545,7 +549,7 @@ async function task() {
     }
     if (t.dateType === 2 && t.awardStatus === 2 && t.completedTimes < t.targetTimes && t.taskCaller === 1) {
       console.log('做任务:', t.taskId, t.taskName, t.completedTimes, t.targetTimes)
-      res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId, configExtra: ''})
+      res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId, configExtra: '', bizCode: t.bizCode})
       await wait(5000)
       if (res.ret === 0) {
         console.log('任务完成')
