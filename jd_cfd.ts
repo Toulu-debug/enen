@@ -567,35 +567,29 @@ async function task() {
   return 0
 }
 
-function makeShareCodes() {
-  return new Promise<void>(async (resolve, reject) => {
-    let bean: string = await getBeanShareCode(cookie)
-    let farm: string = await getFarmShareCode(cookie)
-    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strVersion,strZone', {
-      ddwTaskId: '',
-      strShareId: '',
-      strMarkList: 'undefined',
-      strPgUUNum: token.strPgUUNum,
-      strPgtimestamp: token.strPgtimestamp,
-      strPhoneID: token.strPhoneID,
-      strVersion: '1.0.1'
-    })
-    console.log('助力码:', res.strMyShareId)
-    shareCodesSelf.push(res.strMyShareId)
-    let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
-    pin = Md5.hashStr(pin)
-    axi.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxcfd?sharecode=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-      .then((res: any) => {
-        if (res.data.code === 200)
-          console.log('已自动提交助力码')
-        else
-          console.log('提交失败！已提交farm和bean的cookie才可提交cfd')
-        resolve()
-      })
-      .catch((e) => {
-        reject('访问助力池出错')
-      })
+async function makeShareCodes() {
+  res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strVersion,strZone', {
+    ddwTaskId: '',
+    strShareId: '',
+    strMarkList: 'undefined',
+    strPgUUNum: token.strPgUUNum,
+    strPgtimestamp: token.strPgtimestamp,
+    strPhoneID: token.strPhoneID,
+    strVersion: '1.0.1'
   })
+  console.log('助力码:', res.strMyShareId)
+  shareCodesSelf.push(res.strMyShareId)
+  let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
+  pin = Md5.hashStr(pin)
+  try {
+    let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxcfd?sharecode=${res.strMyShareId}&pin=${pin}`, {timeout: 10000})
+    if (data.code === 200)
+      console.log('已自动提交助力码')
+    else
+      console.log('提交失败！')
+  } catch (e) {
+    console.log('自动提交助力码出错')
+  }
 }
 
 async function getCodesHW() {
