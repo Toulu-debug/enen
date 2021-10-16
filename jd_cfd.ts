@@ -538,8 +538,12 @@ async function task() {
       res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {taskId: t.taskId})
       await wait(2000)
       if (res.ret === 0) {
-        res = JSON.parse(res.data.prizeInfo)
-        console.log(`领奖成功:`, res.ddwCoin, res.ddwMoney)
+        try {
+          res = JSON.parse(res.data.prizeInfo)
+          console.log(`领奖成功:`, res.ddwCoin, res.ddwMoney)
+        } catch (e) {
+          console.log('领奖成功:', res.data)
+        }
         await wait(1000)
         return 1
       } else {
