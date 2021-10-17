@@ -472,7 +472,7 @@ interface Params {
     await getCodesHW();
     // 获取随机助力码
     try {
-      let {data}: any = await axi.get(`${require('./USER_AGENTS').hwApi}jxcfd/30`, {timeout: 10000})
+      let {data}: any = await axi.get(`https://api.jdsharecode.xyz/api/jxcfd/30`, {timeout: 10000})
       console.log('获取到30个随机助力码:', data.data)
       shareCodes = [...shareCodesSelf, ...shareCodesHW, ...data.data]
     } catch (e) {
@@ -582,7 +582,7 @@ async function makeShareCodes() {
   let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
   pin = Md5.hashStr(pin)
   try {
-    let {data}: any = await axios.get(`${require('./USER_AGENTS').hwApi}autoInsert/jxcfd?sharecode=${res.strMyShareId}&pin=${pin}`, {timeout: 10000})
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxcfd?sharecode=${res.strMyShareId}&pin=${pin}`, {timeout: 10000})
     if (data.code === 200)
       console.log('已自动提交助力码')
     else
@@ -594,7 +594,7 @@ async function makeShareCodes() {
 
 async function getCodesHW() {
   try {
-    let {data}: any = await axi.get(`${require('./USER_AGENTS').hwApi}HW_CODES`, {timeout: 10000})
+    let {data}: any = await axi.get(`https://api.jdsharecode.xyz/api/HW_CODES`, {timeout: 10000})
     shareCodesHW = data['jxcfd'] || []
   } catch (e) {
   }

@@ -308,7 +308,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `${$.isNode() ? require('./USER_AGENTS').hwApi : 'https://api.jdsharecode.xyz/api/'}sgmh/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
+      url: `https://api.jdsharecode.xyz/api/sgmh/${randomCount}`, 'timeout': 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
