@@ -40,10 +40,10 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       isquerypicksite: 1,
       isqueryinviteicon: 1
     })
+    console.log(JSON.stringify(homePageInfo))
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
       lastgettime = homePageInfo.data.cow.lastgettime
-      console.log('lastgettime:', lastgettime)
     } else {
       continue
     }
@@ -55,7 +55,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       console.log('未开通？黑号？')
       continue
     }
-    let petid: number = homePageInfo.data.petinfo[0].petid;
+    let petid: string = homePageInfo.data.petinfo[0].petid;
     let coins = homePageInfo.data.coins;
 
     console.log('助力码:', homePageInfo.data.sharekey);
@@ -136,37 +136,43 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
       await wait(5000)
     }
-    await wait(5000)
+    await wait(3000)
 
+    console.log('food:', food, food >= 10)
     while (food >= 10) {
-      try {
-        res = await api('operservice/Feed', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
-        if (res.ret === 0) {
-          food -= 10
-          console.log('剩余草:', res.data.newnum)
-        } else if (res.ret === 2020) {
-          if (res.data.maintaskId === 'pause' || res.data.maintaskId === 'E-1') {
-            console.log('收🥚')
-            res = await api('operservice/GetSelfResult', 'channel,itemid,sceneid,type', {petid: petid, type: '11'})
-            if (res.ret === 0) {
-              console.log('收🥚成功:', res.data.newnum)
-            } else {
-              console.log('收🥚失败:', res)
-            }
+      res = await api('operservice/Feed', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+      if (res.ret === 0) {
+        food -= 10
+        console.log('剩余草:', res.data.newnum)
+      } else if (res.ret === 2020) {
+        console.log('收🥚')
+        homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {
+          isgift: 1,
+          isquerypicksite: 1,
+          isqueryinviteicon: 1
+        })
+        for (let t of homePageInfo.data.petinfo) {
+          if (t.progress === '0') {
+            petid = t.petid
+            break
           }
-        } else if (res.ret === 2005) {
-          console.log('今天吃撑了')
-          break
-        } else {
-          console.log('Feed未知错误:', res)
-          break
         }
-        await wait(6000)
-      } catch (e: any) {
+        res = await api('operservice/GetSelfResult', 'activeid,activekey,channel,itemid,jxmc_jstoken,phoneid,sceneid,timestamp,type', {itemid: petid, type: '11'})
+        if (res.ret === 0) {
+          console.log('收🥚成功:', res.data.newnum)
+        } else {
+          console.log('收🥚失败:', res)
+        }
+      } else if (res.ret === 2005) {
+        console.log('今天吃撑了')
+        break
+      } else {
+        console.log('Feed未知错误:', res)
         break
       }
+      await wait(6000)
     }
-    await wait(4000)
+    await wait(3000)
 
     while (1) {
       try {
@@ -175,7 +181,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('锄草:', res.data.addcoins)
         await wait(5000)
         if (res.data.surprise) {
-          res = await api("operservice/GetSelfResult", "activeid,activekey,channel,sceneid,type", {type: '14'})
+          res = await api("operservice/GetSelfResult", "activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type", {type: '14', itemid: 'undefined'})
           console.log('锄草奖励:', res.data.prizepool)
           await wait(5000)
         }
@@ -188,7 +194,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     while (1) {
       try {
-        res = await api('operservice/Action', 'activeid,activekey,channel,petid,sceneid,type', {
+        res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,petid,phoneid,sceneid,timestamp,type', {
           type: '1',
           petid: petid
         })
@@ -260,7 +266,8 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 interface Params {
   isgift?: number,
   isquerypicksite?: number,
-  petid?: number,
+  petid?: string,
+  itemid?: string,
   type?: string,
   taskId?: number
   configExtra?: string,
@@ -315,9 +322,9 @@ async function api(fn: string, stk: string, params: Params = {}) {
   try {
     let {data}: any = await axios.get(url, {
       headers: {
-        'User-Agent': 'jdpingou;',
         'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',
         'Host': 'm.jingxi.com',
+        'User-Agent': 'jdpingou;',
         'Cookie': cookie
       }
     })
@@ -325,6 +332,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
       return JSON.parse(data.replace(/jsonpCBK.?\(/, '').split('\n')[0])
     return data
   } catch (e: any) {
+    console.log('api Error:', e)
     return {}
   }
 }

@@ -5,9 +5,9 @@
 
 import axios from 'axios';
 import * as path from "path";
-import {requireConfig, TotalBean, wait, requestAlgo, h5st, exceptCookie} from './TS_USER_AGENTS';
+import {requireConfig, wait, requestAlgo, h5st, exceptCookie} from './TS_USER_AGENTS';
 
-let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = require('./sendNotify'), UserName: string, index: number;
+let cookie: string = '', res: any = '', USER_AGENT = "jdpingou;", UserName: string, index: number;
 
 !(async () => {
   await requestAlgo();
@@ -18,12 +18,7 @@ let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = requir
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
-    let {isLogin, nickName}: any = await TotalBean(cookie)
-    if (!isLogin) {
-      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
-      continue
-    }
-    console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+    console.log(`\n开始【京东账号${index}】${UserName}\n`);
 
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
@@ -41,7 +36,7 @@ let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = requir
           } else {
             console.log('任务失败：', res.errmsg)
           }
-          await wait(2000)
+          await wait(3000)
         }
       }
 
@@ -51,13 +46,14 @@ let cookie: string = '', res: any = '', USER_AGENT = "jdpingou", notify = requir
           if (t.status === 1) {
             res = await api(`https://m.jingxi.com/fanxiantask/signhb/bxdraw?_=${Date.now()}&sceneval=2`, '')
             console.log('开宝箱，获得：', res.sendhb)
-            await wait(2000)
+            await wait(3000)
           }
         }
       }
     } catch (e: any) {
       console.log(e)
     }
+    await wait(3000)
   }
 })()
 
