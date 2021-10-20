@@ -39,6 +39,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
 
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
+    jxToken = await token(cookie)
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
 
     await getCodesHW()
@@ -72,6 +73,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    jxToken = await token(cookie)
     index = i + 1;
     console.log(`\n开始【京东账号${index}】${UserName} 拆红包\n`);
 
@@ -107,7 +109,7 @@ interface Params {
 
 async function api(fn: string, stk: string, params: Params = {}) {
   let url: string = `https://m.jingxi.com/cubeactive/steprewardv3/${fn}?activeId=489177&publishFlag=1&channel=7&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&stepreward_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}`
-  UA = `jdpingou;`
+  UA = `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random() * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
   url = h5st(url, stk, params, 10010)
   try {
     let {data}: any = await axios.get(url, {
