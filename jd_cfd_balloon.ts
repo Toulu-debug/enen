@@ -24,7 +24,7 @@ let UserName: string, index: number;
         res = await speedUp('_cfd_t,bizCode,dwEnv,ptag,source,strBuildIndex,strZone')
         if (res.iRet !== 0) {
           console.log('手动建造4个房子')
-          continue
+          flag = false
         }
         console.log('今日热气球:', res.dwTodaySpeedPeople)
         if (res.dwTodaySpeedPeople === 500) {
@@ -32,6 +32,7 @@ let UserName: string, index: number;
         }
       } catch (e) {
         console.log(e)
+        flag = false
       }
       await wait(1000)
     }
