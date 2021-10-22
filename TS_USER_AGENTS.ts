@@ -2,7 +2,7 @@ import axios from "axios";
 import {Md5} from "ts-md5";
 import {format} from 'date-fns';
 import * as dotenv from "dotenv";
-import {accessSync, readFileSync} from "fs";
+import {accessSync, readFileSync, writeFileSync} from "fs";
 
 const CryptoJS = require('crypto-js')
 dotenv.config()
@@ -243,6 +243,13 @@ function randomString(e: number, word?: number) {
   return n
 }
 
+function resetHosts() {
+  try {
+    writeFileSync('/etc/hosts', '')
+  } catch (e) {
+  }
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -256,5 +263,6 @@ export {
   getJxToken,
   h5st,
   exceptCookie,
-  randomString
+  randomString,
+  resetHosts
 }
