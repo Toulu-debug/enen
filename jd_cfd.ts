@@ -10,7 +10,7 @@
 import axios from 'axios';
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns';
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange} from './TS_USER_AGENTS';
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange} from './TS_USER_AGENTS';
 
 const axi = axios.create({timeout: 10000})
 
@@ -66,6 +66,8 @@ interface Params {
   dwPageSize?: number,
   dwProperty?: number,
   bizCode?: string,
+  dwCardType?: number,
+  strCardTypeIndex?: string,
 }
 
 !(async () => {
@@ -126,6 +128,40 @@ interface Params {
           break
         }
         await wait(2000)
+      }
+    }
+
+    // 加速卡
+    res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone');
+    let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard;
+    let coincardUsing = coincard.filter(card => {
+      return card.dwCardState === 2
+    })
+    if (coincardUsing.length === 0) {
+      for (let card of coincard) {
+        if (card.dwIsCanUseNext === 1) {
+          res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 1, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
+          if (res.iRet === 0) {
+            console.log('金币加速卡使用成功')
+          } else {
+            console.log('金币加速卡使用失败', res)
+          }
+          break
+        }
+      }
+    }
+
+    for (let card of richcard) {
+      if (card.dwIsCanUseNext === 1) {
+        for (let j = 0; j < card.dwCardNums; j++) {
+          res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 2, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
+          if (res.iRet === 0) {
+            console.log('点券加速卡使用成功')
+          } else {
+            console.log('点券加速卡使用失败', res)
+          }
+          await wait(2000)
+        }
       }
     }
 
