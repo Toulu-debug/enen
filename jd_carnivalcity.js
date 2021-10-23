@@ -372,9 +372,9 @@ function indexInfo(flag = false) {
         } else {
           data = $.toObj(data);
           if (data.code === 200) {
-            $.hotProductList = data['data']['hotProductList'] ?? [];
-            $.brandList = data['data']['brandList'] ?? [];
-            $.browseshopList = data['data']['browseshopList'] ?? [];
+            $.hotProductList = data['data']['hotProductList'] || [];
+            $.brandList = data['data']['brandList'] || [];
+            $.browseshopList = data['data']['browseshopList'] || [];
           } else {
             console.log(`异常：${JSON.stringify(data)}`)
           }
