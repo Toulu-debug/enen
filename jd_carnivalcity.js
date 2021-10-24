@@ -4,14 +4,14 @@
 ===================quantumultx================
 [task_local]
 #京东手机狂欢城
-0 0-18/6 * * * https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, tag=京东手机狂欢城, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
+5 0-18/6 * * * https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, tag=京东手机狂欢城, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
 =====================Loon================
 [Script]
-cron "0 0-18/6 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, tag=京东手机狂欢城
+cron "5 0-18/6 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, tag=京东手机狂欢城
 ====================Surge================
-京东手机狂欢城 = type=cron,cronexp=0 0-18/6 * * *,wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js
+京东手机狂欢城 = type=cron,cronexp=5 0-18/6 * * *,wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js
 ============小火箭=========
-京东手机狂欢城 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, cronexpr="0 0-18/6 * * *", timeout=3600, enable=true
+京东手机狂欢城 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_carnivalcity.js, cronexpr="5 0-18/6 * * *", timeout=3600, enable=true
 */
 
 const $ = new Env('京东手机狂欢城');
@@ -28,7 +28,7 @@ if ($.isNode()) {
 } else {
   cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
-$.shareCodesArr = [];
+let shareCodes = [], shareCodesSelf = [], shareCodesHW = [];
 const JD_API_HOST = 'https://api.m.jd.com/api';
 const activeEndTime = '2021/11/14 00:00:00+08:00';//活动结束时间
 let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000;
@@ -37,14 +37,14 @@ let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
     return;
   }
-  $.temp = [];
   if (nowTime > new Date(activeEndTime).getTime()) {
     $.msg($.name, '活动已结束', `该活动累计获得京豆：${$.jingBeanNum}个\n请删除此脚本\n咱江湖再见`);
     if ($.isNode()) await notify.sendNotify($.name + '活动已结束', `请删除此脚本\n咱江湖再见`);
     return
   }
-  await updateShareCodesCDN();
 
+  await updateShareCodesCDN();  // 获取助力池
+  // 获取内部助力码
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
@@ -54,22 +54,26 @@ let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 
       getUA()
       await supportList();//助力情况
       await getHelp();//获取邀请码
-      if ($.updatePkActivityIdRes && $.updatePkActivityIdRes.length) {
-        $.temp = [...new Set([...$.temp, ...$.updatePkActivityIdRes])]
-      }
     }
   }
 
-  console.log('助力排队:', $.temp)
+  // 先助力
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     $.index = i + 1;
     $.canHelp = true;//能否助力
     $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
     getUA()
+    if (!shareCodesHW.length) {
+      await getShareCodesHW();
+    }
+    if ($.updatePkActivityIdRes && $.updatePkActivityIdRes.length) {
+      shareCodes = [...new Set([...shareCodesSelf, ...shareCodesHW, ...$.updatePkActivityIdRes])]
+    }
+    console.log('助力排队:', shareCodes)
     if ((cookiesArr && cookiesArr.length >= 1) && $.canHelp) {
       console.log(`\n先自己账号内部相互邀请助力\n`);
-      for (let item of $.temp) {
+      for (let item of shareCodes) {
         console.log(`\n${$.UserName} 去参助力 ${item}`);
         const helpRes = await toHelp(item.trim());
         if (helpRes.data.status === 5) {
@@ -81,6 +85,7 @@ let nowTime = new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 
     }
   }
 
+  // 主任务
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
@@ -619,7 +624,7 @@ function getHelp() {
             $.log(`【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data.data.shareId}\n\n`);
             if (new Date().getHours() !== 0)
               await $.wait(3000)
-            $.temp.push(data.data.shareId);
+            shareCodesSelf.push(data.data.shareId);
           } else {
             console.log(`获取邀请码失败：${JSON.stringify(data)}`);
             if (data.code === 1002) $.blockAccount = true;
@@ -631,21 +636,6 @@ function getHelp() {
       }
     })
   })
-}
-
-function taskUrl(body = {}) {
-  return {
-    url: `${JD_API_HOST}?appid=guardian-starjd&functionId=carnivalcity_jd_prod&body=${JSON.stringify(body)}&t=${Date.now()}&loginType=2`,
-    headers: {
-      "accept": "application/json, text/plain, */*",
-      "accept-encoding": "gzip, deflate, br",
-      "accept-language": "zh-cn",
-      "referer": "https://carnivalcity.m.jd.com/",
-      "origin": "https://carnivalcity.m.jd.com",
-      "Cookie": cookie,
-      "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
-    }
-  }
 }
 
 //获取当前活动总京豆数量
@@ -818,6 +808,24 @@ function jsonParse(str) {
   }
 }
 
+function getShareCodesHW() {
+  return new Promise(resolve => {
+    $.get({
+      url: "https://api.jdsharecode.xyz/api/HW_CODES"
+    }, (err, resp, data) => {
+      try {
+        if (!err) {
+          data = JSON.parse(data)
+          shareCodesHW = data['carnivalcity']
+        }
+      } catch (e) {
+      } finally {
+        resolve()
+      }
+    })
+  })
+}
+
 function Env(t, e) {
   "undefined" != typeof process && JSON.stringify(process.env).indexOf("GITHUB") > -1 && process.exit(0);
 
@@ -976,7 +984,8 @@ function Env(t, e) {
     setdata(t, e) {
       let s = !1;
       if (/^@/.test(e)) {
-        const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e), o = this.getval(i), h = i ? "null" === o ? null : o || "{}" : "{}";
+        const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e), o = this.getval(i),
+          h = i ? "null" === o ? null : o || "{}" : "{}";
         try {
           const e = JSON.parse(h);
           this.lodash_set(e, r, t), s = this.setval(JSON.stringify(e), i)
