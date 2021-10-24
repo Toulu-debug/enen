@@ -79,19 +79,23 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     // 扭蛋机
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
     let drawTimes = res.data.times
-    console.log('扭蛋机剩余次数:', drawTimes)
-    await wait(1000)
-    for (let j = 0; j < drawTimes; j++) {
-      res = await api('operservice/DrawCard', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
-      if (res.ret === 0) {
-        if (res.data.prizetype === 3)
-          console.log('抽奖成功，金币：', res.data.addcoins)
-        else
-          console.log('抽奖成功，其他：', res)
-        await wait(4000)
-      } else {
-        console.log('抽奖失败:', res)
-        break
+    if (typeof drawTimes === "undefined") {
+      await sendNotify("牧场扭蛋机错误", `账号${i + 1} ${UserName}\n手动建造扭蛋机`)
+    } else {
+      console.log('扭蛋机剩余次数:', drawTimes)
+      await wait(1000)
+      for (let j = 0; j < drawTimes; j++) {
+        res = await api('operservice/DrawCard', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+        if (res.ret === 0) {
+          if (res.data.prizetype === 3)
+            console.log('抽奖成功，金币：', res.data.addcoins)
+          else
+            console.log('抽奖成功，其他：', res)
+          await wait(4000)
+        } else {
+          console.log('抽奖失败:', res)
+          break
+        }
       }
     }
 
