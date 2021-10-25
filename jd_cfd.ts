@@ -131,6 +131,39 @@ interface Params {
       }
     }
 
+    let tasks: any
+    // 加速卡任务
+    tasks = await api('story/GetPropTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    for (let t of tasks.Data.TaskList) {
+      if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
+        res = await api('Award', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,taskId', {bizCode: tasks.Data.strZone, taskId: t.ddwTaskId})
+        await wait(1000)
+        if (res.ret === 0) {
+          let prizeInfo: any = JSON.parse(res.data.prizeInfo)
+          let CardList: any = prizeInfo.CardInfo.CardList
+          let cards: string = ''
+          for (let card of CardList) {
+            cards += card.strCardName
+          }
+          console.log('加速卡领取成功', cards)
+        } else {
+          console.log('加速卡领取失败', res)
+          break
+        }
+      }
+      if (t.dwCompleteNum < t.dwTargetNum && t.strTaskName !== '去接待NPC') {
+        console.log(t.strTaskName);
+        res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {bizCode: tasks.Data.strZone, taskId: t.ddwTaskId})
+        await wait(t.dwLookTime * 1000 ?? 2000)
+        if (res.ret === 0) {
+          console.log('加速卡任务完成')
+        } else {
+          console.log('加速卡任务失败', res)
+          break
+        }
+      }
+    }
+
     // 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone');
     let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard;
@@ -438,7 +471,6 @@ interface Params {
     await wait(2000)
 
     // 任务➡️
-    let tasks: any
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     await wait(2000)
     for (let t of tasks.Data.TaskList) {
@@ -522,7 +554,8 @@ interface Params {
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
       if (res.iRet === 0) {
         console.log('助力成功:', res.Data.GuestPrizeInfo.strPrizeName)
-      } else if (res.iRet === 2232 || res.sErrMsg === '今日助力次数达到上限，明天再来帮忙吧~') {
+      } else if (res.iRet === 2190) {
+        console.log('上限')
         break
       } else if (res.iRet === 2191) {
         console.log('已助力')

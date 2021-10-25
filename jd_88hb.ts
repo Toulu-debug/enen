@@ -54,6 +54,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     for (let j = 0; j < shareCodes.length; j++) {
       console.log(`账号${i + 1} ${UserName} 去助力 ${shareCodes[j]}`)
       res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: shareCodes[j]})
+      await wait(5000)
       if (res.iRet === 0) {
         console.log('成功')
       } else if (res.iRet === 2015) {
@@ -65,7 +66,6 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
       } else {
         console.log('其他错误:', res)
       }
-      await wait(5000)
     }
   }
 
