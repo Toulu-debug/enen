@@ -2,7 +2,7 @@ import axios from 'axios';
 import USER_AGENT, {requireConfig, wait, requestAlgo} from './TS_USER_AGENTS';
 
 let cookie: string = '', res: any = '', UserName: string, index: number;
-let shareCodes: string[] = [], shareCodesSelf: string[] = [], tasks: any;
+let shareCodes: string[] = [], shareCodesSelf: string[] = [];
 let shareCodesHW: string[] = [
   '8fa2f89e-39a0-4023-b902-74376f1ac5b4',
   'ca02cf34-1b5b-4da1-9852-8945a8cc0231',
@@ -27,7 +27,8 @@ let shareCodesHW: string[] = [
     shareCodesSelf.push(res.data)
 
     for (let j = 0; j < 9; j++) {
-      if (await doTask() === 0)
+      let ret: number = await doTask();
+      if (!ret)
         break
     }
 
@@ -47,7 +48,7 @@ let shareCodesHW: string[] = [
     await wait(1000)
   }
 
-  shareCodes = [...shareCodesSelf, ...shareCodesHW]
+  shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -78,26 +79,38 @@ async function api(body: string) {
 }
 
 async function doTask() {
-  tasks = await api(`{"apiMapping":"/api/task/getTaskList"}`)
+  console.log('任务列表刷新')
+  let tasks: any = await api(`{"apiMapping":"/api/task/getTaskList"}`)
+  let finished: any = tasks.data.filter(t => {
+    if (t.totalNum === t.finishNum)
+      return t
+  })
+  console.log(finished.length)
+  if (finished.length === 3)
+    return 0
   for (let t of tasks.data) {
-    for (let j = t.finishNum; j < t.totalNum; j++) {
+    for (let j = 0; j < t.totalNum - t.finishNum; j++) {
       console.log(t.taskName)
+      await wait(3000)
       res = await api(`{"parentId":"${t.parentId}","taskId":"${t.taskId}","apiMapping":"/api/task/doTask"}`)
       await wait(10000)
       if (res.code === 200) {
+        console.log('任务完成')
+        await api(`{"apiMapping":"/api/index/indexInfo"}`)
+        if (t.type === 'FOLLOW_SHOP_TASK')
+          return 1
         let timestamp: number = res.data.timeStamp
         res = await api(`{"parentId":"${t.parentId}","taskId":"${t.taskId}","timeStamp":${timestamp},"apiMapping":"/api/task/getReward"}`)
         if (res.code === 200) {
-          console.log('任务成功，获得', res.data.score)
+          console.log('领奖成功，获得', res.data.score)
           await wait(2000)
           return 1
         } else {
-          console.log('任务失败', res)
+          console.log('领奖失败', res)
         }
       } else {
         console.log('任务失败', res)
       }
     }
   }
-  return 0
 }
