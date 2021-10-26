@@ -20,8 +20,8 @@ let cookie: string = '', res: any = '', UserName: string, message: string = '';
 
   let exist: string[];
   try {
-    accessSync('jxgc_stock.json')
-    exist = JSON.parse(readFileSync('jxgc_stock.json').toString())
+    accessSync('./json/jxgc_stock.json')
+    exist = JSON.parse(readFileSync('./json/jxgc_stock.json').toString())
   } catch (e) {
     exist = []
   }
@@ -35,7 +35,7 @@ let cookie: string = '', res: any = '', UserName: string, message: string = '';
       message += t.name + '\n'
     }
   }
-  writeFileSync('./jxgc_stock.json', JSON.stringify(current))
+  writeFileSync('./json/jxgc_stock.json', JSON.stringify(current))
   if (message) {
     console.log('send...')
     sendNotify('京喜工厂可生产', message)

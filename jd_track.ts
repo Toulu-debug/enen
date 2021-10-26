@@ -16,8 +16,8 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
   let except: string[] = exceptCookie(path.basename(__filename));
   let orders: any;
   try {
-    accessSync('./jd_track.json')
-    orders = JSON.parse(readFileSync('./jd_track.json').toString() || '{}')
+    accessSync('./json/jd_track.json')
+    orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
   } catch (e) {
     orders = {}
   }
@@ -53,7 +53,7 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     }
     await wait(1000)
   }
-  writeFileSync('./jd_track.json', JSON.stringify(orders))
+  writeFileSync('./json/jd_track.json', JSON.stringify(orders))
   if (allMessage)
     await sendNotify('京东快递更新', allMessage)
 })()

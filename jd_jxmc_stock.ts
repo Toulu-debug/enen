@@ -17,11 +17,11 @@ let cookie: string = '', res: any = '', UserName: string;
   cookie = cookiesArr[getRandomNumberByRange(0, cookiesArr.length)];
   UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
   try {
-    accessSync('./jxmc_stock.json')
+    accessSync('./json/jxmc_stock.json')
   } catch (e) {
-    writeFileSync('./jxmc_stock.json', '{}', 'utf-8')
+    writeFileSync('./json/jxmc_stock.json', '{}', 'utf-8')
   }
-  let exist: any = readFileSync('./jxmc_stock.json', 'utf-8')
+  let exist: any = readFileSync('./json/jxmc_stock.json', 'utf-8')
   try {
     exist = JSON.parse(exist)
   } catch (e) {
@@ -29,6 +29,11 @@ let cookie: string = '', res: any = '', UserName: string;
   }
   let items: string = '', message: string = '', token = await jxmcToken(cookie);
 
+  while (1) {
+    if (new Date().getSeconds() === 0)
+      break
+    await wait(100)
+  }
   res = await api('queryservice/GetGoodsListV2',
     'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp', {
       activeid: 'jxmc_active_0001',
@@ -37,6 +42,7 @@ let cookie: string = '', res: any = '', UserName: string;
       timestamp: token.timestamp,
       phoneid: token.phoneid
     })
+  console.log(JSON.stringify(res))
   await wait(2000);
 
   for (let good of res.data.goodslist) {
@@ -69,7 +75,7 @@ let cookie: string = '', res: any = '', UserName: string;
       items = ''
     }
   }
-  writeFileSync('./jxmc_stock.json', JSON.stringify(exist, null, 2), 'utf-8')
+  writeFileSync('./json/jxmc_stock.json', JSON.stringify(exist, null, 2), 'utf-8')
   for (let j of Object.keys(exist)) {
     if (allItems.indexOf(j) > -1) {
       message += exist[j].name + '\t' + exist[j].egg + '\n'
