@@ -1,30 +1,16 @@
-const $ = Env('jd_city_withdraw');
+const $ = new Env('jd_city_getParam');
 
-!(async () => {
-  console.log('=======body=========')
-  console.log($.getdata('jd_city_withdraw_body'))
-  console.log('=======headers=========')
-  console.log($.getdata('jd_city_withdraw_headers'))
+if ($request.url === 'https://api.m.jd.com/client.action') {
+  if ($request.body.indexOf('city_withdraw') > -1) {
+    $.msg('found')
+    console.log('=======body=========')
+    console.log($request.body)
+    console.log('=======headers=========')
+    console.log($request.headers)
 
-  for (let i = 0; i < 9999; i++) {
-    if (await withdraw() === 200) {
-      break
-    }
-    await $.wait(100)
+    $.setdata($request.body, 'jd_city_withdraw_body')
+    $.setjson($request.headers, 'jd_city_withdraw_headers')
   }
-
-})()
-  .catch((e) => {
-    $.log("", `❌ ${$.name}, 失败! 原因: ${e}!`, "");
-  })
-  .finally(() => {
-    $.done();
-  });
-
-function withdraw() {
-  return new Promise(resolve => {
-    resolve(200)
-  })
 }
 
 function Env(t, e) {
