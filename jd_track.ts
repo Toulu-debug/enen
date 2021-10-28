@@ -1,6 +1,6 @@
 /**
  * 京东快递更新通知
- * cron: 0-23/2 * * * *
+ * cron: 0 0-23/4 * * *
  */
 
 import axios from "axios";
@@ -35,16 +35,21 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     message = ''
     res = await getOrderList()
     for (let order of res.orderList) {
-      let orderId: string = order['orderId'], title: string = order['productList'][0]['title'], t: string = order['progressInfo']['tip'], status: string = order['progressInfo']['content']
-      if (status.match(/(?=签收|已取走|已暂存)/)) continue
-      console.log(title)
-      console.log('\t', t, status)
-      console.log()
-      if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
-        message += `${title}\n${t}  ${status}\n\n`
-      }
-      orders[orderId] = {
-        title, t, status
+      let orderId: string = order['orderId']
+      let title: string = order['productList'][0]['title']
+      let t: string = order.progressInfo?.tip || null
+      let status: string = order.progressInfo?.content || null
+      if (t && status) {
+        if (status.match(/(?=签收|已取走|已暂存)/)) continue
+        console.log(title)
+        console.log('\t', t, status)
+        console.log()
+        if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
+          message += `${title}\n${t}  ${status}\n\n`
+        }
+        orders[orderId] = {
+          title, t, status
+        }
       }
     }
     if (message) {
