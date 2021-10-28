@@ -31,7 +31,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     await wait(1000)
     shareCodeSelf.push(res.smp)
   }
-  /*
+
   shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
   console.log('内部助力:', shareCodeSelf)
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -45,8 +45,6 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     }
   }
 
-
-   */
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
