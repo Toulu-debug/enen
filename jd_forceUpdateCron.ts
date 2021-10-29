@@ -19,7 +19,7 @@ let server: string = '', message: string = '';
   server = `127.0.0.1:${port}`
 
   // 新cron
-  let taskName = "jd_88hb.ts", cron: string = '5 0,6,18 * * *';
+  let taskName = "jd_bean_box.ts", cron: string = '1 0,9,18,22 * * *';
   let task: any = await get(taskName, bearer);
 
   if (task && task.schedule !== cron) {
@@ -48,7 +48,6 @@ async function set(task: any, bearer: string, cron: string) {
     await sendNotify('强制更新cron', message)
   } else {
     console.log('更新失败：', data)
-    await sendNotify('强制更新cron', `更新失败\n${JSON.stringify(data)}`)
   }
 }
 
