@@ -10,23 +10,23 @@ let cookie: string = '', res: any = '', UserName: string, index: number, uuid: s
 let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW: { shareCode: string, groupCode: string }[] = [
   {
     shareCode: '14E185959D6E7563818B3CD5CAC5A849',
-    groupCode: '903697802776043520'
+    groupCode: '903797055734702080'
   },
   {
     shareCode: 'C24FA9CD98CAC52DCD732BEF4331D894AD1DAAB9A3E3F6CBAFDE81EEB7393333',
-    groupCode: '903703632645218304'
+    groupCode: '903797092127629312'
   },
   {
     shareCode: '2792D0AFEA0FA0FD38D4AF1BCA0E5486',
-    groupCode: '903703899999068160'
+    groupCode: '903797128428937216'
   },
   {
     shareCode: '2EB0774E42574DD3A90570F53695C933',
-    groupCode: '903703914641383424'
+    groupCode: '903797165167763456'
   },
   {
     shareCode: '91B2AF66C68B412620D9AAA015617D60AD1DAAB9A3E3F6CBAFDE81EEB7393333',
-    groupCode: '903703928977907712'
+    groupCode: '903797201671053312'
   }
 ], shareCode: { shareCode: string, groupCode: string }[] = [];
 
@@ -57,6 +57,7 @@ let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW:
     }
 
     uuid = randomString(40)
+    /*
     for (let j = 0; j < 4; j++) {
       console.log(`Round:${j + 1}`)
       res = await api('beanTaskList', {"viewChannel": "AppHome"})
@@ -68,7 +69,7 @@ let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW:
               "actionType": t.taskType === 3 ? 0 : 1,
               "taskToken": t.subTaskVOS[0].taskToken
             })
-            res.data.bizMsg ? console.log(res.data.bizMsg) : console.log(res)
+            res.data?.bizMsg ? console.log(res.data.bizMsg) : console.log(res)
             await wait(t.waitDuration * 1000 || 2000)
 
             if (t.taskType !== 3) {
@@ -76,7 +77,7 @@ let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW:
                 "actionType": 0,
                 "taskToken": t.subTaskVOS[0].taskToken
               })
-              if (res.data.bizMsg)
+              if (res.data?.bizMsg)
                 console.log(res.data.bizMsg)
             }
             await wait(1000)
@@ -88,6 +89,8 @@ let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW:
       await wait(2000)
     }
 
+
+     */
     // 抢京豆
     res = await qjd('signBeanGroupStageIndex', {"monitor_refer": "", "rnVersion": "3.9", "fp": "-1", "shshshfp": "-1", "shshshfpa": "-1", "referUrl": "-1", "userAgent": "-1", "jda": "-1", "monitor_source": "bean_m_bean_index"})
     if (!res.data.shareCode) {
