@@ -1,22 +1,19 @@
 /**
- * 必须编译成js再运行
- * 可在31~59秒启动，0~30秒自动放行
- * 只在00:00:xx和12:00:xx升级建筑
- * 默认：0点1元，12点0.5，其他0.1
- * export CFD_CASHOUT_MONEY=1  // 自定义1元
+ * 0～30秒开始执行，31～59秒死循环等待
+ * 提现金额：0.1、0.5、1
  */
-import {Worker, isMainThread, workerData} from 'worker_threads';
-import {requireConfig, wait} from "./TS_USER_AGENTS";
-import {Md5} from "ts-md5";
-import axios from "axios";
-import USER_AGENT from "./TS_USER_AGENTS";
+
 import {format} from 'date-fns';
+import axios from 'axios';
+import {Md5} from 'ts-md5'
+import USER_AGENT, {requireConfig, wait} from '../TS_USER_AGENTS';
+import {getRandomNumberByRange} from "../TS_USER_AGENTS";
 import * as dotenv from 'dotenv';
 
 const CryptoJS = require('crypto-js')
 dotenv.config()
 let appId: number = 10028, fingerprint: string | number, token: string = '', enCryptMethodJD: any;
-let cookie: string = '', res: any = '';
+let cookie: string = '', res: any = '', UserName: string, index: number;
 
 interface Params {
   ddwMoney?: number,
@@ -28,23 +25,30 @@ interface Params {
   ddwCostCoin?: number,
 }
 
-function f1(cookies: string) {
-  return new Promise<void>(async resolve => {
-    cookie = cookies
+!(async () => {
+  await requestAlgo();
+  let cookiesArr: any = await requireConfig();
+  for (let i = 0; i < cookiesArr.length; i++) {
+    cookie = cookiesArr[i];
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    index = i + 1;
+    console.log(`\n开始【京东账号${index}】${UserName}\n`);
     while (1) {
-      if (new Date().getSeconds() < 30)
+      if (new Date().getSeconds() < 30) {
         break
-      await wait(100)
+      } else {
+        await wait(100)
+      }
     }
 
-    // 只在00:00:00和12:00:00升级建筑
+    // 只在00:00:xx和12:00:xx升级建筑
     if ((new Date().getHours() === 0 || new Date().getHours() === 12) && new Date().getMinutes() === 0) {
       for (let b of ['food', 'fun', 'shop', 'sea']) {
         res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: b})
         if (res.dwCanLvlUp === 1) {
           res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: b})
           if (res.iRet === 0) {
-            console.log(`升级成功:`, res)
+            console.log(`${b}升级成功`)
             break
           }
         }
@@ -58,10 +62,11 @@ function f1(cookies: string) {
       '_cfd_t,bizCode,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
     console.log('资格:', res)
+    if (res.iRet === 2036)
+      break
     await wait(4000)
     console.log('提现：', format(new Date(), 'hh:mm:ss:SSS'))
-    let money: number
-    let h = new Date().getHours()
+    let money: number, h: number = new Date().getHours()
     if (h === 0)
       money = 100
     else if (h === 12)
@@ -69,29 +74,11 @@ function f1(cookies: string) {
     else
       money = 10
     money = process.env.CFD_CASHOUT_MONEY ? parseFloat(process.env.CFD_CASHOUT_MONEY) * 100 : money
-
     console.log('本次计划提现：', money / 100)
+
     res = await api('user/CashOut', '_cfd_t,bizCode,ddwMoney,ddwPaperMoney,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strZone',
       {ddwMoney: money, ddwPaperMoney: money * 10, strPgUUNum: token.strPgUUNum, strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID})
     console.log('提现:', res)
-
-    resolve()
-  })
-}
-
-!(async () => {
-  if (isMainThread) {
-    await requestAlgo();
-    let cookiesArr: any = await requireConfig();
-    for (let i = 0; i < cookiesArr.length; i++) {
-      new Worker(__filename, {
-        workerData: {
-          cookie: cookiesArr[i],
-        }
-      })
-    }
-  } else {
-    await f1(workerData.cookie)
   }
 })()
 
@@ -107,10 +94,6 @@ function getJxToken(cookie: string) {
 
   let phoneId = generateStr(40);
   let timestamp = Date.now().toString();
-  if (!cookie['match'](/pt_pin=([^; ]+)(?=;?)/)) {
-    console.log('此账号cookie填写不规范,你的pt_pin=xxx后面没分号(;)\n');
-    return {}
-  }
   let nickname = cookie.match(/pt_pin=([^;]*)/)![1];
   let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy');
   return {
@@ -134,9 +117,8 @@ function api(fn: string, stk: string, params: Params = {}) {
           url += `&${key}=${params[key]}`
       }
     }
-    console.log(cookie)
     url += '&h5st=' + decrypt(stk, url)
-    let {data} = await axios.get(url, {
+    let {data}: any = await axios.get(url, {
       headers: {
         Cookie: cookie,
         Referer: "https://st.jingxi.com/fortune_island/index.html?ptag=138631.26.55",
@@ -151,7 +133,7 @@ function api(fn: string, stk: string, params: Params = {}) {
 async function requestAlgo() {
   fingerprint = await generateFp();
   return new Promise<void>(async resolve => {
-    let {data} = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
+    let {data}: any = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
       "version": "1.0",
       "fp": fingerprint,
       "appId": appId,
@@ -196,7 +178,6 @@ function decrypt(stk: string, url: string) {
     const random = '5gkjB6SpmC9s';
     token = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`;
     fingerprint = 9686767825751161;
-    // $.fingerprint = 7811850938414161;
     const str = `${token}${fingerprint}${timestamp}${appId}${random}`;
     hash1 = CryptoJS.SHA512(str, token).toString(CryptoJS.enc.Hex);
   }

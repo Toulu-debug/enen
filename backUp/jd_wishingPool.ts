@@ -1,5 +1,5 @@
 import axios from 'axios';
-import USER_AGENT from './TS_USER_AGENTS';
+import USER_AGENT from '../TS_USER_AGENTS';
 
 let $: any = {};
 let cookie: string = '', cookiesArr: Array<string> = [];

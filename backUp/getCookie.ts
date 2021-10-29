@@ -3,7 +3,7 @@
  * export PUSH_COOKIE=true
  */
 import axios from 'axios'
-import {wait} from "./TS_USER_AGENTS";
+import {wait} from "../TS_USER_AGENTS";
 
 const qrcode = require('qrcode-terminal')
 const notify = require('./sendNotify')

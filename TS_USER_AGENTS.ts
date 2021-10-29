@@ -119,7 +119,7 @@ function wait(timeout: number) {
   })
 }
 
-async function requestAlgo(appId: number = 10032) {
+async function requestAlgo(appId: number | string = 10032) {
   fingerprint = generateFp();
   return new Promise<void>(async resolve => {
     let {data}: any = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
