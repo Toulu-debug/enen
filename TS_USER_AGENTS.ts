@@ -119,7 +119,7 @@ function wait(timeout: number) {
   })
 }
 
-async function requestAlgo(appId = 10032) {
+async function requestAlgo(appId: number = 10032) {
   fingerprint = generateFp();
   return new Promise<void>(async resolve => {
     let {data}: any = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
@@ -224,7 +224,7 @@ function getJxToken(cookie: string) {
 }
 
 function exceptCookie(filename: string = 'x.ts') {
-  let except: string[] = [];
+  let except: string[];
   try {
     accessSync('./utils/exceptCookie.json')
     except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename] || []
@@ -250,6 +250,10 @@ function resetHosts() {
   }
 }
 
+function o2s(arr: object) {
+  console.log(JSON.stringify(arr))
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -264,5 +268,6 @@ export {
   h5st,
   exceptCookie,
   randomString,
-  resetHosts
+  resetHosts,
+  o2s
 }
