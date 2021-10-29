@@ -42,12 +42,18 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
 
     jxToken = await token(cookie);
-    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {
-      isgift: 1,
-      isquerypicksite: 1,
-      isqueryinviteicon: 1
-    })
-    console.log(JSON.stringify(homePageInfo))
+    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
+    if (homePageInfo.data.maintaskId !== 'pause') {
+      console.log('init...')
+      for (let j = 0; j < 20; j++) {
+        res = await api('operservice/DoMainTask', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,step,timestamp', {step: homePageInfo.data.maintaskId})
+        if (res.data.maintaskId === 'pause')
+          break
+        await wait(2000)
+      }
+    }
+
+    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
       lastgettime = homePageInfo.data.cow.lastgettime
@@ -311,7 +317,8 @@ interface Params {
   isqueryinviteicon?: number,
   showAreaTaskFlag?: number,
   jxpp_wxapp_type?: number,
-  dateType?: string
+  dateType?: string,
+  step?: string,
 }
 
 async function getTask() {
