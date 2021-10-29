@@ -100,10 +100,13 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       for (let j = 0; j < drawTimes; j++) {
         res = await api('operservice/DrawCard', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
         if (res.ret === 0) {
-          if (res.data.prizetype === 3)
+          if (res.data.prizetype === 3) {
             console.log('抽奖成功，金币：', res.data.addcoins)
-          else
+          } else if (res.data.prizetype === 1) {
+            console.log('抽奖成功，卡片：', res.data.cardtype)
+          } else {
             console.log('抽奖成功，其他：', res)
+          }
           await wait(4000)
         } else {
           console.log('抽奖失败:', res)
