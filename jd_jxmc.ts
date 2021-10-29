@@ -19,8 +19,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   try {
     resetHosts();
   } catch (e) {
-    await sendNotify("脚本执行出错", "删除TS_USER_AGENT.js\n\n删js ! 不是ts !");
-    return;
   }
   await requestAlgo();
   let cookiesArr: any = await requireConfig();

@@ -17,8 +17,6 @@ let cookie: string = '', res: any = '', homePageInfo: any, jxToken: any, UserNam
   try {
     resetHosts();
   } catch (e) {
-    await sendNotify("脚本执行出错", "删除TS_USER_AGENT.js\n\n删js ! 不是ts !");
-    return;
   }
 
   await requestAlgo();
