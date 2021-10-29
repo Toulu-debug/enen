@@ -170,6 +170,9 @@ interface Params {
     let coincardUsing = coincard.filter(card => {
       return card.dwCardState === 2
     })
+    let richcardUsing = richcard.filter(card => {
+      return card.dwCardState === 2
+    })
     if (coincardUsing.length === 0) {
       for (let card of coincard) {
         if (card.dwIsCanUseNext === 1) {
@@ -183,17 +186,18 @@ interface Params {
         }
       }
     }
-
-    for (let card of richcard) {
-      if (card.dwIsCanUseNext === 1) {
-        for (let j = 0; j < card.dwCardNums; j++) {
-          res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 2, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
-          if (res.iRet === 0) {
-            console.log('点券加速卡使用成功')
-          } else {
-            console.log('点券加速卡使用失败', res)
+    if (richcardUsing.length === 0) {
+      for (let card of richcard) {
+        if (card.dwIsCanUseNext === 1) {
+          for (let j = 0; j < card.dwCardNums; j++) {
+            res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 2, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
+            if (res.iRet === 0) {
+              console.log('点券加速卡使用成功')
+            } else {
+              console.log('点券加速卡使用失败', res)
+            }
+            await wait(2000)
           }
-          await wait(2000)
         }
       }
     }
