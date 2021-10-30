@@ -3,18 +3,18 @@
  * cron: 0 0-23/4 * * *
  */
 
-import axios from "axios";
-import * as path from "path";
-import {sendNotify} from './sendNotify';
-import {accessSync, readFileSync, writeFileSync} from "fs";
-import {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS";
+import axios from "axios"
+import * as path from "path"
+import {sendNotify} from './sendNotify'
+import {accessSync, readFileSync, writeFileSync} from "fs"
+import {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
 
-let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = '';
+let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
-  let except: string[] = exceptCookie(path.basename(__filename));
-  let orders: any;
+  let cookiesArr: any = await requireConfig()
+  let except: string[] = exceptCookie(path.basename(__filename))
+  let orders: any
   try {
     accessSync('./json/jd_track.json')
     orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
@@ -22,10 +22,10 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     orders = {}
   }
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
@@ -64,7 +64,7 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
 })()
 
 async function getOrderList() {
-  let t: number = Date.now();
+  let t: number = Date.now()
   let {data} = await axios.get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${t}&sceneval=2&_=${t + 1}&sceneval=2`, {
     headers: {
       'authority': 'wq.jd.com',

@@ -4,27 +4,27 @@
  * cron: 5 0,6,18 * * *
  */
 
-import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS";
-import axios from "axios";
-import {Md5} from "ts-md5";
-import {format} from 'date-fns';
+import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS"
+import axios from "axios"
+import {Md5} from "ts-md5"
+import {format} from 'date-fns'
 
-const token = require('./utils/jd_jxmc.js').token;
+const token = require('./utils/jd_jxmc.js').token
 
-let cookie: string = '', res: any = '', UserName: string, index: number, UA: string = '';
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], jxToken: any;
+let cookie: string = '', res: any = '', UserName: string, index: number, UA: string = ''
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], jxToken: any
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: any = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
     jxToken = await token(cookie)
 
     res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {})
-    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes;
+    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes
     console.log('收到助力:', dwHelpedTimes)
     console.log('助力码：', strUserPin)
     shareCodesSelf.push(strUserPin)
@@ -38,7 +38,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
   console.log('内部助力码：', shareCodesSelf)
 
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     jxToken = await token(cookie)
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
 
@@ -46,7 +46,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     if (shareCodesHW.length !== 0) {
       console.log('获取随机助力码')
-      res = await getCodesPool();
+      res = await getCodesPool()
       shareCodes = Array.from(new Set([...shareCodes, ...res]))
     }
     console.log('助力排队:', shareCodes)
@@ -71,14 +71,14 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
 
   // 拆红包
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     jxToken = await token(cookie)
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName} 拆红包\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName} 拆红包\n`)
 
     res = await api('GetUserInfo', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp,userDraw', {userDraw: 1})
-    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes;
+    let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes
     await wait(2000)
 
     for (let t of res.Data.gradeConfig) {
@@ -165,9 +165,9 @@ async function makeShareCodes(code: string) {
 }
 
 function randomString(e: number) {
-  e = e || 32;
-  let t = "0123456789abcdef", a = t.length, n = "";
+  e = e || 32
+  let t = "0123456789abcdef", a = t.length, n = ""
   for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a));
+    n += t.charAt(Math.floor(Math.random() * a))
   return n
 }

@@ -1,22 +1,22 @@
-import axios from 'axios';
-import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS';
+import axios from 'axios'
+import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS'
 
-let cookie: string = '', res: any = '', UserName: string, index: number;
+let cookie: string = '', res: any = '', UserName: string, index: number
 let shareCodeSelf: {
   encryptProjectId: string,
   encryptAssignmentId: string,
   itemId: string
-} [] = [];
+} [] = []
 
-const DEBUG = false;
+const DEBUG = false
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: any = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
     res = await api("functionId=getInteractionHomeInfo&body=%7B%22sign%22%3A%22u6vtLQ7ztxgykLEr%22%7D&appid=content_ecology&client=wh5&clientVersion=1.0.0")
     let sign: string = res.result.taskConfig.projectId
@@ -37,10 +37,15 @@ const DEBUG = false;
             })
           }
           if (t.assignmentName === '每日签到') {
-            let signDay: number = t.ext.sign1.signList?.length || 0,
-              type: number = t.rewards[signDay].rewardType
-            console.log(signDay, type)
-            // TODO 签到
+            if (t.ext.sign1.status === 1) {
+              let signDay: number = t.ext.sign1.signList?.length || 0,
+                type: number = t.rewards[signDay].rewardType
+              console.log(signDay, type)
+              res = await api(`functionId=doInteractiveAssignment&body=%7B%22encryptProjectId%22%3A%22${sign}%22%2C%22encryptAssignmentId%22%3A%22${t.encryptAssignmentId}%22%2C%22sourceCode%22%3A%22acexinpin0823%22%2C%22itemId%22%3A%221%22%2C%22actionType%22%3A%22%22%2C%22completionFlag%22%3A%22%22%2C%22ext%22%3A%7B%7D%7D&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+              console.log('签到成功', JSON.stringify(res))
+            } else {
+              console.log('已签到')
+            }
           }
 
           for (let proInfo of t.ext.productsInfo ?? []) {
@@ -87,7 +92,7 @@ const DEBUG = false;
 
   console.log('助力排队:', shareCodeSelf)
 
-  cookie = cookiesArr[0];
+  cookie = cookiesArr[0]
   UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
   for (let code of shareCodeSelf) {
     console.log(`账号1 ${UserName} 去助力 ${code.itemId}`)
@@ -96,8 +101,8 @@ const DEBUG = false;
     await wait(2000)
   }
 
-  if(shareCodeSelf[0]) {
-    cookie = cookiesArr[1];
+  if (shareCodeSelf[0]) {
+    cookie = cookiesArr[1]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     let code: any = shareCodeSelf[0]
     console.log(`账号2 ${UserName} 去助力 ${code.itemId}`)

@@ -22,6 +22,7 @@ let index: number, remain: number = 0;
     await getIsvToken2();
     res = await api('setMixNick');
     buyerNick = res.data.data.msg
+    console.log('buyerNick:', buyerNick)
 
     res = await api('UserInfo')
     console.log('total:', res.data.data.totalChance, 'remain:', res.data.data.remainChance)

@@ -5,13 +5,13 @@
  * cron: 30 * * * *
  */
 
-import {format} from 'date-fns';
-import axios from "axios";
-import {h5st, requireConfig, requestAlgo, wait, exceptCookie} from "./TS_USER_AGENTS";
-import {sendNotify} from './sendNotify';
-import * as path from "path";
+import {format} from 'date-fns'
+import axios from "axios"
+import {h5st, requireConfig, requestAlgo, wait, exceptCookie} from "./TS_USER_AGENTS"
+import {sendNotify} from './sendNotify'
+import * as path from "path"
 
-let cookie: string = '', res: any = '', UserName: string, index: number;
+let cookie: string = '', res: any = '', UserName: string, index: number
 
 
 interface Params {
@@ -40,13 +40,13 @@ interface Params {
 
 !(async () => {
   await requestAlgo(10001)
-  let cookiesArr: any = await requireConfig();
-  let except: string[] = exceptCookie(path.basename(__filename));
+  let cookiesArr: any = await requireConfig()
+  let except: string[] = exceptCookie(path.basename(__filename))
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
@@ -162,7 +162,7 @@ async function task() {
         res = await api('DoTask', '_time,bizCode,configExtra,source,taskId', {configExtra: '', taskId: t.taskId, bizCode: t.bizCode})
         await wait(5000)
         if (res.ret === 0) {
-          console.log('任务完成');
+          console.log('任务完成')
           await wait(3000)
           return 1
         } else {

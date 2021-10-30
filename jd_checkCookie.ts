@@ -2,18 +2,18 @@
  * 每天检测cookie是否有效
  * cron: 10 * * * *
  */
-import axios from "axios";
-import USER_AGENT, {requireConfig} from "./TS_USER_AGENTS";
+import axios from "axios"
+import USER_AGENT, {requireConfig} from "./TS_USER_AGENTS"
 
 const notify = require('./sendNotify')
-let cookie: string = '', UserName: string, index: number, errMsg: string = '';
+let cookie: string = '', UserName: string, index: number, errMsg: string = ''
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: any = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
+    index = i + 1
 
     await api(index, cookie, UserName)
   }

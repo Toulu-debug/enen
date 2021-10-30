@@ -88,7 +88,7 @@ function api(fn: string, body: Object): Object {
     url = `https://lzdz-isv.isvjcloud.com/dingzhi/qqxing/pasture/${fn}?_=${Date.now()}`
   }
   return new Promise(async resolve => {
-    let {data, headers} = await axios.post(url, body
+    let {data, headers}: any = await axios.post(url, body
       // `activityId=90121061401&pin=${encodeURIComponent(pin)}&actorUuid=${uuid}&userUuid=${uuid}`
       , {
         headers: {

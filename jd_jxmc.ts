@@ -3,43 +3,43 @@
  * cron: 10 0,12,18 * * *
  */
 
-import axios from 'axios';
-import {Md5} from "ts-md5";
-import * as path from 'path';
-import {sendNotify} from './sendNotify';
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString} from './TS_USER_AGENTS';
+import axios from 'axios'
+import {Md5} from "ts-md5"
+import * as path from 'path'
+import {sendNotify} from './sendNotify'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString} from './TS_USER_AGENTS'
 
-const cow = require('./utils/jd_jxmc.js').cow;
-const token = require('./utils/jd_jxmc.js').token;
+const cow = require('./utils/jd_jxmc.js').cow
+const token = require('./utils/jd_jxmc.js').token
 
-let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, jxToken: any, UserName: string, index: number;
-let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = [];
+let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, jxToken: any, UserName: string, index: number
+let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
   try {
-    resetHosts();
+    resetHosts()
   } catch (e) {
   }
-  await requestAlgo();
-  let cookiesArr: any = await requireConfig();
+  await requestAlgo()
+  let cookiesArr: any = await requireConfig()
   if (process.argv[2]) {
     console.log('收到命令行cookie')
     cookiesArr = [unescape(process.argv[2])]
   }
-  let except: string[] = exceptCookie(path.basename(__filename));
+  let except: string[] = exceptCookie(path.basename(__filename))
 
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
       continue
     }
 
-    jxToken = await token(cookie);
+    jxToken = await token(cookie)
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
     if (homePageInfo.data.maintaskId !== 'pause') {
       console.log('init...')
@@ -61,25 +61,25 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     let food: number = 0
     try {
-      food = homePageInfo.data.materialinfo[0].value;
+      food = homePageInfo.data.materialinfo[0].value
     } catch (e: any) {
       console.log('未开通？黑号？')
       continue
     }
-    let petid: string = homePageInfo.data.petinfo[0].petid;
-    let coins = homePageInfo.data.coins;
+    let petid: string = homePageInfo.data.petinfo[0].petid
+    let coins = homePageInfo.data.coins
 
-    console.log('助力码:', homePageInfo.data.sharekey);
-    shareCodesSelf.push(homePageInfo.data.sharekey);
+    console.log('助力码:', homePageInfo.data.sharekey)
+    shareCodesSelf.push(homePageInfo.data.sharekey)
     try {
-      await makeShareCodes(homePageInfo.data.sharekey);
+      await makeShareCodes(homePageInfo.data.sharekey)
     } catch (e: any) {
       console.log(e)
     }
 
-    console.log('草草🌿', food);
-    console.log('蛋蛋🥚', homePageInfo.data.eggcnt);
-    console.log('钱钱💰', coins);
+    console.log('草草🌿', food)
+    console.log('蛋蛋🥚', homePageInfo.data.eggcnt)
+    console.log('钱钱💰', coins)
 
     // 扭蛋机
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -125,7 +125,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
 
     // 收牛牛
-    let cowToken = await cow(lastgettime);
+    let cowToken = await cow(lastgettime)
     console.log(cowToken)
     res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: cowToken})
     if (res.ret === 0)
@@ -256,7 +256,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
-    await getCodes();
+    await getCodes()
     // 获取随机红包码
     try {
       resetHosts()
@@ -269,7 +269,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
 
     cookie = cookiesArr[i]
-    jxToken = await token(cookie);
+    jxToken = await token(cookie)
     for (let j = 0; j < shareCodes.length; j++) {
       console.log(`账号${i + 1}去助力${shareCodes[j]}`)
       res = await api('operservice/InviteEnroll', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: shareCodes[j]})
@@ -286,7 +286,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   }
 
   for (let i = 0; i < cookiesArr.length; i++) {
-    await getCodes();
+    await getCodes()
     // 获取随机助力码
     try {
       resetHosts()
@@ -298,7 +298,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     }
     cookie = cookiesArr[i]
-    jxToken = await token(cookie);
+    jxToken = await token(cookie)
     for (let j = 0; j < shareCodes.length; j++) {
       console.log(`账号${i + 1}去助力${shareCodes[j]}`)
       res = await api('operservice/EnrollFriend', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: shareCodes[j]})
@@ -350,8 +350,8 @@ async function getTask() {
     if (t.dateType === 2 && t.completedTimes < t.targetTimes && t.awardStatus === 2 && t.taskType === 2) {
       res = await api('DoTask', 'bizCode,configExtra,source,taskId', {taskId: t.taskId, configExtra: ''})
       if (res.ret === 0) {
-        console.log('任务完成');
-        await wait(5000);
+        console.log('任务完成')
+        await wait(5000)
         return 1
       } else {
         console.log('任务失败:', res)
@@ -363,7 +363,7 @@ async function getTask() {
 }
 
 async function api(fn: string, stk: string, params: Params = {}) {
-  let url: string;
+  let url: string
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
     url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
   } else {
