@@ -4,7 +4,7 @@
  */
 
 import axios from "axios"
-import {requireConfig, wait, h5st} from "./TS_USER_AGENTS"
+import {requireConfig, wait, h5st, o2s} from "./TS_USER_AGENTS"
 
 let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
 let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[] = [
@@ -30,13 +30,24 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     let coin: number = res.data.pgAmountTotal
     console.log('金币', coin)
 
+    res = await api('task/QueryUserTask', 'sceneval,taskType', {taskType: 0})
+
+    let tasks: number[] = []
+    for (let t of res.datas ?? []) {
+      if (t.state !== 2)
+        tasks.push(t.taskid)
+    }
+    await wait(2000)
+
     res = await api('task/QueryPgTaskCfg', 'sceneval', {})
     for (let t of res.data.tasks) {
-      console.log(t.taskName)
-      res = await api('task/drawUserTask', 'sceneval,taskid', {taskid: t.taskId})
-      await wait(1000)
-      res = await api('task/UserTaskFinish', 'sceneval,taskid', {taskid: t.taskId})
-      await wait(2000)
+      if (tasks.includes(t.taskid)) {
+        console.log(t.taskName)
+        res = await api('task/drawUserTask', 'sceneval,taskid', {taskid: t.taskId})
+        await wait(1000)
+        res = await api('task/UserTaskFinish', 'sceneval,taskid', {taskid: t.taskId})
+        await wait(2000)
+      }
     }
 
     res = await api('active/LuckyTwistUserInfo', 'sceneval', {})
