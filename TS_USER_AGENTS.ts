@@ -262,6 +262,15 @@ function randomNumString(e: number) {
   return n
 }
 
+async function getshareCodeHW(key: string) {
+  try {
+    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES')
+    return data[key] || []
+  } catch (e) {
+    return []
+  }
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -278,5 +287,6 @@ export {
   randomString,
   resetHosts,
   o2s,
-  randomNumString
+  randomNumString,
+  getshareCodeHW
 }
