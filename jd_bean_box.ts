@@ -1,45 +1,24 @@
 /**
  * 领京豆-任务
  * 助力：内部 -> HW
- * cron: 1 0,9,12 * * *
+ * cron: 1 0,9,12,18 * * *
  */
 
-import axios from 'axios';
-import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS';
+import axios from 'axios'
+import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS'
 
-let cookie: string = '', res: any = '', UserName: string, index: number, uuid: string;
-let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW: { shareCode: string, groupCode: string }[] = [
-  {
-    shareCode: '14E185959D6E7563818B3CD5CAC5A849',
-    groupCode: '903797055734702080'
-  },
-  {
-    shareCode: 'C24FA9CD98CAC52DCD732BEF4331D894AD1DAAB9A3E3F6CBAFDE81EEB7393333',
-    groupCode: '903797092127629312'
-  },
-  {
-    shareCode: '2792D0AFEA0FA0FD38D4AF1BCA0E5486',
-    groupCode: '903797128428937216'
-  },
-  {
-    shareCode: '2EB0774E42574DD3A90570F53695C933',
-    groupCode: '903797165167763456'
-  },
-  {
-    shareCode: '91B2AF66C68B412620D9AAA015617D60AD1DAAB9A3E3F6CBAFDE81EEB7393333',
-    groupCode: '903797201671053312'
-  }
-], shareCode: { shareCode: string, groupCode: string }[] = [];
+let cookie: string = '', res: any = '', UserName: string, index: number, uuid: string
+let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCode: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCodeHW: { shareCode: string, groupCode: string, activeId: string }[] = []
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: any = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
-    res = await initForTurntableFarm();
+    res = await initForTurntableFarm()
     let times: number = res.remainLotteryTimes
     console.log('剩余抽奖机会:', times)
     for (let j = 0; j < times; j++) {
@@ -58,7 +37,6 @@ let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW:
     }
 
     uuid = randomString(40)
-    /*
     for (let j = 0; j < 4; j++) {
       console.log(`Round:${j + 1}`)
       res = await api('beanTaskList', {"viewChannel": "AppHome"})
@@ -90,31 +68,34 @@ let shareCodeSelf: { shareCode: string, groupCode: string }[] = [], shareCodeHW:
       await wait(2000)
     }
 
-
-     */
     // 抢京豆
     res = await qjd('signBeanGroupStageIndex', {"monitor_refer": "", "rnVersion": "3.9", "fp": "-1", "shshshfp": "-1", "shshshfpa": "-1", "referUrl": "-1", "userAgent": "-1", "jda": "-1", "monitor_source": "bean_m_bean_index"})
     if (!res.data.shareCode) {
       console.log('抢京豆 init...')
       res = await qjd('signGroupHit', {"activeType": 2})
       await wait(1000)
+      res = await qjd('signBeanGroupStageIndex', {"monitor_refer": "", "rnVersion": "3.9", "fp": "-1", "shshshfp": "-1", "shshshfpa": "-1", "referUrl": "-1", "userAgent": "-1", "jda": "-1", "monitor_source": "bean_m_bean_index"})
     }
-    res = await qjd('signBeanGroupStageIndex', {"monitor_refer": "", "rnVersion": "3.9", "fp": "-1", "shshshfp": "-1", "shshshfpa": "-1", "referUrl": "-1", "userAgent": "-1", "jda": "-1", "monitor_source": "bean_m_bean_index"})
     console.log('助力码', res.data.shareCode)
-    shareCodeSelf.push({shareCode: res.data.shareCode, groupCode: res.data.groupCode})
+    shareCodeSelf.push({shareCode: res.data.shareCode, groupCode: res.data.groupCode, activeId: res.data.jklInfo.keyId})
     await wait(2000)
   }
 
   console.log('内部助力', shareCodeSelf)
-  shareCode = [...shareCodeSelf, ...shareCodeHW]
   for (let i = 0; i < cookiesArr.length; i++) {
+    if (shareCodeHW.length === 0) {
+      await getShareCodeHW()
+    }
+    shareCode = [...shareCodeSelf, ...shareCodeHW]
     uuid = randomString(40)
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     for (let code of shareCode) {
       console.log(`${UserName} 去助力 ${code.shareCode}`)
-      res = await qjd('signGroupHelp', {"activeType": 2, "groupCode": code.groupCode, "shareCode": code.shareCode, "activeId": "152", "source": "guest"})
-      console.log('助力结果')
+      res = await qjd('signGroupHelp', {"activeType": 2, "groupCode": code.groupCode, "shareCode": code.shareCode, "activeId": code.activeId, "source": "guest"})
+      console.log(res.data?.helpToast)
+      if (res.data.respCode === 'SG209')
+        break
       await wait(2000)
     }
   }
@@ -147,10 +128,10 @@ async function qjd(fn: string, body?: object) {
 }
 
 function randomString(e: number) {
-  e = e || 32;
-  let t = '0123456789', a = t.length, n = "";
+  e = e || 32
+  let t = '0123456789', a = t.length, n = ""
   for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a));
+    n += t.charAt(Math.floor(Math.random() * a))
   return n
 }
 
@@ -168,4 +149,14 @@ async function initForTurntableFarm(type: number = 0) {
     }
   })
   return data
+}
+
+async function getShareCodeHW() {
+  try {
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/HW_CODES`)
+    console.log('获取HW_CODES成功(api)')
+    shareCodeHW = data['qjd']
+  } catch (e: any) {
+    console.log('获取HW_CODES失败(api)')
+  }
 }

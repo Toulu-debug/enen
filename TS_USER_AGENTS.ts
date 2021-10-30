@@ -1,13 +1,13 @@
-import axios from "axios";
-import {Md5} from "ts-md5";
-import {format} from 'date-fns';
-import * as dotenv from "dotenv";
-import {accessSync, readFileSync, writeFileSync} from "fs";
+import axios from "axios"
+import {Md5} from "ts-md5"
+import {format} from 'date-fns'
+import * as dotenv from "dotenv"
+import {accessSync, readFileSync, writeFileSync} from "fs"
 
 const CryptoJS = require('crypto-js')
 dotenv.config()
 
-let fingerprint: string | number, token: string = '', enCryptMethodJD: any;
+let fingerprint: string | number, token: string = '', enCryptMethodJD: any
 
 const USER_AGENTS: Array<string> = [
   "jdapp;android;10.0.2;10;network/wifi;Mozilla/5.0 (Linux; Android 10; ONEPLUS A5010 Build/QKQ1.191014.012; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045230 Mobile Safari/537.36",
@@ -60,7 +60,7 @@ function getRandomNumberByRange(start: number, end: number) {
   return Math.floor(Math.random() * (end - start) + start)
 }
 
-let USER_AGENT = USER_AGENTS[getRandomNumberByRange(0, USER_AGENTS.length)];
+let USER_AGENT = USER_AGENTS[getRandomNumberByRange(0, USER_AGENTS.length)]
 
 async function getBeanShareCode(cookie: string) {
   let {data}: any = await axios.post('https://api.m.jd.com/client.action',
@@ -102,7 +102,7 @@ function requireConfig() {
   let cookiesArr: string[] = []
   return new Promise(resolve => {
     console.log('开始获取配置文件\n')
-    const jdCookieNode = require('./jdCookie.js');
+    const jdCookieNode = require('./jdCookie.js')
     Object.keys(jdCookieNode).forEach((item) => {
       if (jdCookieNode[item]) {
         cookiesArr.push(jdCookieNode[item])
@@ -120,7 +120,7 @@ function wait(timeout: number) {
 }
 
 async function requestAlgo(appId: number | string = 10032) {
-  fingerprint = generateFp();
+  fingerprint = generateFp()
   return new Promise<void>(async resolve => {
     let {data}: any = await axios.post('https://cactus.jd.com/request_algo?g_ty=ajax', {
       "version": "1.0",
@@ -146,10 +146,10 @@ async function requestAlgo(appId: number | string = 10032) {
       },
     })
     if (data['status'] === 200) {
-      token = data.data.result.tk;
+      token = data.data.result.tk
       console.log('token:', token)
-      let enCryptMethodJDString = data.data.result.algo;
-      if (enCryptMethodJDString) enCryptMethodJD = new Function(`return ${enCryptMethodJDString}`)();
+      let enCryptMethodJDString = data.data.result.algo
+      if (enCryptMethodJDString) enCryptMethodJD = new Function(`return ${enCryptMethodJDString}`)()
     } else {
       console.log(`fp: ${fingerprint}`)
       console.log('request_algo 签名参数API请求失败:')
@@ -159,38 +159,38 @@ async function requestAlgo(appId: number | string = 10032) {
 }
 
 function generateFp() {
-  let e = "0123456789";
-  let a = 13;
-  let i = '';
+  let e = "0123456789"
+  let a = 13
+  let i = ''
   for (; a--;)
-    i += e[Math.random() * e.length | 0];
+    i += e[Math.random() * e.length | 0]
   return (i + Date.now()).slice(0, 16)
 }
 
 function getQueryString(url: string, name: string) {
-  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-  let r = url.split('?')[1].match(reg);
-  if (r != null) return unescape(r[2]);
-  return '';
+  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i")
+  let r = url.split('?')[1].match(reg)
+  if (r != null) return unescape(r[2])
+  return ''
 }
 
 function decrypt(stk: string, url: string, appId: number) {
   const timestamp = (format(new Date(), 'yyyyMMddhhmmssSSS'))
-  let hash1: string;
+  let hash1: string
   if (fingerprint && token && enCryptMethodJD) {
-    hash1 = enCryptMethodJD(token, fingerprint.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex);
+    hash1 = enCryptMethodJD(token, fingerprint.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex)
   } else {
-    const random = '5gkjB6SpmC9s';
-    token = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`;
-    fingerprint = 9686767825751161;
-    const str = `${token}${fingerprint}${timestamp}${appId}${random}`;
-    hash1 = CryptoJS.SHA512(str, token).toString(CryptoJS.enc.Hex);
+    const random = '5gkjB6SpmC9s'
+    token = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`
+    fingerprint = 9686767825751161
+    const str = `${token}${fingerprint}${timestamp}${appId}${random}`
+    hash1 = CryptoJS.SHA512(str, token).toString(CryptoJS.enc.Hex)
   }
-  let st: string = '';
+  let st: string = ''
   stk.split(',').map((item, index) => {
-    st += `${item}:${getQueryString(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`;
+    st += `${item}:${getQueryString(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`
   })
-  const hash2 = CryptoJS.HmacSHA256(st, hash1.toString()).toString(CryptoJS.enc.Hex);
+  const hash2 = CryptoJS.HmacSHA256(st, hash1.toString()).toString(CryptoJS.enc.Hex)
   return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fingerprint.toString()), "".concat(appId.toString()), "".concat(token), "".concat(hash2)].join(";"))
 }
 
@@ -204,18 +204,18 @@ function h5st(url: string, stk: string, params: object, appId: number = 10032) {
 
 function getJxToken(cookie: string) {
   function generateStr(input: number) {
-    let src = 'abcdefghijklmnopqrstuvwxyz1234567890';
-    let res = '';
+    let src = 'abcdefghijklmnopqrstuvwxyz1234567890'
+    let res = ''
     for (let i = 0; i < input; i++) {
-      res += src[Math.floor(src.length * Math.random())];
+      res += src[Math.floor(src.length * Math.random())]
     }
-    return res;
+    return res
   }
 
-  let phoneId = generateStr(40);
-  let timestamp = Date.now().toString();
-  let nickname = cookie.match(/pt_pin=([^;]*)/)![1];
-  let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy');
+  let phoneId = generateStr(40)
+  let timestamp = Date.now().toString()
+  let nickname = cookie.match(/pt_pin=([^;]*)/)![1]
+  let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy')
   return {
     'strPgtimestamp': timestamp,
     'strPhoneID': phoneId,
@@ -224,7 +224,7 @@ function getJxToken(cookie: string) {
 }
 
 function exceptCookie(filename: string = 'x.ts') {
-  let except: string[];
+  let except: string[]
   try {
     accessSync('./utils/exceptCookie.json')
     except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename] || []
@@ -236,10 +236,10 @@ function exceptCookie(filename: string = 'x.ts') {
 }
 
 function randomString(e: number, word?: number) {
-  e = e || 32;
-  let t = word === 26 ? "012345678abcdefghijklmnopqrstuvwxyz" : "0123456789abcdef", a = t.length, n = "";
+  e = e || 32
+  let t = word === 26 ? "012345678abcdefghijklmnopqrstuvwxyz" : "0123456789abcdef", a = t.length, n = ""
   for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a));
+    n += t.charAt(Math.floor(Math.random() * a))
   return n
 }
 
@@ -252,6 +252,14 @@ function resetHosts() {
 
 function o2s(arr: object) {
   console.log(JSON.stringify(arr))
+}
+
+function randomNumString(e: number) {
+  e = e || 32
+  let t = '0123456789', a = t.length, n = ""
+  for (let i = 0; i < e; i++)
+    n += t.charAt(Math.floor(Math.random() * a))
+  return n
 }
 
 export default USER_AGENT
@@ -269,5 +277,6 @@ export {
   exceptCookie,
   randomString,
   resetHosts,
-  o2s
+  o2s,
+  randomNumString
 }
