@@ -40,6 +40,11 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     await wait(2000)
 
     res = await api('task/QueryPgTaskCfg', 'sceneval', {})
+    if (tasks.length === 0) {
+      for (let t of res.data.tasks) {
+        tasks.push(t.taskid)
+      }
+    }
     for (let t of res.data.tasks) {
       if (tasks.includes(t.taskid)) {
         console.log(t.taskName)
