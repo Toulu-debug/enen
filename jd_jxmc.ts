@@ -7,7 +7,7 @@ import axios from 'axios'
 import {Md5} from "ts-md5"
 import * as path from 'path'
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString, o2s} from './TS_USER_AGENTS'
 
 const cow = require('./utils/jd_jxmc.js').cow
 const token = require('./utils/jd_jxmc.js').token
@@ -16,10 +16,6 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
 let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
-  try {
-    resetHosts()
-  } catch (e) {
-  }
   await requestAlgo()
   let cookiesArr: any = await requireConfig()
   if (process.argv[2]) {
@@ -80,6 +76,35 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     console.log('草草🌿', food)
     console.log('蛋蛋🥚', homePageInfo.data.eggcnt)
     console.log('钱钱💰', coins)
+
+    // 助农
+    let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
+    for (let t of tasks.data.userTaskStatusList) {
+      if (t.awardStatus === 2) {
+        console.log(t.taskName)
+        if (t.completedTimes < t.targetTimes) {
+          for (let j = t.completedTimes; j < t.targetTimes; j++) {
+            res = await api('DoTask', 'bizCode,configExtra,source,taskId', {taskId: t.taskId}, true)
+            if (res.ret === 0) {
+              console.log('任务完成')
+            } else {
+              console.log('任务失败')
+              break
+            }
+            await wait(5000)
+          }
+        } else {
+          res = await api('Award', 'bizCode,source,taskId', {taskId: t.taskId}, true)
+          if (res.ret === 0) {
+            console.log('领奖成功', res.data.prizeInfo.match(/:(.*)}/)![1])
+          } else {
+            console.log('领奖失败')
+            break
+          }
+          await wait(2000)
+        }
+      }
+    }
 
     // 扭蛋机
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -362,10 +387,13 @@ async function getTask() {
   return 0
 }
 
-async function api(fn: string, stk: string, params: Params = {}) {
+async function api(fn: string, stk: string, params: Params = {}, temporary: boolean = false) {
   let url: string
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
-    url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
+    if (temporary)
+      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc_zanaixin&bizCode=jxmc_zanaixin&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
+    else
+      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
   } else {
     url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now() + 2}&sceneval=2`, stk, params, 10028)
   }
