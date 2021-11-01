@@ -4,11 +4,11 @@ import USER_AGENT, {requireConfig, wait, requestAlgo} from './TS_USER_AGENTS';
 let cookie: string = '', res: any = '', UserName: string, index: number;
 let shareCodes: string[] = [], shareCodesSelf: string[] = [];
 let shareCodesHW: string[] = [
-  '8fa2f89e-39a0-4023-b902-74376f1ac5b4',
-  'ca02cf34-1b5b-4da1-9852-8945a8cc0231',
-  '5b222457-2b63-4702-8579-909ba1a0a6de',
-  '61b17229-85e9-45d4-a399-62a251f8c59f',
-  'ed6801cc-b710-4eaf-a842-526755a907ec'
+  'b674113e-7a08-4dff-bb30-0717ddfabce1',
+  '7b811634-e0cb-4022-8434-76f077845531',
+  '3d2da5d4-488d-46c9-ab37-8bc800bb226c',
+  '278670a6-89da-4a7c-8665-4ff412a47a22',
+  '23f31f87-5b7b-4341-842d-654f592846de'
 ]
 
 !(async () => {
@@ -44,10 +44,10 @@ let shareCodesHW: string[] = [
       }
       await wait(3000)
     }
-
     await wait(1000)
   }
 
+  console.log('内部助力', shareCodesSelf)
   shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
