@@ -17,13 +17,17 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
     uuid = randomString(40)
-    res = await api('showSecondFloorCardInfo', {"source": "card"})
-    activityId = res.data.result.activityBaseInfo.activityId, encryptProjectId = res.data.result.activityBaseInfo.encryptProjectId
-    console.log(activityId)
+    try {
+      res = await api('showSecondFloorCardInfo', {"source": "card"})
+      activityId = res.data.result.activityBaseInfo.activityId
+      encryptProjectId = res.data.result.activityBaseInfo.encryptProjectId
+    } catch (e) {
+      console.log(e)
+      continue
+    }
     res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
     for (let t of res.data.result.taskList) {
       if (!t.completionFlag) {
-        /*
         if (t.assignmentName !== '邀请好友' && t.assignmentName !== '去首页限时下拉') {
           console.log(t.assignmentName)
           res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 1, "itemId": t.ext.shoppingActivity[0].itemId, "actionType": 0})
@@ -32,8 +36,6 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
           }
           await wait(3000)
         }
-
-         */
         if (t.assignmentName === '邀请好友') {
           inviteTaskId = t.encryptAssignmentId
           console.log('助力码', t.ext.assistTaskDetail.itemId)
@@ -75,14 +77,20 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
 })()
 
 async function api(fn: string, body: object) {
-  let {data} = await axios.post(`https://api.m.jd.com/?uuid=${uuid}&client=wh5&appid=ProductZ4Brand&functionId=${fn}&t=${+new Date()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
-    headers: {
-      'Host': 'api.m.jd.com',
-      'Origin': 'https://prodev.m.jd.com',
-      'User-Agent': USER_AGENT,
-      'Referer': 'https://prodev.m.jd.com/mall/active/ZskuZGqQMZ2j6L99PM1L8jg2F2a/index.html',
-      'Cookie': cookie
-    }
-  })
-  return data
+  try {
+    let {data} = await axios.post(`https://api.m.jd.com/?uuid=${uuid}&client=wh5&appid=ProductZ4Brand&functionId=${fn}&t=${+new Date()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
+      headers: {
+        'Host': 'api.m.jd.com',
+        'Origin': 'https://prodev.m.jd.com',
+        'User-Agent': USER_AGENT,
+        'Referer': 'https://prodev.m.jd.com/mall/active/ZskuZGqQMZ2j6L99PM1L8jg2F2a/index.html',
+        'Cookie': cookie
+      }
+    })
+    return data
+  } catch (e) {
+    console.log('Error')
+    o2s(e)
+    return ''
+  }
 }
