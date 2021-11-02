@@ -25,8 +25,10 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
       console.log(e)
       continue
     }
+
     res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
-    for (let t of res.data.result.taskList) {
+    o2s(res)
+    for (let t of res.data.result.taskList || []) {
       if (!t.completionFlag) {
         if (t.assignmentName !== '邀请好友' && t.assignmentName !== '去首页限时下拉') {
           console.log(t.assignmentName)
@@ -41,7 +43,36 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
           console.log('助力码', t.ext.assistTaskDetail.itemId)
           shareCodeSelf.push(t.ext.assistTaskDetail.itemId)
           res = await api('superBrandMyVoteFriendList', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assistInfoFlag": 1})
-          console.log('收到助力', res.data.result.friendList.length, '/', 30)
+          console.log('收到助力', t.completionCnt, '/', 30)
+          if (t.completionCnt >= 10 && t.ext.cardAssistBoxOpen === 0) {
+            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+            await wait(2000)
+            console.log('打开成功 1号盒子')
+          }
+          if (t.completionCnt >= 20 && t.ext.cardAssistBoxOpen === 1) {
+            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+            await wait(2000)
+            console.log('打开成功 2号盒子')
+          }
+          if (t.completionCnt >= 30 && t.ext.cardAssistBoxOpen === 1) {
+            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+            await wait(2000)
+            console.log('打开成功 3号盒子')
+          }
+        }
+        if (t.assignmentName === '去首页限时下拉') {
+          let arr = {
+            9: '090000100000',
+            13: '130000140000',
+            16: '160000170000',
+            19: '190000200000'
+          }
+          res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 5, "itemId": arr[new Date().getHours()], "actionType": 0, "dropDownChannel": 1})
+          if (res.data.bizCode === '0') {
+            console.log('任务完成', res.data.result.rewards[1].beanNum)
+          } else {
+            console.log('任务失败', res, res.data.bizMsg)
+          }
         }
       }
     }
@@ -69,7 +100,6 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
       } else {
         console.log('助力失败', res.data.bizMsg)
         await wait(2000)
-        break
       }
       await wait(2000)
     }

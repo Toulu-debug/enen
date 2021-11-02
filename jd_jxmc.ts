@@ -108,14 +108,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     // 扭蛋机
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
-    for (let card of res.data.cardinfo) {
-      console.log(`card ${card.cardtype}`, card.currnum, '/', card.neednum)
-      if (card.currnum >= card.neednum) {
-        console.log('可以兑换')
-        // TODO 兑换卡片
-        await sendNotify('牧场卡片可兑换', UserName)
-      }
-    }
     let drawTimes = res.data.times
     if (typeof drawTimes === "undefined") {
       await sendNotify("牧场扭蛋机错误", `账号${i + 1} ${UserName}\n手动建造扭蛋机`)
@@ -138,6 +130,18 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           break
         }
       }
+    }
+    res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+    try {
+      for (let card of res.data.cardinfo) {
+        console.log(`card ${card.cardtype}`, card.currnum, '/', card.neednum)
+        if (card.currnum >= card.neednum) {
+          console.log('可以兑换')
+          // TODO 兑换卡片
+          await sendNotify('牧场卡片可兑换', UserName)
+        }
+      }
+    } catch (e) {
     }
 
     // 红包
