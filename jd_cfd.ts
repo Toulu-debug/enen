@@ -10,7 +10,7 @@
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange, getBeanShareCode, getFarmShareCode} from './TS_USER_AGENTS'
 
 const axi = axios.create({timeout: 10000})
 
@@ -641,27 +641,26 @@ async function task() {
 }
 
 async function makeShareCodes() {
-  res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strVersion,strZone', {
-    ddwTaskId: '',
-    strShareId: '',
-    strMarkList: 'undefined',
-    strPgUUNum: token.strPgUUNum,
-    strPgtimestamp: token.strPgtimestamp,
-    strPhoneID: token.strPhoneID,
-    strVersion: '1.0.1'
-  })
-  console.log('助力码:', res.strMyShareId)
-  shareCodesSelf.push(res.strMyShareId)
-  let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
-  pin = Md5.hashStr(pin)
   try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxcfd?sharecode=${res.strMyShareId}&pin=${pin}`, {timeout: 10000})
-    if (data.code === 200)
-      console.log('已自动提交助力码')
-    else
-      console.log('提交失败！')
+    res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strVersion,strZone', {
+      ddwTaskId: '',
+      strShareId: '',
+      strMarkList: 'undefined',
+      strPgUUNum: token.strPgUUNum,
+      strPgtimestamp: token.strPgtimestamp,
+      strPhoneID: token.strPhoneID,
+      strVersion: '1.0.1'
+    })
+    console.log('助力码:', res.strMyShareId)
+    shareCodesSelf.push(res.strMyShareId)
+    let bean: string = await getBeanShareCode(cookie)
+    let farm: string = await getFarmShareCode(cookie)
+    let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
+    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxcfd?sharecode=${res.strMyShareId}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    console.log(data.message)
   } catch (e) {
-    console.log('自动提交助力码出错')
+    console.log('自动提交失败')
+    console.log(e)
   }
 }
 

@@ -80,7 +80,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     // 助农
     let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
     for (let t of tasks.data.userTaskStatusList) {
-      if (t.awardStatus === 2) {
+      if (t.awardStatus === 2 && t.taskName !== '邀请牧场新用户助力') {
         console.log(t.taskName)
         if (t.completedTimes < t.targetTimes) {
           for (let j = t.completedTimes; j < t.targetTimes; j++) {
@@ -314,7 +314,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     await getCodes()
     // 获取随机助力码
     try {
-      resetHosts()
       let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmc/30`, {timeout: 10000})
       console.log('获取到30个随机助力码:', data.data)
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW, ...data.data]))
@@ -415,46 +414,30 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
   }
 }
 
-function makeShareCodes(code: string) {
-  return new Promise(async (resolve, reject) => {
+async function makeShareCodes(code: string) {
+  try {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
-    let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
-    pin = Md5.hashStr(pin)
-    resetHosts()
-    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-      .then((res: any) => {
-        if (res.data.code === 200)
-          console.log('已自动提交助力码')
-        else
-          console.log('提交失败！已提交farm的cookie才可提交cfd')
-        resolve(200)
-      })
-      .catch(() => {
-        reject('访问助力池出错')
-      })
-  })
+    let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
+    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    console.log(data.message)
+  } catch (e) {
+    console.log('自动提交失败')
+    console.log(e)
+  }
 }
 
-function makeShareCodesHb(code: string) {
-  return new Promise(async (resolve, reject) => {
+async function makeShareCodesHb(code: string) {
+  try {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
-    let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
-    pin = Md5.hashStr(pin)
-    resetHosts()
-    await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-      .then((res: any) => {
-        if (res.data.code === 200)
-          console.log('已自动提交红包码')
-        else
-          console.log('提交失败！已提交farm的cookie才可提交cfd')
-        resolve(200)
-      })
-      .catch(() => {
-        reject('访问助力池出错')
-      })
-  })
+    let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
+    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    console.log(data.message)
+  } catch (e) {
+    console.log('自动提交失败')
+    console.log(e)
+  }
 }
 
 async function getCodes() {

@@ -149,18 +149,15 @@ async function getCodesPool() {
 }
 
 async function makeShareCodes(code: string) {
-  let bean: string = await getBeanShareCode(cookie)
-  let farm: string = await getFarmShareCode(cookie)
-  let pin: string = cookie.match(/pt_pin=([^;]*)/)![1]
-  pin = Md5.hashStr(pin)
   try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/hb88?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
-    if (data.code === 200)
-      console.log('自动提交助力码成功')
-    else
-      console.log('自动提交助力码失败！已提交farm的cookie才可提交88hb')
-  } catch (e: any) {
-    console.log('自动提交助力码出错')
+    let bean: string = await getBeanShareCode(cookie)
+    let farm: string = await getFarmShareCode(cookie)
+    let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
+    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/hb88?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    console.log(data.message)
+  } catch (e) {
+    console.log('自动提交失败')
+    console.log(e)
   }
 }
 
