@@ -4,7 +4,7 @@
  * cron: 5 0,6,18 * * *
  */
 
-import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS"
+import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode, getshareCodeHW, randomString} from "./TS_USER_AGENTS"
 import axios from "axios"
 import {Md5} from "ts-md5"
 import {format} from 'date-fns'
@@ -42,18 +42,13 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     jxToken = await token(cookie)
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
 
-    await getCodesHW()
-    shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
-    if (shareCodesHW.length !== 0) {
-      console.log('获取随机助力码')
-      res = await getCodesPool()
-      shareCodes = Array.from(new Set([...shareCodes, ...res]))
+    if (shareCodesHW.length === 0) {
+      shareCodesHW = await getshareCodeHW('88hb')
     }
-    console.log('助力排队:', shareCodes)
-
-    for (let j = 0; j < shareCodes.length; j++) {
-      console.log(`账号${i + 1} ${UserName} 去助力 ${shareCodes[j]}`)
-      res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: shareCodes[j]})
+    shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+    for (let code of shareCodes) {
+      console.log(`账号 ${UserName} 去助力 ${code}`)
+      res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: code})
       await wait(5000)
       if (res.iRet === 0) {
         console.log('成功')
@@ -128,26 +123,6 @@ async function api(fn: string, stk: string, params: Params = {}) {
   }
 }
 
-async function getCodesHW() {
-  try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/HW_CODES`, {timeout: 10000})
-    console.log('获取HW_CODES成功(api)')
-    shareCodesHW = data['88hb']
-  } catch (e: any) {
-    console.log('获取HW_CODES失败(api)')
-  }
-}
-
-async function getCodesPool() {
-  try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/hb88/30`, {timeout: 10000})
-    return data.data
-  } catch (e: any) {
-    console.log('获取助力池出错')
-    return []
-  }
-}
-
 async function makeShareCodes(code: string) {
   try {
     let bean: string = await getBeanShareCode(cookie)
@@ -159,12 +134,4 @@ async function makeShareCodes(code: string) {
     console.log('自动提交失败')
     console.log(e)
   }
-}
-
-function randomString(e: number) {
-  e = e || 32
-  let t = "0123456789abcdef", a = t.length, n = ""
-  for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a))
-  return n
 }

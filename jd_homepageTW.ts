@@ -1,6 +1,6 @@
 /**
  * 京东-下拉
- * cron: 0 9,13,16,19,23 * * *
+ * cron: 0 9,13,16,19,20 * * *
  */
 
 import axios from 'axios'
@@ -27,7 +27,6 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
     }
 
     res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
-    o2s(res)
     for (let t of res.data.result.taskList || []) {
       if (!t.completionFlag) {
         if (t.assignmentName !== '邀请好友' && t.assignmentName !== '去首页限时下拉') {
@@ -38,28 +37,6 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
           }
           await wait(3000)
         }
-        if (t.assignmentName === '邀请好友') {
-          inviteTaskId = t.encryptAssignmentId
-          console.log('助力码', t.ext.assistTaskDetail.itemId)
-          shareCodeSelf.push(t.ext.assistTaskDetail.itemId)
-          res = await api('superBrandMyVoteFriendList', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assistInfoFlag": 1})
-          console.log('收到助力', t.completionCnt, '/', 30)
-          if (t.completionCnt >= 10 && t.ext.cardAssistBoxOpen === 0) {
-            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
-            await wait(2000)
-            console.log('打开成功 1号盒子')
-          }
-          if (t.completionCnt >= 20 && t.ext.cardAssistBoxOpen === 1) {
-            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
-            await wait(2000)
-            console.log('打开成功 2号盒子')
-          }
-          if (t.completionCnt >= 30 && t.ext.cardAssistBoxOpen === 1) {
-            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
-            await wait(2000)
-            console.log('打开成功 3号盒子')
-          }
-        }
         if (t.assignmentName === '去首页限时下拉') {
           let arr = {
             9: '090000100000',
@@ -67,16 +44,48 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
             16: '160000170000',
             19: '190000200000'
           }
-          res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 5, "itemId": arr[new Date().getHours()], "actionType": 0, "dropDownChannel": 1})
-          if (res.data.bizCode === '0') {
-            console.log('任务完成', res.data.result.rewards[1].beanNum)
-          } else {
-            console.log('任务失败', res, res.data.bizMsg)
+          if ([9, 13, 16, 19].includes(new Date().getHours())) {
+            res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 5, "itemId": arr[new Date().getHours()], "actionType": 0, "dropDownChannel": 1})
+            if (res.data.bizCode === '0') {
+              console.log('任务完成', res.data.result.rewards[1].beanNum)
+            } else {
+              console.log('任务失败', res, res.data.bizMsg)
+            }
           }
         }
       }
+      if (t.assignmentName === '邀请好友') {
+        inviteTaskId = t.encryptAssignmentId
+        console.log('助力码', t.ext.assistTaskDetail.itemId)
+        shareCodeSelf.push(t.ext.assistTaskDetail.itemId)
+        res = await api('superBrandMyVoteFriendList', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assistInfoFlag": 1})
+        console.log('收到助力', t.completionCnt, '/', 30)
+        if (t.completionCnt >= 10 && t.ext.cardAssistBoxOpen === 0) {
+          res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+          await wait(2000)
+          console.log('打开成功 1号盒子')
+          t.ext.cardAssistBoxOpen++
+        }
+        if (t.completionCnt >= 20 && t.ext.cardAssistBoxOpen === 1) {
+          res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+          await wait(2000)
+          console.log('打开成功 2号盒子')
+          t.ext.cardAssistBoxOpen++
+        }
+        if (t.completionCnt >= 30 && t.ext.cardAssistBoxOpen === 2) {
+          res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+          await wait(2000)
+          console.log('打开成功 3号盒子')
+        }
+      }
     }
-    await wait(1000)
+    res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "tag": "divide"})
+    o2s(res)
+    try {
+      console.log('瓜分', res.data.result.rewards[0].beanNum)
+    } catch (e) {
+    }
+    await wait(2000)
   }
 
   console.log('内部助力', shareCodeSelf)
@@ -108,7 +117,7 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
 
 async function api(fn: string, body: object) {
   try {
-    let {data} = await axios.post(`https://api.m.jd.com/?uuid=${uuid}&client=wh5&appid=ProductZ4Brand&functionId=${fn}&t=${+new Date()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
+    let {data} = await axios.post(`https://api.m.jd.com/?uuid=${uuid}&client=wh5&appid=ProductZ4Brand&functionId=${fn}&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
       headers: {
         'Host': 'api.m.jd.com',
         'Origin': 'https://prodev.m.jd.com',
