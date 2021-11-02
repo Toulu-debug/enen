@@ -1,7 +1,7 @@
 /**
  * 京喜app->领88元红包
  * 先内部，后助力HW.ts
- * cron: 5 0,6,18 * * *
+ * cron: 5,50 0,1,18 * * *
  */
 
 import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode, getshareCodeHW, randomString} from "./TS_USER_AGENTS"
@@ -128,7 +128,7 @@ async function makeShareCodes(code: string) {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
-    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/hb88?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/hb88?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
     console.log(data.message)
   } catch (e) {
     console.log('自动提交失败')

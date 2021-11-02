@@ -423,7 +423,7 @@ async function makeShareCodes(code: string) {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
-    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
     console.log(data.message)
   } catch (e) {
     console.log('自动提交失败')
@@ -436,7 +436,7 @@ async function makeShareCodesHb(code: string) {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
-    let {data} = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
     console.log(data.message)
   } catch (e) {
     console.log('自动提交失败')
