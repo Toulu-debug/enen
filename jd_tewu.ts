@@ -50,7 +50,7 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
           for (let sign2 of t.ext.sign2) {
             console.log(sign2.beginTime, sign2.status)
             let beginClock: number = new Date(`2021-01-01 ${sign2.beginTime}`).getHours()
-            if (new Date().getHours() === beginClock && sign2.status === 0) {
+            if (new Date().getHours() === beginClock && sign2.status === 1) {
               console.log('开始下拉任务')
               res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 5, "itemId": sign2.itemId, "actionType": 0, "dropDownChannel": 1})
               o2s(res)
