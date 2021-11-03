@@ -10,7 +10,7 @@
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange, getBeanShareCode, getFarmShareCode} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getRandomNumberByRange, getBeanShareCode, getFarmShareCode, randomString} from './TS_USER_AGENTS'
 
 const axi = axios.create({timeout: 10000})
 
@@ -166,39 +166,35 @@ interface Params {
 
     // 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard
-    let coincardUsing = coincard.filter(card => {
-      return card.dwCardState === 2
-    })
-    let richcardUsing = richcard.filter(card => {
-      return card.dwCardState === 2
-    })
-    if (coincardUsing.length === 0) {
-      for (let card of coincard) {
-        if (card.dwIsCanUseNext === 1) {
-          res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 1, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
-          if (res.iRet === 0) {
-            console.log('金币加速卡使用成功')
-          } else {
-            console.log('金币加速卡使用失败', res)
-          }
-          break
+    let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard, isUsing: boolean = res.cardInfo.dwWorkingType !== 0
+
+    for (let card of coincard) {
+      if (!isUsing && card.dwCardNums !== 0) {
+        res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 1, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
+        if (res.iRet === 0) {
+          console.log('金币加速卡使用成功')
+          isUsing = true
+        } else {
+          console.log('金币加速卡使用失败', res)
         }
+      } else {
+        break
       }
     }
-    if (richcardUsing.length === 0) {
-      for (let card of richcard) {
-        if (card.dwIsCanUseNext === 1) {
-          for (let j = 0; j < card.dwCardNums; j++) {
-            res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 2, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
-            if (res.iRet === 0) {
-              console.log('点券加速卡使用成功')
-            } else {
-              console.log('点券加速卡使用失败', res)
-            }
-            await wait(2000)
+    for (let card of richcard) {
+      if (!isUsing && card.dwCardNums !== 0) {
+        for (let j = 0; j < card.dwCardNums; j++) {
+          res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 2, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
+          if (res.iRet === 0) {
+            console.log('点券加速卡使用成功')
+            isUsing = true
+          } else {
+            console.log('点券加速卡使用失败', res)
           }
+          await wait(2000)
         }
+      } else {
+        break
       }
     }
 
@@ -571,34 +567,32 @@ interface Params {
   }
 })()
 
-function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
-  return new Promise((resolve, reject) => {
-    let url: string
-    if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
-      let bizCode: string
-      if (!params.bizCode) {
-        bizCode = taskPosition === 'right' ? 'jxbfddch' : 'jxbfd'
-      } else {
-        bizCode = params.bizCode
-      }
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+async function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
+  let url: string
+  if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
+    let bizCode: string
+    if (!params.bizCode) {
+      bizCode = taskPosition === 'right' ? 'jxbfddch' : 'jxbfd'
     } else {
-      url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_ste=1&_=${Date.now()}&sceneval=2&_stk=${encodeURIComponent(stk)}`
+      bizCode = params.bizCode
     }
-    url = h5st(url, stk, params, 10032)
-    axios.get(url, {
-      headers: {
-        'Host': 'm.jingxi.com',
-        'Referer': 'https://st.jingxi.com/',
-        'User-Agent': USER_AGENT,
-        'Cookie': cookie
-      }
-    }).then((res: any) => {
-      resolve(res.data)
-    }).catch(e => {
-      reject(e)
-    })
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+  } else {
+    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=7155.9.47&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+  }
+  url = h5st(url, stk, params, 10032)
+  let {data} = await axios.get(url, {
+    headers: {
+      'Host': 'm.jingxi.com',
+      'Referer': 'https://st.jingxi.com/',
+      'User-Agent': USER_AGENT,
+      'Cookie': cookie
+    }
   })
+  if (typeof data === 'string')
+    return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
+  else
+    return data
 }
 
 async function task() {
