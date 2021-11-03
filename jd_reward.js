@@ -148,8 +148,8 @@ function init() {
             switch (_a.label) {
                 case 0:
                     lkt = new Date().getTime().toString();
-                    lks = ts_md5_1.Md5.hashStr('' + 'JL1VTNRadM68cIMQ' + lkt);
-                    return [4 /*yield*/, axios_1["default"].get("https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ&validate=" + validate, {
+                    lks = ts_md5_1.Md5.hashStr('' + 'q8DNJdpcfRQ69gIx' + lkt);
+                    return [4 /*yield*/, axios_1["default"].get("https://jdjoy.jd.com/common/gift/getBeanConfigs?reqSource=h5&invokeKey=q8DNJdpcfRQ69gIx&validate=" + validate, {
                             headers: {
                                 'lkt': lkt,
                                 'lks': lks,
@@ -184,8 +184,8 @@ function exchange(beanId) {
                 case 4:
                     lkt = new Date().getTime();
                     console.log('exchange()', (0, date_fns_1.format)(lkt, 'hh:mm:ss:SSS'));
-                    lks = ts_md5_1.Md5.hashStr('' + 'JL1VTNRadM68cIMQ' + lkt);
-                    return [4 /*yield*/, axios_1["default"].post("https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=JL1VTNRadM68cIMQ&validate=" + validate, JSON.stringify({ "buyParam": { "orderSource": 'pet', "saleInfoId": beanId }, "deviceInfo": {} }), {
+                    lks = ts_md5_1.Md5.hashStr('' + 'q8DNJdpcfRQ69gIx' + lkt);
+                    return [4 /*yield*/, axios_1["default"].post("https://jdjoy.jd.com/common/gift/new/exchange?reqSource=h5&invokeKey=q8DNJdpcfRQ69gIx&validate=" + validate, JSON.stringify({ "buyParam": { "orderSource": 'pet', "saleInfoId": beanId }, "deviceInfo": {} }), {
                             headers: {
                                 "Host": "jdjoy.jd.com",
                                 "Content-Type": "application/json",

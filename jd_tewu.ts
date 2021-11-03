@@ -1,6 +1,6 @@
 /**
  * 京东-下拉
- * cron: 0 9,13,16,19,20 * * *
+ * cron: 0 * * * *
  */
 
 import axios from 'axios'
@@ -26,33 +26,43 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
       continue
     }
 
+    let activityCardInfo: any = res.data.result.activityCardInfo
+    if (activityCardInfo.divideTimeStatus === 1 && activityCardInfo.divideStatus === 0 && activityCardInfo.cardStatus === 1) {
+      res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "tag": "divide"})
+      console.log('瓜分')
+      o2s(res)
+      await wait(2000)
+    }
+
     res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
     for (let t of res.data.result.taskList || []) {
       if (!t.completionFlag) {
-        if (t.assignmentName !== '邀请好友' && t.assignmentName !== '去首页限时下拉') {
-          console.log(t.assignmentName)
-          res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 1, "itemId": t.ext.shoppingActivity[0].itemId, "actionType": 0})
-          if (res.data.bizCode === '0') {
-            console.log('任务完成', res.data.result.rewards[1].beanNum)
-          }
-          await wait(3000)
+        // 关注品牌店铺
+        if (t.assignmentType === 3) {
+          res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 3, "itemId": t.ext.followShop[0].itemId, "actionType": 0})
+          o2s(res)
+          await wait(2000)
         }
-        if (t.assignmentName === '去首页限时下拉') {
-          let arr = {
-            9: '090000100000',
-            13: '130000140000',
-            16: '160000170000',
-            19: '190000200000'
-          }
-          if ([9, 13, 16, 19].includes(new Date().getHours())) {
-            res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 5, "itemId": arr[new Date().getHours()], "actionType": 0, "dropDownChannel": 1})
-            if (res.data.bizCode === '0') {
-              console.log('任务完成', res.data.result.rewards[1].beanNum)
-            } else {
-              console.log('任务失败', res, res.data.bizMsg)
+
+        // 下拉任务
+        if (t.assignmentType === 5) {
+          console.log(t.assignmentName)
+          for (let sign2 of t.ext.sign2) {
+            console.log(sign2.beginTime, sign2.status)
+            let beginClock: number = new Date(`2021-01-01 ${sign2.beginTime}`).getHours()
+            if (new Date().getHours() === beginClock && sign2.status === 0) {
+              console.log('开始下拉任务')
+              res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 5, "itemId": sign2.itemId, "actionType": 0, "dropDownChannel": 1})
+              o2s(res)
             }
           }
         }
+
+        if (t.assignmentType === 7) {
+          console.log('开卡？')
+        }
+        await wait(2000)
+
       }
       if (t.assignmentName === '邀请好友') {
         inviteTaskId = t.encryptAssignmentId
@@ -78,12 +88,6 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
           console.log('打开成功 3号盒子')
         }
       }
-    }
-    res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "tag": "divide"})
-    o2s(res)
-    try {
-      console.log('瓜分', res.data.result.rewards[0].beanNum)
-    } catch (e) {
     }
     await wait(2000)
   }

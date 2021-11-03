@@ -55,15 +55,15 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       continue
     }
 
-    let food: number = 0
+    let food: number,petid: string, coins:number
     try {
       food = homePageInfo.data.materialinfo[0].value
+      petid=homePageInfo.data.petinfo[0].petid
+      coins = homePageInfo.data.coins
     } catch (e: any) {
-      console.log('未开通？黑号？')
+      console.log('初始化出错，手动去app')
       continue
     }
-    let petid: string = homePageInfo.data.petinfo[0].petid
-    let coins = homePageInfo.data.coins
 
     console.log('助力码:', homePageInfo.data.sharekey)
     shareCodesSelf.push(homePageInfo.data.sharekey)
