@@ -13,6 +13,14 @@ const token = require('./utils/jd_jxmc.js').token
 
 let cookie: string = '', res: any = '', UserName: string, index: number, UA: string = ''
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], jxToken: any
+let HW_Priority: boolean = true
+/**
+ * CK1助力顺序
+ * HW_Priority: boolean
+ * true  HW.ts -> 内部
+ * false 内部   -> HW.ts
+ */
+process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -45,7 +53,11 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('88hb')
     }
-    shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+    if (i === 0 && HW_Priority) {
+      shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+    } else {
+      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+    }
     for (let code of shareCodes) {
       console.log(`账号 ${UserName} 去助力 ${code}`)
       res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: code})

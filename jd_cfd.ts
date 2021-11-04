@@ -589,9 +589,14 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
       'Cookie': cookie
     }
   })
-  if (typeof data === 'string')
-    return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
-  else
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
+    } catch (e) {
+      console.log(data)
+      return ''
+    }
+  } else
     return data
 }
 
