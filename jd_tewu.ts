@@ -21,6 +21,12 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
       res = await api('showSecondFloorCardInfo', {"source": "card"})
       activityId = res.data.result.activityBaseInfo.activityId
       encryptProjectId = res.data.result.activityBaseInfo.encryptProjectId
+
+      // 已收集
+      console.log('已收集')
+      for (let card of res.data.result.activityCardInfo.cardPackList) {
+        console.log(`card-${card.cardType}`, card.num, card.num === 0 ? "!!!" : "")
+      }
     } catch (e) {
       console.log(e)
       continue
