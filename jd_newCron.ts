@@ -6,30 +6,35 @@
 import axios from "axios";
 import {readFileSync} from "fs";
 import {execSync} from "child_process";
-import {sendNotify} from './sendNotify';
 
-let server: string = '', message: string = '';
+const sendNotify = require('./sendNotify').sendNotify
+let server: string = '', message: string = '', taskName: string;
 
 !(async () => {
-  // 获取token和服务器IP:Port
-  let auth: any = JSON.parse(readFileSync(`${process.env.QL_DIR}/config/auth.json`).toString())
-  let bearer: string = auth.token
-  let netstat = execSync("netstat -tnlp").toString();
-  let port: string = netstat.match(/.*0\.0\.0\.0:(\d+).*nginx\.conf/)![1]
-  server = `127.0.0.1:${port}`
+  if (process.env.HOSTNAME === 'qinglong') {
+    // 获取token和服务器IP:Port
+    let auth: any = JSON.parse(readFileSync(`${process.env.QL_DIR}/config/auth.json`).toString())
+    let bearer: string = auth.token
+    let netstat = execSync("netstat -tnlp").toString();
+    let port: string = netstat.match(/.*0\.0\.0\.0:(\d+).*nginx\.conf/)![1]
+    server = `127.0.0.1:${port}`
 
-  // 新cron
-  let taskName = "jd_bean_box.ts", cron: string = '1 0,9,18,22 * * *';
-  let task: any = await get(taskName, bearer);
+    // 新cron
+    taskName = "jd_joy_new.js"
+    let cron: string = '0 0-23/2 * * *';
+    let task: any = await get(taskName, bearer);
 
-  if (task && task.schedule !== cron) {
-    console.log(`开始更新${task.name}的cron`)
-    console.log('旧', task.schedule)
-    console.log('新', cron)
-    message = `旧  ${task.schedule}\n新  ${cron}\n更新成功`
-    await set(task, bearer, cron)
+    if (task && task.schedule !== cron) {
+      console.log(`开始更新${task.name}的cron`)
+      console.log('旧', task.schedule)
+      console.log('新', cron)
+      message = `旧  ${task.schedule}\n新  ${cron}\n更新成功`
+      await set(task, bearer, cron)
+    } else {
+      console.log('cron相同，忽略更新')
+    }
   } else {
-    console.log('cron相同，忽略更新')
+    console.log('NOT 🐉')
   }
 })()
 
@@ -45,7 +50,7 @@ async function set(task: any, bearer: string, cron: string) {
   })
   if (data.code === 200) {
     console.log(`${task.name}的cron更新成功`)
-    await sendNotify('强制更新cron', message)
+    await sendNotify(taskName, message)
   } else {
     console.log('更新失败：', data)
   }

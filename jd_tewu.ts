@@ -35,8 +35,7 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
     let activityCardInfo: any = res.data.result.activityCardInfo
     if (activityCardInfo.divideTimeStatus === 1 && activityCardInfo.divideStatus === 0 && activityCardInfo.cardStatus === 1) {
       res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "tag": "divide"})
-      console.log('瓜分')
-      o2s(res)
+      console.log('瓜分', res.data.result.rewards[0].beanNum)
       await wait(2000)
     }
 

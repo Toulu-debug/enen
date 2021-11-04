@@ -1,6 +1,6 @@
 /**
  更新时间：2021-09-30
- cron: 0-23/2 * * * *
+ cron: 0 0-23/2 * * *
  export feedNum=80
  export JD_JOY_teamLevel=2
  */
