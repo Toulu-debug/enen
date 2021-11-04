@@ -1,24 +1,23 @@
-/*
-东东超市
-Last Modified time: 2021-3-4 21:22:37
-活动入口：京东APP首页-京东超市-底部东东超市
-Some Functions Modified From https://github.com/Zero-S1/JD_tools/blob/master/JD_superMarket.py
-东东超市兑换奖品请使用此脚本 jd_blueCoin.js
-脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
-=================QuantumultX==============
-[task_local]
-#东东超市
-11 * * * * jd_superMarket.js, tag=东东超市, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jxc.png, enabled=true
-===========Loon===============
-[Script]
-cron "11 * * * *" script-path=jd_superMarket.js,tag=东东超市
-=======Surge===========
-东东超市 = type=cron,cronexp="11 * * * *",wake-system=1,timeout=3600,script-path=jd_superMarket.js
-==============小火箭=============
-东东超市 = type=cron,script-path=jd_superMarket.js, cronexpr="11 * * * *", timeout=3600, enable=true
+/**
+ * 东东超市
+ * 京东APP首页-京东超市-底部东东超市
+ * =================QuantumultX==============
+ * [task_local]
+ * #东东超市
+ * 11 * * * * jd_superMarket.js, tag=东东超市, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jxc.png, enabled=true
+ * ===========Loon===============
+ * [Script]
+ * cron "11 * * * *" script-path=jd_superMarket.js,tag=东东超市
+ * =======Surge===========
+ * 东东超市 = type=cron,cronexp="11 * * * *",wake-system=1,timeout=3600,script-path=jd_superMarket.js
+ * ==============小火箭=============
+ * 东东超市 = type=cron,script-path=jd_superMarket.js, cronexpr="11 * * * *", timeout=3600, enable=true
  */
+
 const $ = new Env('东东超市');
 let cookiesArr = [], cookie = '', jdSuperMarketShareArr = [], notify, newShareCodes;
+let helpAu = false;//给作者助力 免费拿,省钱大赢家等活动.默认true是,false不助力.
+helpAu = $.isNode() ? (process.env.HELP_AUTHOR ? process.env.HELP_AUTHOR === 'true' : helpAu) : helpAu;
 let jdNotify = true;//用来是否关闭弹窗通知，true表示关闭，false表示开启。
 let drawLotteryFlag = false;//是否用500蓝币去抽奖，true表示开启，false表示关闭。默认关闭
 let message = '', subTitle;
@@ -36,10 +35,9 @@ let shareCodes = []
       cookie = cookiesArr[i];
       $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
       $.index = i + 1;
-      $.coincount = 0;
+      $.coincount = 0;//收取了多少个蓝币
       $.coinerr = "";
       $.blueCionTimes = 0;
-      $.isLogin = true;
       console.log(`\n开始【京东账号${$.index}】${$.UserName}\n`);
       message = '';
       subTitle = '';
@@ -57,6 +55,7 @@ let shareCodes = []
 
 async function jdSuperMarket() {
   try {
+    await smtgHome();
     await receiveBlueCoin();//收蓝币（小费）
     await daySign();//每日签到
     await BeanSign()//
@@ -79,6 +78,7 @@ function showMsg() {
   }
 }
 
+//抽奖功能(招财进宝)
 async function drawLottery() {
   console.log(`\n注意⚠:东东超市抽奖已改版,花费500蓝币抽奖一次,现在脚本默认已关闭抽奖功能\n`);
   drawLotteryFlag = $.getdata('jdSuperMarketLottery') ? $.getdata('jdSuperMarketLottery') : drawLotteryFlag;
@@ -100,16 +100,6 @@ async function drawLottery() {
     }
   } else {
     console.log(`设置的为不抽奖\n`)
-  }
-}
-
-async function help() {
-  return
-  console.log(`\n开始助力好友`);
-  for (let code of newShareCodes) {
-    if (!code) continue;
-    const res = await smtgDoAssistPkTask(code);
-    console.log(`助力好友${JSON.stringify(res)}`);
   }
 }
 
@@ -176,154 +166,48 @@ async function doDailyTask() {
   }
 }
 
-var _0xod8 = 'jsjiami.com.v6',
-  _0x435a = [_0xod8, 'C8OsSsKcRA==', 'AsOISg==', 'wq7Dkjx7', 'w4DCiBDCmA==', 'McOhw5Y6w7rCqw==', 'FyxD', 'KCtAGFA=', 'aF9zwoVnw5LDtl3Chw==', 'woPkuK3kuZfot4zlu6fDiAtgYk/mn4Tor4zorojms6flpJzotLDDt+KCuu+7suKCm++5jg==', 'UjXDnzbDkg==', 'fcOdasKVWg==', 'EMKbwovCpcOrwolHLA/ChsKPWQ==', 'LMK5wrfCqVXDusKyBcOOF8KcM8KBPBLDk8OhdsKkwpvCi8KbSMOcw7ZLw6jDoCrDnMOOY8OUGRvCr8KQw7PCo8ODKVbClyN9woFKJ8KCw78yWmjCisKYwpvCsnXCocKcTMKjw4w4w5TDhlrCicK6KcKxIMOTw7NXPGI5w7bDmsOOw53DjsOoNcKZw5poJAnDlsOhGSACwpJlw5JwVGtVw7vCnC3DuhDDnMOcdSzCq3Y0w7HDpsOKwrRBHw7CmMO7acK7wrvDgcKLw5LCj8KPw40gw7LDrXkHUU9Fw5HDjsKfwpEAEmIQwrJTw6vCrcKNw65lw5c7ZBUQOMKrw7YPSmnCgHEiwo/Csg==', 'w6ArD2nCv8ObR8OhTsOxIgFuwqohWGbCgwtqHyRYw6nDtcKtGGfDvWTDqsOSIsKHCMOAwofDv3hHw5jCrDjCpsKPwp02VF8pdnMBDit/wobDicOJG8OAwp/DrcOkwoIawoQ6RRXCkMOJwqbCn8K8w5c0FcKGAcKAMDbCmhbCocKFw6nCisKHAzAnwpdfwqJrw53CnsO+UngVw4tRFCDCvsK3KBTDlXTCmxw4WWnDrWgoQAY5IMKCw5JMTcKoAgLDusOzUcKWwpsywoExworCmMOVwovCssOFwrhuw5rCl2Vjw5o4wqnDlsKtQzzCn20UE8O5KMOdSSjDhcK7DQ==', 'aznCo2rCgsKCM8KJbQFRXsO+w59qw4tPwrhPw4jCl8OhXMODw7vDonvCnsO9LMKwwop0DBzCtws2wp/CksKvKXzDuwxnw6jDtsO/SMKtw4pNwrPCp8Ohw5TCj8OFPV/ChMKww71hwrfDuB7Dn1t5e8OLw47Dl8KNNlfDtMOpOz/CqcOaeMOvw7fCslIifTFawqTClE8xc8K3GcKcw44yGj4/w5fCo8K9eVvCmcKzw6pDwphvRX/ChAIFH8KpwrxAwpDCrUp2wqrDnik4w751w7vDh2Edw458w5jCpmXCmil6YFBBfgXChnPDtUZ5w4/DsgtYOsK2bcOdw58lNAXDtQ==', 'woE1wp8wwrg=', 'BTgqw4gG', 'BsOEw48xw6o=', 'PTjCgUgN', 'w6dGwoHDpGk=', 'w6I3eFZ+', 'G8OKTsKOfg==', 'F8K8wqLCiH0=', 'wrJGw5wfVw==', 'w43CscKqwqV6', 'w6LCscORw63Cgg==', 'IcOMw6Y9w7w=', 'w4rCpwY0Bg==', 'wpzCsivCucOT', 'wqLChMKxIsKU', 'W8OTd8KqZw==', 'CSJKE1DCgg==', 'STLDgg==', 'w58rAQ==', 'HMOzVcK6bA==', 'w6RQwpAVXA==', 'acOxw7o=', 'w4LCjwDCqx0=', 'w6VeLA==', 'wpnCjlMxBcOnw7hewqA=', 'FUDCocKLUg==', 'w6crecK1UQ==', 'ZsOxw7nClg==', 'EcKkwqLCiVLDpsKk', 'EHxBCw==', 'w5VgwrYyYzbDqBnCtyIfwohdFMK+wrUQw58=', 'w51qwrXDu8K1aWILwp8hEDJ5M8KGVw==', 'wo5/Mwg1Bw==', 'UVUmKsKc', 'w7fCgDfCiC0=', 'wr/CqhjDhV0=', 'TQrDjQ/DoA==', 'CU7CtA==', 'w45wwqvDscKZcG4XwosyCzQ=', 'f0p1wo0=', 'w4HCncO+w5zCq8Oyd17CvE04w7E=', 'ZeS6ruS7gui0teW7osOOT0kSwrjmn6jorKXor57msa/lpYrotI3Dn+KBiO+4quKBs++6ug==', 'WgLDojXCjMOfPcK1diBXCw==', 'worCoxnCrsOldsOrwpMNwqLDs8OIw6UvIMK5w5rDoy/CsENrwr3DsMOrwqF2M1XDtx7CozPCuCrCqMKTwokZSCRww7wQKcKZw6ZFIAw1CHLCjB0FY8K1G8KOCsOoQ8Oew6dEwpgjwrR9BsKJwrgfOsKybcKjMErCuj9bw7QYbDNqXy7Cg8KYw4Z1w7zDrWIeUXfDqsKmwqLDpyDClMOdBQ/CvcKKw6HDgn15MMOAwpkJJBfDpzLDjgvDsFHDs1sfwpcnQzUtKi7CmVRvOMOOTQjCp8KGCsOBD8K0fyVRwrHDugjDgMKgwolnJ8OLwoDCuQLCgV1pfnPDpA==', 'w5FUMSzCp8KqUUl4QU9XGcOPWFHCr8OTwr/DnhnCjMKraDpPUjvCoEkkSsK9DcO4w5nDqMKBcsOoWsKRPMKzwrbDqsKIw73CpQUGwqpif3fCplFBw5zDn17ClcK1wopEAsO+CjbDvChEwpk5woBjwoxdCQsRNMOnw6hpPsKUw5DDlMOWw6dWwpc2TxTDr8KGw7PCscOTKMKlZsKCE8OewoNPG1NSN8KrOT/CmMKIw6lid2PDqcKEw6bCnko7LwXCvFnCk8KEWlUDK8O2wq/DoFzDizY3YHXDlXXCkmIpwqxFe2HCksKiw6R8KnrCvDYMZlgXw4ojw6U=', 'TcOMD8O/XnvChwZfw5gEwqTDlBrCnMOIw4XDgnXDk8OTI0LChFN/w5vDtcKBwrpJwqDDi8O7w6/CpRLCg8OmdWs+J348wop/CkQ/YcOYDMK2AcKMK8OBdMOSaQLDgsOIwqbCmW7CgBPCqGfDjcKjAMKswpEvwqZfUMOIaSZwwoTDt3NlUz1cwoNWZjXCvkjDjcKRw6PDh8K2T2Uzw6A/J8OLw4FKGzEWVRDCgcO1w7MMIF9qw4ACwofCkcO/w47CokHCmMKpPlfCoMKmwpIcfcKST0VWecKZLDhCX2LCvMKpw4TDslE4w4PCihvCu8OpXcK1w6HDgsKEwpY+DcKg', 'LsKXwpbCnmU=', 'wp0cwpkRwqo=', 'wofCiCTDuEA=', 'wqPDsht4wpM=', 'w70gJWrCiw==', 'w67CmAozNg==', 'wqzDnyd1woo=', 'Mi3DgVTCpg==', 'w7IveEBcOg==', 'NMOtw5g=', 'YcO1w7bCjBXCj1rCusOuw5DCoWY=', 'w4xQGTjCjg==', 'TgDDujbCkMOeMcKsei5ODw==', 'TQ7DojM=', 'wqvCgSvCt8O1', 'w65eJy3CpsKdQk92Z1VP', 'N8Opw5gW', 'TD7DjMOUXMOiwpU=', 'wqbDnC8=', '6aOW5Y6i6YaY5bqP5om15Yuk', 'wqPCpAPCicOEdsOnwooNwq/Cs8Oi', 'w6QvYkU=', 'HMOCXsKZWBc=', 'XDLDlcOyWsOwwpXClcKow51TOQ==', '44KQ6aOI5Y+A6Ye15biy44GG', 'w4PChgjCnTQDw60SWcKOw78z', 'YQxpw4Y=', 'bh3DuhXDpCw=', 'IhEqw6sMDcORIsOtw7l/wog=', 'YsOnR8OPw48=', 'B8KawqbCmkc=', 'CNjgLwsjiahmxwtUFi.kcom.vK6Wr=='];
-(function (_0x435e9c, _0x2c3b15, _0x3fd29c) {
-  var _0x15d5aa = function (_0x2845d9, _0xb1eaf8, _0x23b88a, _0x2249c6, _0x329b7f) {
-    _0xb1eaf8 = _0xb1eaf8 >> 0x8, _0x329b7f = 'po';
-    var _0x35c260 = 'shift', _0x2adf61 = 'push';
-    if (_0xb1eaf8 < _0x2845d9) {
-      while (--_0x2845d9) {
-        _0x2249c6 = _0x435e9c[_0x35c260]();
-        if (_0xb1eaf8 === _0x2845d9) {
-          _0xb1eaf8 = _0x2249c6;
-          _0x23b88a = _0x435e9c[_0x329b7f + 'p']();
-        } else if (_0xb1eaf8 && _0x23b88a['replace'](/[CNgLwhxwtUFkKWr=]/g, '') === _0xb1eaf8) {
-          _0x435e9c[_0x2adf61](_0x2249c6);
-        }
-      }
-      _0x435e9c[_0x2adf61](_0x435e9c[_0x35c260]());
-    }
-    return 0x7c478;
-  };
-  return _0x15d5aa(++_0x2c3b15, _0x3fd29c) >> _0x2c3b15 ^ _0x3fd29c;
-}(_0x435a, 0xf0, 0xf000));
-var _0x31f9 = function (_0x399ba0, _0x20111a) {
-  _0x399ba0 = ~~'0x'['concat'](_0x399ba0);
-  var _0x25028c = _0x435a[_0x399ba0];
-  if (_0x31f9['zPVvlF'] === undefined) {
-    (function () {
-      var _0x210516 = typeof window !== 'undefined' ? window : typeof process === 'object' && typeof require === 'function' && typeof global === 'object' ? global : this;
-      var _0x57bbc1 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-      _0x210516['atob'] || (_0x210516['atob'] = function (_0x20394a) {
-        var _0x2b515a = String(_0x20394a)['replace'](/=+$/, '');
-        for (var _0x1de264 = 0x0, _0x45341e, _0x202179, _0x2931f0 = 0x0, _0x25ac2b = ''; _0x202179 = _0x2b515a['charAt'](_0x2931f0++); ~_0x202179 && (_0x45341e = _0x1de264 % 0x4 ? _0x45341e * 0x40 + _0x202179 : _0x202179, _0x1de264++ % 0x4) ? _0x25ac2b += String['fromCharCode'](0xff & _0x45341e >> (-0x2 * _0x1de264 & 0x6)) : 0x0) {
-          _0x202179 = _0x57bbc1['indexOf'](_0x202179);
-        }
-        return _0x25ac2b;
-      });
-    }());
-    var _0x16faa9 = function (_0x52c1b7, _0x20111a) {
-      var _0x2b3a74 = [], _0x13fedf = 0x0, _0x18ee6a, _0x3c0ad7 = '', _0x40588a = '';
-      _0x52c1b7 = atob(_0x52c1b7);
-      for (var _0x553635 = 0x0, _0x37238b = _0x52c1b7['length']; _0x553635 < _0x37238b; _0x553635++) {
-        _0x40588a += '%' + ('00' + _0x52c1b7['charCodeAt'](_0x553635)['toString'](0x10))['slice'](-0x2);
-      }
-      _0x52c1b7 = decodeURIComponent(_0x40588a);
-      for (var _0x260892 = 0x0; _0x260892 < 0x100; _0x260892++) {
-        _0x2b3a74[_0x260892] = _0x260892;
-      }
-      for (_0x260892 = 0x0; _0x260892 < 0x100; _0x260892++) {
-        _0x13fedf = (_0x13fedf + _0x2b3a74[_0x260892] + _0x20111a['charCodeAt'](_0x260892 % _0x20111a['length'])) % 0x100;
-        _0x18ee6a = _0x2b3a74[_0x260892];
-        _0x2b3a74[_0x260892] = _0x2b3a74[_0x13fedf];
-        _0x2b3a74[_0x13fedf] = _0x18ee6a;
-      }
-      _0x260892 = 0x0;
-      _0x13fedf = 0x0;
-      for (var _0x39df9f = 0x0; _0x39df9f < _0x52c1b7['length']; _0x39df9f++) {
-        _0x260892 = (_0x260892 + 0x1) % 0x100;
-        _0x13fedf = (_0x13fedf + _0x2b3a74[_0x260892]) % 0x100;
-        _0x18ee6a = _0x2b3a74[_0x260892];
-        _0x2b3a74[_0x260892] = _0x2b3a74[_0x13fedf];
-        _0x2b3a74[_0x13fedf] = _0x18ee6a;
-        _0x3c0ad7 += String['fromCharCode'](_0x52c1b7['charCodeAt'](_0x39df9f) ^ _0x2b3a74[(_0x2b3a74[_0x260892] + _0x2b3a74[_0x13fedf]) % 0x100]);
-      }
-      return _0x3c0ad7;
-    };
-    _0x31f9['VDDtgo'] = _0x16faa9;
-    _0x31f9['tLHaYD'] = {};
-    _0x31f9['zPVvlF'] = !![];
-  }
-  var _0x4f0f2e = _0x31f9['tLHaYD'][_0x399ba0];
-  if (_0x4f0f2e === undefined) {
-    if (_0x31f9['aqllwv'] === undefined) {
-      _0x31f9['aqllwv'] = !![];
-    }
-    _0x25028c = _0x31f9['VDDtgo'](_0x25028c, _0x20111a);
-    _0x31f9['tLHaYD'][_0x399ba0] = _0x25028c;
-  } else {
-    _0x25028c = _0x4f0f2e;
-  }
-  return _0x25028c;
-};
-
 function smtgHome() {
-  var _0x2b0b51 = {
-    'Tnybf': function (_0x3cfac6, _0x5ebf63) {
-      return _0x3cfac6(_0x5ebf63);
-    }, 'KfcyW': _0x31f9('2c', 'dS]p'), 'ULcFc': function (_0xf3db46, _0x4ddbc1) {
-      return _0xf3db46 === _0x4ddbc1;
-    }, 'OZgNt': _0x31f9('2d', 'niHx'), 'fgcRm': function (_0x218926, _0xe4ad23) {
-      return _0x218926(_0xe4ad23);
-    }, 'bynrM': function (_0x4ded26, _0x51a247) {
-      return _0x4ded26 !== _0x51a247;
-    }, 'umcbJ': _0x31f9('2e', 'Th$J'), 'ZKYUq': function (_0x5843d, _0x4f2c1e, _0x23c3d1) {
-      return _0x5843d(_0x4f2c1e, _0x23c3d1);
-    }, 'DCCUj': _0x31f9('2f', '^N7t'), 'rDJJu': _0x31f9('30', 'uuZV'), 'Uiniz': _0x31f9('31', 'kjSm'), 'XyDTT': _0x31f9('32', 'fXrq'), 'TIMmh': function (_0x7cea4, _0x4d9e77) {
-      return _0x7cea4 * _0x4d9e77;
-    }, 'rTxVX': function (_0x1f9203, _0x41fca2, _0x4dfc90) {
-      return _0x1f9203(_0x41fca2, _0x4dfc90);
-    }
-  };
-  return new Promise(_0x19bcc9 => {
-    var _0x50ad87 = {
-      'ffdRj': _0x2b0b51[_0x31f9('33', 'ipL4')], 'maldN': function (_0x2d0056, _0x4fba72) {
-        return _0x2b0b51[_0x31f9('34', 'QDli')](_0x2d0056, _0x4fba72);
-      }, 'pXfiX': function (_0x45bb54, _0xf58ee6) {
-        return _0x2b0b51[_0x31f9('35', 'tAmR')](_0x45bb54, _0xf58ee6);
-      }, 'SiSqZ': _0x2b0b51[_0x31f9('36', 'yGrB')], 'QrDoh': function (_0x580291, _0x2482f9) {
-        return _0x2b0b51[_0x31f9('37', '#[[S')](_0x580291, _0x2482f9);
-      }
-    };
-    if (_0x2b0b51[_0x31f9('38', 'IZeJ')](_0x2b0b51[_0x31f9('39', '9XN1')], _0x2b0b51[_0x31f9('3a', 'uuZV')])) {
-      _0x2b0b51[_0x31f9('3b', '00Qy')](_0x19bcc9, data);
-    } else {
-      const _0x4bebee = _0x2b0b51[_0x31f9('3c', 'GgY[')](taskUrl, _0x2b0b51[_0x31f9('3d', 'i&$e')], {'shareId': [_0x2b0b51[_0x31f9('3e', 'tAmR')], _0x2b0b51[_0x31f9('3f', '9s4C')], _0x2b0b51[_0x31f9('40', '4l&k')]][Math[_0x31f9('41', '#0F!')](_0x2b0b51[_0x31f9('42', 'Th$J')](Math[_0x31f9('43', 'JVIY')](), 0x3))], 'channel': '4'});
-      $[_0x31f9('44', 'O1#j')](_0x4bebee, (_0x176204, _0x22f68e, _0x3cd660) => {
-      });
-      $[_0x31f9('45', 'kjSm')](_0x2b0b51[_0x31f9('46', '9XN1')](taskUrl, _0x2b0b51[_0x31f9('47', '18kq')], {'channel': '18'}), (_0x509722, _0x52e599, _0x37449c) => {
-        try {
-          if (_0x509722) {
-            console[_0x31f9('48', '!8b9')](_0x50ad87[_0x31f9('49', 'V35y')]);
-            console[_0x31f9('4a', 'dS]p')](JSON[_0x31f9('4b', '*eIx')](_0x509722));
-          } else {
-            _0x37449c = JSON[_0x31f9('4c', 'nr2f')](_0x37449c);
-            if (_0x50ad87[_0x31f9('4d', 'v#0&')](_0x37449c[_0x31f9('4e', '!8b9')], 0x0) && _0x37449c[_0x31f9('1f', '1v!Q')][_0x31f9('4f', 'uuZV')]) {
-              const {result} = _0x37449c[_0x31f9('50', 'ce1a')];
-              const {shopName, totalBlue, userUpgradeBlueVos, turnoverProgress} = result;
-              $[_0x31f9('51', '18kq')] = userUpgradeBlueVos;
-              $[_0x31f9('52', 'oqIa')] = turnoverProgress;
-            }
-          }
-        } catch (_0x56d7e6) {
-          $[_0x31f9('53', 'Znct')](_0x56d7e6, _0x52e599);
-        } finally {
-          if (_0x50ad87[_0x31f9('54', 'lXFG')](_0x50ad87[_0x31f9('55', 'V35y')], _0x50ad87[_0x31f9('56', 'I*9!')])) {
-            _0x50ad87[_0x31f9('57', 'niHx')](_0x19bcc9, _0x37449c);
-          } else {
-            console[_0x31f9('58', 'nr2f')]('' + ($[_0x31f9('59', 'oqIa')][_0x31f9('5a', 'XM88')] && $[_0x31f9('5b', 'i&$e')][_0x31f9('5a', 'XM88')][_0x31f9('28', 'tAmR')]));
+  return new Promise((resolve) => {
+    const options = taskUrl("smtg_newHome", {
+      "shareId": "",
+      "channel": "4",
+    });
+    $.get(options, (err, resp, data) => {
+    });
+    $.get(taskUrl("smtg_newHome", {"shopType": "0", "channel": "18"}), (err, resp, data) => {
+      try {
+        if (err) {
+          console.log("\n东东超市: API查询请求失败 ‼️‼️");
+          console.log(JSON.stringify(err));
+        } else {
+          data = JSON.parse(data);
+          if (data.code === 0 && data.data.success) {
+            const {result} = data.data;
+            const {
+              shopName,
+              totalBlue,
+              userUpgradeBlueVos,
+              turnoverProgress,
+              currentShopId
+            } = result;
+            $.currentShopId = currentShopId
+            $.userUpgradeBlueVos = userUpgradeBlueVos;
+            $.turnoverProgress = turnoverProgress;
           }
         }
-      });
-    }
-  });
-};_0xod8 = 'jsjiami.com.v6';
-
+      } catch (e) {
+        $.logErr(e, resp);
+      } finally {
+        resolve(data);
+      }
+    })
+  })
+}
+//领蓝币
 function receiveBlueCoin(timeout = 0) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      $.get(taskUrl('smtg_receiveCoin', {"type": 2, "channel": "18"}), async (err, resp, data) => {
+      $.get(taskUrl('smtg_receiveCoin', {"type": 4, "shopId": $.currentShopId, "channel": "18"}), async (err, resp, data) => {
         try {
           if (err) {
             console.log('\n东东超市: API查询请求失败 ‼️‼️')
@@ -381,6 +265,7 @@ async function BeanSign() {
   }
 }
 
+//每日签到
 function smtgSign(body) {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_sign', body), async (err, resp, data) => {
@@ -400,6 +285,7 @@ function smtgSign(body) {
   })
 }
 
+//领取店铺升级的蓝币奖励
 async function receiveUserUpgradeBlue() {
   $.receiveUserUpgradeBlue = 0;
   if ($.userUpgradeBlueVos && $.userUpgradeBlueVos.length > 0) {
@@ -429,6 +315,7 @@ async function Home() {
   }
 }
 
+//查询有哪些货架
 function smtg_shopIndex() {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_shopIndex', {"channel": 1}), async (err, resp, data) => {
@@ -480,6 +367,7 @@ function smtg_shopIndex() {
   })
 }
 
+//解锁店铺
 function smtg_shelfUnlock(body) {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_shelfUnlock', body), (err, resp, data) => {
@@ -520,6 +408,7 @@ function smtg_shelfUpgrade(body) {
   })
 }
 
+//售卖限时商品API
 function smtg_sellMerchandise(body) {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_sellMerchandise', body), (err, resp, data) => {
@@ -612,25 +501,6 @@ function smtgSignList() {
     $.get(taskUrl('smtg_signList', {"channel": "18"}), (err, resp, data) => {
       try {
         // console.log('ddd----ddd', data)
-        if (err) {
-          console.log('\n东东超市: API查询请求失败 ‼️‼️')
-          console.log(JSON.stringify(err));
-        } else {
-          data = JSON.parse(data);
-        }
-      } catch (e) {
-        $.logErr(e, resp);
-      } finally {
-        resolve(data);
-      }
-    })
-  })
-}
-
-function smtgDoAssistPkTask(code) {
-  return new Promise((resolve) => {
-    $.get(taskUrl('smtg_doAssistPkTask', {"inviteCode": code}), (err, resp, data) => {
-      try {
         if (err) {
           console.log('\n东东超市: API查询请求失败 ‼️‼️')
           console.log(JSON.stringify(err));
@@ -742,6 +612,7 @@ function smtg_getBusinessCircleList() {
   })
 }
 
+//加入商圈API
 function smtg_joinBusinessCircle(circleId) {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_joinBusinessCircle', {circleId}), (err, resp, data) => {
@@ -799,6 +670,7 @@ function smtg_receivedPkTeamPrize() {
   })
 }
 
+//领取商圈PK奖励
 function smtg_getPkPrize() {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_getPkPrize'), (err, resp, data) => {
@@ -837,6 +709,7 @@ function smtg_quitBusinessCircle() {
   })
 }
 
+//我的货架
 function smtg_shelfList() {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_shelfList'), (err, resp, data) => {
@@ -856,6 +729,7 @@ function smtg_shelfList() {
   })
 }
 
+//检查某个货架可以上架的商品列表
 function smtg_shelfProductList(shelfId) {
   return new Promise((resolve) => {
     console.log(`开始检查货架[${shelfId}] 可上架产品`)
@@ -877,6 +751,7 @@ function smtg_shelfProductList(shelfId) {
   })
 }
 
+//升级商品
 function smtg_upgradeProduct(productId) {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_upgradeProduct', {productId}), (err, resp, data) => {
@@ -898,6 +773,7 @@ function smtg_upgradeProduct(productId) {
   })
 }
 
+//解锁商品
 function smtg_unlockProduct(productId) {
   return new Promise((resolve) => {
     console.log(`开始解锁商品`)
@@ -919,6 +795,7 @@ function smtg_unlockProduct(productId) {
   })
 }
 
+//升级货架
 function smtg_upgradeShelf(shelfId) {
   return new Promise((resolve) => {
     $.get(taskUrl('smtg_upgradeShelf', {shelfId}), (err, resp, data) => {
@@ -940,6 +817,7 @@ function smtg_upgradeShelf(shelfId) {
   })
 }
 
+//解锁货架
 function smtg_unlockShelf(shelfId) {
   return new Promise((resolve) => {
     console.log(`开始解锁货架`)
@@ -1039,6 +917,7 @@ function smtg_drawLottery() {
   })
 }
 
+//格式化助力码
 function shareCodesFormat() {
   return new Promise(resolve => {
     console.log(`第${$.index}个京东账号的助力码:::${jdSuperMarketShareArr[$.index - 1]}`)
@@ -1056,8 +935,11 @@ function shareCodesFormat() {
 
 function requireConfig() {
   return new Promise(resolve => {
+    // console.log('\n开始获取东东超市配置文件\n')
     notify = $.isNode() ? require('./sendNotify') : '';
+    //Node.js用户请在jdCookie.js处填写京东ck;
     const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
+    //IOS等用户直接用NobyDa的jd cookie
     if ($.isNode()) {
       Object.keys(jdCookieNode).forEach((item) => {
         if (jdCookieNode[item]) {
@@ -1070,19 +952,67 @@ function requireConfig() {
       cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
     }
     console.log(`共${cookiesArr.length}个京东账号\n`);
+    // console.log(`东东超市已改版,目前暂不用助力, 故无助力码`)
+    // console.log(`\n东东超市商圈助力码::${JSON.stringify(jdSuperMarketShareArr)}`);
+    // console.log(`您提供了${jdSuperMarketShareArr.length}个账号的助力码\n`);
     resolve()
+  })
+}
+
+function TotalBean() {
+  return new Promise(async resolve => {
+    const options = {
+      url: "https://wq.jd.com/user_new/info/GetJDUserInfoUnion?sceneval=2",
+      headers: {
+        Host: "wq.jd.com",
+        Accept: "*/*",
+        Connection: "keep-alive",
+        Cookie: cookie,
+        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+        "Accept-Language": "zh-cn",
+        "Referer": "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&",
+        "Accept-Encoding": "gzip, deflate, br"
+      }
+    }
+    $.get(options, (err, resp, data) => {
+      try {
+        if (err) {
+          $.logErr(err)
+        } else {
+          if (data) {
+            data = JSON.parse(data);
+            if (data['retcode'] === 1001) {
+              $.isLogin = false; //cookie过期
+              return;
+            }
+            if (data['retcode'] === 0 && data.data && data.data.hasOwnProperty("userInfo")) {
+              $.nickName = data.data.userInfo.baseInfo.nickname;
+            }
+          } else {
+            console.log('京东服务器返回空数据');
+          }
+        }
+      } catch (e) {
+        $.logErr(e)
+      } finally {
+        resolve();
+      }
+    })
   })
 }
 
 function taskUrl(function_id, body = {}) {
   return {
-    url: `${JD_API_HOST}?functionId=${function_id}&appid=jdsupermarket&clientVersion=8.0.0&client=m&body=${escape(JSON.stringify(body))}&t=${Date.now()}`,
+    url: `${JD_API_HOST}?appid=jdsupermarket&functionId=${function_id}&clientVersion=8.0.0&client=m&body=${encodeURIComponent(JSON.stringify(body))}&t=${Date.now()}`,
     headers: {
-      'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-      'Host': 'api.m.jd.com',
-      'Cookie': cookie,
-      'Referer': 'https://jdsupermarket.jd.com/game',
-      'Origin': 'https://jdsupermarket.jd.com',
+      "Host": "api.m.jd.com",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://jdsupermarket.jd.com",
+      "Accept-Encoding": "gzip, deflate, br",
+      "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+      "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+      "Referer": "https://jdsupermarket.jd.com/",
+      "Cookie": cookie
     }
   }
 }
