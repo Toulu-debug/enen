@@ -1,6 +1,6 @@
 /**
  * 京东-下拉
- * cron: 0 * * * *
+ * cron: 0 9-20/* * * *
  */
 
 import axios from 'axios'
@@ -37,6 +37,13 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
     res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
     for (let t of res.data.result.taskList || []) {
       if (!t.completionFlag) {
+        // 逛
+        if (t.assignmentType === 1) {
+          res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 1, "itemId": t.ext.shoppingActivity[0].itemId, "actionType": 0})
+          o2s(res)
+          await wait(2000)
+        }
+
         // 关注品牌店铺
         if (t.assignmentType === 3) {
           res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 3, "itemId": t.ext.followShop[0].itemId, "actionType": 0})
@@ -61,8 +68,6 @@ let activityId: number, encryptProjectId: string, inviteTaskId: string;
         if (t.assignmentType === 7) {
           console.log('开卡？')
         }
-        await wait(2000)
-
       }
       if (t.assignmentName === '邀请好友') {
         inviteTaskId = t.encryptAssignmentId
