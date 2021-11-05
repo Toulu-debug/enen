@@ -153,16 +153,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     } catch (e: any) {
     }
 
-    // 收牛牛
-    let cowToken = await cow(lastgettime)
-    console.log(cowToken)
-    res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: cowToken})
-    if (res.ret === 0)
-      console.log('收牛牛:', res.data.addcoin)
-    else
-      console.log('收牛牛:', res)
-    await wait(1000)
-
     // 签到
     res = await api('queryservice/GetSignInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
     if (res.data.signlist) {

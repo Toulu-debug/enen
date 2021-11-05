@@ -58,7 +58,12 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     }
     await wait(1000)
   }
-  writeFileSync('./json/jd_track.json', JSON.stringify(orders))
+  orders = JSON.stringify(orders, null, 2)
+  let account: { pt_pin: string, remarks: string, wxpusher_uid?: string }[] = JSON.parse(readFileSync('./utils/account.json').toString() || '[]') || []
+  for (let acc of account) {
+    orders = orders.replace(new RegExp(decodeURIComponent(acc['pt_pin']), 'g'), acc['remarks'])
+  }
+  writeFileSync('./json/jd_track.json', orders)
   if (allMessage)
     await sendNotify('京东快递更新', allMessage)
 })()

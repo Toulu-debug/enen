@@ -1,22 +1,26 @@
-import axios from 'axios';
-import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS';
+/**
+ * 东东世界
+ * cron: 5 0,8,20 * * *
+ */
 
-let cookie: string = '', res: any = '', shareCodes: any[] = [], shareCodesInternal: any[] = [], UserName: string, index: number;
+import axios from 'axios'
+import USER_AGENT, {o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
-let tokenKey: string = '', token: string = '', bearer: string = '';
+let cookie: string = '', res: any = '', shareCodesInternal: any[] = [], UserName: string, index: number
+let tokenKey: string = '', token: string = '', bearer: string = ''
+
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: any = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1;
-    console.log(`\n开始【京东账号${index}】${UserName}\n`);
-    await getIsvToken();
-    await getIsvToken2();
-    await getToken();
+    index = i + 1
+    console.log(`\n开始【京东账号${index}】${UserName}\n`)
+    await getIsvToken()
+    await getIsvToken2()
+    await getToken()
 
-
-    res = await api('get_task');
+    res = await api('get_task')
     for (let t of res.result.taskVos) {
       if (t.status === 1) {
         if (t.simpleRecordInfoVo) {
@@ -37,28 +41,40 @@ let tokenKey: string = '', token: string = '', bearer: string = '';
         }
         if (t.taskName === '邀请好友助力') {
           console.log('助力码：', t.assistTaskDetailVo.taskToken)
-          res = await api('get_user_info');
+          res = await api('get_user_info')
           shareCodesInternal.push({
             taskToken: t.assistTaskDetailVo.taskToken,
             inviter_id: res.openid
           })
-          try {
-            await axios.get(`http://127.0.0.1:10001/api/autoInsert/ddworld?sharecode=` + encodeURIComponent(t.assistTaskDetailVo.taskToken + ',' + res.openid))
-          } catch (e) {
-          }
+        }
+      }
+    }
+
+    if (new Date().getHours() === 20) {
+      res = await api('get_exchange')
+      console.log(res)
+      for (let t of res) {
+        if (t.times_limit !== t.exchange_total) {
+          console.log('兑换', t.coins)
+          res = await api('do_exchange', `id=${t.id}`)
+          o2s(res)
+          await wait(2000)
         }
       }
     }
   }
+
   console.log('内部助力码：', shareCodesInternal)
 
   for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i];
+    cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`${UserName}去助力${shareCodesInternal[0].taskToken}`)
     res = await api('do_assist_task', `taskToken=${shareCodesInternal[0].taskToken}&inviter_id=${shareCodesInternal[0].inviter_id}`)
     await wait(2000)
     console.log('助力结果：', res)
+    if (!res)
+      break
   }
 })()
 
@@ -70,17 +86,21 @@ async function api(fn: string, body: string = '') {
     'Authorization': `Bearer ${bearer}`,
     'Referer': 'https://ddsj-dz.isvjcloud.com/dd-world/',
   }
-  let data: any = {}
   if (body) {
     try {
-      data = await axios.post(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, body, {headers})
+      let {data} = await axios.post(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, body, {headers})
+      return data
+    } catch (e) {
+      return e.response.data
+    }
+  } else {
+    try {
+      let {data} = await axios.get(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, {headers})
+      return data
     } catch (e) {
       return
     }
-  } else {
-    data = await axios.get(`https://ddsj-dz.isvjcloud.com/dd-api/${fn}`, {headers})
   }
-  return data.data
 }
 
 async function getIsvToken() {
@@ -96,7 +116,7 @@ async function getIsvToken() {
         'Cookie': cookie
       }
     })
-  tokenKey = data.tokenKey;
+  tokenKey = data.tokenKey
   return
 }
 
@@ -113,7 +133,7 @@ async function getIsvToken2() {
         'Cookie': cookie
       }
     })
-  token = data.token;
+  token = data.token
   return
 }
 
@@ -129,6 +149,6 @@ async function getToken() {
         'Cookie': `IsvToken=${tokenKey};`
       }
     })
-  bearer = data.access_token;
-  return;
+  bearer = data.access_token
+  return
 }
