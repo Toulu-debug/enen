@@ -19,12 +19,13 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
     res = await api('sign/UserSignNew', 'sceneval,source', {source: ''})
-    console.log('签到', JSON.stringify(res))
+    console.log('签到')
     console.log('助力码', res.data.token)
     shareCodeSelf.push(res.data.token)
     let coin: number = res.data.pgAmountTotal
     console.log('金币', coin)
 
+    /*
     res = await api('task/QueryUserTask', 'sceneval,taskType', {taskType: 0})
     let tasks: number[] = []
     if (res.datas) {
@@ -42,17 +43,19 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     }
     console.log('tasks:', tasks)
     await wait(2000)
+     */
 
     res = await api('task/QueryPgTaskCfg', 'sceneval', {})
     for (let t of res.data.tasks) {
-      if (tasks.includes(t.taskId)) {
+      // if (tasks.includes(t.taskId)) {
+      if (t.taskState === 1) {
         console.log(t.taskName)
         res = await api('task/drawUserTask', 'sceneval,taskid', {taskid: t.taskId})
         await wait(1000)
         res = await api('task/UserTaskFinish', 'sceneval,taskid', {taskid: t.taskId})
         await wait(2000)
-
       }
+      // }
     }
 
     res = await api('active/LuckyTwistUserInfo', 'sceneval', {})

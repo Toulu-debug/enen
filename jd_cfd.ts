@@ -541,7 +541,6 @@ interface Params {
     // 获取随机助力码
     try {
       let {data}: any = await axi.get(`https://api.jdsharecode.xyz/api/jxcfd/30`, {timeout: 10000})
-      console.log('获取到30个随机助力码:', data.data)
       shareCodes = [...shareCodesSelf, ...shareCodesHW, ...data.data]
     } catch (e) {
       console.log('获取助力池失败')
@@ -554,8 +553,11 @@ interface Params {
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: shareCodes[j]})
       if (res.iRet === 0) {
         console.log('助力成功:', res.Data.GuestPrizeInfo.strPrizeName)
-      } else if (res.iRet === 2190) {
+      } else if (res.iRet === 2235) {
         console.log('上限')
+        break
+      } else if (res.iRet === 1023) {
+        console.log('信号弱')
         break
       } else if (res.iRet === 2191) {
         console.log('已助力')

@@ -1,6 +1,6 @@
 /**
  * 京东-下拉
- * cron: 0 9-20/* * * *
+ * cron: 0 9-20/1 * * *
  */
 
 import axios from 'axios'
