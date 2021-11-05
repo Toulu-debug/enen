@@ -1,5 +1,13 @@
 /**
- * 任务、宝箱
+ * 京喜-88红包-宝箱
+ * 做任务、开宝箱
+ * 每号可收20次助力，出1次助力
+ * cron: 5 0,6,12 * * *
+ * TODO CK 20+
+ * CK1默认优先助力HW.ts，其余助力CK1
+ * HW_Priority: boolean
+ * true  HW.ts -> 内部
+ * false 内部   -> HW.ts
  */
 
 import axios from 'axios'
@@ -9,12 +17,6 @@ import {requireConfig, wait, requestAlgo, h5st, exceptCookie, randomString} from
 let cookie: string = '', res: any = '', UserName: string, index: number
 let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[] = ['aae98a3e3b04d3ac430ee9ee91f4759d', 'bdf489af86e5021575040fffee407bc2', '92a46b6081a955fb4dcea1e56e590b3a', '638d77021a1dd4d74cad72d44afd9899', 'f4dc33716d2551e372fd44f5ac0baca8']
 let HW_Priority: boolean = true
-/**
- * CK1助力顺序
- * HW_Priority: boolean
- * true  HW.ts -> 内部
- * false 内部   -> HW.ts
- */
 process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
 !(async () => {
