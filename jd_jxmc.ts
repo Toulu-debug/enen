@@ -188,6 +188,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       await wait(3000)
     }
     console.log('任务列表结束')
+    await wait(2000)
 
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
@@ -217,7 +218,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           isqueryinviteicon: 1
         })
         for (let t of homePageInfo.data.petinfo) {
-          if (t.progress === '0') {
+          if (t.cangetborn === 1) {
             petid = t.petid
             break
           }
