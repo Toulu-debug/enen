@@ -93,11 +93,11 @@ async function getShareCodes() {
     let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxfactory/30`)
     console.log(`从助力池获取到30个:${JSON.stringify(data.data)}`)
     HELP_HW === 'true'
-      ? shareCodes = [...shareCodesInternal, ...HW_CODE, ...data.data]
-      : shareCodes = [...shareCodesInternal, ...data.data]
+      ? shareCodes = Array.from(new Set([...shareCodesInternal, ...HW_CODE, ...data.data]))
+      : shareCodes = Array.from(new Set([...shareCodesInternal, ...data.data]))
   } catch (e) {
     HELP_HW === 'true'
-      ? shareCodes = [...shareCodesInternal, ...HW_CODE]
-      : shareCodes = [...shareCodesInternal]
+      ? shareCodes = Array.from(new Set([...shareCodesInternal, ...HW_CODE]))
+      : shareCodes = Array.from(new Set([...shareCodesInternal]))
   }
 }
