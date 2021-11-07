@@ -42,8 +42,9 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     for (let code of shareCode) {
       console.log(`${UserName} 去助力 ${code}`)
       res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: code, type: 1})
-      console.log('助力', JSON.stringify(res))
       await wait(2000)
+      if (res.autosign_sendhb !== '0' || res.todaysign === 1)
+        break
     }
   }
 

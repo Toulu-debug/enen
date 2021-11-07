@@ -73,17 +73,17 @@ let message: string = '', sendNotify = require('./sendNotify').sendNotify
         if (t.assignmentType === 7) {
           console.log('开卡  pass')
         }
-
-        if (t.assignmentName === '邀请好友') {
-          inviteTaskId = t.encryptAssignmentId
-          console.log('助力码', t.ext.assistTaskDetail.itemId)
-          shareCodeSelf.push(t.ext.assistTaskDetail.itemId)
-          console.log('收到助力', t.completionCnt, '/', 30)
-          for (let j = 0; j < t.cardAssistBoxRest; j++) {
-            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
-            await wait(3000)
-            console.log('打开盒子', JSON.stringify(res))
-          }
+      }
+      if (t.assignmentName === '邀请好友') {
+        o2s(t)
+        inviteTaskId = t.encryptAssignmentId
+        console.log('助力码', t.ext.assistTaskDetail.itemId)
+        shareCodeSelf.push(t.ext.assistTaskDetail.itemId)
+        console.log('收到助力', t.completionCnt, '/', 30)
+        for (let j = 0; j < t.ext.cardAssistBoxRest; j++) {
+          res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId})
+          console.log('打开盒子', JSON.stringify(res))
+          await wait(3000)
         }
       }
     }

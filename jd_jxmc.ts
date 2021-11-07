@@ -143,6 +143,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
     } catch (e) {
     }
+    await wait(3000)
 
     // 红包
     res = await api('operservice/GetInviteStatus', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -170,6 +171,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     } else {
       console.log('没有获取到签到信息！')
     }
+    await wait(3000)
 
     // 登录领白菜
     res = await api('queryservice/GetVisitBackInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -179,6 +181,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('登录领白菜：', res.data.drawnum)
       }
     }
+    await wait(3000)
 
     console.log('任务列表开始')
     for (let j = 0; j < 30; j++) {
@@ -188,7 +191,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       await wait(3000)
     }
     console.log('任务列表结束')
-    await wait(2000)
+    await wait(3000)
 
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
@@ -274,6 +277,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
     }
   }
+  await wait(3000)
 
   for (let i = 0; i < cookiesArr.length; i++) {
     await getCodes()
