@@ -631,21 +631,24 @@ async function getExtraAward2() {
   await masterHelpTaskInitForFarm2();
   if ($.masterHelpResult2.code === '0') {
     peopleHelps = $.masterHelpResult2.assistFriendList
-	if (Array.isArray(peopleHelps) && peopleHelps.length !== 0) {
-      for (let i = 0; i < peopleHelps.length; i++) {
-		  helps = i+1;
-		  if (helps > 1 && Number.isInteger(helps/2)) {
+	status = $.masterHelpResult2.status
+	assistStageList = $.masterHelpResult2.assistStageList
+	if (status != '0') {
+	  for (let vo of assistStageList) {
+		  stageStaus = vo.stageStaus
+		  assistNum = vo.assistNum
+		  if (stageStaus == '2') {
 			  await masterGotFinishedTaskForFarm2()
 			  if ($.masterGotFinished2.code === '0') {
-				  console.log(`已成功领取${helps}个好友助力奖励：【${$.masterGotFinished2.amount}】g水`);
-				  message += `【${helps}个好友额外奖励】${$.masterGotFinished2.amount}g水领取成功\n`;
-			  } else {
-				  console.log(`已经领取过${helps}个好友助力额外奖励`);
-				  message += `【${helps}个好友助力额外奖励】已被领取过\n`;
+				  console.log(`已成功领取${assistNum}个好友助力奖励：【${$.masterGotFinished2.amount}】g水`);
+				  message += `【${assistNum}个好友额外奖励】${$.masterGotFinished2.amount}g水领取成功\n`;
 			  }
+		  } else if (stageStaus == '3') {
+			  console.log(`已经领取过${assistNum}个好友助力额外奖励`);
+			  message += `【${assistNum}个好友助力额外奖励】已被领取过\n`;
 		  }
 	  }
-    } else {
+	} else {
       console.log("助力好友少于2个");
       message += `【额外奖励】领取失败,原因：给您助力的人少于2个\n`;
     }
