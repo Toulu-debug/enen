@@ -153,6 +153,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       await makeShareCodesHb(res.data.sharekey)
     } catch (e: any) {
     }
+    await wait(3000)
 
     // 签到
     res = await api('queryservice/GetSignInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -207,7 +208,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
     await wait(3000)
 
-    console.log('food:', food, food >= 10)
     while (food >= 10) {
       res = await api('operservice/Feed', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
       if (res.ret === 0) {
