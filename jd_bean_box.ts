@@ -37,7 +37,7 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
     }
 
     uuid = randomString(40)
-    for (let j = 0; j < 4; j++) {
+    for (let j = 0; j < 2; j++) {
       console.log(`Round:${j + 1}`)
       res = await api('beanTaskList', {"viewChannel": "AppHome"})
       try {
