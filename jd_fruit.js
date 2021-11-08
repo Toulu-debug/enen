@@ -32,7 +32,7 @@ let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭
 let jdFruitBeanCard = false;//农场使用水滴换豆卡(如果出现限时活动时100g水换20豆,此时比浇水划算,推荐换豆),true表示换豆(不浇水),false表示不换豆(继续浇水),脚本默认是浇水
 let randomCount = $.isNode() ? 20 : 5;
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
-const newPrizeBody = {"version":14,"channel":1,"babelChannel":"120"};
+const newPrizeBody = {"version": 14, "channel": 1, "babelChannel": "120"};
 const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://h5.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html%22%20%7D`;
 !(async () => {
   await requireConfig();
@@ -631,24 +631,24 @@ async function getExtraAward2() {
   await masterHelpTaskInitForFarm2();
   if ($.masterHelpResult2.code === '0') {
     peopleHelps = $.masterHelpResult2.assistFriendList
-	status = $.masterHelpResult2.status
-	assistStageList = $.masterHelpResult2.assistStageList
-	if (status != '0') {
-	  for (let vo of assistStageList) {
-		  stageStaus = vo.stageStaus
-		  assistNum = vo.assistNum
-		  if (stageStaus == '2') {
-			  await masterGotFinishedTaskForFarm2()
-			  if ($.masterGotFinished2.code === '0') {
-				  console.log(`已成功领取${assistNum}个好友助力奖励：【${$.masterGotFinished2.amount}】g水`);
-				  message += `【${assistNum}个好友额外奖励】${$.masterGotFinished2.amount}g水领取成功\n`;
-			  }
-		  } else if (stageStaus == '3') {
-			  console.log(`已经领取过${assistNum}个好友助力额外奖励`);
-			  message += `【${assistNum}个好友助力额外奖励】已被领取过\n`;
-		  }
-	  }
-	} else {
+    status = $.masterHelpResult2.status
+    assistStageList = $.masterHelpResult2.assistStageList
+    if (status != '0') {
+      for (let vo of assistStageList) {
+        stageStaus = vo.stageStaus
+        assistNum = vo.assistNum
+        if (stageStaus == '2') {
+          await masterGotFinishedTaskForFarm2()
+          if ($.masterGotFinished2.code === '0') {
+            console.log(`已成功领取${assistNum}个好友助力奖励：【${$.masterGotFinished2.amount}】g水`);
+            message += `【${assistNum}个好友额外奖励】${$.masterGotFinished2.amount}g水领取成功\n`;
+          }
+        } else if (stageStaus == '3') {
+          console.log(`已经领取过${assistNum}个好友助力额外奖励`);
+          message += `【${assistNum}个好友助力额外奖励】已被领取过\n`;
+        }
+      }
+    } else {
       console.log("助力好友少于2个");
       message += `【额外奖励】领取失败,原因：给您助力的人少于2个\n`;
     }
@@ -1145,13 +1145,13 @@ async function masterHelpTaskInitForFarm() {
 //领取新的助力奖励
 async function masterGotFinishedTaskForFarm2() {
   const functionId = `receiveStageEnergy`;
-  $.masterGotFinished2 = await request(functionId,newPrizeBody);
+  $.masterGotFinished2 = await request(functionId, newPrizeBody);
 }
 
 //新的助力好友信息API
 async function masterHelpTaskInitForFarm2() {
   const functionId = `farmAssistInit`;
-  $.masterHelpResult2 = await request(functionId,newPrizeBody);
+  $.masterHelpResult2 = await request(functionId, newPrizeBody);
 }
 
 //接受对方邀请,成为对方好友的API
