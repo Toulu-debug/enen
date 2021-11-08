@@ -69,7 +69,6 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
     }
 
     // 抢京豆
-    /*
     res = await qjd('signBeanGroupStageIndex', {"monitor_refer": "", "rnVersion": "3.9", "fp": "-1", "shshshfp": "-1", "shshshfpa": "-1", "referUrl": "-1", "userAgent": "-1", "jda": "-1", "monitor_source": "bean_m_bean_index"})
     if (!res.data.shareCode) {
       console.log('抢京豆 init...')
@@ -80,7 +79,6 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
     console.log('助力码', res.data.shareCode)
     shareCodeSelf.push({shareCode: res.data.shareCode, groupCode: res.data.groupCode, activeId: res.data.jklInfo.keyId})
     await wait(2000)
-    */
   }
 
   console.log('内部助力', shareCodeSelf)
