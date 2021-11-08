@@ -25,6 +25,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     let coin: number = res.data.pgAmountTotal
     console.log('金币', coin)
 
+    /*
     res = await api('task/QueryUserTask', 'sceneval,taskType', {taskType: 0})
     let tasks: number[] = []
     if (res.datas) {
@@ -43,9 +44,11 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     console.log('tasks:', tasks)
     await wait(2000)
 
+     */
+
     res = await api('task/QueryPgTaskCfg', 'sceneval', {})
     for (let t of res.data.tasks) {
-      if (tasks.includes(t.taskId) && t.taskState === 1) {
+      // if (tasks.includes(t.taskId) && t.taskState === 1) {
         console.log(t.taskName)
         res = await api('task/drawUserTask', 'sceneval,taskid', {taskid: t.taskId})
         o2s(res)
@@ -53,7 +56,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
         res = await api('task/UserTaskFinish', 'sceneval,taskid', {taskid: t.taskId})
         o2s(res)
         await wait(2000)
-      }
+      // }
     }
 
     res = await api('active/LuckyTwistUserInfo', 'sceneval', {})
@@ -61,7 +64,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
     console.log('剩余抽奖次数', surplusTimes)
     for (let j = 0; j < surplusTimes && coin >= 10; j++) {
       res = await api('active/LuckyTwistDraw', 'active,activedesc,sceneval', {active: 'rwjs_fk1111', activedesc: encodeURIComponent('幸运扭蛋机抽奖')})
-      console.log('抽奖成功', res.data?.prize[0]?.prizename || JSON.stringify(res))
+      console.log('抽奖成功', res.data)
       coin -= 10
       await wait(5000)
     }

@@ -62,8 +62,8 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
     try {
       res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
-      let rili: number = res.riliremind_task.status
       /*
+      let rili: number = res.riliremind_task.status
         "riliremind_task":
         {
             "domax": 0,
@@ -81,8 +81,18 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
             "taskname": "",
             "url": ""
         }
-      */
       console.log(res.riliremind_task.getmoney)
+
+      // 日历
+      if (rili === 1) {
+        res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=rili_remind&signhb_source=5&ispp=0&sqactive=&tk=&_stk=ispp%2Csignhb_source%2Csqactive%2Ctask%2Ctk&_ste=1&_=${Date.now()}&sceneval=2`, 'ispp,signhb_source,sqactive,task,tk')
+        if (res.ret === 0) {
+          console.log('日历任务完成')
+        } else {
+          console.log('日历任务失败', res)
+        }
+      }
+      */
       for (let t of res.commontask) {
         if (t.status === 1) {
           console.log(t.taskname)
@@ -96,17 +106,6 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
         }
       }
 
-      // 日历
-      /*
-      if (rili === 1) {
-        res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=rili_remind&signhb_source=5&ispp=0&sqactive=&tk=&_stk=ispp%2Csignhb_source%2Csqactive%2Ctask%2Ctk&_ste=1&_=${Date.now()}&sceneval=2`, 'ispp,signhb_source,sqactive,task,tk')
-        if (res.ret === 0) {
-          console.log('日历任务完成')
-        } else {
-          console.log('日历任务失败', res)
-        }
-      }
-      */
       res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
       if (res.baoxiang_left != 0) {
         console.log(res.baoxiang_stage)
