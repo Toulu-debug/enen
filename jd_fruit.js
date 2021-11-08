@@ -32,6 +32,7 @@ let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭
 let jdFruitBeanCard = false;//农场使用水滴换豆卡(如果出现限时活动时100g水换20豆,此时比浇水划算,推荐换豆),true表示换豆(不浇水),false表示不换豆(继续浇水),脚本默认是浇水
 let randomCount = $.isNode() ? 20 : 5;
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
+const newPrizeBody = {"version":14,"channel":1,"babelChannel":"120"};
 const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://h5.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html%22%20%7D`;
 !(async () => {
   await requireConfig();
@@ -232,6 +233,7 @@ async function doDailyTask() {
   await clockInIn();//打卡领水
   await executeWaterRains();//水滴雨
   await getExtraAward();//领取额外水滴奖励
+  await getExtraAward2();//新的助力奖励
   await turntableFarm()//天天抽奖得好礼
 }
 
@@ -624,6 +626,50 @@ async function getExtraAward() {
   }
 }
 
+//领取新的助力奖励
+async function getExtraAward2() {
+  await masterHelpTaskInitForFarm2();
+  if ($.masterHelpResult2.code === '0') {
+    peopleHelps = $.masterHelpResult2.assistFriendList
+	status = $.masterHelpResult2.status
+	assistStageList = $.masterHelpResult2.assistStageList
+	if (status != '0') {
+	  for (let vo of assistStageList) {
+		  stageStaus = vo.stageStaus
+		  assistNum = vo.assistNum
+		  if (stageStaus == '2') {
+			  await masterGotFinishedTaskForFarm2()
+			  if ($.masterGotFinished2.code === '0') {
+				  console.log(`已成功领取${assistNum}个好友助力奖励：【${$.masterGotFinished2.amount}】g水`);
+				  message += `【${assistNum}个好友额外奖励】${$.masterGotFinished2.amount}g水领取成功\n`;
+			  }
+		  } else if (stageStaus == '3') {
+			  console.log(`已经领取过${assistNum}个好友助力额外奖励`);
+			  message += `【${assistNum}个好友助力额外奖励】已被领取过\n`;
+		  }
+	  }
+	} else {
+      console.log("助力好友少于2个");
+      message += `【额外奖励】领取失败,原因：给您助力的人少于2个\n`;
+    }
+    if (Array.isArray(peopleHelps) && peopleHelps.length !== 0) {
+      let str = '';
+      peopleHelps.map((item, index) => {
+        if (index === (peopleHelps.length - 1)) {
+          str += item.nickName || "匿名用户";
+        } else {
+          str += (item.nickName || "匿名用户") + ',';
+        }
+        let date = new Date(item.time);
+        let time = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getMinutes();
+        console.log(`\n京东昵称【${item.nickName || "匿名用户"}】 在 ${time} 给您助过力\n`);
+      })
+      message += `【助力您的好友】${str}\n`;
+    }
+    console.log('领取额外奖励水滴结束\n');
+  }
+}
+
 //助力好友
 async function masterHelpShare() {
   console.log('开始助力好友')
@@ -703,7 +749,7 @@ async function executeWaterRains() {
       if (Date.now() < ($.farmTask.waterRainInit.lastTime + 3 * 60 * 60 * 1000)) {
         executeWaterRain = false;
         // message += `【第${$.farmTask.waterRainInit.winTimes + 1}次水滴雨】未到时间，请${new Date($.farmTask.waterRainInit.lastTime + 3 * 60 * 60 * 1000).toLocaleTimeString()}再试\n`;
-        console.log(`\`【第${$.farmTask.waterRainInit.winTimes + 1}次水滴雨】未到时间，请${new Date($.farmTask.waterRainInit.lastTime + 3 * 60 * 60 * 1000).toLocaleTimeString()}再试\n`);
+        console.log(`\【第${$.farmTask.waterRainInit.winTimes + 1}次水滴雨】未到时间，请${new Date($.farmTask.waterRainInit.lastTime + 3 * 60 * 60 * 1000).toLocaleTimeString()}再试\n`);
       }
     }
     if (executeWaterRain) {
@@ -1095,6 +1141,19 @@ async function masterHelpTaskInitForFarm() {
   $.masterHelpResult = await request(functionId);
 }
 
+
+//领取新的助力奖励
+async function masterGotFinishedTaskForFarm2() {
+  const functionId = `receiveStageEnergy`;
+  $.masterGotFinished2 = await request(functionId,newPrizeBody);
+}
+
+//新的助力好友信息API
+async function masterHelpTaskInitForFarm2() {
+  const functionId = `farmAssistInit`;
+  $.masterHelpResult2 = await request(functionId,newPrizeBody);
+}
+
 //接受对方邀请,成为对方好友的API
 async function inviteFriend() {
   $.inviteFriendRes = await request(`initForFarm`, {
@@ -1220,7 +1279,7 @@ async function initForFarm() {
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-site",
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;10.2.2;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
         "Content-Type": "application/x-www-form-urlencoded"
       },
       timeout: 10000,
@@ -1423,7 +1482,7 @@ function taskUrl(function_id, body = {}) {
     url: `${JD_API_HOST}?functionId=${function_id}&appid=wh5&body=${escape(JSON.stringify(body))}`,
     headers: {
       Cookie: cookie,
-      UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+      UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;10.2.2;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
     },
     timeout: 10000,
   }
