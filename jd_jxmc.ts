@@ -79,7 +79,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     // 助农
     let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
     for (let t of tasks.data.userTaskStatusList) {
-      if (t.awardStatus === 2 && t.taskName !== '邀请牧场新用户助力') {
+      if (t.awardStatus === 2 && t.taskName !== '邀请牧场新用户助力' && t.taskName !== '拆开邀人红包') {
         console.log(t.taskName)
         if (t.completedTimes < t.targetTimes) {
           for (let j = t.completedTimes; j < t.targetTimes; j++) {
@@ -183,17 +183,17 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
     }
     await wait(3000)
-
-    console.log('任务列表开始')
-    for (let j = 0; j < 30; j++) {
-      if (await getTask() === 0) {
-        break
-      }
-      await wait(3000)
-    }
-    console.log('任务列表结束')
-    await wait(3000)
-
+    /*
+        console.log('任务列表开始')
+        for (let j = 0; j < 30; j++) {
+          if (await getTask() === 0) {
+            break
+          }
+          await wait(3000)
+        }
+        console.log('任务列表结束')
+        await wait(3000)
+    */
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
@@ -390,11 +390,11 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
   let url: string
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
     if (temporary)
-      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc_zanaixin&bizCode=jxmc_zanaixin&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
+      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc_zanaixin&bizCode=jxmc_zanaixin&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
     else
-      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
+      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
   } else {
-    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now() + 2}&sceneval=2`, stk, params, 10028)
+    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now() + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
   }
   try {
     let {data}: any = await axios.get(url, {
@@ -406,7 +406,7 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
       }
     })
     if (typeof data === 'string')
-      return JSON.parse(data.replace(/jsonpCBK.?\(/, '').split('\n')[0])
+      return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
     return data
   } catch (e: any) {
     console.log('api Error:', e)
