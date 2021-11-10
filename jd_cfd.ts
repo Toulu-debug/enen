@@ -167,7 +167,6 @@ interface Params {
     // 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard, isUsing: boolean = res.cardInfo.dwWorkingType !== 0
-
     for (let card of coincard) {
       if (!isUsing && card.dwCardNums !== 0) {
         res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 1, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
@@ -176,6 +175,7 @@ interface Params {
           isUsing = true
         } else {
           console.log('金币加速卡使用失败', res)
+          break
         }
       } else {
         break
@@ -190,6 +190,7 @@ interface Params {
             isUsing = true
           } else {
             console.log('点券加速卡使用失败', res)
+            break
           }
           await wait(2000)
         }
@@ -580,7 +581,7 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
     }
     url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
   } else {
-    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=7155.9.47&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
   }
   url = h5st(url, stk, params, 10032)
   let {data} = await axios.get(url, {
@@ -598,8 +599,9 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
       console.log(data)
       return ''
     }
-  } else
+  } else {
     return data
+  }
 }
 
 async function task() {

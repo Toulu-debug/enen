@@ -8,7 +8,7 @@ import USER_AGENT, {getshareCodeHW, o2s, randomString, requireConfig, wait} from
 
 let cookie: string = '', res: any = '', UserName: string, index: number, uuid: string
 let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[] = []
-let activityId: number, encryptProjectId: string, inviteTaskId: string;
+let activityId: number, encryptProjectId: string, inviteTaskId: string, isOpen: boolean = false;
 let message: string = '', sendNotify = require('./sendNotify').sendNotify
 
 !(async () => {
@@ -23,6 +23,7 @@ let message: string = '', sendNotify = require('./sendNotify').sendNotify
       res = await api('showSecondFloorCardInfo', {"source": "card"})
       activityId = res.data.result.activityBaseInfo.activityId
       encryptProjectId = res.data.result.activityBaseInfo.encryptProjectId
+      isOpen = true
 
       // 已收集
       console.log('已收集')
@@ -30,8 +31,8 @@ let message: string = '', sendNotify = require('./sendNotify').sendNotify
         console.log(`card-${card.cardType}`, card.num, card.num === 0 ? "!!!" : "")
       }
     } catch (e) {
-      console.log(e)
-      continue
+      console.log('活动未开启')
+      break
     }
 
     let activityCardInfo: any = res.data.result.activityCardInfo
@@ -93,29 +94,31 @@ let message: string = '', sendNotify = require('./sendNotify').sendNotify
     await sendNotify("特物瓜分", message)
   }
 
-  console.log('内部助力', shareCodeSelf)
-  if (shareCodeHW.length === 0) {
-    shareCodeHW = await getshareCodeHW('tw')
-  }
-  shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
+  if (isOpen) {
+    console.log('内部助力', shareCodeSelf)
+    if (shareCodeHW.length === 0) {
+      shareCodeHW = await getshareCodeHW('tw')
+    }
+    shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
 
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
-    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    for (let code of shareCode) {
-      console.log(`账号 ${UserName} 去助力 ${code}`)
-      res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": inviteTaskId, "assignmentType": 2, "itemId": code, "actionType": 0})
-      if (res.data.bizCode === '0') {
-        console.log('成功')
-      } else if (res.data.bizCode === '104') {
-        console.log('已助力过')
-      } else if (res.data.bizCode === '109') {
-        console.log('不能自己给自己助力')
-      } else {
-        console.log('助力失败', res.data.bizMsg)
+    for (let i = 0; i < cookiesArr.length; i++) {
+      cookie = cookiesArr[i]
+      UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+      for (let code of shareCode) {
+        console.log(`账号 ${UserName} 去助力 ${code}`)
+        res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": inviteTaskId, "assignmentType": 2, "itemId": code, "actionType": 0})
+        if (res.data.bizCode === '0') {
+          console.log('成功')
+        } else if (res.data.bizCode === '104') {
+          console.log('已助力过')
+        } else if (res.data.bizCode === '109') {
+          console.log('不能自己给自己助力')
+        } else {
+          console.log('助力失败', res.data.bizMsg)
+          await wait(2000)
+        }
         await wait(2000)
       }
-      await wait(2000)
     }
   }
 })()

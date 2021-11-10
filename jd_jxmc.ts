@@ -54,10 +54,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       continue
     }
 
-    let food: number, petid: string, coins: number
+    let food: number, petid: string, coins: number, petNum: number
     try {
       food = homePageInfo.data.materialinfo[0].value
       petid = homePageInfo.data.petinfo[0].petid
+      petNum = homePageInfo.data.petinfo.length
       coins = homePageInfo.data.coins
     } catch (e: any) {
       console.log('初始化出错，手动去app')
@@ -75,6 +76,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     console.log('草草🌿', food)
     console.log('蛋蛋🥚', homePageInfo.data.eggcnt)
     console.log('钱钱💰', coins)
+    console.log('鸡鸡🐔', petNum)
 
     // 助农
     let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
@@ -134,7 +136,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     try {
       for (let card of res.data.cardinfo) {
         console.log(`card ${card.cardtype}`, card.currnum, '/', card.neednum)
-        if (card.currnum >= card.neednum) {
+        if (card.currnum >= card.neednum && petNum < 6) {
           console.log('可以兑换')
           res = await api('operservice/Combine', 'activeid,activekey,cardtype,channel,jxmc_jstoken,phoneid,sceneid,timestamp', {cardtype: card.cardtype})
           res.ret === 0 ? console.log('兑换成功') : ''
@@ -183,17 +185,17 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
     }
     await wait(3000)
-    /*
-        console.log('任务列表开始')
-        for (let j = 0; j < 30; j++) {
-          if (await getTask() === 0) {
-            break
-          }
-          await wait(3000)
-        }
-        console.log('任务列表结束')
-        await wait(3000)
-    */
+
+    console.log('任务列表开始')
+    for (let j = 0; j < 30; j++) {
+      if (await getTask() === 0) {
+        break
+      }
+      await wait(3000)
+    }
+    console.log('任务列表结束')
+    await wait(3000)
+
     while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
