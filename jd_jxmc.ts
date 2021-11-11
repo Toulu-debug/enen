@@ -7,7 +7,7 @@ import axios from 'axios'
 import {Md5} from "ts-md5"
 import * as path from 'path'
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString, o2s} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, randomString, o2s} from './TS_USER_AGENTS'
 
 const token = require('./utils/jd_jxmc.js').token
 
@@ -36,6 +36,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     jxToken = await token(cookie)
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
+    await wait(5000)
     if (homePageInfo.data.maintaskId !== 'pause') {
       console.log('init...')
       for (let j = 0; j < 20; j++) {
@@ -54,10 +55,14 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       continue
     }
 
-    let food: number, petid: string, coins: number, petNum: number
+    let food: number = 0, petid: string = '', coins: number = 0, petNum: number = 0, petids: string[] = []
     try {
       food = homePageInfo.data.materialinfo[0].value
       petid = homePageInfo.data.petinfo[0].petid
+      petids = homePageInfo.data.petinfo.map(pet => {
+        return pet.petid
+      })
+      await wait(20000)
       petNum = homePageInfo.data.petinfo.length
       coins = homePageInfo.data.coins
     } catch (e: any) {
@@ -77,9 +82,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     console.log('蛋蛋🥚', homePageInfo.data.eggcnt)
     console.log('钱钱💰', coins)
     console.log('鸡鸡🐔', petNum)
+    await wait(5000)
 
     // 助农
     let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
+    await wait(2000)
     for (let t of tasks.data.userTaskStatusList) {
       if (t.awardStatus === 2 && t.taskName !== '邀请牧场新用户助力' && t.taskName !== '拆开邀人红包') {
         console.log(t.taskName)
@@ -92,7 +99,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
               console.log('任务失败')
               break
             }
-            await wait(5000)
+            await wait(6000)
           }
         } else {
           res = await api('Award', 'bizCode,source,taskId', {taskId: t.taskId}, true)
@@ -102,19 +109,20 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
             console.log('领奖失败')
             break
           }
-          await wait(2000)
+          await wait(4000)
         }
       }
     }
+    await wait(5000)
 
     // 扭蛋机
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+    await wait(5000)
     let drawTimes = res.data.times
     if (typeof drawTimes === "undefined") {
       await sendNotify("牧场扭蛋机错误", `账号${i + 1} ${UserName}\n手动建造扭蛋机`)
     } else {
       console.log('扭蛋机剩余次数:', drawTimes)
-      await wait(1000)
       for (let j = 0; j < drawTimes; j++) {
         res = await api('operservice/DrawCard', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
         if (res.ret === 0) {
@@ -125,13 +133,14 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           } else {
             console.log('抽奖成功，其他：', res)
           }
-          await wait(4000)
+          await wait(8000)
         } else {
           console.log('抽奖失败:', res)
           break
         }
       }
     }
+
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
     try {
       for (let card of res.data.cardinfo) {
@@ -140,12 +149,12 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           console.log('可以兑换')
           res = await api('operservice/Combine', 'activeid,activekey,cardtype,channel,jxmc_jstoken,phoneid,sceneid,timestamp', {cardtype: card.cardtype})
           res.ret === 0 ? console.log('兑换成功') : ''
-          await wait(2000)
+          await wait(4000)
         }
       }
     } catch (e) {
     }
-    await wait(3000)
+    await wait(5000)
 
     // 红包
     res = await api('operservice/GetInviteStatus', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -155,7 +164,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       await makeShareCodesHb(res.data.sharekey)
     } catch (e: any) {
     }
-    await wait(3000)
+    await wait(5000)
 
     // 签到
     res = await api('queryservice/GetSignInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -174,29 +183,32 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     } else {
       console.log('没有获取到签到信息！')
     }
-    await wait(3000)
+    await wait(5000)
 
     // 登录领白菜
     res = await api('queryservice/GetVisitBackInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
+    await wait(5000)
     if (res.iscandraw === 1) {
       res = await api('operservice/GetVisitBackCabbage', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
       if (res.ret === 0) {
         console.log('登录领白菜：', res.data.drawnum)
       }
     }
-    await wait(3000)
+    await wait(5000)
 
-    console.log('任务列表开始')
-    for (let j = 0; j < 30; j++) {
-      if (await getTask() === 0) {
-        break
-      }
-      await wait(3000)
-    }
-    console.log('任务列表结束')
-    await wait(3000)
+    // console.log('任务列表开始')
+    // for (let j = 0; j < 30; j++) {
+    //   if (await getTask() === 0) {
+    //     break
+    //   }
+    //   await wait(4000)
+    // }
+    // console.log('任务列表结束')
+    // await wait(5000)
 
-    while (coins >= 5000 && food <= 500) {
+    while (coins >= 5000) {
+      console.log('buy...')
+      await wait(10000)
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
         console.log('买草成功:', res.data.newnum)
@@ -208,12 +220,13 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
       await wait(5000)
     }
-    await wait(3000)
+    await wait(5000)
 
+    console.log('草草🌿', food)
     while (food >= 10) {
+      food -= 10
       res = await api('operservice/Feed', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
       if (res.ret === 0) {
-        food -= 10
         console.log('剩余草:', res.data.newnum)
       } else if (res.ret === 2020) {
         console.log('收🥚')
@@ -242,9 +255,9 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('Feed未知错误:', res)
         break
       }
-      await wait(6000)
+      await wait(4000)
     }
-    await wait(3000)
+    await wait(5000)
 
     while (1) {
       try {
@@ -266,26 +279,22 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     while (1) {
       try {
-        res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,petid,phoneid,sceneid,timestamp,type', {
-          type: '1',
-          petid: petid
-        })
+        res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,petid,phoneid,sceneid,timestamp,type', {type: '1', petid: petids[Math.floor((Math.random() * petids.length))]})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
-        await wait(5000)
+        await wait(4000)
       } catch (e: any) {
         console.log('Error:', e)
         break
       }
     }
   }
-  await wait(3000)
+  await wait(5000)
 
   for (let i = 0; i < cookiesArr.length; i++) {
     await getCodes()
     // 获取随机红包码
     try {
-      resetHosts()
       let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmchb/30`, {timeout: 10000})
       console.log('获取到30个随机红包码:', data.data)
       shareCodes = Array.from(new Set([...shareCodesHbSelf, ...shareCodesHbHw, ...data.data]))
@@ -396,7 +405,7 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
     else
       url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
   } else {
-    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now() + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
+    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
   }
   try {
     let {data}: any = await axios.get(url, {
