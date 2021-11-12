@@ -182,7 +182,7 @@ if (process.env.appToken) {
  * @param author 作者仓库等信息  例：`本脚本免费使用 By：xxxx`
  * @returns {Promise<unknown>}
  */
-async function sendNotify(text, desp, params = {}, author = `\n\nJDHelloWorld.ts\n${format(Date.now(), "yyyy-MM-dd")}`) {
+async function sendNotify(text, desp, params = {}, author = `\n\nJDHelloWorld.ts\n${format(Date.now(), "yyyy-MM-dd HH:mm:ss")}`) {
   //提供6种通知
   let remarks = '';
   try {
