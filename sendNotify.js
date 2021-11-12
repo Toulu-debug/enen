@@ -8,6 +8,7 @@
  */
 const querystring = require("querystring");
 const fs = require('fs');
+const {format} = require("date-fns");
 const $ = new Env();
 const timeout = 15000;//超时时间(单位毫秒)
 // =======================================微信server酱通知设置区域===========================================
@@ -181,7 +182,7 @@ if (process.env.appToken) {
  * @param author 作者仓库等信息  例：`本脚本免费使用 By：xxxx`
  * @returns {Promise<unknown>}
  */
-async function sendNotify(text, desp, params = {}, author = '\n\nJDHelloWorld.ts') {
+async function sendNotify(text, desp, params = {}, author = `\n\nJDHelloWorld.ts\n${format(Date.now(), "yyyy-MM-dd")}`) {
   //提供6种通知
   let remarks = '';
   try {
