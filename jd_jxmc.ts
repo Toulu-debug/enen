@@ -196,18 +196,17 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
     await wait(5000)
 
-    // console.log('任务列表开始')
-    // for (let j = 0; j < 30; j++) {
-    //   if (await getTask() === 0) {
-    //     break
-    //   }
-    //   await wait(4000)
-    // }
-    // console.log('任务列表结束')
-    // await wait(5000)
+    console.log('任务列表开始')
+    for (let j = 0; j < 30; j++) {
+      if (await getTask() === 0) {
+        break
+      }
+      await wait(4000)
+    }
+    console.log('任务列表结束')
+    await wait(5000)
 
     while (coins >= 5000) {
-      console.log('buy...')
       await wait(10000)
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
@@ -222,7 +221,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
     await wait(5000)
 
-    console.log('草草🌿', food)
     while (food >= 10) {
       food -= 10
       res = await api('operservice/Feed', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -255,10 +253,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('Feed未知错误:', res)
         break
       }
-      await wait(4000)
+      await wait(6000)
     }
-    await wait(5000)
+    await wait(8000)
 
+    console.log('除草...start')
     while (1) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '2'})
@@ -271,7 +270,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           await wait(5000)
         }
       } catch (e: any) {
-        console.log('Error:', e)
+        console.log('Error:', e.response.status)
         break
       }
     }
