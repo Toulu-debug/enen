@@ -47,15 +47,15 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[
      */
 
     res = await api('task/QueryPgTaskCfg', 'sceneval', {})
+
     for (let t of res.data.tasks) {
       // if (tasks.includes(t.taskId) && t.taskState === 1) {
-        console.log(t.taskName)
-        res = await api('task/drawUserTask', 'sceneval,taskid', {taskid: t.taskId})
-        o2s(res)
-        await wait(1000)
-        res = await api('task/UserTaskFinish', 'sceneval,taskid', {taskid: t.taskId})
-        o2s(res)
-        await wait(2000)
+      console.log(t.taskName)
+      res = await api('task/drawUserTask', 'sceneval,taskid', {taskid: t.taskId})
+      await wait(t.param7 * 1000 + 1000)
+      res = await api('task/UserTaskFinish', 'sceneval,taskid', {taskid: t.taskId})
+      o2s(res)
+      await wait(2000)
       // }
     }
 
