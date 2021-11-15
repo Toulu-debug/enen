@@ -40,6 +40,7 @@ let cookie: string = '', res: any = '', message: string = '';
   let keywords: string[] = ['KFC', 'kfc', '肯德基', '沃尔玛']
   for (let t of res.data.commodityList) {
     let name: string = t.name
+    console.log(name)
     for (let keyword of keywords) {
       if (name.indexOf(keyword) > -1) {
         await sendNotify("京喜工厂", name)
