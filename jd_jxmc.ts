@@ -238,7 +238,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
             break
           }
         }
-        res = await api('operservice/GetSelfResult', 'activeid,activekey,channel,itemid,jxmc_jstoken,phoneid,sceneid,timestamp,type', {itemid: petids[Math.floor((Math.random() * petids.length))], type: '11'})
+        res = await api('operservice/GetSelfResult', 'activeid,activekey,channel,itemid,jxmc_jstoken,phoneid,sceneid,timestamp,type', {itemid: petid, type: '11'})
         if (res.ret === 0) {
           console.log('收🥚成功:', res.data.newnum)
         } else {
