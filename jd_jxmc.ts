@@ -207,7 +207,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     await wait(5000)
 
     while (coins >= 5000) {
-      await wait(10000)
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
         console.log('买草成功:', res.data.newnum)
@@ -217,9 +216,9 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log(res)
         break
       }
-      await wait(5000)
+      await wait(8000)
     }
-    await wait(5000)
+    await wait(6000)
 
     while (food >= 10) {
       food -= 10
@@ -239,7 +238,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
             break
           }
         }
-        res = await api('operservice/GetSelfResult', 'activeid,activekey,channel,itemid,jxmc_jstoken,phoneid,sceneid,timestamp,type', {itemid: petid, type: '11'})
+        res = await api('operservice/GetSelfResult', 'activeid,activekey,channel,itemid,jxmc_jstoken,phoneid,sceneid,timestamp,type', {itemid: petids[Math.floor((Math.random() * petids.length))], type: '11'})
         if (res.ret === 0) {
           console.log('收🥚成功:', res.data.newnum)
         } else {
@@ -253,7 +252,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('Feed未知错误:', res)
         break
       }
-      await wait(6000)
+      await wait(7000)
     }
     await wait(8000)
 
@@ -270,20 +269,20 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           await wait(5000)
         }
       } catch (e: any) {
-        console.log('Error:', e.response.status)
+        console.log('除草 Error:', e)
         break
       }
     }
-    await wait(5000)
+    await wait(6000)
 
     while (1) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,petid,phoneid,sceneid,timestamp,type', {type: '1', petid: petids[Math.floor((Math.random() * petids.length))]})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
-        await wait(4000)
+        await wait(6000)
       } catch (e: any) {
-        console.log('Error:', e)
+        console.log('挑逗 Error:', e)
         break
       }
     }
@@ -419,7 +418,6 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
       return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
     return data
   } catch (e: any) {
-    console.log('api Error:', e)
     return {}
   }
 }

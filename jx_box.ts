@@ -94,7 +94,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
         }
       }
       */
-      for (let t of res.commontask) {
+      for (let t of res.commontask || []) {
         if (t.status === 1) {
           console.log(t.taskname)
           res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=${t.task}&signhb_source=5&_=${Date.now()}&sceneval=2`, '')
