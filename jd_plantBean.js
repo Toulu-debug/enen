@@ -131,10 +131,8 @@ function runTimes(){
         console.log('上报失败', err)
         reject(err)
       } else {
-        if (data === '1' || data === '0') {
-          console.log('上报成功')
-          resolve()
-        }
+        console.log(data)
+        resolve()
       }
     })
   })
