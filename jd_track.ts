@@ -6,20 +6,20 @@
 import axios from "axios"
 import * as path from "path"
 import {sendNotify} from './sendNotify'
-import {accessSync, readFileSync, writeFileSync} from "fs"
+import {existsSync, readFileSync, writeFileSync} from "fs"
 import {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
+import {execSync} from "child_process";
 
 let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
   let except: string[] = exceptCookie(path.basename(__filename))
-  let orders: any
-  try {
-    accessSync('./json/jd_track.json')
+  let orders: any = {}
+  if (existsSync('./json')) {
     orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
-  } catch (e) {
-    orders = {}
+  } else {
+    execSync('mkdir json')
   }
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]

@@ -6,7 +6,7 @@
 
 import {subDays, format, getTime} from "date-fns";
 import axios from "axios";
-import USER_AGENT, {requireConfig, wait} from "./test/TS_USER_AGENTS";
+import USER_AGENT, {requireConfig, wait} from "./TS_USER_AGENTS";
 
 const PrettyTable = require('prettytable');
 

@@ -2219,16 +2219,6 @@ function userInfo() {
               $.productionId = production.productionId;//商品ID
               $.commodityDimId = production.commodityDimId;
               $.encryptPin = data.user.encryptPin;
-              for (let k = 0; k < 5; k++) {
-                try {
-                  await runTimes()
-                  console.log('ok')
-                  break
-                } catch (e) {
-                }
-                await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
-              }
-
               await GetCommodityDetails();//获取已选购的商品信息
               if (productionStage['productionStageAwardStatus'] === 1) {
                 $.log(`可以开红包了\n`);
@@ -2285,22 +2275,6 @@ function userInfo() {
         $.logErr(e, resp)
       } finally {
         resolve();
-      }
-    })
-  })
-}
-
-function runTimes() {
-  return new Promise((resolve, reject) => {
-    $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=jxfactory&sharecode=${$.encryptPin}`
-    }, (err, resp, data) => {
-      if (err) {
-        console.log('上报失败', err)
-        reject(err)
-      } else {
-        console.log(data)
-        resolve()
       }
     })
   })
