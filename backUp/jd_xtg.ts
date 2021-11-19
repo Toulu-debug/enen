@@ -1,5 +1,5 @@
 import axios from 'axios';
-import USER_AGENT, {requireConfig, wait, requestAlgo} from './TS_USER_AGENTS';
+import USER_AGENT, {requireConfig, wait, requestAlgo} from '../TS_USER_AGENTS';
 
 let cookie: string = '', res: any = '', UserName: string, index: number;
 let shareCodes: string[] = [], shareCodesSelf: string[] = [];
