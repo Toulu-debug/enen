@@ -1,5 +1,5 @@
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
 
 let cookie: string = '', res: any = '', UserName: string, index: number
@@ -22,10 +22,9 @@ let cookie: string = '', res: any = '', UserName: string, index: number
       await wait(1000)
       for (let t of tasks.content) {
         if (t.status === 1) {
-          res = await taskApi('saveTaskRecord', {"taskId": t.taskId, "taskType": t.taskType})
-          console.log(res.content.uid, res.content.tt + '')
+          res = await taskApi('saveTaskRecord', {taskId: t.taskId, taskType: t.taskType, businessId: t.businessId})
           await wait(t.watchTime * 1000 + 500)
-          res = await taskApi('saveTaskRecord', {"taskId": t.taskId, "taskType": t.taskType, uid: res.content.uid, tt: res.content.tt})
+          res = await taskApi('saveTaskRecord', {taskId: t.taskId, taskType: t.taskType, businessId: t.businessId, uid: res.content.uid, tt: res.content.tt})
           console.log(res.content.msg)
           await wait(2000)
         }
@@ -51,7 +50,7 @@ async function taskApi(fn: string, body: object) {
   let {data} = await axios.post(`https://ifanli.m.jd.com/rebateapi/task/${fn}`, JSON.stringify(body), {
     headers: {
       'authority': 'ifanli.m.jd.com',
-      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+      'user-agent': USER_AGENT,
       'content-type': 'application/json;charset=UTF-8',
       'accept': 'application/json, text/plain, */*',
       'origin': 'https://ifanli.m.jd.com',

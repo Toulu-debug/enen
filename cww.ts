@@ -90,9 +90,9 @@ async function api(fn: string, taskType?: string) {
 async function beforeTask(fn: string, linkAddr: string) {
   let lkt: number = Date.now()
   let lks: string = Md5.hashStr('' + invokeKey + lkt)
-  let {data} = await axios.post(`https://draw.jdfcloud.com//common/pet/icon/click?iconCode=${fn}&linkAddr=${linkAddr}&reqSource=weapp&invokeKey=${invokeKey}`, {
+  let {data} = await axios.post(`https://draw.jdfcloud.com//common/pet/icon/click?iconCode=${fn}&linkAddr=${linkAddr}&reqSource=weapp&invokeKey=${invokeKey}`, '', {
     headers: {
-      'lkt': lkt,
+      'lkt': lkt.toString(),
       'lks': lks,
       'Host': 'draw.jdfcloud.com',
       'content-type': 'application/json',
@@ -107,9 +107,9 @@ async function beforeTask(fn: string, linkAddr: string) {
 async function doTask(fn: string, body: object | string) {
   let lkt: number = Date.now()
   let lks: string = Md5.hashStr('' + invokeKey + lkt)
-  let {data} = await axios.post(`https://draw.jdfcloud.com//common/pet/${fn}?reqSource=weapp&invokeKey=${invokeKey}`, {
+  let {data} = await axios.post(`https://draw.jdfcloud.com//common/pet/${fn}?reqSource=weapp&invokeKey=${invokeKey}`, typeof body === 'object' ? JSON.stringify(body) : body, {
     headers: {
-      'lkt': lkt,
+      'lkt': lkt.toString(),
       'lks': lks,
       'Host': 'draw.jdfcloud.com',
       'content-type': fn === 'followGood' || fn === 'followShop' ? 'application/x-www-form-urlencoded' : 'application/json',
@@ -117,7 +117,6 @@ async function doTask(fn: string, body: object | string) {
       'Referer': 'https://servicewechat.com/wxccb5c536b0ecd1bf/770/page-frame.html',
       'Cookie': cookie
     },
-    body: typeof body === 'object' ? JSON.stringify(body) : body
   })
   return data
 }
