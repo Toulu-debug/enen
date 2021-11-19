@@ -17,9 +17,8 @@ let cookie: string = '', res: any = '', UserName: string, index: number
     let finishCount: number = res.content.finishCount, maxTaskCount: number = res.content.maxTaskCount
     console.log(finishCount, '/', maxTaskCount)
 
-    for (let j = 0; j < 1; j++) {
+    for (let j = 0; j < maxTaskCount - finishCount; j++) {
       let tasks: any = await api('getTaskList')
-      o2s(tasks)
       await wait(1000)
       for (let t of tasks.content) {
         if (t.status === 1) {
