@@ -17,15 +17,17 @@ let cookie: string = '', res: any = '', UserName: string, index: number
     let finishCount: number = res.content.finishCount, maxTaskCount: number = res.content.maxTaskCount
     console.log(finishCount, '/', maxTaskCount)
 
-    for (let j = 0; j < maxTaskCount - finishCount; j++) {
+    for (let j = 0; j < 1; j++) {
       let tasks: any = await api('getTaskList')
+      o2s(tasks)
       await wait(1000)
       for (let t of tasks.content) {
         if (t.status === 1) {
           res = await taskApi('saveTaskRecord', {taskId: t.taskId, taskType: t.taskType, businessId: t.businessId})
+          o2s(res)
           await wait(t.watchTime * 1000 + 500)
           res = await taskApi('saveTaskRecord', {taskId: t.taskId, taskType: t.taskType, businessId: t.businessId, uid: res.content.uid, tt: res.content.tt})
-          console.log(res.content.msg)
+          o2s(res)
           await wait(2000)
         }
       }
