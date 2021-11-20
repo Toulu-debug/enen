@@ -68,13 +68,15 @@ let cookie: string = '', res: any = '', UserName: string, index: number, invokeK
           break
         }
       }
-      // res = await api('pet/combat/detail/v2')
-      // o2s(res)
     } else if (res.data.petRaceResult === 'participate') {
       console.log('比赛中......')
       for (let user of res.data.raceUsers) {
         console.log(user.nickName, user.distance)
       }
+    } else if (res.data.petRaceResult === 'time_over') {
+      console.log('非比赛时段')
+    } else if (res.data.petRaceResult === 'race_lose') {
+      console.log('赛跑结果  输')
     } else {
       console.log('race状态未知')
       o2s(res)
@@ -144,7 +146,7 @@ async function api(fn: string, taskType?: string, params?: string) {
   let lks: string = Md5.hashStr('' + invokeKey + lkt)
   let url: string = taskType
     ? `https://jdjoy.jd.com/common/${fn}?reqSource=h5&invokeKey=${invokeKey}&taskType=${taskType}`
-    : `https://jdjoy.jd.com/common/${fn}?reqSource=h5&invokeKey=${invokeKey}` + params
+    : `https://jdjoy.jd.com/common/${fn}?reqSource=h5&invokeKey=${invokeKey}${params ?? ''}`
   let {data} = await axios.get(url, {
     headers: {
       'Host': 'jdjoy.jd.com',
@@ -224,7 +226,7 @@ async function beforeTask(fn: string, linkAddr: string) {
 async function doTask(fn: string, body: object | string, params?: string) {
   let lkt: number = Date.now()
   let lks: string = Md5.hashStr('' + invokeKey + lkt)
-  let {data}: any = await axios.post(`https://jdjoy.jd.com/common/pet/${fn}?reqSource=h5&invokeKey=${invokeKey}` + params, typeof body === 'object' ? JSON.stringify(body) : body, {
+  let {data}: any = await axios.post(`https://jdjoy.jd.com/common/pet/${fn}?reqSource=h5&invokeKey=${invokeKey}${params ?? ''}`, typeof body === 'object' ? JSON.stringify(body) : body, {
     headers: {
       'Host': 'jdjoy.jd.com',
       'lkt': lkt.toString(),
