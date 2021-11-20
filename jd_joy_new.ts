@@ -6,8 +6,9 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, o2s} from './TS_USER_AGENTS'
 import {Md5} from "ts-md5";
+import {differenceInMinutes, format} from "date-fns";
+import USER_AGENT, {requireConfig, wait, o2s} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number, invokeKey = 'q8DNJdpcfRQ69gIx'
 
@@ -19,18 +20,67 @@ let cookie: string = '', res: any = '', UserName: string, index: number, invokeK
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
-    /*
-    await beforeFeed()
+    res = await doTask('enterRoom/h5', {}, '&invitePin=')
     await wait(1000)
-    res = await feed()
-    if (res.errorCode === 'feed_ok') {
-      console.log('喂食成功', 80)
-    } else {
-      console.log('喂食失败', res)
-    }
-    await wait(2000)
+    let lastFeedTime: number = res.data.lastFeedTime
 
-     */
+    // feed
+    if (differenceInMinutes(Date.now(), lastFeedTime) > 180) {
+      await click('feed')
+      await beforeFeed()
+      await wait(1000)
+      res = await feed()
+      if (res.errorCode === 'feed_ok') {
+        console.log('喂食成功', 80)
+      } else {
+        console.log('喂食失败', res)
+      }
+    } else {
+      console.log('feed间隔未满3小时，上次喂食', format(lastFeedTime, 'HH:mm:ss'))
+    }
+    await wait(3000)
+
+    // run
+    await click('race')
+    await beforeFeed('race')
+    await wait(1000)
+    res = await api('pet/combat/detail/v2', '', '&help=false')
+    await wait(2000)
+    if (res.data.petRaceResult === 'unreceive') {
+      let winCoin: number = res.data.winCoin  // 赛跑奖励
+      res = await api('pet/combat/receive')
+      await wait(2000)
+      if (!res.errorCode) {
+        console.log('赛跑领奖成功', winCoin)
+      }
+    } else if (res.data.petRaceResult === 'not_participate') {
+      console.log('可参赛')
+      res = await api('pet/combat/match', '', '&teamLevel=2')
+      await beforeFeed('race_match')
+      await click('race_match')
+      await wait(5000)
+      while (1) {
+        if (res.data.petRaceResult === 'matching') {
+          console.log('正在匹配......')
+          res = await api('pet/combat/match', '', '&teamLevel=2')
+          await wait(5000)
+        } else {
+          break
+        }
+      }
+      // res = await api('pet/combat/detail/v2')
+      // o2s(res)
+    } else if (res.data.petRaceResult === 'participate') {
+      console.log('比赛中......')
+      for (let user of res.data.raceUsers) {
+        console.log(user.nickName, user.distance)
+      }
+    } else {
+      console.log('race状态未知')
+      o2s(res)
+    }
+    await wait(3000)
+
     res = await api('pet/getPetTaskConfig')
     for (let t of res.datas) {
       if (t.receiveStatus === 'unreceive') {
@@ -89,12 +139,12 @@ let cookie: string = '', res: any = '', UserName: string, index: number, invokeK
   }
 })()
 
-async function api(fn: string, taskType?: string) {
+async function api(fn: string, taskType?: string, params?: string) {
   let lkt: number = Date.now()
   let lks: string = Md5.hashStr('' + invokeKey + lkt)
   let url: string = taskType
     ? `https://jdjoy.jd.com/common/${fn}?reqSource=h5&invokeKey=${invokeKey}&taskType=${taskType}`
-    : `https://jdjoy.jd.com/common/${fn}?reqSource=h5&invokeKey=${invokeKey}`
+    : `https://jdjoy.jd.com/common/${fn}?reqSource=h5&invokeKey=${invokeKey}` + params
   let {data} = await axios.get(url, {
     headers: {
       'Host': 'jdjoy.jd.com',
@@ -171,10 +221,10 @@ async function beforeTask(fn: string, linkAddr: string) {
   }
 }
 
-async function doTask(fn: string, body: object | string) {
+async function doTask(fn: string, body: object | string, params?: string) {
   let lkt: number = Date.now()
   let lks: string = Md5.hashStr('' + invokeKey + lkt)
-  let {data}: any = await axios.post(`https://jdjoy.jd.com/common/pet/${fn}?reqSource=h5&invokeKey=${invokeKey}`, typeof body === 'object' ? JSON.stringify(body) : body, {
+  let {data}: any = await axios.post(`https://jdjoy.jd.com/common/pet/${fn}?reqSource=h5&invokeKey=${invokeKey}` + params, typeof body === 'object' ? JSON.stringify(body) : body, {
     headers: {
       'Host': 'jdjoy.jd.com',
       'lkt': lkt.toString(),
@@ -187,7 +237,10 @@ async function doTask(fn: string, body: object | string) {
       'Cookie': cookie
     },
   })
-  console.log(data.errorCode)
+  if (data.errorCode) {
+    console.log(data.errorCode)
+  }
+  return data
 }
 
 async function click(iconCode: string, linkAddr?: string) {
