@@ -7,7 +7,7 @@ import axios from 'axios'
 import {Md5} from "ts-md5"
 import * as path from 'path'
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, randomString, o2s} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, o2s} from './TS_USER_AGENTS'
 
 const token = require('./utils/jd_jxmc.js').token
 
@@ -19,7 +19,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   let cookiesArr: any = await requireConfig()
   if (process.argv[2]) {
     console.log('收到命令行cookie')
-    cookiesArr = [unescape(process.argv[2])]
+    cookiesArr = [decodeURIComponent(process.argv[2])]
   }
   let except: string[] = exceptCookie(path.basename(__filename))
 
