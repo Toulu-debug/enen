@@ -10,7 +10,7 @@
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, o2s, randomString} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, randomString} from './TS_USER_AGENTS'
 
 const axi = axios.create({timeout: 10000})
 
@@ -245,7 +245,6 @@ interface Params {
       await wait(3000)
     }
 
-    /*
     // 珍珠
     res = await api('user/ComposePearlState', '', {__t: Date.now(), dwGetType: 0})
     let dwCurProgress: number = res.dwCurProgress, strDT: string = res.strDT, strMyShareId: string = res.strMyShareId, ddwSeasonStartTm: number = res.ddwSeasonStartTm
@@ -292,7 +291,6 @@ interface Params {
         console.log('合成失败:', res)
       }
     }
-    */
 
     // 签到 助力奖励
     res = await api('story/GetTakeAggrPage', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
