@@ -21,7 +21,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number
       let tasks: any = await api('getTaskList')
       await wait(1000)
       for (let t of tasks.content) {
-        if (t.status === 1) {
+        if (t.statusName !== '活动结束') {
           res = await taskApi('saveTaskRecord', {taskId: t.taskId, taskType: t.taskType, businessId: t.businessId})
           o2s(res)
           await wait(t.watchTime * 1000 + 500)

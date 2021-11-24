@@ -5,9 +5,8 @@
 
 import axios from 'axios'
 import {Md5} from "ts-md5"
-import * as path from 'path'
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, exceptCookie, o2s} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st} from './TS_USER_AGENTS'
 
 const token = require('./utils/jd_jxmc.js').token
 
@@ -17,22 +16,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 !(async () => {
   await requestAlgo()
   let cookiesArr: any = await requireConfig()
-  if (process.argv[2]) {
-    console.log('收到命令行cookie')
-    cookiesArr = [decodeURIComponent(process.argv[2])]
-  }
-  let except: string[] = exceptCookie(path.basename(__filename))
-
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
-
-    if (except.includes(encodeURIComponent(UserName))) {
-      console.log('已设置跳过')
-      continue
-    }
 
     jxToken = await token(cookie)
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})

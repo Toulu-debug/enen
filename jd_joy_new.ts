@@ -11,6 +11,7 @@ import {differenceInMinutes, format} from "date-fns";
 import USER_AGENT, {requireConfig, wait, o2s} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number, invokeKey = 'q8DNJdpcfRQ69gIx'
+let message: string
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -58,6 +59,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number, invokeK
         await wait(2000)
         if (!res.errorCode) {
           console.log('赛跑领奖成功', winCoin)
+          message += `【京东账号${index}】${UserName}\n赛跑领奖成功，获得${winCoin}积分\n\n`
         }
       } else if (res.data.petRaceResult === 'not_participate') {
         console.log('可参赛')
@@ -83,6 +85,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number, invokeK
         console.log('赛跑已结束')
       } else if (res.data.petRaceResult === 'race_lose') {
         console.log('赛跑结果  输')
+        message += `【京东账号${index}】${UserName}\n赛跑结果：输\n\n`
       } else if (res.data.petRaceResult === 'unbegin') {
         console.log('赛跑未开始')
       } else {
