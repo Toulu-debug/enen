@@ -7,7 +7,7 @@ import axios from "axios"
 import * as path from "path"
 import {sendNotify} from './sendNotify'
 import {existsSync, readFileSync, writeFileSync} from "fs"
-import {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
+import {requireConfig, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
 import {execSync} from "child_process";
 
 let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
@@ -34,21 +34,28 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
 
     message = ''
     res = await getOrderList()
+    await wait(2000)
+
     for (let order of res.orderList) {
-      let orderId: string = order['orderId']
-      let title: string = order['productList'][0]['title']
+      let orderId: string = order.orderId
+      let orderType: string = order.orderType
+      let title: string = order.productList[0].title
       let t: string = order.progressInfo?.tip || null
       let status: string = order.progressInfo?.content || null
+
+      res = await getWuliu(orderId, orderType)
+      let carrier: string = res.carrier, carriageId: string = res.carriageId
+
       if (t && status) {
         if (status.match(/(?=签收|已取走|已暂存)/)) continue
         console.log(title)
         console.log('\t', t, status)
         console.log()
         if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
-          message += `${title}\n${t}  ${status}\n\n`
+          message += `${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
         }
         orders[orderId] = {
-          user: UserName, title, t, status
+          user: UserName, title, t, status, carrier, carriageId
         }
       }
     }
@@ -78,5 +85,18 @@ async function getOrderList() {
       'cookie': cookie
     }
   })
+  return data
+}
+
+async function getWuliu(orderId: string, orderType: string) {
+  let {data} = await axios.get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, {
+    headers: {
+      'authority': 'wq.jd.com',
+      'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+      'referer': 'https://wqs.jd.com/',
+      'cookie': cookie
+    }
+  })
+  await wait(1000)
   return data
 }
