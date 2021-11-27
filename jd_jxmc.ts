@@ -115,11 +115,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         res = await api('operservice/DrawCard', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
         if (res.ret === 0) {
           if (res.data.prizetype === 3) {
-            console.log('抽奖成功，金币：', res.data.addcoins)
+            console.log('抽奖成功，金币:', res.data.addcoins)
           } else if (res.data.prizetype === 1) {
-            console.log('抽奖成功，卡片：', res.data.cardtype)
+            console.log('抽奖成功，卡片:', res.data.cardtype)
           } else {
-            console.log('抽奖成功，其他：', res)
+            console.log('抽奖成功，其他:', res)
           }
           await wait(8000)
         } else {
@@ -175,11 +175,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     // 登录领白菜
     res = await api('queryservice/GetVisitBackInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
-    await wait(5000)
+    await wait(3000)
     if (res.iscandraw === 1) {
       res = await api('operservice/GetVisitBackCabbage', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
       if (res.ret === 0) {
-        console.log('登录领白菜：', res.data.drawnum)
+        console.log('登录领白菜:', res.data.drawnum)
       }
     }
     await wait(5000)
@@ -300,7 +300,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('上限')
         break
       } else {
-        console.log('失败：', res)
+        console.log('失败:', res)
       }
       await wait(8000)
     }
@@ -325,7 +325,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       if (res.ret === 0) {
         console.log('成功，获得:', res.data.addcoins)
       } else {
-        console.log('失败：', res)
+        console.log('失败:', res)
       }
       await wait(8000)
     }

@@ -5,7 +5,7 @@
 
 import {format} from 'date-fns'
 import axios from "axios"
-import {h5st, requireConfig, requestAlgo, wait, exceptCookie, o2s} from "./TS_USER_AGENTS"
+import {h5st, requireConfig, requestAlgo, wait, exceptCookie} from "./TS_USER_AGENTS"
 import {sendNotify} from './sendNotify'
 import * as path from "path"
 
@@ -74,19 +74,9 @@ interface Params {
       console.log('当前没有产品在生产')
       continue
     }
-    let factoryId: number = res.data.factoryList[0].factoryId
-
-    // 开红包
-    if (res.data.productionStage.productionStageAwardStatus === 1) {
-      res = await api('userinfo/DrawProductionStagePrize', '', {productionId: productionId})
-      if (res.ret === 0)
-        console.log('开红包成功', res.data.active)
-      else
-        console.log('开红包失败', JSON.stringify(res))
-      await wait(2000)
-    }
 
     // 收发电机
+    let factoryId: number = res.data.factoryList[0].factoryId
     res = await api('generator/QueryCurrentElectricityQuantity', '_time,factoryid,querytype,zone', {factoryid: factoryId, querytype: 1})
     await wait(1000)
     let flag: number = -1
@@ -183,22 +173,26 @@ async function task() {
   return 0
 }
 
-async function api(fn: string, stk: string, params: Params = {}) {
-  let url: string, t = Date.now()
-  if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${t}&_ts=${t}&_=${t}&sceneval=2`
-  else
-    url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${t}&_ts=${t}&_=${t}&sceneval=2`
-  for (const [key, val] of Object.entries(params)) {
-    url += `&${key}=${val}`
-  }
-  let {data} = await axios.get(url, {
-    headers: {
-      'Host': 'm.jingxi.com',
-      'User-Agent': 'jdpingou;',
-      'Referer': 'https://st.jingxi.com/',
-      'Cookie': cookie
-    }
+function api(fn: string, stk: string, params: Params = {}) {
+  return new Promise((resolve, reject) => {
+    let url: string = ''
+    if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
+      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+    else
+      url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
+    url = h5st(url, stk, params, 10001)
+    axios.get(url, {
+      headers: {
+        'Cookie': cookie,
+        'Host': 'm.jingxi.com',
+        'User-Agent': 'jdpingou;',
+        'Referer': 'https://st.jingxi.com/pingou/dream_factory/index.html',
+      }
+    }).then((res: any) => {
+      resolve(res.data)
+    }).catch(err => {
+      console.log('err:', err)
+      reject(err)
+    })
   })
-  return data
 }
