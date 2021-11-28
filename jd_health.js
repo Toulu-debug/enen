@@ -20,6 +20,8 @@ cron "13 1,6,22 * * *" script-path=jd_health.js, tag=东东健康社区
 ============小火箭=========
 东东健康社区 = type=cron,script-path=jd_health.js, cronexpr="13 1,6,22 * * *", timeout=3600, enable=true
  */
+const {accessSync, readFileSync} = require("fs");
+const path = require("path");
 const $ = new Env("东东健康社区");
 
 console.log('\n====================Hello World====================\n')
@@ -42,26 +44,34 @@ if ($.isNode()) {
     ...$.toObj($.getdata("CookiesJD") || "[]").map((item) => item.cookie)].filter((item) => !!item);
 }
 const JD_API_HOST = "https://api.m.jd.com/client.action";
+
 !(async () => {
-  if (!cookiesArr[0]) {
-    $.msg(
-      $.name,
-      "【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取",
-      "https://bean.m.jd.com/",
-      {"open-url": "https://bean.m.jd.com/"}
-    );
-    return;
-  }
   await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
-      $.UserName = decodeURIComponent(
-        cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]
-      );
+      $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]);
       $.index = i + 1;
       message = "";
       console.log(`\n******开始【京东账号${$.index}】${$.UserName}*********\n`);
+
+      if ($.isNode()) {
+        const path = require('path')
+        const {accessSync, readFileSync} = require("fs");
+        let except
+        try {
+          accessSync('./utils/exceptCookie.json')
+          except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[path.basename(__filename)] || []
+        } catch (e) {
+          except = []
+        }
+        console.log('except:', except)
+        if (except.includes($.UserName)) {
+          console.log(`已设置跳过`)
+          continue
+        }
+      }
+
       await shareCodesFormat()
       await main()
       await showMsg()

@@ -263,12 +263,20 @@ function randomNumString(e: number) {
 }
 
 async function getshareCodeHW(key: string) {
-  try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES')
-    return data[key] || []
-  } catch (e) {
-    return []
+  let shareCodeHW: string[] = []
+  for (let i = 0; i < 5; i++) {
+    try {
+      let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES')
+      shareCodeHW = data[key] || []
+      if (shareCodeHW.length !== 0) {
+        break
+      }
+    } catch (e) {
+      console.log("getshareCodeHW Error, Retry...")
+      await wait(getRandomNumberByRange(2000, 6000))
+    }
   }
+  return shareCodeHW
 }
 
 export default USER_AGENT
