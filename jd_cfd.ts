@@ -1,16 +1,12 @@
 /**
  * 京喜财富岛
- * 包含雇佣导游，建议每小时1次
- * 使用jd_env_copy.js同步js环境变量到ts
- * 使用jd_ts_test.ts测试环境变量
- *
  * cron: 0 * * * *
  */
 
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, randomString} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, randomString, o2s} from './TS_USER_AGENTS'
 
 const axi = axios.create({timeout: 10000})
 
@@ -146,7 +142,7 @@ interface Params {
           break
         }
       }
-      if (t.dwCompleteNum < t.dwTargetNum && t.strTaskName !== '去接待NPC') {
+      if (t.dwCompleteNum < t.dwTargetNum && !['去接待NPC', '累计邀请10位好友打工'].includes(t.strTaskName)) {
         console.log(t.strTaskName)
         res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {bizCode: tasks.Data.strZone, taskId: t.ddwTaskId})
         await wait(t.dwLookTime * 1000 ?? 2000)
@@ -159,7 +155,7 @@ interface Params {
       }
     }
 
-    // 加速卡
+// 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard, isUsing: boolean = res.cardInfo.dwWorkingType !== 0
     for (let card of coincard) {
@@ -194,7 +190,7 @@ interface Params {
       }
     }
 
-    // 任务⬇️
+// 任务⬇️
     console.log('底部任务列表开始')
     for (let j = 0; j < 30; j++) {
       if (await task() === 0) {
@@ -204,7 +200,7 @@ interface Params {
     }
     console.log('底部任务列表结束')
 
-    // 升级建筑
+// 升级建筑
     while (1) {
       res = await api('user/QueryUserInfo',
         '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
@@ -243,53 +239,6 @@ interface Params {
         break
       }
       await wait(3000)
-    }
-
-    // 珍珠
-    res = await api('user/ComposePearlState', '', {__t: Date.now(), dwGetType: 0})
-    let dwCurProgress: number = res.dwCurProgress, strDT: string = res.strDT, strMyShareId: string = res.strMyShareId, ddwSeasonStartTm: number = res.ddwSeasonStartTm
-    let strLT: string = res.oPT[res.ddwCurTime % (res.oPT.length)]
-    console.log(`已合成${dwCurProgress}个珍珠，${res.ddwVirHb / 100}元红包`)
-
-    if (res.dayDrawInfo.dwIsDraw === 0) {
-      res = await api("user/GetPearlDailyReward", "__t,strZone", {__t: Date.now()})
-      if (res.iRet === 0) {
-        res = await api("user/PearlDailyDraw", "__t,ddwSeaonStart,strToken,strZone", {__t: Date.now(), ddwSeaonStart: ddwSeasonStartTm, strToken: res.strToken})
-        if (res.strPrizeName) {
-          console.log('抽奖获得:', res.strPrizeName)
-        } else {
-          console.log('抽奖失败？', res)
-        }
-      }
-    }
-
-    // 模拟合成
-    if (strDT) {
-      console.log('继续合成')
-      let RealTmReport: number = getRandomNumberByRange(10, 20)
-      console.log('本次合成需要上报:', RealTmReport)
-      for (let j = 0; j < RealTmReport; j++) {
-        res = await api('user/RealTmReport', '', {__t: Date.now(), dwIdentityType: 0, strBussKey: 'composegame', strMyShareId: strMyShareId, ddwCount: 10})
-        if (res.iRet === 0)
-          console.log(`游戏中途上报${j + 1}:OK`)
-        await wait(2000)
-        if (getRandomNumberByRange(1, 6) === 2) {
-          res = await api('user/ComposePearlAward', '__t,size,strBT,strZone,type', {__t: Date.now(), size: 1, strBT: strDT, type: 4})
-          if (res.iRet === 0) {
-            console.log(`上报得红包:${res.ddwAwardHb / 100}红包，当前有${res.ddwVirHb / 100}`)
-          } else {
-            console.log('上报得红包失败:', res)
-          }
-          await wait(1000)
-        }
-      }
-      // 珍珠奖励
-      res = await api(`user/ComposePearlAddProcess`, '__t,strBT,strLT,strZone', {__t: Date.now(), strBT: strDT, strLT: strLT})
-      if (res.iRet === 0) {
-        console.log(`合成成功:获得${res.ddwAwardHb / 100}红包，当前有${res.dwCurProgress}珍珠，${res.ddwVirHb / 100}红包`)
-      } else {
-        console.log('合成失败:', res)
-      }
     }
 
     // 签到 助力奖励
