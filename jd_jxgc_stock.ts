@@ -45,7 +45,7 @@ let cookie: string = '', res: any = '', message: string = '';
 
     let desp: string = res.data.commodityList[0].description
     if (desp.indexOf('红包') > -1) {
-      desp = desp.match(/奖励以(.*)发放/)![1]
+      desp = desp.match(/奖[励|品]以(.*)发放/)[1]
       message += `${name} ${desp}\n`
     } else if (desp.indexOf('支付') > -1) {
       desp = desp.match(/完成需(.*元)/)![1]
