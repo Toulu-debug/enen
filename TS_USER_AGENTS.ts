@@ -98,19 +98,20 @@ async function getFarmShareCode(cookie: string) {
     return ''
 }
 
-function requireConfig() {
+async function requireConfig(index: number = -1) {
   let cookiesArr: string[] = []
-  return new Promise(resolve => {
-    console.log('开始获取配置文件\n')
-    const jdCookieNode = require('./jdCookie.js')
-    Object.keys(jdCookieNode).forEach((item) => {
-      if (jdCookieNode[item]) {
-        cookiesArr.push(jdCookieNode[item])
-      }
-    })
-    console.log(`共${cookiesArr.length}个京东账号\n`)
-    resolve(cookiesArr)
+  const jdCookieNode = require('./jdCookie.js')
+  Object.keys(jdCookieNode).forEach((item) => {
+    if (jdCookieNode[item]) {
+      cookiesArr.push(jdCookieNode[item])
+    }
   })
+  console.log(`共${cookiesArr.length}个京东账号\n`)
+  if (index != -1) {
+    return [cookiesArr[index]]
+  } else {
+    return cookiesArr
+  }
 }
 
 function wait(timeout: number) {

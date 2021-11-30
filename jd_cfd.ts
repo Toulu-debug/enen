@@ -206,17 +206,8 @@ interface Params {
     console.log('底部任务列表结束')
 
     // 升级建筑
-    while (1) {
-      res = await api('user/QueryUserInfo',
-        '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
-        {
-          ddwTaskId: '',
-          strShareId: '',
-          strMarkList: 'guider_step,collect_coin_auth,guider_medal,guider_over_flag,build_food_full,build_sea_full,build_shop_full,build_fun_full,medal_guider_show,guide_guider_show,guide_receive_vistor,daily_task,guider_daily_task',
-          strPgtimestamp: token.strPgtimestamp,
-          strPhoneID: token.strPhoneID,
-          strPgUUNum: token.strPgUUNum
-        })
+    for (let j = 0; j < 5; j++) {
+      res = await api('user/QueryUserInfo', '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone', {ddwTaskId: '', strShareId: '', strMarkList: 'guider_step,collect_coin_auth,guider_medal,guider_over_flag,build_food_full,build_sea_full,build_shop_full,build_fun_full,medal_guider_show,guide_guider_show,guide_receive_vistor,daily_task,guider_daily_task', strPgtimestamp: token.strPgtimestamp, strPhoneID: token.strPhoneID, strPgUUNum: token.strPgUUNum})
       let wallet: number = res.ddwCoinBalance
       console.log('金币余额:', wallet)
       let build: string = '', minLV: number = 99999
@@ -239,6 +230,8 @@ interface Params {
         if (res.iRet === 0) {
           console.log(`升级成功`)
           await wait(2000)
+        } else {
+          console.log('升级失败', res)
         }
       } else {
         break

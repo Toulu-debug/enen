@@ -80,7 +80,7 @@ async function jdFruit() {
         }
         await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
       }
-
+      console.log('当前种植', $.farmInfo.farmUserPro.name)
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
       message += `【已兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`;
       await masterHelpShare();//助力好友
