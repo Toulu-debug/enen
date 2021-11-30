@@ -418,7 +418,7 @@ interface Params {
     tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     await wait(2000)
     for (let t of tasks.Data.TaskList) {
-      if ([1, 2].indexOf(t.dwOrderId) > -1 && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '热气球接待20位游客') {
+      if ([1, 2].indexOf(t.dwOrderId) > -1 && t.dwCompleteNum < t.dwTargetNum && t.strTaskName != '升级1个建筑') {
         console.log('开始任务➡️:', t.strTaskName)
         res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId, configExtra: ''}, 'right')
         await wait(t.dwLookTime * 1000)
@@ -437,7 +437,7 @@ interface Params {
         res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId}, 'right')
         await wait(1000)
         if (res.ret === 0) {
-          console.log(`领奖成功:`, res)
+          console.log('领奖成功')
         } else {
           console.log('领奖失败', res)
         }
@@ -564,7 +564,7 @@ async function task() {
           res = JSON.parse(res.data.prizeInfo)
           console.log(`领奖成功:`, res.ddwCoin, res.ddwMoney)
         } catch (e) {
-          console.log('领奖成功:', res.data)
+          console.log('领奖失败:', res.data)
         }
         await wait(1000)
         return 1
