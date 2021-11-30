@@ -1,12 +1,16 @@
 /**
  * 京喜财富岛
+ * 包含雇佣导游，建议每小时1次
+ * 使用jd_env_copy.js同步js环境变量到ts
+ * 使用jd_ts_test.ts测试环境变量
+ *
  * cron: 0 * * * *
  */
 
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, randomString, o2s} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, getRandomNumberByRange, randomString} from './TS_USER_AGENTS'
 
 const axi = axios.create({timeout: 10000})
 
@@ -142,7 +146,7 @@ interface Params {
           break
         }
       }
-      if (t.dwCompleteNum < t.dwTargetNum && !['去接待NPC', '累计邀请10位好友打工'].includes(t.strTaskName)) {
+      if (t.dwCompleteNum < t.dwTargetNum && t.strTaskName !== '去接待NPC' && t.strTaskName.indexOf('累计邀请') === -1) {
         console.log(t.strTaskName)
         res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {bizCode: tasks.Data.strZone, taskId: t.ddwTaskId})
         await wait(t.dwLookTime * 1000 ?? 2000)
@@ -155,7 +159,7 @@ interface Params {
       }
     }
 
-// 加速卡
+    // 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard, isUsing: boolean = res.cardInfo.dwWorkingType !== 0
     for (let card of coincard) {
@@ -181,6 +185,7 @@ interface Params {
             isUsing = true
           } else {
             console.log('点券加速卡使用失败', res)
+            isUsing = true
             break
           }
           await wait(2000)
@@ -190,7 +195,7 @@ interface Params {
       }
     }
 
-// 任务⬇️
+    // 任务⬇️
     console.log('底部任务列表开始')
     for (let j = 0; j < 30; j++) {
       if (await task() === 0) {
@@ -200,7 +205,7 @@ interface Params {
     }
     console.log('底部任务列表结束')
 
-// 升级建筑
+    // 升级建筑
     while (1) {
       res = await api('user/QueryUserInfo',
         '_cfd_t,bizCode,ddwTaskId,dwEnv,ptag,source,strMarkList,strPgUUNum,strPgtimestamp,strPhoneID,strShareId,strZone',
@@ -228,7 +233,7 @@ interface Params {
       res = await api('user/GetBuildInfo', '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strBuildIndex,strZone', {strBuildIndex: build})
       console.log(`${build}升级需要:`, res.ddwNextLvlCostCoin)
       await wait(2000)
-      if (res.dwCanLvlUp === 1 && res.ddwNextLvlCostCoin * 2 <= wallet) {
+      if (res.dwCanLvlUp === 1 && res.ddwNextLvlCostCoin <= wallet) {
         res = await api('user/BuildLvlUp', '_cfd_t,bizCode,ddwCostCoin,dwEnv,ptag,source,strBuildIndex,strZone', {ddwCostCoin: res.ddwNextLvlCostCoin, strBuildIndex: build})
         await wait(2000)
         if (res.iRet === 0) {
