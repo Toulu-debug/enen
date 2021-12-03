@@ -5,7 +5,7 @@
 
 import {format} from 'date-fns'
 import axios from "axios"
-import {h5st, requireConfig, requestAlgo, wait, exceptCookie} from "./TS_USER_AGENTS"
+import {h5st, requireConfig, requestAlgo, wait, exceptCookie, o2s} from "./TS_USER_AGENTS"
 import {sendNotify} from './sendNotify'
 import * as path from "path"
 
@@ -60,10 +60,11 @@ interface Params {
       needPickSiteInfo: 0,
       source: ''
     })
-    let productionId: number = 0
+    let productionId: number = 0, factoryId: number = 0
     await wait(1000)
     try {
       productionId = res.data.productionList[0].productionId
+      factoryId = res.data.factoryList[0].factoryId
       let investedElectric: number = res.data.productionList[0].investedElectric, needElectric: number = res.data.productionList[0].needElectric, progress: string = (investedElectric / needElectric * 100).toFixed(2)
       console.log('生产进度:', progress)
       if (progress === '100.00') {
@@ -75,8 +76,14 @@ interface Params {
       continue
     }
 
+    // 开红包
+    if (res.data.productionStage.productionStageAwardStatus === 1) {
+      res = await api('userinfo/DrawProductionStagePrize', '_time,productionId,zone', {productionId: productionId})
+      console.log('打开红包:', res.data.active)
+      await wait(2000)
+    }
+
     // 收发电机
-    let factoryId: number = res.data.factoryList[0].factoryId
     res = await api('generator/QueryCurrentElectricityQuantity', '_time,factoryid,querytype,zone', {factoryid: factoryId, querytype: 1})
     await wait(1000)
     let flag: number = -1
