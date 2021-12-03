@@ -89,19 +89,15 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     await wait(2000)
 
     for (let t of res.Data.gradeConfig) {
-      if (dwHelpedTimes >= t.dwHelpTimes) {
+      if (dwHelpedTimes >= t.dwHelpTimes && t.dwIsHasDraw !== 2) {
         res = await api('DoGradeDraw', 'activeId,channel,grade,phoneid,publishFlag,stepreward_jstoken,strPin,timestamp', {grade: t.dwGrade, strPin: strUserPin})
-        if (res.iRet === 2018)
-          console.log(`等级${t.dwGrade}红包已打开过`)
-        else if (res.iRet === 0)
+        if (res.iRet === 0) {
           console.log(`等级${t.dwGrade}红包打开成功`)
-        else {
+        } else {
           console.log('其他错误', res.sErrMsg ?? JSON.stringify(res))
           break
         }
         await wait(15000)
-      } else {
-        break
       }
     }
   }
