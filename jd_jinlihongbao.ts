@@ -73,6 +73,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
       console.log(`\n开始【京东账号${index}】${UserName}\n`);
 
       let j: number = 1
+      res = await api('h5activityIndex', {"isjdapp": 1})
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
         if (t.packetStatus === 2) {
           console.log(`红包${j}已拆过，获得`, t.packetAmount)
