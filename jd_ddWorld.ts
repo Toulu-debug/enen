@@ -58,7 +58,7 @@ let tokenKey: string = '', token: string = '', bearer: string = ''
           console.log('兑换', t.coins)
           res = await api('do_exchange', `id=${t.id}`)
           o2s(res)
-          await wait(2000)
+          await wait(5000)
         }
       }
     }
@@ -69,9 +69,9 @@ let tokenKey: string = '', token: string = '', bearer: string = ''
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    console.log(`${UserName}去助力${shareCodesInternal[0].taskToken}`)
+    console.log(`${UserName} 去助力 ${shareCodesInternal[0].taskToken}`)
     res = await api('do_assist_task', `taskToken=${shareCodesInternal[0].taskToken}&inviter_id=${shareCodesInternal[0].inviter_id}`)
-    await wait(2000)
+    await wait(4000)
     console.log('助力结果：', res)
     if (!res)
       break
