@@ -41,9 +41,11 @@ let goodsUrl = '', taskInfoKey = [];
 let randomCount = $.isNode() ? 20 : 5;
 !(async () => {
   await requireConfig();
-  if ($.isNode() && process.argv[2]) {
-    cookiesArr = [decodeURIComponent(process.argv[2])];
-    console.log(`收到Cookie：${decodeURIComponent(cookiesArr[0])}`)
+  if ($.isNode()) {
+    if (process.argv[2]) {
+      cookiesArr = [decodeURIComponent(process.argv[2])];
+      console.log(`收到Cookie：${decodeURIComponent(cookiesArr[0])}`)
+    }
   }
   if (!cookiesArr[0]) {
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});

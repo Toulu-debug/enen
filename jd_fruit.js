@@ -40,9 +40,11 @@ const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%2
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
     return;
   }
-  if ($.isNode() && process.argv[2]) {
-    cookiesArr = [decodeURIComponent(process.argv[2])];
-    console.log(`收到Cookie：${decodeURIComponent(cookiesArr[0])}`)
+  if ($.isNode()) {
+    if (process.argv[2]) {
+      cookiesArr = [decodeURIComponent(process.argv[2])];
+      console.log(`收到Cookie：${decodeURIComponent(cookiesArr[0])}`)
+    }
   }
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
