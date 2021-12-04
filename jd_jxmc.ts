@@ -16,11 +16,10 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 !(async () => {
   await requestAlgo()
   let cookiesArr: any = await requireConfig()
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1
-    console.log(`\n开始【京东账号${index}】${UserName}\n`)
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     jxToken = await token(cookie)
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
@@ -107,7 +106,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     await wait(5000)
     let drawTimes = res.data.times
     if (typeof drawTimes === "undefined") {
-      await sendNotify("牧场扭蛋机错误", `账号${i + 1} ${UserName}\n手动建造扭蛋机`)
+      await sendNotify("牧场扭蛋机错误", `账号${index + 1} ${UserName}\n手动建造扭蛋机`)
     } else {
       console.log('扭蛋机剩余次数:', drawTimes)
       for (let j = 0; j < drawTimes; j++) {
@@ -276,12 +275,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   }
   await wait(5000)
 
-  /*
-  for (let i = 0; i < cookiesArr.length; i++) {
+  for (let [index, value] of cookiesArr.entries()) {
     await getCodes()
     // 获取随机红包码
     try {
-      let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmchb/30`, {timeout: 10000})
+      let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmchb/30`)
       console.log('获取到30个随机红包码:', data.data)
       shareCodes = Array.from(new Set([...shareCodesHbSelf, ...shareCodesHbHw, ...data.data]))
     } catch (e: any) {
@@ -289,11 +287,11 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       shareCodes = Array.from(new Set([...shareCodesHbSelf, ...shareCodesHbHw]))
     }
 
-    cookie = cookiesArr[i]
+    cookie = value
     jxToken = await token(cookie)
-    for (let j = 0; j < shareCodes.length; j++) {
-      console.log(`账号${i + 1}去助力${shareCodes[j]}`)
-      res = await api('operservice/InviteEnroll', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: shareCodes[j]})
+    for (let code of shareCodes) {
+      console.log(`账号${index + 1} 去助力 ${code}`)
+      res = await api('operservice/InviteEnroll', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: code})
       if (res.ret === 0) {
         console.log('成功')
       } else if (res.ret === 2711) {
@@ -306,7 +304,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     }
   }
 
-  for (let i = 0; i < cookiesArr.length; i++) {
+  for (let [index, value] of cookiesArr.entries()) {
     await getCodes()
     // 获取随机助力码
     try {
@@ -317,11 +315,12 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       console.log('获取助力池失败')
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     }
-    cookie = cookiesArr[i]
+
+    cookie = value
     jxToken = await token(cookie)
-    for (let j = 0; j < shareCodes.length; j++) {
-      console.log(`账号${i + 1}去助力${shareCodes[j]}`)
-      res = await api('operservice/EnrollFriend', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: shareCodes[j]})
+    for (let code of shareCodes) {
+      console.log(`账号${index + 1} 去助力 ${code}`)
+      res = await api('operservice/EnrollFriend', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: code})
       if (res.ret === 0) {
         console.log('成功，获得:', res.data.addcoins)
       } else {
@@ -330,8 +329,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       await wait(8000)
     }
   }
-
-   */
 })()
 
 interface Params {

@@ -11,7 +11,7 @@ import {sendNotify} from '../sendNotify';
   res = await api(file)
   file = 'https:' + res.match(/src="([^"]*)/)[1]
   res = await api(file)
-  file = res.match(/h=n\(\d+\),v="([^"]*)/)[1]
+  file = res.match(/var invokeKey = '(.*)';/)[1]
   console.log('invokeKey:', file)
   if (file !== 'q8DNJdpcfRQ69gIx') {
     await sendNotify('invokeKey Update', file)

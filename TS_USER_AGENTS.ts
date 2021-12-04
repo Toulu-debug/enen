@@ -2,7 +2,7 @@ import axios from "axios"
 import {Md5} from "ts-md5"
 import {format} from 'date-fns'
 import * as dotenv from "dotenv"
-import {accessSync, readFileSync, writeFileSync} from "fs"
+import {existsSync, readFileSync, writeFileSync} from "fs"
 
 const CryptoJS = require('crypto-js')
 dotenv.config()
@@ -225,14 +225,15 @@ function getJxToken(cookie: string) {
 }
 
 function exceptCookie(filename: string = 'x.ts') {
-  let except: string[]
-  try {
-    accessSync('./utils/exceptCookie.json')
-    except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename] || []
-  } catch (e: any) {
-    except = []
+  let except: any
+  if (existsSync('./utils/exceptCookie.json')) {
+    try {
+      except = JSON.parse(readFileSync('./utils/exceptCookie.json').toString() || '{}')[filename] || []
+    } catch (e) {
+      console.log('./utils/exceptCookie.json JSON格式错误')
+      except = []
+    }
   }
-  console.log('except:', except)
   return except
 }
 

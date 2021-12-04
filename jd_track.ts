@@ -6,9 +6,8 @@
 import axios from "axios"
 import * as path from "path"
 import {sendNotify} from './sendNotify'
-import {existsSync, readFileSync, writeFileSync} from "fs"
-import {requireConfig, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
-import {execSync} from "child_process";
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
+import {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
 
 let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
 
@@ -17,9 +16,14 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
   let except: string[] = exceptCookie(path.basename(__filename))
   let orders: any = {}
   if (existsSync('./json')) {
-    orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
+    if (existsSync('./json/jd_track.json')) {
+      orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
+    } else {
+      writeFileSync('./json/jd_track.json', '{}')
+    }
   } else {
-    execSync('mkdir json')
+    mkdirSync('./json')
+    writeFileSync('./json/jd_track.json', '{}')
   }
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
