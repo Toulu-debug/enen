@@ -1,4 +1,10 @@
-import USER_AGENT, {requireConfig, wait, getshareCodeHW, o2s} from "./test/TS_USER_AGENTS"
+/**
+ * 金榜任务
+ * 入口 https://wz.my/7tf
+ * cron: 30 22,18 * * *
+ */
+
+import USER_AGENT, {requireConfig, wait, getshareCodeHW, o2s} from "./TS_USER_AGENTS"
 import axios from "axios"
 
 let cookie: string = '', res: any = '', UserName: string, index: number
