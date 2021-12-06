@@ -1,7 +1,7 @@
 /**
  * 金榜任务
  * 入口 https://wz.my/7tf
- * cron: 30 22,18 * * *
+ * cron: 30 6,12,22 * * *
  */
 
 import USER_AGENT, {requireConfig, wait, getshareCodeHW, o2s} from "./TS_USER_AGENTS"
