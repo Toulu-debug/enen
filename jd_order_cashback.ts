@@ -110,7 +110,7 @@ async function makeShareCodes(code: string) {
 
 async function getShareCodes() {
   try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/baoji/20`)
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/fanxian/20`)
     console.log(`从助力池获取到${data.data.length}个：${JSON.stringify(data.data)}`)
     shareCodes = data.data
   } catch (e) {
