@@ -281,6 +281,24 @@ async function getshareCodeHW(key: string) {
   return shareCodeHW
 }
 
+async function getShareCodePool(key: string, num: number) {
+  let shareCode: string[] = []
+  for (let i = 0; i < 2; i++) {
+    try {
+      let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/${key}/${num}`)
+      shareCode = data.data || []
+      console.log(`随机获取${num}个${key}成功：${JSON.stringify(shareCode)}`)
+      if (shareCode.length !== 0) {
+        break
+      }
+    } catch (e) {
+      console.log("getShareCodePool Error, Retry...")
+      await wait(getRandomNumberByRange(2000, 6000))
+    }
+  }
+  return shareCode
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -298,5 +316,6 @@ export {
   resetHosts,
   o2s,
   randomNumString,
-  getshareCodeHW
+  getshareCodeHW,
+  getShareCodePool
 }

@@ -4,7 +4,7 @@
  * cron: 5 0,6,18 * * *
  */
 
-import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode, getshareCodeHW, randomString} from "./TS_USER_AGENTS"
+import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode, getshareCodeHW, randomString, getShareCodePool} from "./TS_USER_AGENTS"
 import axios from "axios"
 import {Md5} from "ts-md5"
 import {format} from 'date-fns'
@@ -12,7 +12,7 @@ import {format} from 'date-fns'
 const token = require('./utils/jd_jxmc.js').token
 
 let cookie: string = '', res: any = '', UserName: string, index: number, UA: string = ''
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], jxToken: any
+let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[] = [], shareCodePool: string[] = [], jxToken: any
 let HW_Priority: boolean = true
 /**
  * CK1助力顺序
@@ -35,7 +35,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     let strUserPin: string = res.Data.strUserPin, dwHelpedTimes: number = res.Data.dwHelpedTimes
     console.log('收到助力:', dwHelpedTimes)
     console.log('助力码：', strUserPin)
-    shareCodesSelf.push(strUserPin)
+    shareCodeSelf.push(strUserPin)
     await makeShareCodes(strUserPin)
     await wait(2000)
     res = await api('JoinActive', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp')
@@ -43,22 +43,22 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     await wait(1000)
   }
 
-  console.log('内部助力码：', shareCodesSelf)
-
+  console.log('内部助力码：', shareCodeSelf)
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
-    jxToken = await token(cookie)
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    jxToken = await token(cookie)
+    shareCodePool = await getShareCodePool('hb88', 30)
 
-    if (shareCodesHW.length === 0) {
-      shareCodesHW = await getshareCodeHW('88hb')
+    if (shareCodeHW.length === 0) {
+      shareCodeHW = await getshareCodeHW('88hb')
     }
     if (i === 0 && HW_Priority) {
-      shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+      shareCode = Array.from(new Set([...shareCodeHW, ...shareCodeSelf, ...shareCodePool]))
     } else {
-      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+      shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool, ...shareCodeHW]))
     }
-    for (let code of shareCodes) {
+    for (let code of shareCode) {
       console.log(`账号 ${UserName} 去助力 ${code}`)
       res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: code})
       await wait(5000)
