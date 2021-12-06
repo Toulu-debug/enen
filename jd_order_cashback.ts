@@ -1,15 +1,15 @@
 /**
  * 下单返红包助力
- * demo
- * 仅测试助力池能收集多少助力码
+ * 只助力助力池，不助力内部，多次被同账号助力可能会黑
+ * cron: 30 0,9,17 * * *
  */
 
 import axios from "axios"
-import {requireConfig, wait, randomString, getBeanShareCode, getFarmShareCode} from "./TS_USER_AGENTS"
+import {requireConfig, wait, randomString, getBeanShareCode, getFarmShareCode, o2s} from "./TS_USER_AGENTS"
 import {Md5} from "ts-md5";
 
 let cookie: string = '', UserName: string, index: number, res: any = ''
-let orders: string[] = [], baoji: string[] = []
+let orders: string[] = [], shareCodeSelf: string[] = [], shareCodes: string[] = []
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -30,24 +30,49 @@ let orders: string[] = [], baoji: string[] = []
       if (!orders.includes(order)) {
         orders.push(order)
         res = await api(`QueryGroupDetail`, order)
-        if (res.data.groupinfo && res.data.groupinfo.end_time * 1000 < Date.now()) {
+
+        if (res.data.groupinfo && res.data.groupinfo.end_time * 1000 > Date.now()) {
           let remaininghongbaosum = res.data.groupinfo.remaininghongbaosum * 1
-          console.log(`订单 ${order} 有暴击：`, res.data.groupinfo.groupid, '剩余：', remaininghongbaosum)
+          console.log(`订单 ${order} ✅`, res.data.groupinfo.groupid, '剩余：', remaininghongbaosum)
           if (remaininghongbaosum !== 0) {
             await makeShareCodes(res.data.groupinfo.groupid)
-            baoji.push(res.data.groupinfo.groupid)
+            shareCodeSelf.push(res.data.groupinfo.groupid)
           }
         } else {
-          console.log(`订单 ${order} 无暴击`)
+          console.log(`订单 ${order} ❌`)
         }
         await wait(2000)
+      }
+    }
+
+    await getShareCodes()
+    let max: number = 0
+    for (let code of shareCodes) {
+      if (max === 3) {
+        console.log('3次')
+        break
+      }
+      if (!shareCodeSelf.includes(code)) {
+        res = await api('Help', code)
+        if (res.msg === '') {
+          console.log('助力成功，获得：', parseFloat(res.data.prize.discount))
+          max++
+        } else {
+          console.log(res.msg)
+        }
+        await wait(2000)
+      } else {
+        console.log(`跳过内部账号`)
       }
     }
   }
 })()
 
 async function api(fn: string, orderid: string) {
-  let {data} = await axios.get(`https://m.jingxi.com/fanxianzl/zhuli/${fn}?isquerydraw=1&orderid=${orderid}&groupid=&_=${Date.now()}&sceneval=2`, {
+  let url: string = fn === 'Help'
+    ? `https://wq.jd.com/fanxianzl/zhuli/Help?groupid=${orderid}&_stk=groupid&_ste=2&sceneval=2`
+    : `https://m.jingxi.com/fanxianzl/zhuli/${fn}?isquerydraw=1&orderid=${orderid}&groupid=&_=${Date.now()}&sceneval=2`
+  let {data} = await axios.get(url, {
     headers: {
       'Host': 'm.jingxi.com',
       'User-Agent': `jdpingou;iPhone;5.12.0;15.1;${randomString(40)};network/wifi;`,
@@ -75,10 +100,20 @@ async function makeShareCodes(code: string) {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/baoji?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/fanxian?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
     console.log(data.message)
   } catch (e) {
     console.log('自动提交失败')
     console.log(e)
+  }
+}
+
+async function getShareCodes() {
+  try {
+    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/baoji/20`)
+    console.log(`从助力池获取到${data.data.length}个：${JSON.stringify(data.data)}`)
+    shareCodes = data.data
+  } catch (e) {
+    shareCodes = []
   }
 }

@@ -30,7 +30,7 @@ def main(ck, index):
         program = "node"
     else:
         program = "node"
-    with open(f"./test/logs/{filename.split('.')[0]}-{index}.log", 'r+') as f:
+    with open(f"./test/logs/{filename.split('.')[0]}-{index}.log", 'w') as f:
         f.truncate(0)
     os.system(f"{program} {filename} {quote(ck)} >> ./test/logs/{filename.split('.')[0]}-{index}.log &")
     print('done')
