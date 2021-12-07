@@ -5,7 +5,7 @@
  */
 
 import axios from "axios"
-import {requireConfig, wait, randomString, getBeanShareCode, getFarmShareCode, o2s} from "./TS_USER_AGENTS"
+import {requireConfig, wait, randomString, getBeanShareCode, getFarmShareCode, o2s, getShareCodePool} from "./TS_USER_AGENTS"
 import {Md5} from "ts-md5";
 
 let cookie: string = '', UserName: string, index: number, res: any = ''
@@ -44,19 +44,18 @@ let orders: string[] = [], shareCodeSelf: string[] = [], shareCodes: string[] = 
         await wait(2000)
       }
     }
+  }
 
-    await getShareCodes()
-    let max: number = 0
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    await getShareCodePool('fanxian', 20)
     for (let code of shareCodes) {
-      if (max === 3) {
-        console.log('3次')
-        break
-      }
       if (!shareCodeSelf.includes(code)) {
+        console.log(`账号${index + 1} ${UserName} 去助力 ${code}`)
         res = await api('Help', code)
         if (res.msg === '') {
           console.log('助力成功，获得：', parseFloat(res.data.prize.discount))
-          max++
         } else {
           console.log(res.msg)
         }
@@ -105,15 +104,5 @@ async function makeShareCodes(code: string) {
   } catch (e) {
     console.log('自动提交失败')
     console.log(e)
-  }
-}
-
-async function getShareCodes() {
-  try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/fanxian/20`)
-    console.log(`从助力池获取到${data.data.length}个：${JSON.stringify(data.data)}`)
-    shareCodes = data.data
-  } catch (e) {
-    shareCodes = []
   }
 }
