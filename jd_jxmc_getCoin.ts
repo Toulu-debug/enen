@@ -5,13 +5,10 @@
 
 import axios from 'axios';
 import * as path from 'path';
-import {sendNotify} from './sendNotify';
 import {requireConfig, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString} from './TS_USER_AGENTS';
 
-const cow = require('./utils/jd_jxmc.js').cow;
-const token = require('./utils/jd_jxmc.js').token;
-
 let cookie: string = '', res: any = '', homePageInfo: any, jxToken: any, UserName: string, index: number;
+let {cow, token} = require('./utils/jd_jxmc.js');
 
 !(async () => {
   try {
@@ -21,10 +18,6 @@ let cookie: string = '', res: any = '', homePageInfo: any, jxToken: any, UserNam
 
   await requestAlgo();
   let cookiesArr: any = await requireConfig();
-  if (process.argv[2]) {
-    console.log('收到命令行cookie')
-    cookiesArr = [unescape(process.argv[2])]
-  }
   let except: string[] = exceptCookie(path.basename(__filename));
 
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -39,11 +32,7 @@ let cookie: string = '', res: any = '', homePageInfo: any, jxToken: any, UserNam
     }
 
     jxToken = await token(cookie);
-    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {
-      isgift: 1,
-      isquerypicksite: 1,
-      isqueryinviteicon: 1
-    })
+    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
       lastgettime = homePageInfo.data.cow.lastgettime

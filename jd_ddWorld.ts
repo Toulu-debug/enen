@@ -1,13 +1,22 @@
 /**
  * 东东世界
+ * https://ddsj-dz.isvjcloud.com/
  * cron: 5 0,8,20 * * *
  */
 
 import axios from 'axios'
-import USER_AGENT, {o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {getshareCodeHW, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodesInternal: any[] = [], UserName: string, index: number
 let tokenKey: string = '', token: string = '', bearer: string = ''
+let HW_Priority: boolean = true, shareCodeHW: any[] = [], shareCode: any[] = []
+/**
+ * CK1助力顺序
+ * HW_Priority: boolean
+ * true  HW.ts -> 内部
+ * false 内部   -> HW.ts
+ */
+process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -69,12 +78,21 @@ let tokenKey: string = '', token: string = '', bearer: string = ''
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+
+    if (shareCodeHW.length === 0) {
+      shareCodeHW = await getshareCodeHW('ddWorld')
+    }
+    if (i === 0 && HW_Priority) {
+      shareCode = [...shareCodeHW, ...shareCodesInternal]
+    } else {
+      shareCode = [...shareCodesInternal, ...shareCodeHW]
+    }
+
     console.log(`${UserName} 去助力 ${shareCodesInternal[0].taskToken}`)
     res = await api('do_assist_task', `taskToken=${shareCodesInternal[0].taskToken}&inviter_id=${shareCodesInternal[0].inviter_id}`)
+    o2s(res)
+    // console.log('助力结果：', res)
     await wait(4000)
-    console.log('助力结果：', res)
-    if (!res)
-      break
   }
 })()
 
