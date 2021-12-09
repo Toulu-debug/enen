@@ -6,13 +6,13 @@
 
 import {subDays, format, getTime} from "date-fns";
 import axios from "axios";
+import {sendNotify} from './sendNotify';
 import USER_AGENT, {requireConfig, wait} from "./TS_USER_AGENTS";
 
 const PrettyTable = require('prettytable');
 
 const START: number = getTime(new Date(format(subDays(Date.now(), 7), 'yyyy-MM-dd 00:00:00')))
-const END: number = getTime(new Date(format(Date.now(), 'yyyy-MM-dd 00:00:00')))
-let cookie: string = '', res: any = '', UserName: string, index: number
+let cookie: string = '', res: any = '', UserName: string, index: number, message: string = ''
 let headers = ["Type", "Used", "Total"]
 
 !(async () => {
@@ -29,9 +29,7 @@ let headers = ["Type", "Used", "Total"]
       if (flag) {
         res = await api(page)
         for (let t of res.data.unUseRedInfo.redList) {
-          if (t.activityName === '双11热爱环游记')
-            continue
-          if (t.beginTime * 1000 > START && t.beginTime * 1000 < END) {
+          if (t.beginTime * 1000 > START) {
             redNum++
             total = accAdd(total, t.discount * 1)
             if (t.orgLimitStr.indexOf('京喜') > -1) {
@@ -59,7 +57,10 @@ let headers = ["Type", "Used", "Total"]
       } else {
         break
       }
+
     }
+    message += `【京东账号${index}】${UserName}\n京喜：${jx}，已用${jxUsed}\n极速：${js}，已用${jsUsed}\n健康：${jk}，已用${jkUsed}\n京东：${jd}，已用${jdUsed}\n通用：${all}，已用${allUsed}\n合计：${total}元，共${redNum}个红包\n\n`
+
     // console.log('红包数量', redNum)
     // console.log('总计', total)
     // console.log('京喜', jxUsed, '/', jx)
@@ -77,6 +78,9 @@ let headers = ["Type", "Used", "Total"]
     rows.push(['Total', '', total])
     pt.create(headers, rows);
     pt.print();
+  }
+  if (message) {
+    await sendNotify('每周质量报告', message)
   }
 })()
 
