@@ -11,8 +11,8 @@ let cookiesArr = []
 Object.keys(jdCookieNode).forEach((item) => {
   cookiesArr.push(jdCookieNode[item])
 })
-let id = process.argv[2];
 
+let id = process.argv[2] || '';
 if (id) {
   let body = {
     funName: "getSuperClickUrl",
