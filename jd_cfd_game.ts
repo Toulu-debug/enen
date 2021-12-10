@@ -105,7 +105,7 @@ interface Params {
           res = await api('user/RealTmReport', '', {__t: Date.now(), dwIdentityType: 0, strBussKey: 'composegame', strMyShareId: strMyShareId, ddwCount: 10})
           if (res.iRet === 0)
             console.log(`游戏中途上报${j + 1}:OK`)
-          await wait(4000)
+          await wait(5000)
           console.log(JSON.stringify(PearlList[j]))
           if (PearlList[j].rbf) {
             res = await api('user/ComposePearlAward', '__t,size,strBT,strZone,type', {__t: Date.now(), size: 1, strBT: strDT, type: PearlList[j].type})
@@ -114,7 +114,7 @@ interface Params {
             } else {
               console.log('上报得红包失败:', res)
             }
-            await wait(1000)
+            await wait(2000)
           }
         }
         // 珍珠奖励

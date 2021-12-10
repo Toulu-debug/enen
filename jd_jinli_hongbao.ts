@@ -4,17 +4,14 @@
  * cron: 1 0,6,18 * * *
  * 固定log，不知道什么时候会gg
  * CK1助力顺序
- * HW_Priority: boolean
- * true  HW.ts -> 内部
- * false 内部   -> HW.ts
+ * HW.ts -> 内部
  */
 
 import axios from 'axios';
 import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, getshareCodeHW} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], HW_Priority: boolean = true
-process.env.HW_Priority === 'false' ? HW_Priority = false : ''
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
   let cookiesArr: any = await requireConfig();
@@ -38,12 +35,12 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
   console.log('内部助力：', shareCodesSelf)
   for (let [index, value] of cookiesArr.entries()) {
-    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     cookie = value;
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('jlhb')
     }
-    if (index === 0 && HW_Priority) {
+    if (index === 0) {
       shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
     } else {
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))

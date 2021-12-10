@@ -16,17 +16,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^16.11.9",
+    "@types/node": "^16.11.12",
     "axios": "^0.24.0",
     "commander": "^8.3.0",
     "crypto-js": "^4.1.1",
-    "date-fns": "^2.26.0",
+    "date-fns": "^2.27.0",
     "dotenv": "^10.0.0",
     "download": "^8.0.0",
     "form-data": "^4.0.0",
     "got": "^11.8.3",
     "http-server": "^14.0.0",
-    "jsdom": "^18.1.1",
+    "jsdom": "^19.0.0",
     "md5": "^2.3.0",
     "png-js": "^1.0.0",
     "prettytable": "^0.3.1",
@@ -36,6 +36,6 @@
     "ts-md5": "^1.2.10",
     "tslib": "^2.3.1",
     "tunnel": "0.0.6",
-    "ws": "^8.2.3"
+    "ws": "^8.3.0"
   }
 }
