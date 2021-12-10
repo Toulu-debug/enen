@@ -5,16 +5,24 @@
  */
 
 import axios from 'axios';
-import USER_AGENT, {requireConfig, wait} from "./TS_USER_AGENTS";
+import USER_AGENT, {exceptCookie, requireConfig, wait} from "./TS_USER_AGENTS";
+import * as path from "path";
 
 let cookie: string = '', res: any = '', UserName: string
 
 !(async () => {
   let cookiesArr: any = await requireConfig();
+  let except: string[] = exceptCookie(path.basename(__filename));
+
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value;
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`);
+
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
 
     res = await api('jdhealth_getTaskDetail', {"buildingId": "", "taskId": "", "channelId": 1})
     try {

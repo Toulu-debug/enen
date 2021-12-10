@@ -49,7 +49,7 @@ let orders: string[] = [], shareCodeSelf: string[] = [], shareCodes: string[] = 
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    await getShareCodePool('fanxian', 20)
+    shareCodes = await getShareCodePool('fanxian', 20)
     for (let code of shareCodes) {
       if (!shareCodeSelf.includes(code)) {
         console.log(`账号${index + 1} ${UserName} 去助力 ${code}`)
