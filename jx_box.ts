@@ -30,11 +30,11 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
   console.log('内部助力:', shareCodeSelf)
   for (let i = 0; i < cookiesArr.length; i++) {
-    let HW_Random = shareCodeHW[Math.floor(Math.random() * shareCodeHW.length)]
+    // let HW_Random = shareCodeHW[Math.floor(Math.random() * shareCodeHW.length)]
     if (i === 0 && HW_Priority) {
-      shareCode = Array.from(new Set([HW_Random, ...shareCodeSelf]))
+      shareCode = Array.from(new Set([...shareCodeHW, ...shareCodeSelf]))
     } else {
-      shareCode = Array.from(new Set([...shareCodeSelf, HW_Random]))
+      shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
     }
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
