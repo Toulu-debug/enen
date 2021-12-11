@@ -57,7 +57,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     } else {
       shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool, ...shareCodeHW]))
     }
-    /*
+
     for (let code of shareCode) {
       console.log(`账号 ${UserName} 去助力 ${code}`)
       res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: code})
@@ -74,8 +74,6 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
         console.log('其他错误:', res)
       }
     }
-
-     */
   }
 
   // 拆红包
