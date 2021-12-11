@@ -4,7 +4,7 @@
  * cron: 5 0,6,14 * * *
  */
 
-import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode, getshareCodeHW, randomString, getShareCodePool} from "./TS_USER_AGENTS"
+import {requireConfig, wait, h5st, getBeanShareCode, getFarmShareCode, getshareCodeHW, randomString, getShareCodePool, o2s} from "./TS_USER_AGENTS"
 import axios from "axios"
 import {Md5} from "ts-md5"
 import {format} from 'date-fns'
@@ -39,7 +39,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     await wait(2000)
     res = await api('JoinActive', 'activeId,channel,phoneid,publishFlag,stepreward_jstoken,timestamp')
     res.iRet === 0 ? console.log('JoinActive: 成功') : console.log('JoinActive:', res.sErrMsg)
-    await wait(1000)
+    await wait(2000)
   }
 
   console.log('内部助力码：', shareCodeSelf)
@@ -57,6 +57,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     } else {
       shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool, ...shareCodeHW]))
     }
+    /*
     for (let code of shareCode) {
       console.log(`账号 ${UserName} 去助力 ${code}`)
       res = await api('EnrollFriend', 'activeId,channel,joinDate,phoneid,publishFlag,strPin,timestamp', {joinDate: format(Date.now(), 'yyyyMMdd'), strPin: code})
@@ -73,6 +74,8 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
         console.log('其他错误:', res)
       }
     }
+
+     */
   }
 
   // 拆红包
