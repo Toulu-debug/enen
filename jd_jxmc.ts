@@ -238,7 +238,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         console.log('Feed未知错误:', res)
         break
       }
-      await wait(7000)
+      await wait(8000)
     }
     await wait(8000)
 
