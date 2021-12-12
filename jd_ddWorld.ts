@@ -7,7 +7,7 @@
 import axios from 'axios'
 import USER_AGENT, {getshareCodeHW, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
-let cookie: string = '', res: any = '', shareCodesInternal: any[] = [], UserName: string, index: number
+let cookie: string = '', res: any = '', shareCodesInternal: any[] = [], UserName: string
 let tokenKey: string = '', token: string = '', bearer: string = ''
 let HW_Priority: boolean = true, shareCodeHW: any[] = [], shareCode: any[] = []
 /**
@@ -16,15 +16,14 @@ let HW_Priority: boolean = true, shareCodeHW: any[] = [], shareCode: any[] = []
  * true  HW.ts -> 内部
  * false 内部   -> HW.ts
  */
-process.env.HW_Priority === 'false' ? HW_Priority = false : ''
+process.env.HW_Priority.toLowerCase() === 'false' ? HW_Priority = false : ''
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1
-    console.log(`\n开始【京东账号${index}】${UserName}\n`)
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
     await getIsvToken()
     await getIsvToken2()
     await getToken()
@@ -49,8 +48,8 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
           }
         }
         if (t.taskName === '邀请好友助力') {
-          console.log('助力码：', t.assistTaskDetailVo.taskToken)
           res = await api('get_user_info')
+          console.log('助力码：', t.assistTaskDetailVo.taskToken, res.openid)
           shareCodesInternal.push({
             taskToken: t.assistTaskDetailVo.taskToken,
             inviter_id: res.openid
@@ -75,24 +74,30 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
   console.log('内部助力码：', shareCodesInternal)
 
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    await getIsvToken()
+    await getIsvToken2()
+    await getToken()
 
     if (shareCodeHW.length === 0) {
       shareCodeHW = await getshareCodeHW('ddWorld')
     }
-    if (i === 0 && HW_Priority) {
+    if (index === 0 && HW_Priority) {
       shareCode = [...shareCodeHW, ...shareCodesInternal]
     } else {
       shareCode = [...shareCodesInternal, ...shareCodeHW]
     }
-
-    console.log(`${UserName} 去助力 ${shareCodesInternal[0].taskToken}`)
-    res = await api('do_assist_task', `taskToken=${shareCodesInternal[0].taskToken}&inviter_id=${shareCodesInternal[0].inviter_id}`)
-    o2s(res)
-    // console.log('助力结果：', res)
-    await wait(4000)
+    for (let code of shareCodesInternal) {
+      console.log(`${UserName} 去助力 ${code.taskToken}`)
+      res = await api('do_assist_task', `taskToken=${code.taskToken}&inviter_id=${code.inviter_id}`)
+      o2s(res)
+      // console.log('助力结果：', res)
+      await wait(4000)
+      if (res.status_code === 422)
+        break
+    }
   }
 })()
 

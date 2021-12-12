@@ -31,9 +31,13 @@ if (id) {
       "content-type": "application/json",
     }
   }).then(res => {
-    console.log(res.data.data['skuName'])
-    console.log(res.data.data['promotionUrl'])
-    console.log(res.data.data['wlCommission'])
+    try {
+      console.log(res.data.data['skuName'])
+      console.log(res.data.data['promotionUrl'])
+      console.log(res.data.data['wlCommission'])
+    } catch (e) {
+      console.log('没有返利')
+    }
   })
 } else {
   console.log('未提供商品ID\nUsage: node jd_ConvertSuperLink.js [ID]\nExample: node jd_ConvertSuperLink.js 100026667858')
