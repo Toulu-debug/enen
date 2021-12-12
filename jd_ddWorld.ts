@@ -16,7 +16,7 @@ let HW_Priority: boolean = true, shareCodeHW: any[] = [], shareCode: any[] = []
  * true  HW.ts -> 内部
  * false 内部   -> HW.ts
  */
-process.env.HW_Priority.toLowerCase() === 'false' ? HW_Priority = false : ''
+process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
