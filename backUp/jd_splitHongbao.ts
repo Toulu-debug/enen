@@ -4,7 +4,7 @@
  * cron: 0 0,15 * * *
  */
 
-import USER_AGENT, {requireConfig, wait, getshareCodeHW, o2s} from "./TS_USER_AGENTS"
+import USER_AGENT, {requireConfig, wait, getshareCodeHW, o2s} from "../TS_USER_AGENTS"
 import axios from "axios"
 
 let cookie: string = '', res: any = '', UserName: string, index: number

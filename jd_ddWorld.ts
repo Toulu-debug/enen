@@ -48,6 +48,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
           }
         }
         if (t.taskName === '邀请好友助力') {
+          console.log('收到助力：', t.times)
           res = await api('get_user_info')
           console.log('助力码：', t.assistTaskDetailVo.taskToken, res.openid)
           shareCodesInternal.push({
@@ -60,9 +61,8 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
     if (new Date().getHours() === 20) {
       res = await api('get_exchange')
-      console.log(res)
       for (let t of res) {
-        if (t.times_limit !== t.exchange_total) {
+        if ([500, 1000].includes(t.coins) && t.times_limit !== t.exchange_total) {
           console.log('兑换', t.coins)
           res = await api('do_exchange', `id=${t.id}`)
           o2s(res)

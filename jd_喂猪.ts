@@ -38,7 +38,9 @@ let cookie: string = '', res: any = '', UserName: string, index: number
     for (let j = 0; j < res.resultData.resultData.currentCount; j++) {
       res = await api('pigPetLotteryPlay', {"type": 0, "validation": "", "channelLV": "", "source": 2, "riskDeviceParam": "{}"})
       try {
-        console.log('转盘：', res.resultData.resultData.award.content, res.resultData.resultData.award.count)
+        console.log('转盘')
+        o2s(res)
+        // console.log('转盘：', res.resultData.resultData.award.content, res.resultData.resultData.award.count)
       } catch (e) {
         console.log(e)
         o2s(res)
@@ -54,6 +56,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number
       for (let j = 0; j < 10; j++) {
         if (food >= 20 && !levelMax) {
           res = await api('pigPetAddFood', {channelLV: "", riskDeviceParam: "{}", skuId: "1001003003", source: 2})
+          o2s(res)
           console.log(`喂${t.goodsName}，成长值：`, res.resultData.resultData.cote.pig.currCount)
           if (res.resultData.resultData.cote.pig.currCount === currLevelCount) {
             console.log('成长值已满')
