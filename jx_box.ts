@@ -55,6 +55,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
     try {
+      // 宝箱任务
       res = await api('query', 'ispp,signhb_source,smp,tk,type', {signhb_source: 5, smp: '', ispp: 0, tk: '', type: 1})
       try {
         console.log(res.invitesign)
@@ -108,6 +109,19 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
         }
       }
 
+      // 喜豆任务
+      res = await api('query', 'type,signhb_source,smp,ispp,tk', {type: 0, signhb_source: 5, smp: '', ispp: 1, tk: ''})
+      let sqactive: string = res.sqactive
+      for (let t of res.commontask) {
+        if (t.status === 1) {
+          console.log('喜豆任务：', t.taskbtnn)
+          res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=${t.task}&signhb_source=5&ispp=1&sqactive=${sqactive}&tk=&_=${Date.now()}&sceneval=2`, '')
+          console.log('任务完成，获得：', res.sendxd)
+          await wait(2000)
+        }
+      }
+
+      // 开宝箱
       res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
       if (res.baoxiang_left != 0) {
         console.log(res.baoxiang_stage)
