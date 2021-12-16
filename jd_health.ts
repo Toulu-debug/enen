@@ -24,33 +24,37 @@ let cookie: string = '', res: any = '', UserName: string
       continue
     }
 
-    res = await api('jdhealth_getTaskDetail', {"buildingId": "", "taskId": "", "channelId": 1})
-    try {
-      for (let t of res.data.result.taskVos) {
-        if (t.status === 1 || t.status === 3) {
-          console.log(t.taskName)
-          for (let tp of t.productInfoVos || t.followShopVo || t.shoppingActivityVos || []) {
-            if (tp.status === 1) {
-              console.log('\t', tp.skuName || tp.shopName || tp.title)
-              if (t.taskName.includes('早睡打卡') && t.taskBeginTime < Date.now() && t.taskEndTime > Date.now()) {
-                res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 1})
-                await wait(2000)
-                console.log('\t', res.data.bizMsg)
+    for (let j = 0; j < 3; j++) {
+      res = await api('jdhealth_getTaskDetail', {"buildingId": "", "taskId": "", "channelId": 1})
+      try {
+        for (let t of res.data.result.taskVos) {
+          if (t.status === 1 || t.status === 3) {
+            console.log(t.taskName)
+            for (let tp of t.productInfoVos || t.followShopVo || t.shoppingActivityVos || []) {
+              if (tp.status === 1) {
+                console.log('\t', tp.skuName || tp.shopName || tp.title)
+                if (t.taskName.includes('早睡打卡') && t.taskBeginTime < Date.now() && t.taskEndTime > Date.now()) {
+                  res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 1})
+                  await wait(2000)
+                  console.log('\t', res.data.bizMsg)
+                }
+                if (t.waitDuration) {
+                  res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 1})
+                  console.log('\t', res.data.bizMsg)
+                  await wait(t.waitDuration * 1000)
+                }
+                res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 0})
+                console.log(res.data.bizMsg, res.data.result.score * 1)
+                await wait(1500)
               }
-              if (t.waitDuration) {
-                res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 1})
-                console.log('\t', res.data.bizMsg)
-                await wait(t.waitDuration * 1000)
-              }
-              res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 0})
-              console.log(res.data.bizMsg, res.data.result.score * 1)
-              await wait(1500)
             }
           }
         }
+      } catch (e) {
+        console.log('Error', e)
+        break
       }
-    } catch (e) {
-      console.log('Error', e)
+      await wait(3000)
     }
   }
 })();

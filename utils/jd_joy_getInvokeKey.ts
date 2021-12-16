@@ -9,9 +9,9 @@ import {sendNotify} from '../sendNotify';
   let res: any = await api('https://prodev.m.jd.com/mall/active/2tZssTgnQsiUqhmg5ooLSHY9XSeN/index.html')
   let file: string = 'https://storage.360buyimg.com/' + res.match(/htmlSourceUrl":"([^"]*)/)[1]
   res = await api(file)
-  file = 'https:' + res.match(/src="([^"]*)/)[1]
+  file = 'https:' + res.match(/src="(\/\/storage.*)"/)[1]
   res = await api(file)
-  file = res.match(/var invokeKey = '(.*)';/)[1]
+  file = res.match(/invokeKey: '(.*)'/)[1]
   console.log('invokeKey:', file)
   if (file !== 'q8DNJdpcfRQ69gIx') {
     await sendNotify('invokeKey Update', file)

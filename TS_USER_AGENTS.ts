@@ -263,6 +263,11 @@ function randomNumString(e: number) {
   return n
 }
 
+function randomWord() {
+  let t = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', a = t.length, n = ""
+  return t.charAt(Math.floor(Math.random() * a))
+}
+
 async function getshareCodeHW(key: string) {
   let shareCodeHW: string[] = []
   for (let i = 0; i < 5; i++) {
@@ -316,5 +321,6 @@ export {
   o2s,
   randomNumString,
   getshareCodeHW,
-  getShareCodePool
+  getShareCodePool,
+  randomWord
 }

@@ -3,14 +3,13 @@
  * cron: 30 * * * *
  */
 
-import {format} from 'date-fns'
 import axios from "axios"
-import {h5st, requireConfig, requestAlgo, wait, exceptCookie, o2s} from "./TS_USER_AGENTS"
-import {sendNotify} from './sendNotify'
 import * as path from "path"
+import {format} from 'date-fns'
+import {sendNotify} from './sendNotify'
+import {h5st, requireConfig, requestAlgo, wait, exceptCookie, randomWord, randomString, getRandomNumberByRange} from "./TS_USER_AGENTS"
 
 let cookie: string = '', res: any = '', UserName: string, index: number
-
 
 interface Params {
   bizCode?: string,
@@ -45,21 +44,12 @@ interface Params {
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
-
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
       continue
     }
 
-    res = await api('userinfo/GetUserInfo', '_time,materialTuanId,materialTuanPin,needPickSiteInfo,pin,sharePin,shareType,source,zone', {
-      pin: '',
-      sharePin: '',
-      shareType: '',
-      materialTuanPin: '',
-      materialTuanId: '',
-      needPickSiteInfo: 0,
-      source: ''
-    })
+    res = await api('userinfo/GetUserInfo', '_time,materialTuanId,materialTuanPin,needPickSiteInfo,pin,sharePin,shareType,source,zone', {pin: '', sharePin: '', shareType: '', materialTuanPin: '', materialTuanId: '', needPickSiteInfo: 0, source: ''})
     let productionId: number = 0, factoryId: number = 0
     await wait(1000)
     try {
@@ -180,26 +170,24 @@ async function task() {
   return 0
 }
 
-function api(fn: string, stk: string, params: Params = {}) {
-  return new Promise((resolve, reject) => {
-    let url: string = ''
-    if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
-      url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
-    else
-      url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
-    url = h5st(url, stk, params, 10001)
-    axios.get(url, {
-      headers: {
-        'Cookie': cookie,
-        'Host': 'm.jingxi.com',
-        'User-Agent': 'jdpingou;',
-        'Referer': 'https://st.jingxi.com/pingou/dream_factory/index.html',
-      }
-    }).then((res: any) => {
-      resolve(res.data)
-    }).catch(err => {
-      console.log('err:', err)
-      reject(err)
-    })
+async function api(fn: string, stk: string, params: Params = {}) {
+  let url: string, t = Date.now()
+  if (['GetUserTaskStatusList', 'DoTask', 'Award'].includes(fn)) {
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${t}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+  } else {
+    url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${t}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+  }
+  url = h5st(url, stk, params, 10001)
+  let {data} = await axios.get(url, {
+    headers: {
+      'Host': 'm.jingxi.com',
+      'Accept': '*/*',
+      'Connection': 'keep-alive',
+      'User-Agent': `jdpingou;iPhone;5.14.2;${getRandomNumberByRange(12, 15)}.${getRandomNumberByRange(0, 3)};${randomString(40)};`,
+      'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+      'Referer': 'https://st.jingxi.com/',
+      'Cookie': cookie
+    }
   })
+  return JSON.parse(data.match(/try.?{jsonpCBK.?\((.*)/)[1])
 }
