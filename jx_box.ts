@@ -10,7 +10,7 @@
  */
 
 import axios from 'axios'
-import {requireConfig, wait, requestAlgo, h5st, randomString, o2s} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, randomWord} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number
 let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[] = ['aae98a3e3b04d3ac430ee9ee91f4759d', 'bdf489af86e5021575040fffee407bc2', '92a46b6081a955fb4dcea1e56e590b3a', '638d77021a1dd4d74cad72d44afd9899', 'f4dc33716d2551e372fd44f5ac0baca8', 'c99659c47858f18fb34427fec4647f17', '34bf741e6bb01c53d879f58b2c1a9205']
@@ -110,7 +110,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
       }
 
       // 喜豆任务
-      res = await api('query', 'type,signhb_source,smp,ispp,tk', {type: 0, signhb_source: 5, smp: '', ispp: 1, tk: ''})
+      res = await api('query', 'ispp,signhb_source,smp,tk,type', {type: 0, signhb_source: 5, smp: '', ispp: 1, tk: ''})
       let sqactive: string = res.sqactive
       for (let t of res.commontask) {
         if (t.status === 1) {
@@ -154,49 +154,37 @@ interface Params {
   tk?: string
 }
 
-function api(fn: string, stk: string, params: Params = {}) {
-  return new Promise(async (resolve, reject) => {
-    let url = `https://m.jingxi.com/fanxiantask/signhb/${fn}?_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`
-    if (fn.match(/(dotask|bxdraw)/)) {
-      url = fn
-    }
-    url = h5st(url, stk, params, 10038)
-    try {
-      let {data}: any = await axios.get(url, {
-        headers: {
-          'Host': 'm.jingxi.com',
-          'User-Agent': `jdpingou;iPhone;5.9.0;12.4.1;${randomString(40)};network/wifi;`,
-          'Referer': 'https://st.jingxi.com/',
-          'Cookie': cookie,
-        }
-      })
-      if (typeof data === 'string') {
-        data = data.replace('try{jsonpCBKB(', '').replace('try{Query(', '').replace('try{BxDraw(', '').replace('try{Dotask(', '').split('\n')[0]
-        resolve(JSON.parse(data))
-      } else {
-        resolve(data)
-      }
-    } catch (e: any) {
-      reject(e)
+async function api(fn: string, stk: string, params: Params = {}) {
+  let url = `https://m.jingxi.com/fanxiantask/signhb/${fn}?_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+  if (fn.match(/(dotask|bxdraw)/)) {
+    url = fn
+  }
+  url = h5st(url, stk, params, 10038)
+  let {data}: any = await axios.get(url, {
+    headers: {
+      'Host': 'm.jingxi.com',
+      'Accept': '*/*',
+      'Connection': 'keep-alive',
+      'User-Agent': 'jdpingou;',
+      'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+      'Referer': 'https://st.jingxi.com/',
+      'Cookie': cookie,
     }
   })
+  return JSON.parse(data.match(/\((.*)/)![1])
 }
 
 async function doubleSign() {
-  try {
-    let {data} = await axios.get('https://m.jingxi.com/double_sign/IssueReward?sceneval=2', {
-      headers: {
-        'Host': 'm.jingxi.com',
-        'Origin': 'https://st.jingxi.com',
-        'Accept': 'application/json',
-        'User-Agent': 'jdpingou;',
-        'Referer': 'https://st.jingxi.com/pingou/jxapp_double_signin/index.html',
-        'Cookie': cookie
-      }
-    })
-    return data
-  } catch (e) {
-    console.log(e)
-    return ''
-  }
+  let {data} = await axios.get(`https://m.jingxi.com/double_sign/IssueReward?sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, {
+    headers: {
+      'Host': 'm.jingxi.com',
+      'Accept': '*/*',
+      'Connection': 'keep-alive',
+      'User-Agent': 'jdpingou;',
+      'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+      'Referer': 'https://st.jingxi.com/',
+      'Cookie': cookie
+    }
+  })
+  return JSON.parse(data.match(/jsonpCBK.?\((.*)/)![1])
 }

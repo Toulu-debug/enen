@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, requestAlgo, h5st} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, randomWord} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = ''
 process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.CFD_LOOP_DELAY)) : console.log('设置延迟:10000~25000随机')
@@ -47,30 +47,19 @@ let UserName: string, index: number
 
 async function speedUp(stk: string, dwType?: number) {
   try {
-    let url: string
-    if (stk === '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-      url = `https://m.jingxi.com/jxbfd/story/queryshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=_cfd_t%2CbizCode%2CdwEnv%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
-    else if (stk === '_cfd_t,bizCode,dwEnv,dwType,ptag,source,strZone')
-      url = `https://m.jingxi.com/jxbfd/story/pickshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&dwType=${dwType}&_stk=_cfd_t%2CbizCode%2CdwEnv%2CdwType%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    let url: string = stk === '_cfd_t,bizCode,dwEnv,ptag,source,strZone'
+      ? `https://m.jingxi.com/jxbfd/story/queryshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=_cfd_t%2CbizCode%2CdwEnv%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+      : `https://m.jingxi.com/jxbfd/story/pickshell?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&dwType=${dwType}&_stk=_cfd_t%2CbizCode%2CdwEnv%2CdwType%2Cptag%2Csource%2CstrZone&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
     url = h5st(url, stk, {})
     let {data} = await axios.get(url, {
       headers: {
         'Host': 'm.jingxi.com',
         'Referer': 'https://st.jingxi.com/',
-        'User-Agent': USER_AGENT,
+        'User-Agent': 'jdpingou;',
         'Cookie': cookie
       }
     })
-    if (typeof data === 'string') {
-      try {
-        return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
-      } catch (e) {
-        console.log(data)
-        return ''
-      }
-    } else {
-      return data
-    }
+    return JSON.parse(data.match(/jsonpCBK.?\((.*)/)![1])
   } catch (e) {
     return ''
   }

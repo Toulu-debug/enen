@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, randomString} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, randomWord} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number, token: any = {}
 
@@ -141,9 +141,9 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
     } else {
       bizCode = params.bizCode
     }
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   } else {
-    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   }
   url = h5st(url, stk, params, 10032)
   let {data} = await axios.get(url, {
@@ -152,19 +152,10 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
       'Accept': '*/*',
       'Connection': 'keep-alive',
       'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-      'User-Agent': `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random() * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`,
+      'User-Agent': `jdpingou;`,
       'Referer': 'https://st.jingxi.com/',
       'Cookie': cookie
     }
   })
-  if (typeof data === 'string') {
-    try {
-      return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
-    } catch (e) {
-      console.log(data)
-      return ''
-    }
-  } else {
-    return data
-  }
+  return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
 }

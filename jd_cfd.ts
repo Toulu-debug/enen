@@ -10,7 +10,7 @@
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, randomString} from './TS_USER_AGENTS'
+import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, randomString, randomWord, getRandomNumberByRange, o2s} from './TS_USER_AGENTS'
 
 const axi = axios.create({timeout: 10000})
 
@@ -161,13 +161,14 @@ interface Params {
 
     // 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard, isUsing: boolean = res.cardInfo.dwWorkingType !== 0
+    console.log('加速卡：')
+    o2s(res)
+    let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard
     for (let card of coincard) {
-      if (!isUsing && card.dwCardNums !== 0) {
+      if (card.dwCardNums !== 0) {
         res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 1, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
         if (res.iRet === 0) {
           console.log('金币加速卡使用成功')
-          isUsing = true
         } else {
           console.log('金币加速卡使用失败', res)
           break
@@ -177,15 +178,13 @@ interface Params {
       }
     }
     for (let card of richcard) {
-      if (!isUsing && card.dwCardNums !== 0) {
+      if (card.dwCardNums !== 0) {
         for (let j = 0; j < card.dwCardNums; j++) {
           res = await api('user/UsePropCard', '_cfd_t,bizCode,dwCardType,dwEnv,ptag,source,strCardTypeIndex,strZone', {dwCardType: 2, strCardTypeIndex: encodeURIComponent(card.strCardTypeIndex)})
           if (res.iRet === 0) {
             console.log('点券加速卡使用成功')
-            isUsing = true
           } else {
             console.log('点券加速卡使用失败', res)
-            isUsing = true
             break
           }
           await wait(2000)
@@ -346,7 +345,6 @@ interface Params {
         console.log('收藏家出现')
         // TODO 背包满了再卖给收破烂的
         res = await api('story/CollectorOper', '_cfd_t,bizCode,dwEnv,ptag,source,strZone,strStoryId,dwType,ddwTriggerDay', {strStoryId: res.StoryInfo.StoryList[0].strStoryId, dwType: '2', ddwTriggerDay: res.StoryInfo.StoryList[0].ddwTriggerDay})
-        console.log(res)
         await wait(1000)
         isCollector = true
         // 清空背包
@@ -437,7 +435,7 @@ interface Params {
         res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId}, 'right')
         await wait(1000)
         if (res.ret === 0) {
-          console.log('领奖成功')
+          console.log('领奖成功：', res)
         } else {
           console.log('领奖失败', res)
         }
@@ -514,7 +512,7 @@ interface Params {
 })()
 
 async function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
-  let url: string
+  let url: string, t: number = Date.now()
   if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
     let bizCode: string
     if (!params.bizCode) {
@@ -522,9 +520,9 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
     } else {
       bizCode = params.bizCode
     }
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${t}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   } else {
-    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${Date.now()}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`
+    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${t}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   }
   url = h5st(url, stk, params, 10032)
   let {data} = await axios.get(url, {
@@ -533,20 +531,16 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
       'Accept': '*/*',
       'Connection': 'keep-alive',
       'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-      'User-Agent': `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random() * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`,
+      'User-Agent': `jdpingou;iPhone;5.14.2;${getRandomNumberByRange(12, 16)}.${getRandomNumberByRange(0, 3)};${randomString(40)};`,
       'Referer': 'https://st.jingxi.com/',
       'Cookie': cookie
     }
   })
-  if (typeof data === 'string') {
-    try {
-      return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
-    } catch (e) {
-      console.log(data)
-      return ''
-    }
-  } else {
-    return data
+  try {
+    return JSON.parse(data.match(/jsonpCBK.?\(([^)]*)/)![1])
+  } catch (e) {
+    console.log(data)
+    return ''
   }
 }
 
