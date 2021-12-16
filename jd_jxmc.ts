@@ -6,7 +6,7 @@
 import axios from 'axios'
 import {Md5} from "ts-md5"
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, o2s} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, o2s, randomWord, getRandomNumberByRange, randomString} from './TS_USER_AGENTS'
 
 const token = require('./utils/jd_jxmc.js').token
 
@@ -173,8 +173,8 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
 
     // 登录领白菜
     res = await api('queryservice/GetVisitBackInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
-    await wait(3000)
-    if (res.iscandraw === 1) {
+    await wait(2000)
+    if (res.data.iscandraw === 1) {
       res = await api('operservice/GetVisitBackCabbage', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
       if (res.ret === 0) {
         console.log('登录领白菜:', res.data.drawnum)
@@ -386,27 +386,24 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
   let url: string
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
     if (temporary)
-      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc_zanaixin&bizCode=jxmc_zanaixin&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
+      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc_zanaixin&bizCode=jxmc_zanaixin&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, stk, params, 10028)
     else
-      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${String.fromCharCode(Math.floor(Math.random() * 26) + "A".charCodeAt(0))}&g_ty=ls`, stk, params, 10028)
+      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, stk, params, 10028)
   } else {
-    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2`, stk, params, 10028)
+    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, stk, params, 10028)
   }
-  try {
-    let {data}: any = await axios.get(url, {
-      headers: {
-        'Host': 'm.jingxi.com',
-        'User-Agent': `jdpingou;`,
-        'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',
-        'Cookie': cookie
-      }
-    })
-    if (typeof data === 'string')
-      return JSON.parse(data.replace(/\n/g, '').match(/jsonpCBK.?\(([^)]*)/)![1])
-    return data
-  } catch (e: any) {
-    return {}
-  }
+  let {data}: any = await axios.get(url, {
+    headers: {
+      'Host': 'm.jingxi.com',
+      'Accept': '*/*',
+      'Connection': 'keep-alive',
+      'User-Agent': `jdpingou;iPhone;5.14.2;${getRandomNumberByRange(12, 16)}.${getRandomNumberByRange(0, 3)};${randomString(40)};`,
+      'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+      'Referer': 'https://st.jingxi.com/',
+      'Cookie': cookie
+    }
+  })
+  return JSON.parse(data.match(/jsonpCBK.?\((.*)/)![1])
 }
 
 async function makeShareCodes(code: string) {
