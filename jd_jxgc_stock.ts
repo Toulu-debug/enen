@@ -4,7 +4,7 @@
  */
 
 import axios from "axios";
-import {requireConfig, requestAlgo, o2s, wait} from "./TS_USER_AGENTS";
+import {requireConfig, requestAlgo, o2s, wait, randomWord} from "./TS_USER_AGENTS";
 import {sendNotify} from './sendNotify'
 
 let cookie: string = '', res: any = '', message: string = '';
@@ -69,8 +69,8 @@ let cookie: string = '', res: any = '', message: string = '';
 async function api(commodityId?: number) {
   let t = Date.now()
   let url: string = commodityId
-    ? `https://m.jingxi.com/dreamfactory/diminfo/GetCommodityDetails?zone=dream_factory&commodityId=${commodityId}&_time=${t}&_ts=${t}&_=${t}&sceneval=2`
-    : `https://m.jingxi.com/dreamfactory/diminfo/GetCommodityList?zone=dream_factory&flag=2&pageNo=1&pageSize=12&_time=${t}&_ts=${t}&_=${t}&sceneval=2`
+    ? `https://m.jingxi.com/dreamfactory/diminfo/GetCommodityDetails?zone=dream_factory&commodityId=${commodityId}&_time=${t}&_ts=${t}&_=${t}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+    : `https://m.jingxi.com/dreamfactory/diminfo/GetCommodityList?zone=dream_factory&flag=2&pageNo=1&pageSize=12&_time=${t}&_ts=${t}&_=${t}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   let {data}: any = await axios.get(url, {
     headers: {
       'Host': 'm.jingxi.com',
@@ -79,5 +79,5 @@ async function api(commodityId?: number) {
       'Cookie': cookie
     }
   })
-  return data
+  return JSON.parse(data.match(/jsonpCBK.?\((.*)/)[1])
 }
