@@ -9,7 +9,7 @@ import {format} from 'date-fns'
 import {sendNotify} from './sendNotify'
 import {h5st, requireConfig, requestAlgo, wait, exceptCookie, randomWord, randomString, getRandomNumberByRange} from "./TS_USER_AGENTS"
 
-let cookie: string = '', res: any = '', UserName: string, index: number
+let cookie: string = '', res: any = '', UserName: string
 
 interface Params {
   bizCode?: string,
@@ -39,11 +39,10 @@ interface Params {
   await requestAlgo(10001)
   let cookiesArr: any = await requireConfig()
   let except: string[] = exceptCookie(path.basename(__filename))
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1
-    console.log(`\n开始【京东账号${index}】${UserName}\n`)
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
       continue
@@ -51,14 +50,14 @@ interface Params {
 
     res = await api('userinfo/GetUserInfo', '_time,materialTuanId,materialTuanPin,needPickSiteInfo,pin,sharePin,shareType,source,zone', {pin: '', sharePin: '', shareType: '', materialTuanPin: '', materialTuanId: '', needPickSiteInfo: 0, source: ''})
     let productionId: number = 0, factoryId: number = 0
-    await wait(1000)
+    await wait(2000)
     try {
       productionId = res.data.productionList[0].productionId
       factoryId = res.data.factoryList[0].factoryId
       let investedElectric: number = res.data.productionList[0].investedElectric, needElectric: number = res.data.productionList[0].needElectric, progress: string = (investedElectric / needElectric * 100).toFixed(2)
-      console.log('生产进度:', progress)
+      console.log('生产进度：', progress)
       if (progress === '100.00') {
-        sendNotify("京喜工厂生产完成", `账号${index} ${UserName}`)
+        sendNotify("京喜工厂生产完成", `账号${index + 1} ${UserName}`)
         continue
       }
     } catch (e) {
@@ -69,13 +68,13 @@ interface Params {
     // 开红包
     if (res.data.productionStage.productionStageAwardStatus === 1) {
       res = await api('userinfo/DrawProductionStagePrize', '_time,productionId,zone', {productionId: productionId})
-      console.log('打开红包:', res.data.active)
-      await wait(2000)
+      console.log('打开红包：', res.data.active)
+      await wait(4000)
     }
 
     // 收发电机
     res = await api('generator/QueryCurrentElectricityQuantity', '_time,factoryid,querytype,zone', {factoryid: factoryId, querytype: 1})
-    await wait(1000)
+    await wait(2000)
     let flag: number = -1
     if (res.data.nextCollectDoubleFlag === 1) {
       // 下次双倍
@@ -90,44 +89,42 @@ interface Params {
       flag = 0
     }
     if (flag !== -1) {
-      res = await api('generator/CollectCurrentElectricity',
-        '_time,apptoken,doubleflag,factoryid,pgtimestamp,phoneID,zone',
-        {apptoken: '', pgtimestamp: '', phoneID: '', factoryid: factoryId, doubleflag: flag, timeStamp: 'undefined'})
+      res = await api('generator/CollectCurrentElectricity', '_time,apptoken,doubleflag,factoryid,pgtimestamp,phoneID,zone', {apptoken: '', pgtimestamp: '', phoneID: '', factoryid: factoryId, doubleflag: flag, timeStamp: 'undefined'})
       res.ret === 0
-        ? console.log('发电机收取成功:', res.data.CollectElectricity)
-        : console.log('发电机收取失败:', res)
+        ? console.log('发电机收取成功：', res.data.CollectElectricity)
+        : console.log('发电机收取失败：', res)
     }
-    await wait(2000)
+    await wait(4000)
 
     // 投入电力
-    for (let j = 0; j < 3; j++) {
+    for (let j = 0; j < 2; j++) {
       res = await api('userinfo/InvestElectric', '_time,productionId,zone', {productionId: productionId})
       if (res.ret === 0) {
-        console.log('投入电力:', res.data.investElectric)
+        console.log('投入电力成功：', res.data.investElectric)
       } else {
-        console.log('投入电力失败:', res)
+        console.log('投入电力失败：', res)
         break
       }
       await wait(3000)
     }
 
     res = await api('friend/QueryHireReward', '_time,zone')
-    await wait(1000)
+    await wait(2000)
     for (let t of res.data.hireReward) {
       if (t.date !== format(Date.now(), "yyyyMMdd")) {
         res = await api('friend/HireAward', '_time,date,type,zone', {date: t.date})
-        await wait(1000)
+        await wait(2000)
         if (res.ret === 0)
-          console.log('收取气泡成功:', t.electricityQuantity)
+          console.log('收取气泡成功：', t.electricityQuantity)
       }
     }
 
     console.log('任务列表开始')
-    for (let j = 0; j < 30; j++) {
+    for (let j = 0; j < 5; j++) {
       if (await task() === 0) {
         break
       }
-      await wait(4000)
+      await wait(5000)
     }
     console.log('任务列表结束')
   }
@@ -136,14 +133,14 @@ interface Params {
 async function task() {
   res = await api('GetUserTaskStatusList', '_time,bizCode,showAreaTaskFlag,source', {showAreaTaskFlag: 1, bizCode: 'dream_factory'})
   console.log('GetUserTaskStatusList: 刷新任务列表')
-  await wait(2000)
+  await wait(3000)
   for (let t of res.data.userTaskStatusList) {
     if (t.awardStatus === 2) {
       if (t.completedTimes >= t.targetTimes) {
-        console.log('可领奖:', t.taskName)
+        console.log('可领奖：', t.taskName)
         res = await api('Award', '_time,bizCode,source,taskId', {taskId: t.taskId, bizCode: t.bizCode})
         if (res.ret === 0) {
-          console.log('领奖成功:', res.data.prizeInfo.trim() * 1)
+          console.log('领奖成功：', res.data.prizeInfo.trim() * 1)
           await wait(4000)
           return 1
         } else {
@@ -153,7 +150,7 @@ async function task() {
       }
 
       if (t.dateType === 2 && t.completedTimes < t.targetTimes && [2, 6, 9].indexOf(t.taskType) > -1) {
-        console.log('任务开始:', t.taskName)
+        console.log('任务开始：', t.taskName)
         res = await api('DoTask', '_time,bizCode,configExtra,source,taskId', {configExtra: '', taskId: t.taskId, bizCode: t.bizCode})
         await wait(5000)
         if (res.ret === 0) {
@@ -161,7 +158,7 @@ async function task() {
           await wait(3000)
           return 1
         } else {
-          console.log('任务失败:')
+          console.log('任务失败')
           return 0
         }
       }

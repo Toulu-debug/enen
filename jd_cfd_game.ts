@@ -71,7 +71,7 @@ interface Params {
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
-    for (let j = 0; j < 3; j++) {
+    for (let j = 0; j < 1; j++) {
       token = getJxToken(cookie)
       // 珍珠
       res = await api('user/ComposePearlState', '', {__t: Date.now(), dwGetType: 0})
