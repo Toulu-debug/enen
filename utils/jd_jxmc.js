@@ -29,7 +29,6 @@ cron "20 0-23/3 * * *" script-path=jd_jxmc.js,tag=京喜牧场
 });
 const $ = new Env('京喜牧场');
 $.inviteCodeList = [];
-let cookiesArr = [];
 $.appId = 10028;
 
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;

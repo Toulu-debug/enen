@@ -6,7 +6,7 @@
 import axios from 'axios'
 import {Md5} from "ts-md5"
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, o2s, randomWord, getRandomNumberByRange, randomString} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, o2s, randomWord, getshareCodeHW} from './TS_USER_AGENTS'
 
 const token = require('./utils/jd_jxmc.js').token
 
@@ -49,6 +49,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       petids = homePageInfo.data.petinfo.map(pet => {
         return pet.petid
       })
+      console.log('当前🐔🐔：', petids)
       petNum = homePageInfo.data.petinfo.length
       coins = homePageInfo.data.coins
     } catch (e: any) {
@@ -243,7 +244,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     await wait(8000)
 
     console.log('除草...start')
-    while (1) {
+    for (let j = 0; j < 30; j++) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '2'})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
@@ -255,20 +256,20 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
           await wait(5000)
         }
       } catch (e: any) {
-        console.log('除草 Error:', e)
+        console.log('除草 Error:', e.response)
         break
       }
     }
     await wait(6000)
 
-    while (1) {
+    for (let j = 0; j < 30; j++) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,petid,phoneid,sceneid,timestamp,type', {type: '1', petid: petids[Math.floor((Math.random() * petids.length))]})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
         console.log('挑逗:', res.data.addcoins)
         await wait(6000)
       } catch (e: any) {
-        console.log('挑逗 Error:', e)
+        console.log('挑逗 Error:', e.response)
         break
       }
     }
@@ -276,7 +277,9 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   await wait(5000)
 
   for (let [index, value] of cookiesArr.entries()) {
-    await getCodes()
+    if (shareCodesHbHw.length === 0) {
+      shareCodesHbHw = await getshareCodeHW('jxmchb')
+    }
     // 获取随机红包码
     try {
       let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmchb/30`)
@@ -305,7 +308,9 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
   }
 
   for (let [index, value] of cookiesArr.entries()) {
-    await getCodes()
+    if (shareCodesHW.length === 0) {
+      shareCodesHW = await getshareCodeHW('jxmc')
+    }
     // 获取随机助力码
     try {
       let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmc/30`, {timeout: 10000})
@@ -396,8 +401,7 @@ async function api(fn: string, stk: string, params: Params = {}, temporary: bool
     headers: {
       'Host': 'm.jingxi.com',
       'Accept': '*/*',
-      'Connection': 'keep-alive',
-      'User-Agent': `jdpingou;iPhone;5.14.2;${getRandomNumberByRange(12, 16)}.${getRandomNumberByRange(0, 3)};${randomString(40)};`,
+      'User-Agent': 'jdpingou;iPhone;5.15.0;15.1;3271867e5dc749cc8cc76aa5aa6a084eea8e7920;network/wifi;model/iPhone11,6;appBuild/100779;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/15;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
       'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
       'Referer': 'https://st.jingxi.com/',
       'Cookie': cookie
@@ -429,14 +433,5 @@ async function makeShareCodesHb(code: string) {
   } catch (e) {
     console.log('自动提交失败')
     console.log(e)
-  }
-}
-
-async function getCodes() {
-  try {
-    let {data}: any = await axios.get('https://api.jdsharecode.xyz/api/HW_CODES')
-    shareCodesHW = data.jxmc || []
-    shareCodesHbHw = data.jxmchb || []
-  } catch (e) {
   }
 }
