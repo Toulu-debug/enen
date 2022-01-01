@@ -10,8 +10,8 @@ import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5
 
 const token = require('./utils/jd_jxmc.js').token
 
-let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any, jxToken: any, UserName: string, index: number
-let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSelf: string[] = [], shareCodesHW: string[] = []
+let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any = '', jxToken: any = '', UserName: string = ''
+let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
   await requestAlgo()
@@ -24,15 +24,16 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     jxToken = await token(cookie)
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
     await wait(2000)
-    if (homePageInfo.data.maintaskId !== 'pause') {
-      console.log('init...')
-      for (let j = 0; j < 20; j++) {
-        res = await api('operservice/DoMainTask', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,step,timestamp', {step: homePageInfo.data.maintaskId})
-        if (res.data.maintaskId === 'pause')
-          break
-        await wait(2000)
-      }
-    }
+
+    // if (homePageInfo.data.maintaskId !== 'pause') {
+    //   console.log('init...')
+    //   for (let j = 0; j < 20; j++) {
+    //     res = await api('operservice/DoMainTask', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,step,timestamp', {step: homePageInfo.data.maintaskId})
+    //     if (res.data.maintaskId === 'pause')
+    //       break
+    //     await wait(2000)
+    //   }
+    // }
 
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
     let lastgettime: number
@@ -75,7 +76,7 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
     let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
     await wait(2000)
     for (let t of tasks.data.userTaskStatusList) {
-      if (t.awardStatus === 2 && t.taskName !== '邀请牧场新用户助力' && t.taskName !== '拆开邀人红包') {
+      if (t.awardStatus === 2 && !['邀请牧场新用户助力', '拆开邀人红包', '去下单得爱心'].includes(t.taskName)) {
         console.log(t.taskName)
         if (t.completedTimes < t.targetTimes) {
           for (let j = t.completedTimes; j < t.targetTimes; j++) {
@@ -140,16 +141,6 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
         }
       }
     } catch (e) {
-    }
-    await wait(5000)
-
-    // 红包
-    res = await api('operservice/GetInviteStatus', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
-    console.log('红包助力:', res.data.sharekey)
-    shareCodesHbSelf.push(res.data.sharekey)
-    try {
-      await makeShareCodesHb(res.data.sharekey)
-    } catch (e: any) {
     }
     await wait(5000)
 
@@ -274,39 +265,8 @@ let shareCodesHbSelf: string[] = [], shareCodesHbHw: string[] = [], shareCodesSe
       }
     }
   }
+
   await wait(5000)
-
-  for (let [index, value] of cookiesArr.entries()) {
-    if (shareCodesHbHw.length === 0) {
-      shareCodesHbHw = await getshareCodeHW('jxmchb')
-    }
-    // 获取随机红包码
-    try {
-      let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmchb/30`)
-      console.log('获取到30个随机红包码:', data.data)
-      shareCodes = Array.from(new Set([...shareCodesHbSelf, ...shareCodesHbHw, ...data.data]))
-    } catch (e: any) {
-      console.log('获取助力池失败')
-      shareCodes = Array.from(new Set([...shareCodesHbSelf, ...shareCodesHbHw]))
-    }
-
-    cookie = value
-    jxToken = await token(cookie)
-    for (let code of shareCodes) {
-      console.log(`账号${index + 1} 去助力 ${code}`)
-      res = await api('operservice/InviteEnroll', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: code})
-      if (res.ret === 0) {
-        console.log('成功')
-      } else if (res.ret === 2711) {
-        console.log('上限')
-        break
-      } else {
-        console.log('失败:', res.message)
-      }
-      await wait(8000)
-    }
-  }
-
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('jxmc')
@@ -416,19 +376,6 @@ async function makeShareCodes(code: string) {
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
     let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
-    console.log(data.message)
-  } catch (e) {
-    console.log('自动提交失败')
-    console.log(e)
-  }
-}
-
-async function makeShareCodesHb(code: string) {
-  try {
-    let bean: string = await getBeanShareCode(cookie)
-    let farm: string = await getFarmShareCode(cookie)
-    let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/autoInsert/jxmchb?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`, {timeout: 10000})
     console.log(data.message)
   } catch (e) {
     console.log('自动提交失败')

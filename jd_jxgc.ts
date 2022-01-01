@@ -180,7 +180,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
       'Host': 'm.jingxi.com',
       'Accept': '*/*',
       'Connection': 'keep-alive',
-      'User-Agent': `jdpingou;iPhone;5.14.2;${getRandomNumberByRange(12, 15)}.${getRandomNumberByRange(0, 3)};${randomString(40)};`,
+      'User-Agent': `jdpingou;`,
       'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
       'Referer': 'https://st.jingxi.com/',
       'Cookie': cookie
