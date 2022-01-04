@@ -184,7 +184,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     console.log('任务列表结束')
     await wait(5000)
 
-    while (coins >= 5000) {
+    while (coins >= 5000 && food <= 500) {
       res = await api('operservice/Buy', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '1'})
       if (res.ret === 0) {
         console.log('买草成功:', res.data.newnum)
