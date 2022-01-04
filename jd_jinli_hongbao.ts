@@ -11,7 +11,7 @@ import axios from 'axios';
 import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, getshareCodeHW} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = []
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
 
 !(async () => {
   let cookiesArr: any = await requireConfig();
@@ -46,17 +46,24 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     }
     for (let code of shareCodes) {
-      console.log(`账号${index + 1} ${UserName} 去助力 ${code}`)
-      res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~0gga2ik`, "sceneid": "JLHBhPageh5"})
-      if (res.data.result.status === 0) {
-        console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))
-      } else if (res.data.result.status === 3) {
-        console.log('今日助力次数已满')
-        break
+      if (!fullCode.includes(code)) {
+        console.log(`账号${index + 1} ${UserName} 去助力 ${code}`)
+        res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~0gga2ik`, "sceneid": "JLHBhPageh5"})
+        if (res.data.result.status === 0) {
+          console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))
+        } else if (res.data.result.status === 3) {
+          console.log('今日助力次数已满')
+          break
+        } else {
+          console.log('助力结果：', res.data.result.statusDesc)
+          if (res.data.result.statusDesc === '啊偶，TA的助力已满，开启自己的红包活动吧~') {
+            fullCode.push(code)
+          }
+        }
+        await wait(1000)
       } else {
-        console.log('助力结果：', res.data.result.statusDesc)
+        console.log(`Code ${code} 已被助满`)
       }
-      await wait(1000)
     }
   }
 
@@ -92,8 +99,21 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
           await wait(2000)
         }
       }
+      await wait(3000)
 
-      // 拆红包
+      // 打开任务红包
+      res = await api('taskHomePage', {})
+      await wait(2000)
+      for (let t of res.data.result.taskInfos) {
+        if (t.innerStatus === 3) {
+          res = await api('h5receiveRedpacketAll', {"taskType": t.taskType, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~138q6w6`, "sceneid": "JLHBhPageh5"})
+          console.log(`${t.title} 打开成功，获得`, parseFloat(res.data.result.discount))
+          await wait(2000)
+        }
+      }
+      await wait(3000)
+
+      // 打开助力红包
       let j: number = 1
       res = await api('h5activityIndex', {"isjdapp": 1})
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
