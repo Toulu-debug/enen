@@ -25,7 +25,7 @@ const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let exchangeFlag = $.isNode() ? (process.env.JD_CITY_EXCHANGE === "true" ? true : false) : ($.getdata('jdJxdExchange') === "true" ? true : false)  //是否开启自动抽奖，建议活动快结束开启，默认关闭
 let helpPool = $.isNode() ? (process.env.JD_CITY_HELPPOOL === "false" ? false : true) : ($.getdata('JD_CITY_HELPPOOL') === "false" ? false : true) //是否全部助力助力池开关，默认开启
 let cookiesArr = [], cookie = '', message;
-let uuid, UA, shareCodesSelf = [], shareCodes;
+let uuid, UA, shareCodesSelf = [], shareCodes = [];
 
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
@@ -149,7 +149,7 @@ function getInfo(inviteId, flag = false) {
                 if (flag) {
                   console.log(`【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data.data && data.data.result.userActBaseInfo.inviteId}`);
                   if (data.data && data.data.result.userActBaseInfo.inviteId) {
-                    shareCodesSelf.push(data.data.result.userActBaseInfo.inviteId)
+                    shareCodes.push(data.data.result.userActBaseInfo.inviteId)
                   }
                   console.log(`剩余金额：${data.data.result.userActBaseInfo.poolMoney}`)
                   for (let pop of data.data.result.popWindows || []) {
@@ -168,6 +168,28 @@ function getInfo(inviteId, flag = false) {
                       }
                     }
                   }
+                  // for (let task of taskVos || []) {
+                  //   const t = Date.now();
+                  //   if (task.status === 1 && t >= task.taskBeginTime && t < task.taskEndTime) {
+                  //     const id = task.taskId, max = task.maxTimes;
+                  //     const waitDuration = task.waitDuration || 0;
+                  //     let time = task?.times || 0;
+                  //     for (let ltask of task.shoppingActivityVos) {
+                  //       if (ltask.status === 1) {
+                  //         console.log(`去做任务：${ltask.title}`);
+                  //         if (waitDuration) {
+                  //           await $.wait(1500);
+                  //           await city_doTaskByTk(id, ltask.taskToken, 1);
+                  //           await $.wait(waitDuration * 1000);
+                  //         }
+                  //         await city_doTaskByTk(id, ltask.taskToken);
+                  //         time++;
+                  //         if (time >= max) break;
+                  //       }
+                  //     }
+                  //     await $.wait(2500);
+                  //   }
+                  // }
                 }
                 for (let vo of data.data.result && data.data.result.mainInfos || []) {
                   if (vo && vo.remaingAssistNum === 0 && vo.status === "1") {
