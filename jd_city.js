@@ -18,14 +18,14 @@ cron "0 0-23/1 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/syn
 城城领现金 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_city.js, cronexpr="0 0-23/1 * * *", timeout=3600, enable=true
  */
 const $ = new Env('城城领现金');
-const notify = $.isNode() ? require('../sendNotify') : '';
+const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
-const jdCookieNode = $.isNode() ? require('../jdCookie.js') : '';
+const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 //自动抽奖 ，环境变量  JD_CITY_EXCHANGE
 let exchangeFlag = $.isNode() ? (process.env.JD_CITY_EXCHANGE === "true" ? true : false) : ($.getdata('jdJxdExchange') === "true" ? true : false)  //是否开启自动抽奖，建议活动快结束开启，默认关闭
 let helpPool = $.isNode() ? (process.env.JD_CITY_HELPPOOL === "false" ? false : true) : ($.getdata('JD_CITY_HELPPOOL') === "false" ? false : true) //是否全部助力助力池开关，默认开启
 let cookiesArr = [], cookie = '', message;
-let uuid, UA, shareCodesSelf=[], shareCodes;
+let uuid, UA, shareCodesSelf = [], shareCodes;
 
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
@@ -114,7 +114,7 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
       }
     } else {
       //默认10.29开启抽奖
-      if ((new Date().getMonth() + 1) === 10 && new Date().getDate() >= 29) {
+      if ((new Date().getMonth() + 1) === 1 && new Date().getDate() >= 21) {
         const res = await city_lotteryAward();//抽奖
         if (res && res > 0) {
           for (let i = 0; i < new Array(res).fill('').length; i++) {
@@ -134,9 +134,9 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
   })
 
 function getInfo(inviteId, flag = false) {
-  let body = {"lbsCity": "1", "realLbsCity": "2953", "inviteId": inviteId, "headImg": "", "userName": "", "taskChannel": "1"}
+  let body = {"lbsCity": "1", "realLbsCity": "2953", "inviteId": inviteId, "headImg": "", "userName": "", "taskChannel": "1", "location": "", "safeStr": ""}
   return new Promise((resolve) => {
-    $.post(taskPostUrl("city_getHomeData", body), async (err, resp, data) => {
+    $.post(taskPostUrl("city_getHomeDatav1", body), async (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -168,28 +168,6 @@ function getInfo(inviteId, flag = false) {
                       }
                     }
                   }
-                  // for (let task of taskVos || []) {
-                  //   const t = Date.now();
-                  //   if (task.status === 1 && t >= task.taskBeginTime && t < task.taskEndTime) {
-                  //     const id = task.taskId, max = task.maxTimes;
-                  //     const waitDuration = task.waitDuration || 0;
-                  //     let time = task?.times || 0;
-                  //     for (let ltask of task.shoppingActivityVos) {
-                  //       if (ltask.status === 1) {
-                  //         console.log(`去做任务：${ltask.title}`);
-                  //         if (waitDuration) {
-                  //           await $.wait(1500);
-                  //           await city_doTaskByTk(id, ltask.taskToken, 1);
-                  //           await $.wait(waitDuration * 1000);
-                  //         }
-                  //         await city_doTaskByTk(id, ltask.taskToken);
-                  //         time++;
-                  //         if (time >= max) break;
-                  //       }
-                  //     }
-                  //     await $.wait(2500);
-                  //   }
-                  // }
                 }
                 for (let vo of data.data.result && data.data.result.mainInfos || []) {
                   if (vo && vo.remaingAssistNum === 0 && vo.status === "1") {
@@ -363,7 +341,7 @@ function TotalBean() {
         "Connection": "keep-alive",
         "Cookie": cookie,
         "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('../USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
+        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
       }
     }
     $.post(options, (err, resp, data) => {
