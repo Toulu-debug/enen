@@ -16,7 +16,6 @@ cron "0 0-23/1 * * *" script-path=https://raw.githubusercontent.com/Aaron-lv/syn
 ====================================小火箭=============================
 城城领现金 = type=cron,script-path=https://raw.githubusercontent.com/Aaron-lv/sync/jd_scripts/jd_city.js, cronexpr="0 0-23/1 * * *", timeout=3600, enable=true
  */
-
 const $ = new Env('城城领现金');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
@@ -73,7 +72,11 @@ let inviteCodes = []
       await $.wait(1000)
     }
   }
-  inviteCodes = []
+  inviteCodes = await getAuthorShareCode()
+  await $.wait(5000)
+  if (!inviteCodes) {
+    inviteCodes = await getAuthorShareCode()
+  }
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
@@ -85,11 +88,7 @@ let inviteCodes = []
     if (helpPool) {
       shareCodes = [...new Set([...inviteCodes, ...$.readShareCode])]
     } else {
-      if (i === 0) {
-        shareCodes = [...new Set([...inviteCodes, ...$.readShareCode])]
-      } else {
-        shareCodes = [...$.newShareCodes]
-      }
+      shareCodes = [...$.newShareCodes]
     }
     for (let j = 0; j < shareCodes.length; j++) {
       console.log(helpPool ? `\n${$.UserName} 开始助力 助力池 【${shareCodes[j]}】` : i === 0 ? `\nCK1 ${$.UserName} 开始助力 助力池 【${shareCodes[j]}】` : `\n${$.UserName} 开始助力 【${shareCodes[j]}】`)
@@ -320,7 +319,7 @@ function randomString(e) {
 
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `https://api.jdsharecode.xyz/api/city/50`, 'timeout': 15000}, (err, resp, data) => {
+    $.get({url: `https://api.jdsharecode.xyz/api/city/30`, 'timeout': 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -336,7 +335,7 @@ function readShareCode() {
         resolve(data);
       }
     })
-    await $.wait(15000);
+    await $.wait(3000);
     resolve()
   })
 }
@@ -355,6 +354,21 @@ function shareCodesFormat() {
     }
     console.log(`\n第${$.index}个京东账号将要助力的好友${JSON.stringify($.newShareCodes)}`)
     resolve();
+  })
+}
+
+function getAuthorShareCode() {
+  return new Promise(async resolve => {
+    $.get({
+      url: "https://api.jdsharecode.xyz/api/HW_CODES"
+    }, (err, resp, data) => {
+      try {
+        data = JSON.parse(data)
+        resolve(data['city'] || [])
+      } catch (e) {
+        resolve([])
+      }
+    })
   })
 }
 
