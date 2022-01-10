@@ -1,3 +1,9 @@
+/**
+ * 城城.ts
+ * cron 0 0-23/1 * * *
+ * 优先内部助力
+ */
+
 import axios from 'axios'
 import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
 
