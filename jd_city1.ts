@@ -18,40 +18,15 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
 
     res = await api('city_getHomeDatav1', {"lbsCity": "", "realLbsCity": "", "inviteId": "", "headImg": "", "userName": "", "taskChannel": "1", "location": "", "safeStr": ""})
 
-    o2s(res)
+    // o2s(res)
     console.log('助力码：', res.data.result.userActBaseInfo.inviteId)
     shareCodesSelf.push(res.data.result.userActBaseInfo.inviteId)
 
-    // 打开红包
-    for (let t of res.data.result.mainInfos) {
-      if (t.remaingAssistNum === 0 && t.status === '1') {
-        console.log()
-        res = await api("city_receiveCash", {"cashType": 1, "roundNum": t.roundNum})
-        console.log(`打开红包<${t.roundNum + ''}> 获得：`, res.data.result.currentTimeCash * 1, '累计：', res.data.result.totalCash * 1)
-        await wait(2000)
-      }
-    }
-
-    // 抽奖
-    // res = await api("city_getLotteryInfo", {})
-    // let lotteryNum = res.data.result.lotteryNum
-    // console.log(`可以抽奖${lotteryNum}次`)
-    // for (let i = 0; i < lotteryNum; i++) {
-    //   res = await api("city_lotteryAward", {})
-    //   if (res.code === 0 && res.data.bizCode === 0) {
-    //     console.log('抽奖成功：', res.data.result.prizeId)
-    //     await wait(5000)
-    //   } else {
-    //     console.log('抽奖出错', JSON.stringify(res))
-    //     break
-    //   }
-    // }
     // break
     await wait(1000)
   }
 
   // 助力
-
   shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodesHW.length === 0) {
@@ -79,6 +54,39 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
       }
       await wait(2000)
     }
+  }
+
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+
+    // 打开红包
+    res = await api('city_getHomeDatav1', {"lbsCity": "", "realLbsCity": "", "inviteId": "", "headImg": "", "userName": "", "taskChannel": "1", "location": "", "safeStr": ""})
+    for (let t of res.data.result.mainInfos) {
+      if (t.remaingAssistNum === 0 && t.status === '1') {
+        res = await api("city_receiveCash", {"cashType": 1, "roundNum": t.roundNum})
+        console.log(`打开红包<${t.roundNum + ''}> 获得：`, res.data.result.currentTimeCash * 1, '累计：', res.data.result.totalCash * 1)
+        await wait(2000)
+      }
+    }
+
+    // 抽奖
+    res = await api("city_getLotteryInfo", {})
+    let lotteryNum = res.data.result.lotteryNum
+    console.log(`可以抽奖${lotteryNum}次`)
+    for (let i = 0; i < lotteryNum; i++) {
+      res = await api("city_lotteryAward", {})
+      if (res.code === 0 && res.data.bizCode === 0) {
+        console.log('抽奖成功：', res.data.result.prizeId)
+        await wait(5000)
+      } else {
+        console.log('抽奖出错', JSON.stringify(res))
+        break
+      }
+    }
+
+    await wait(2000)
   }
 })()
 
