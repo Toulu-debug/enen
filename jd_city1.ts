@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool, getRandomNumberByRange, stringify} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
@@ -17,10 +17,20 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     res = await api('city_getHomeDatav1', {"lbsCity": "", "realLbsCity": "", "inviteId": "", "headImg": "", "userName": "", "taskChannel": "1", "location": "", "safeStr": ""})
-
-    // o2s(res)
     console.log('助力码：', res.data.result.userActBaseInfo.inviteId)
     shareCodesSelf.push(res.data.result.userActBaseInfo.inviteId)
+    console.log('待提现：', res.data.result.userActBaseInfo.poolMoney * 1)
+    console.log('已完成：', res.data.result.userActBaseInfo.withdrawBarNum, '/ 100')
+    await wait(1000)
+
+    // 赏金
+    res = await api('city_masterMainData', {})
+    if (res.data.result.masterData.actStatus === 2) {
+      res = await api('city_receiveCash', {"cashType": "4"})
+      res.data.bizMsg === 'success'
+        ? console.log('领取赏金成功：', res.data.result.masterInfo.cash * 1)
+        : console.log('领取赏金失败：', stringify(res))
+    }
 
     // break
     await wait(1000)
@@ -76,19 +86,26 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
     }
 
     // 抽奖
-    // res = await api("city_getLotteryInfo", {})
-    // let lotteryNum = res.data.result.lotteryNum
-    // console.log(`可以抽奖${lotteryNum}次`)
-    // for (let i = 0; i < lotteryNum; i++) {
-    //   res = await api("city_lotteryAward", {})
-    //   if (res.code === 0 && res.data.bizCode === 0) {
-    //     console.log('抽奖成功：', res.data.result.prizeId)
-    //     await wait(5000)
-    //   } else {
-    //     console.log('抽奖出错', JSON.stringify(res))
-    //     break
-    //   }
-    // }
+    let lotterySum: number = 0
+    res = await api("city_getLotteryInfo", {})
+    let lotteryNum = res.data.result.lotteryNum
+    console.log('可以抽奖', lotteryNum, '次')
+    for (let i = 0; i < lotteryNum; i++) {
+      res = await api("city_lotteryAward", {})
+      if (res.code === 0 && res.data.bizCode === 0) {
+        console.log('抽奖成功：', res.data.result.prizeId === '0' ? '空气' : "辣鸡优惠券")
+        if (res.data.result?.hongbao) {
+          lotterySum = accAdd(lotterySum, res.data.result.hongbao.value * 1)
+          console.log('获得红包：', res.data.result.hongbao.value * 1, '累计：', lotterySum)
+        }
+        await wait(5000)
+      } else {
+        console.log('抽奖出错', JSON.stringify(res))
+        break
+      }
+      if (res.data.result.lotteryNum === 0)
+        break
+    }
 
     await wait(2000)
   }
@@ -110,4 +127,20 @@ async function api(fn: string, params: object) {
     }
   })
   return data
+}
+
+function accAdd(arg1: number, arg2: number) {
+  let r1, r2, m
+  try {
+    r1 = arg1.toString().split('.')[1].length
+  } catch (e) {
+    r1 = 0
+  }
+  try {
+    r2 = arg2.toString().split('.')[1].length
+  } catch (e) {
+    r2 = 0
+  }
+  m = Math.pow(10, Math.max(r1, r2))
+  return parseFloat(((arg1 * m + arg2 * m) / m).toFixed(2))
 }
