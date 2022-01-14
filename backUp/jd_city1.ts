@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool, getRandomNumberByRange, stringify} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool, getRandomNumberByRange, stringify} from '../TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
@@ -27,9 +27,10 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
     res = await api('city_masterMainData', {})
     if (res.data.result.masterData.actStatus === 2) {
       res = await api('city_receiveCash', {"cashType": "4"})
-      res.data.bizMsg === 'success'
-        ? console.log('领取赏金成功：', res.data.result.masterInfo.cash * 1)
-        : console.log('领取赏金失败：', stringify(res))
+      o2s(res)
+      // res.data.bizMsg === 'success'
+      //   ? console.log('领取赏金成功：', res.data.result.masterInfo.cash * 1)
+      //   : console.log('领取赏金失败：', stringify(res))
     }
 
     // break
