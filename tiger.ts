@@ -3,12 +3,12 @@
  * https://yearfestival.jd.com
  * cron: 0 0,9,16 * * *
  * 助力顺序
- * CK1    HW.ts -> 内部
- * CK2~n  内部   -> HW.ts
+ * CK1    HW.ts -> 内部   -> 助力池
+ * CK2~n  内部   -> HW.ts -> 助力池
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, getshareCodeHW} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
@@ -62,12 +62,13 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    let temp: string[] = await getShareCodePool('tiger', 30)
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('tiger')
     }
     index === 0
-      ? shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
-      : shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+      ? shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf, ...temp]))
+      : shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW, ...temp]))
     for (let code of shareCodes) {
       console.log(`账号${index + 1} 去助力 ${code} ${shareCodesSelf.includes(code) ? '(内部)' : ''}`)
       res = await api({"shareId": code, "apiMapping": "/api/task/support/doSupport"})
