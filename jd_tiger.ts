@@ -8,9 +8,11 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, getshareCodeHW, getShareCodePool, o2s} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
+
+let cards = {}
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -18,6 +20,69 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
     cookiesArr = [decodeURIComponent(process.argv[2])];
     console.log(`收到Cookie：${decodeURIComponent(cookiesArr[0])}`)
   }
+  /*
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+
+    res = await api({"apiMapping": "/api/card/list"})
+    cards[decodeURIComponent(UserName)] = {}
+    let flag: boolean = true
+    for (let c of res.data.cardList) {
+      let cardId: number = c.cardId, cardCount: number = c.count
+      console.log(c.cardName, cardId, cardCount)
+      let uuid: string = ''
+      if (cardCount > 1 && flag) {
+        res = await api({"cardId": cardId, "apiMapping": "/api/card/share"})
+        res.msg === '您今天赠送卡片次数已用完'
+          ? flag = false
+          : uuid = res.data
+        await wait(1000)
+      }
+      cards[decodeURIComponent(UserName)][cardId] = {cardCount, uuid}
+    }
+  }
+
+  console.log(cards)
+
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
+    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+
+    try {
+      let myCards: any = cards[decodeURIComponent(UserName)]
+      for (let key in myCards) {
+        let cardId: string = key, cardCount: number = myCards[key]["cardCount"]
+
+        console.log(cardId, cardCount)
+        if (cardCount === 0) {
+          console.log('卡片不足')
+          for (let key in cards) {
+            if (decodeURIComponent(key) !== UserName && cards[key][cardId]["cardCount"] > 1 && cards[key][cardId]["uuid"]) {
+              let haoxinren: string = decodeURIComponent(key)
+              console.log('好心人', haoxinren, cardId)
+              res = await api({"uuid": cards[haoxinren][cardId]["uuid"], "apiMapping": "/api/card/receiveCard"})
+              try{
+              console.log(`账号${index + 1} 收到好心人 ${haoxinren} 卡片 ${res.data.cardName} 1张`)
+              }catch(e){
+                o2s('赠送卡片出错',res)
+              }
+              await wait(1000)
+              cards[encodeURIComponent(UserName)][cardId]["cardCount"]++
+              cards[key][cardId]["cardCount"]--
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log('黑号？', e)
+    }
+  }
+  console.log(cards)
+  */
+
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -106,9 +171,10 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
     try {
       res = await api({"apiMapping": "/api/index/indexInfo"})
       let lotteryNum: number = res.data.lotteryNum
+      console.log('抽奖次数：', lotteryNum)
       for (let i = 0; i < lotteryNum; i++) {
         res = await api({"apiMapping": "/api/lottery/lottery"})
-        console.log('抽奖：', res.data.prizeName)
+        console.log('抽奖', i + 1, '/', lotteryNum, res.data.prizeName)
         await wait(4000)
       }
     } catch (e) {
