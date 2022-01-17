@@ -6,7 +6,8 @@
 import axios from 'axios'
 import {Md5} from "ts-md5"
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, requestAlgo, h5st, o2s, randomWord, getshareCodeHW} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, o2s, randomWord, getshareCodeHW} from './TS_USER_AGENTS'
+import {requestAlgo, geth5st} from "./V3";
 
 const token = require('./utils/jd_jxmc.js').token
 
@@ -14,7 +15,7 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
 let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
-  await requestAlgo()
+  await requestAlgo('00df8')
   let cookiesArr: any = await requireConfig()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
@@ -22,19 +23,6 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     jxToken = await token(cookie)
-    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
-    await wait(2000)
-
-    // if (homePageInfo.data.maintaskId !== 'pause') {
-    //   console.log('init...')
-    //   for (let j = 0; j < 20; j++) {
-    //     res = await api('operservice/DoMainTask', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,step,timestamp', {step: homePageInfo.data.maintaskId})
-    //     if (res.data.maintaskId === 'pause')
-    //       break
-    //     await wait(2000)
-    //   }
-    // }
-
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
@@ -63,7 +51,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     try {
       await makeShareCodes(homePageInfo.data.sharekey)
     } catch (e: any) {
-      console.log(e)
+      console.log("提交助力码出错")
     }
 
     console.log('草草🌿', food)
@@ -71,37 +59,6 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     console.log('钱钱💰', coins)
     console.log('鸡鸡🐔', petNum)
     await wait(3000)
-
-    // 助农
-    let tasks: any = await api('GetUserTaskStatusList', 'bizCode,dateType,jxpp_wxapp_type,showAreaTaskFlag,source', {dateType: '2', showAreaTaskFlag: 0, jxpp_wxapp_type: 7}, true)
-    await wait(2000)
-    for (let t of tasks.data.userTaskStatusList) {
-      if (t.awardStatus === 2 && !['邀请牧场新用户助力', '拆开邀人红包', '去下单得爱心'].includes(t.taskName)) {
-        console.log(t.taskName)
-        if (t.completedTimes < t.targetTimes) {
-          for (let j = t.completedTimes; j < t.targetTimes; j++) {
-            res = await api('DoTask', 'bizCode,configExtra,source,taskId', {taskId: t.taskId}, true)
-            if (res.ret === 0) {
-              console.log('任务完成')
-            } else {
-              console.log('任务失败')
-              break
-            }
-            await wait(6000)
-          }
-        } else {
-          res = await api('Award', 'bizCode,source,taskId', {taskId: t.taskId}, true)
-          if (res.ret === 0) {
-            console.log('领奖成功', res.data.prizeInfo.match(/:(.*)}/)![1])
-          } else {
-            console.log('领奖失败')
-            break
-          }
-          await wait(4000)
-        }
-      }
-    }
-    await wait(5000)
 
     // 扭蛋机
     res = await api('queryservice/GetCardInfo', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp')
@@ -247,7 +204,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
           await wait(5000)
         }
       } catch (e: any) {
-        console.log('除草 Error:', e.response)
+        console.log('除草 Error')
         break
       }
     }
@@ -260,13 +217,12 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
         console.log('挑逗:', res.data.addcoins)
         await wait(6000)
       } catch (e: any) {
-        console.log('挑逗 Error:', e.response)
+        console.log('挑逗 Error')
         break
       }
     }
   }
 
-  await wait(5000)
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('jxmc')
@@ -347,27 +303,42 @@ async function getTask() {
   return 0
 }
 
-async function api(fn: string, stk: string, params: Params = {}, temporary: boolean = false) {
-  let url: string
-  if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
-    if (temporary)
-      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc_zanaixin&bizCode=jxmc_zanaixin&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, stk, params, 10028)
-    else
-      url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, stk, params, 10028)
-  } else {
-    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, stk, params, 10028)
+async function api(fn: string, stk: string, params: Params = {}) {
+  let url: string, t: { key: string, value: string } [] = [
+    {key: 'activeid', value: 'jxmc_active_0001'},
+    {key: 'activekey', value: 'null'},
+    {key: 'channel', value: '7'},
+    {key: 'jxmc_jstoken', value: jxToken['farm_jstoken']},
+    {key: 'phoneid', value: jxToken['phoneid']},
+    {key: 'sceneid', value: '1001'},
+    {key: 'timestamp', value: jxToken['timestamp']},
+  ]
+  if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+  else
+    url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+
+  for (let [key, value] of Object.entries(params)) {
+    t.push({key, value})
+    url += `&${key}=${value}`
   }
-  let {data}: any = await axios.get(url, {
-    headers: {
-      'Host': 'm.jingxi.com',
-      'Accept': '*/*',
-      'User-Agent': 'jdpingou;iPhone;5.15.0;15.1;3271867e5dc749cc8cc76aa5aa6a084eea8e7920;network/wifi;model/iPhone11,6;appBuild/100779;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/15;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-      'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-      'Referer': 'https://st.jingxi.com/',
-      'Cookie': cookie
-    }
-  })
-  return JSON.parse(data.match(/jsonpCBK.?\((.*)/)![1])
+  let h5st = geth5st(t, '00df8')
+  url += `&h5st=${encodeURIComponent(h5st)}`
+  try {
+    let {data}: any = await axios.get(url, {
+      headers: {
+        'Host': 'm.jingxi.com',
+        'Accept': '*/*',
+        'User-Agent': 'jdpingou;iPhone;5.15.0;15.1;3271867e5dc749cc8cc76aa5aa6a084eea8e7920;network/wifi;model/iPhone11,6;appBuild/100779;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/15;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+        'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+        'Referer': 'https://st.jingxi.com/',
+        'Cookie': cookie
+      }
+    })
+    return JSON.parse(data.match(/jsonpCBK.?\((.*)/)![1])
+  } catch (e) {
+    o2s(e)
+  }
 }
 
 async function makeShareCodes(code: string) {
