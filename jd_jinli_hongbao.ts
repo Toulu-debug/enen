@@ -8,10 +8,12 @@
  */
 
 import axios from 'axios';
+import {sendNotify} from './sendNotify'
 import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, getshareCodeHW} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
+let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2]
 
 !(async () => {
   let cookiesArr: any = await requireConfig();
@@ -96,6 +98,8 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
         if (t.innerStatus === 3) {
           res = await api('h5receiveRedpacketAll', {"taskType": t.taskType, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~138q6w6`, "sceneid": "JLHBhPageh5"})
           console.log(`${t.title} 打开成功，获得`, parseFloat(res.data.result.discount))
+          if (!min.includes(parseFloat(res.data.result.discount)))
+            await sendNotify(`锦鲤红包`, `账号${index + 1} ${UserName}\n${res.data.result.discount}`)
           await wait(2000)
         }
       }
@@ -108,6 +112,8 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
         if (t.innerStatus === 3) {
           res = await api('h5receiveRedpacketAll', {"taskType": t.taskType, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~138q6w6`, "sceneid": "JLHBhPageh5"})
           console.log(`${t.title} 打开成功，获得`, parseFloat(res.data.result.discount))
+          if (!min.includes(parseFloat(res.data.result.discount)))
+            await sendNotify(`锦鲤红包`, `账号${index + 1} ${UserName}\n${res.data.result.discount}`)
           await wait(2000)
         }
       }

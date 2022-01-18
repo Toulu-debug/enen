@@ -7,20 +7,36 @@ import axios from 'axios'
 import {Md5} from "ts-md5"
 import {sendNotify} from './sendNotify'
 import {requireConfig, getBeanShareCode, getFarmShareCode, wait, o2s, randomWord, getshareCodeHW} from './TS_USER_AGENTS'
-import {requestAlgo, geth5st} from "./V3";
+import {requestAlgo, geth5st} from "./utils/V3";
+import {existsSync, readFileSync} from "fs";
 
 const token = require('./utils/jd_jxmc.js').token
 
-let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any = '', jxToken: any = '', UserName: string = ''
+let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any = '', jxToken: any = '', UserName: string = '', ua: string = null, account: { pt_pin: string, remarks: string, jdpingou: string }[] = []
 let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
-  await requestAlgo('00df8')
+  if (existsSync('./utils/account.json')) {
+    try {
+      account = JSON.parse(readFileSync('./utils/account.json').toString())
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  await requestAlgo('00df8', 'jdpingou;')
   let cookiesArr: any = await requireConfig()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+    ua = null
+    for (let acc of account) {
+      if (acc?.pt_pin.includes(UserName)) {
+        ua = acc.jdpingou
+        break
+      }
+    }
 
     jxToken = await token(cookie)
     homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
@@ -223,6 +239,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     }
   }
 
+  /*
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('jxmc')
@@ -244,12 +261,17 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
       res = await api('operservice/EnrollFriend', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,sharekey,timestamp', {sharekey: code})
       if (res.ret === 0) {
         console.log('成功，获得:', res.data.addcoins)
+      } else if(res.ret===1016){
+        console.log('火爆:', res)
+        break
+      }
       } else {
         console.log('失败:', res)
       }
       await wait(8000)
     }
   }
+  */
 })()
 
 interface Params {
@@ -329,7 +351,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
       headers: {
         'Host': 'm.jingxi.com',
         'Accept': '*/*',
-        'User-Agent': 'jdpingou;iPhone;5.15.0;15.1;3271867e5dc749cc8cc76aa5aa6a084eea8e7920;network/wifi;model/iPhone11,6;appBuild/100779;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/15;pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+        'User-Agent': ua ?? 'jdpingou;',
         'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
         'Referer': 'https://st.jingxi.com/',
         'Cookie': cookie

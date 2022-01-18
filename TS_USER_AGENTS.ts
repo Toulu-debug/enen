@@ -327,6 +327,33 @@ function obj2str(obj: object) {
   return JSON.stringify(obj)
 }
 
+async function getDevice() {
+  let {data} = await axios.get('https://betahub.cn/api/apple/devices/iPhone', {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
+    }
+  })
+  data = data[getRandomNumberByRange(0, 16)]
+  return data.identifier
+}
+
+async function getVersion(device: string) {
+  let {data} = await axios.get(`https://betahub.cn/api/apple/firmwares/${device}`, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
+    }
+  })
+  data = data[getRandomNumberByRange(0, data.length)]
+  return data.firmware_info.version
+}
+
+async function jdpingou() {
+  let device: string, version: string;
+  device = await getDevice();
+  version = await getVersion(device);
+  return `jdpingou;iPhone;5.19.0;${version};${randomString(40)};network/wifi;model/${device};appBuild/100833;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/${getRandomNumberByRange(10, 90)};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -348,5 +375,6 @@ export {
   getShareCodePool,
   randomWord,
   wechat_app_msg,
-  obj2str
+  obj2str,
+  jdpingou
 }
