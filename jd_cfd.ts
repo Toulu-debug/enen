@@ -1,19 +1,16 @@
 /**
  * 京喜财富岛
- * 包含雇佣导游，建议每小时1次
- * 使用jd_env_copy.js同步js环境变量到ts
- * 使用jd_ts_test.ts测试环境变量
- *
- * cron: 0 * * * *
+ * cron: 40 * * * *
  */
 
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, requestAlgo, h5st, getJxToken, getBeanShareCode, getFarmShareCode, randomString, randomWord, getRandomNumberByRange, o2s, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
+import {requireConfig, wait, getJxToken, getBeanShareCode, getFarmShareCode, randomWord, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
+import {requestAlgo, geth5st} from "./utils/V3"
+import {existsSync, readFileSync} from "fs";
 
-
-let cookie: string = '', res: any = '', UserName: string, index: number
+let cookie: string = '', res: any = '', UserName: string, index: number, ua: string = null, account: any[] = []
 let shareCode: string[] = [], shareCodeSelf: string[] = [], shareCodeHW: string[] = [], isCollector: Boolean = false, token: any = {}
 
 interface Params {
@@ -71,13 +68,30 @@ interface Params {
 }
 
 !(async () => {
-  await requestAlgo()
-  let cookiesArr: any = await requireConfig()
+  if (existsSync('./utils/account.json')) {
+    try {
+      account = JSON.parse(readFileSync('./utils/account.json').toString())
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  await requestAlgo('92a36', 'jdpingou;')
+  let cookiesArr: string[] = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
+
+    ua = 'jdpingou;'
+    for (let acc of account) {
+      if (acc?.pt_pin.includes(UserName) && acc?.jdpingou) {
+        ua = acc.jdpingou
+        console.log('指定UA：', ua)
+        break
+      }
+    }
 
     token = getJxToken(cookie)
     try {
@@ -160,8 +174,6 @@ interface Params {
 
     // 加速卡
     res = await api('user/GetPropCardCenterInfo', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
-    console.log('加速卡：')
-    o2s(res)
     let richcard: any = res.cardInfo.richcard, coincard: any = res.cardInfo.coincard
     for (let card of coincard) {
       if (card.dwCardNums !== 0) {
@@ -283,6 +295,7 @@ interface Params {
       // 美人鱼
       if (res.StoryInfo.StoryList[0].Mermaid) {
         console.log(`发现美人鱼🧜‍♀️`)
+        /*
         let MermaidRes: any = await api('story/MermaidOper', '_cfd_t,bizCode,ddwTriggerDay,dwEnv,dwType,ptag,source,strStoryId,strZone', {
           strStoryId: res.StoryInfo.StoryList[0].strStoryId,
           dwType: '1',
@@ -307,6 +320,8 @@ interface Params {
         })
         if (MermaidRes.iRet === 0)
           console.log('获得金币:', MermaidRes.Data.ddwCoin)
+
+         */
       }
       await wait(2000)
 
@@ -405,9 +420,9 @@ interface Params {
     await wait(2000)
 
     // 任务➡️
-    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    res = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     await wait(2000)
-    for (let t of tasks.Data.TaskList) {
+    for (let t of res.Data.TaskList) {
       if ([1, 2].indexOf(t.dwOrderId) > -1 && t.dwCompleteNum < t.dwTargetNum && t.strTaskName !== '升级1个建筑') {
         console.log('开始任务➡️:', t.strTaskName)
         res = await api('DoTask', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId, configExtra: ''}, 'right')
@@ -420,23 +435,28 @@ interface Params {
       }
     }
 
-    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    res = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     await wait(2000)
-    for (let t of tasks.Data.TaskList) {
+    for (let t of res.Data.TaskList) {
       if (t.dwCompleteNum === t.dwTargetNum && t.dwAwardStatus === 2) {
         res = await api('Award', '_cfd_t,bizCode,configExtra,dwEnv,ptag,source,strZone,taskId', {taskId: t.ddwTaskId}, 'right')
         await wait(1000)
         if (res.ret === 0) {
-          console.log('领奖成功：', res)
+          try {
+            res = JSON.parse(res.data.prizeInfo)
+            console.log(`领奖成功:`, res.ddwCoin, res.ddwMoney)
+          } catch (e) {
+            console.log(`领奖成功:`, res)
+          }
         } else {
           console.log('领奖失败', res)
         }
       }
     }
 
-    tasks = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
+    res = await api('story/GetActTask', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
     await wait(2000)
-    if (tasks.Data.dwStatus === 3) {
+    if (res.Data.dwStatus === 3) {
       res = await api('story/ActTaskAward', '_cfd_t,bizCode,dwEnv,ptag,source,strZone')
       if (res.ret === 0) {
         console.log('100财富任务完成')
@@ -470,7 +490,8 @@ interface Params {
     }
   }
 
-  for (let [value, index] of cookiesArr.entries()) {
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     if (shareCodeHW.length === 0) {
       shareCodeHW = await getshareCodeHW('jxcfd')
     }
@@ -479,7 +500,6 @@ interface Params {
     shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodeHW, ...pool]))
 
     for (let code of shareCode) {
-      cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
       console.log(`【账号${index + 1}】 ${UserName} 去助力 ${code}`)
       res = await api('story/helpbystage', '_cfd_t,bizCode,dwEnv,ptag,source,strShareId,strZone', {strShareId: code})
@@ -502,7 +522,16 @@ interface Params {
 })()
 
 async function api(fn: string, stk: string, params: Params = {}, taskPosition = '') {
-  let url: string, t: number = Date.now()
+  let timestamp: number = Date.now()
+
+  let url: string, t: { key: string, value: string } [] = [
+    {key: 'strZone', value: 'jxbfd'},
+    {key: 'source', value: 'jxbfd'},
+    {key: 'dwEnv', value: '7'},
+    {key: 'ptag', value: ''},
+    {key: '_cfd_t', value: timestamp.toString()},
+  ]
+
   if (['GetUserTaskStatusList', 'Award', 'DoTask'].includes(fn)) {
     let bizCode: string
     if (!params.bizCode) {
@@ -510,18 +539,24 @@ async function api(fn: string, stk: string, params: Params = {}, taskPosition = 
     } else {
       bizCode = params.bizCode
     }
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${t}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?strZone=jxbfd&bizCode=${bizCode}&source=jxbfd&dwEnv=7&_cfd_t=${timestamp}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   } else {
-    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${t}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 2}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+    url = `https://m.jingxi.com/jxbfd/${fn}?strZone=jxbfd&bizCode=jxbfd&source=jxbfd&dwEnv=7&_cfd_t=${timestamp}&ptag=&_stk=${encodeURIComponent(stk)}&_ste=1&_=${timestamp}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   }
-  url = h5st(url, stk, params, 10032)
+  for (let [key, value] of Object.entries(params)) {
+    t.push({key, value})
+    url += `&${key}=${value}`
+  }
+  let h5st = geth5st(t, '92a36')
+  url += `&h5st=${encodeURIComponent(h5st)}`
+
   let {data} = await axios.get(url, {
     headers: {
       'Host': 'm.jingxi.com',
       'Accept': '*/*',
       'Connection': 'keep-alive',
       'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-      'User-Agent': `jdpingou;iPhone;5.14.2;${getRandomNumberByRange(12, 16)}.${getRandomNumberByRange(0, 3)};${randomString(40)};`,
+      'User-Agent': ua,
       'Referer': 'https://st.jingxi.com/',
       'Cookie': cookie
     }
@@ -548,7 +583,7 @@ async function task() {
           res = JSON.parse(res.data.prizeInfo)
           console.log(`领奖成功:`, res.ddwCoin, res.ddwMoney)
         } catch (e) {
-          console.log('领奖失败:', res.data)
+          console.log('领奖成功:', res)
         }
         await wait(1000)
         return 1
