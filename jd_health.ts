@@ -11,7 +11,7 @@ import * as path from "path";
 let cookie: string = '', res: any = '', UserName: string
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: string[] = await requireConfig();
   let except: string[] = exceptCookie(path.basename(__filename));
 
   for (let [index, value] of cookiesArr.entries()) {

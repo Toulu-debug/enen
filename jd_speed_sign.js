@@ -68,9 +68,6 @@ async function jdGlobal() {
     await wheelsHome()
 
     await signInit()
-    await sign()
-    // await invite()
-    // await invite2()
     $.score = 0
     $.total = 0
     await taskList()
@@ -115,37 +112,6 @@ async function signInit() {
         resolve(data);
       }
     })
-  })
-}
-
-async function sign() {
-  return new Promise(resolve => {
-    $.get(taskUrl('speedSign', {
-        "kernelPlatform": "RN",
-        "activityId": "8a8fabf3cccb417f8e691b6774938bc2",
-        "noWaitPrize": "false"
-      }),
-      async (err, resp, data) => {
-        try {
-          if (err) {
-            console.log(`${JSON.stringify(err)}`)
-            console.log(`${$.name} API请求失败，请检查网路重试`)
-          } else {
-            if (safeGet(data)) {
-              data = JSON.parse(data);
-              if (data.subCode === 0) {
-                console.log(`签到获得${data.data.signAmount}现金，共计获得${data.data.cashDrawAmount}`)
-              } else {
-                console.log(`签到失败，${data.msg}`)
-              }
-            }
-          }
-        } catch (e) {
-          $.logErr(e, resp)
-        } finally {
-          resolve(data);
-        }
-      })
   })
 }
 

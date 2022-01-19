@@ -19,7 +19,7 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
 
 !(async () => {
   await requestAlgo()
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   cookie = cookiesArr[0]
   UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
   console.log(`\n开始【京东账号1 ${UserName}\n`)

@@ -12,7 +12,7 @@ let cookie: string = '', UserName: string, index: number, res: any = ''
 let orders: string[] = [], shareCodeSelf: string[] = [], shareCodes: string[] = []
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

@@ -12,7 +12,7 @@ import USER_AGENT, {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
 let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   let except: string[] = exceptCookie(path.basename(__filename))
   let orders: any = {}
   if (existsSync('./json')) {

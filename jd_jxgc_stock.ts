@@ -11,7 +11,7 @@ let cookie: string = '', res: any = '', message: string = '';
 
 !(async () => {
   await requestAlgo(10001)
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: string[] = await requireConfig();
   cookie = cookiesArr[Math.floor(Math.random() * cookiesArr.length)];
 
   /*

@@ -4,7 +4,7 @@ import USER_AGENT, {getRandomNumberByRange, requireConfig, wait} from './TS_USER
 let cookie: string = '', res: any = '', UserName: string, index: number
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

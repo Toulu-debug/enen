@@ -10,7 +10,7 @@ import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool, 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

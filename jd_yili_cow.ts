@@ -9,7 +9,7 @@ let milk: number;
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
 async function main() {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: string[] = await requireConfig();
   for (let i = 0; i < cookiesArr.length; i++) {
     try {
       cookie = cookiesArr[i];

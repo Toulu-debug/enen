@@ -12,7 +12,7 @@ process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.C
 let UserName: string, index: number
 !(async () => {
   await requestAlgo()
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
 
   while (1) {
     if (new Date().getHours() === 0 && new Date().getMinutes() < 10)

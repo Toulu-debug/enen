@@ -263,7 +263,7 @@ function randomNumString(e: number) {
 }
 
 function randomWord() {
-  let t = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', a = t.length
+  let t = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', a = t.length
   return t.charAt(Math.floor(Math.random() * a))
 }
 

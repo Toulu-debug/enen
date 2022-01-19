@@ -8,7 +8,7 @@ import {bean, farm, pet, factory, sgmh, jxfactory, health} from "./utils/shareCo
 let cookie: string = '', UserName: string, index: number
 let beans: string = '', farms: string = '', healths: string = '', pets: string = '', factorys: string = '', jxfactorys: string = '', sgmhs: string = '', s: string = '';
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: string[] = await requireConfig();
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

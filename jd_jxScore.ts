@@ -5,7 +5,7 @@ import USER_AGENT from "./test/TS_USER_AGENTS";
 let cookie: string = '', UserName: string = '', elements: Array<{ desc: string, level: number | null, name: string }>
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
