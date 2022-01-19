@@ -8,24 +8,25 @@
 ============Quantumultx===============
 [task_local]
 #京东极速版红包
-10 0,22 * * * jd_speed_redpocke.js, tag=京东极速版红包, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
+20 0,22 * * * https://gitee.com/lxk0301/jd_scripts/raw/master/jd_speed_redpocke.js, tag=京东极速版红包, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
 
 ================Loon==============
 [Script]
-cron "10 0,22 * * *" script-path=jd_speed_redpocke.js,tag=京东极速版红包
+cron "20 0,22 * * *" script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_speed_redpocke.js,tag=京东极速版红包
 
 ===============Surge=================
-京东极速版红包 = type=cron,cronexp="10 0,22 * * *",wake-system=1,timeout=3600,script-path=jd_speed_redpocke.js
+京东极速版红包 = type=cron,cronexp="20 0,22 * * *",wake-system=1,timeout=3600,script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_speed_redpocke.js
 
 ============小火箭=========
-京东极速版红包 = type=cron,script-path=jd_speed_redpocke.js, cronexpr="10 0,22 * * *", timeout=3600, enable=true
+京东极速版红包 = type=cron,script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_speed_redpocke.js, cronexpr="20 0,22 * * *", timeout=3600, enable=true
 */
 
 const $ = new Env('京东极速版红包');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let cookiesArr = [], cookie = '', message;
-const linkIdArr = ["9wdf1YTT2L59Vr-meKskLA", "7ya6o83WSbNhrbYJqsMfFA"], signLinkId = '9WA12jYGulArzWS7vcrwhw';
-let linkId = '';
+const linkIds = ["7ya6o83WSbNhrbYJqsMfFA", "Eu7-E0CUzqYyhZJo9d3YkQ"];
+const signLinkId = '9WA12jYGulArzWS7vcrwhw';
+let linkId
 
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
@@ -37,6 +38,7 @@ if ($.isNode()) {
 } else {
   cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
+
 !(async () => {
   if (!cookiesArr[0]) {
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
@@ -48,10 +50,13 @@ if ($.isNode()) {
       cookie = cookiesArr[i];
       $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
       $.index = i + 1;
+      $.isLogin = true;
+      $.nickName = '';
       message = '';
       console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-      for (let j = 0; j < linkIdArr.length; j++) {
-        linkId = linkIdArr[j]
+
+      for (const id of linkIds) {
+        linkId = id
         await jsRedPacket()
       }
     }
@@ -66,79 +71,22 @@ if ($.isNode()) {
 
 async function jsRedPacket() {
   try {
-    await sign();//极速版签到提现
     await reward_query();
-    for (let i = 0; i < 3; ++i) {
+    for (let i = 0; i < 5; ++i) {
       await redPacket();//开红包
-      await $.wait(2000)
+      await $.wait(1000)
     }
     await getPacketList();//领红包提现
     await signPrizeDetailList();
-    await showMsg()
   } catch (e) {
     $.logErr(e)
   }
 }
 
-function showMsg() {
-  return new Promise(resolve => {
-    if (message) $.msg($.name, '', `京东账号${$.index}${$.nickName}\n${message}`);
-    resolve()
-  })
-}
-
-async function sign() {
-  return new Promise(resolve => {
-    const body = {"linkId": signLinkId, "serviceName": "dayDaySignGetRedEnvelopeSignService", "business": 1};
-    const options = {
-      url: `https://api.m.jd.com`,
-      body: `functionId=apSignIn_day&body=${escape(JSON.stringify(body))}&_t=${+new Date()}&appid=activities_platform`,
-      headers: {
-        'Cookie': cookie,
-        "Host": "api.m.jd.com",
-        'Origin': 'https://daily-redpacket.jd.com',
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "*/*",
-        "Connection": "keep-alive",
-        "User-Agent": "jdltapp;iPhone;3.3.2;14.5.1network/wifi;hasUPPay/0;pushNoticeIsOpen/1;lang/zh_CN;model/iPhone13,2;addressid/137923973;hasOCPay/0;appBuild/1047;supportBestPay/0;pv/467.11;apprpd/MyJD_Main;",
-        "Accept-Language": "zh-Hans-CN;q=1, en-CN;q=0.9, zh-Hant-CN;q=0.8",
-        'Referer': `https://daily-redpacket.jd.com/?activityId=${signLinkId}`,
-        "Accept-Encoding": "gzip, deflate, br"
-      }
-    }
-    $.post(options, async (err, resp, data) => {
-      try {
-        if (err) {
-          console.log(`${JSON.stringify(err)}`)
-          console.log(`${$.name} API请求失败，请检查网路重试`)
-        } else {
-          if (safeGet(data)) {
-            data = $.toObj(data);
-            if (data.code === 0) {
-              if (data.data.retCode === 0) {
-                message += `极速版签到提现：签到成功\n`;
-                console.log(`极速版签到提现：签到成功\n`);
-              } else {
-                console.log(`极速版签到提现：签到失败:${data.data.retMessage}\n`);
-              }
-            } else {
-              console.log(`极速版签到提现：签到异常:${JSON.stringify(data)}\n`);
-            }
-          }
-        }
-      } catch (e) {
-        $.logErr(e, resp)
-      } finally {
-        resolve(data);
-      }
-    })
-  })
-}
-
 function reward_query() {
   return new Promise(resolve => {
     $.get(taskGetUrl("spring_reward_query", {
-      "inviter": ["HXZ60he5XxG8XNUF2LSrZg"][Math.floor((Math.random() * 1))],
+      "inviter": "7057MkYN_M4C3K_QNqU2YQ",
       linkId
     }), async (err, resp, data) => {
       try {
@@ -166,7 +114,7 @@ function reward_query() {
 
 async function redPacket() {
   return new Promise(resolve => {
-    $.get(taskGetUrl("spring_reward_receive", {"inviter": ["HXZ60he5XxG8XNUF2LSrZg"][Math.floor((Math.random() * 1))], linkId}),
+    $.get(taskGetUrl("spring_reward_receive", {"inviter": "7057MkYN_M4C3K_QNqU2YQ", linkId}),
       async (err, resp, data) => {
         try {
           if (err) {
@@ -198,7 +146,7 @@ async function redPacket() {
 
 function getPacketList() {
   return new Promise(resolve => {
-    $.get(taskGetUrl("spring_reward_list", {"pageNum": 1, "pageSize": 100, linkId, "inviter": ""}), async (err, resp, data) => {
+    $.get(taskGetUrl("spring_reward_list", {"pageNum": 1, "pageSize": 100, linkId, "inviter": "7057MkYN_M4C3K_QNqU2YQ"}), async (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -243,7 +191,7 @@ function signPrizeDetailList() {
         "Connection": "keep-alive",
         "User-Agent": "jdltapp;iPhone;3.3.2;14.5.1network/wifi;hasUPPay/0;pushNoticeIsOpen/1;lang/zh_CN;model/iPhone13,2;addressid/137923973;hasOCPay/0;appBuild/1047;supportBestPay/0;pv/467.11;apprpd/MyJD_Main;",
         "Accept-Language": "zh-Hans-CN;q=1, en-CN;q=0.9, zh-Hant-CN;q=0.8",
-        'Referer': `https://daily-redpacket.jd.com/?activityId=${signLinkId}`,
+        'Referer': 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw',
         "Accept-Encoding": "gzip, deflate, br"
       }
     }
@@ -306,7 +254,7 @@ function apCashWithDraw(id, poolBaseId, prizeGroupId, prizeBaseId) {
         "Connection": "keep-alive",
         "User-Agent": "jdltapp;iPhone;3.3.2;14.5.1network/wifi;hasUPPay/0;pushNoticeIsOpen/1;lang/zh_CN;model/iPhone13,2;addressid/137923973;hasOCPay/0;appBuild/1047;supportBestPay/0;pv/467.11;apprpd/MyJD_Main;",
         "Accept-Language": "zh-Hans-CN;q=1, en-CN;q=0.9, zh-Hant-CN;q=0.8",
-        'Referer': `https://daily-redpacket.jd.com/?activityId=${signLinkId}`,
+        'Referer': 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw',
         "Accept-Encoding": "gzip, deflate, br"
       }
     }
@@ -385,6 +333,7 @@ function cashOut(id, poolBaseId, prizeGroupId, prizeBaseId,) {
   })
 }
 
+
 function taskPostUrl(function_id, body) {
   return {
     url: `https://api.m.jd.com/`,
@@ -403,6 +352,7 @@ function taskPostUrl(function_id, body) {
     }
   }
 }
+
 
 function taskGetUrl(function_id, body) {
   return {
@@ -445,6 +395,7 @@ function jsonParse(str) {
   }
 }
 
+// prettier-ignore
 function Env(t, e) {
   "undefined" != typeof process && JSON.stringify(process.env).indexOf("GITHUB") > -1 && process.exit(0);
 
