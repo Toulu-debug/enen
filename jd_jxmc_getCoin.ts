@@ -5,19 +5,25 @@
 
 import axios from 'axios';
 import * as path from 'path';
-import {requireConfig, wait, requestAlgo, h5st, exceptCookie, resetHosts, randomString} from './TS_USER_AGENTS';
+import {requireConfig, wait, exceptCookie, randomWord} from './TS_USER_AGENTS';
+import {requestAlgo, geth5st} from "./utils/V3";
+import {existsSync, readFileSync} from "fs";
 
-let cookie: string = '', res: any = '', homePageInfo: any, jxToken: any, UserName: string, index: number;
-let {cow, token} = require('./utils/jd_jxmc.js');
+let cookie: string = '', res: any = '', homePageInfo: any, jxToken: { farm_jstoken: string, phoneid: string, timestamp: number }, UserName: string, index: number;
+let {cow, token} = require('./utils/jd_jxmc.js'), ua: string = 'jdpingou;';
 
 !(async () => {
-  try {
-    resetHosts();
-  } catch (e) {
+  let account: any[] = [];
+  if (existsSync('./utils/account.json')) {
+    try {
+      account = JSON.parse(readFileSync('./utils/account.json').toString())
+    } catch (e) {
+      console.log(e)
+    }
   }
 
-  await requestAlgo();
-  let cookiesArr: any = await requireConfig();
+  await requestAlgo('00df8', 'jdpingou;');
+  let cookiesArr: string[] = await requireConfig();
   let except: string[] = exceptCookie(path.basename(__filename));
 
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -31,8 +37,17 @@ let {cow, token} = require('./utils/jd_jxmc.js');
       continue
     }
 
+    ua = 'jdpingou;'
+    for (let acc of account) {
+      if (acc?.pt_pin.includes(UserName) && acc?.jdpingou) {
+        ua = acc.jdpingou
+        console.log('指定UA：', ua)
+        break
+      }
+    }
+
     jxToken = await token(cookie);
-    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1})
+    homePageInfo = await api('queryservice/GetHomePageInfo', 'activeid,activekey,channel,isgift,isqueryinviteicon,isquerypicksite,isregionflag,jxmc_jstoken,phoneid,sceneid,timestamp', {isgift: 1, isquerypicksite: 1, isqueryinviteicon: 1, isregionflag: 0, activeid: null})
     let lastgettime: number
     if (homePageInfo.data?.cow?.lastgettime) {
       lastgettime = homePageInfo.data.cow.lastgettime
@@ -50,36 +65,43 @@ let {cow, token} = require('./utils/jd_jxmc.js');
 
     // 收牛牛
     let cowToken = await cow(lastgettime);
-    res = await api('operservice/GetCoin', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: cowToken})
+    res = await api('operservice/GetCoin', 'activeid,activekey,channel,commtype,jxmc_jstoken,phoneid,sceneid,timestamp,token', {token: cowToken, commtype: 0, activeid: 'jxmc_active_0001'})
     if (res.ret === 0)
       console.log('收牛牛:', res.data.addcoin)
     else
       console.log('收牛牛:', res)
-    await wait(1000)
+    await wait(3000)
   }
 })()
 
 async function api(fn: string, stk: string, params: object) {
-  let url: string;
-  if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1) {
-    url = h5st(`https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2`, stk, params, 10028)
-  } else {
-    url = h5st(`https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now() + 2}&sceneval=2`, stk, params, 10028)
+  let url: string, t: { key: string, value: string } [] = [
+    {key: 'activekey', value: 'null'},
+    {key: 'channel', value: '7'},
+    {key: 'jxmc_jstoken', value: jxToken.farm_jstoken},
+    {key: 'phoneid', value: jxToken.phoneid},
+    {key: 'sceneid', value: '1001'},
+    {key: 'timestamp', value: jxToken.timestamp.toString()},
+  ]
+  url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken.timestamp}&phoneid=${jxToken.phoneid}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+
+  for (let [key, value] of Object.entries(params)) {
+    t.push({key, value})
+    url += `&${key}=${value}`
   }
+  url += `&h5st=${encodeURIComponent(geth5st(t, '00df8'))}`
   try {
     let {data}: any = await axios.get(url, {
       headers: {
         'Host': 'm.jingxi.com',
         'Accept': '*/*',
         'Connection': 'keep-alive',
-        'User-Agent': `jdpingou;iPhone;5.9.0;12.4.1;${randomString(40)};network/wifi;`,
+        'User-Agent': ua,
         'Referer': 'https://st.jingxi.com/pingou/jxmc/index.html',
         'Cookie': cookie
       }
     })
-    if (typeof data === 'string')
-      return JSON.parse(data.replace(/jsonpCBK.?\(/, '').split('\n')[0])
-    return data
+    return JSON.parse(data.replace(/jsonpCBK.?\(/, '').split('\n')[0])
   } catch (e: any) {
     console.log('api Error:', e)
     return {}
