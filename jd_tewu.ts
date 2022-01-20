@@ -1,6 +1,6 @@
 /**
  * 京东-下拉
- * cron: 15 1,22 * * *
+ * cron: 15 1,15,22 * * *
  */
 
 import axios from 'axios'
@@ -17,7 +17,7 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
 
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   let activityId: number
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
@@ -35,12 +35,27 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
 
     for (let t of res.data.result.taskList) {
       if (t.completionCnt !== t.assignmentTimesLimit) {
-        if (t.ext?.shoppingActivity) {
-          let tp = t.ext.shoppingActivity[0]
-          console.log(tp.title, tp.itemId)
-          res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": 1, "itemId": tp.advId, "actionType": 0})
+        // 浏览、关注
+        if (t.ext?.shoppingActivity || t.ext?.followShop) {
+          let tp = t.ext?.shoppingActivity || t.ext?.followShop
+          tp = tp[0]
+          console.log(tp.title || tp.shopName, tp.itemId)
+          res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": tp.itemId, "actionType": 0})
           console.log(res.data?.bizMsg)
           await wait(2000)
+        }
+
+        // 下拉
+        if (t.ext?.sign2) {
+          try {
+            if (new Date().getHours() >= 14 && new Date().getHours() <= 20) {
+              res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": t.ext.sign2[0].itemId, "actionType": 0})
+              console.log(res.data?.bizMsg)
+              await wait(2000)
+            }
+          } catch (e) {
+            console.log(t.ext?.sign2)
+          }
         }
       }
 
@@ -58,21 +73,27 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
     }
 
     // 抽奖
-    res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
-    let userStarNum: number = res.data.result.activityUserInfo.userStarNum
-    console.log('可以抽奖', userStarNum, '次')
-    for (let i = 0; i < userStarNum; i++) {
-      res = await api('superBrandTaskLottery', {"source": "secondfloor", "activityId": activityId})
-      o2s(res)
-      if (res.data.result?.rewardComponent?.beanList?.length) {
-        console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
+    if (new Date().getHours() === 23) {
+      res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
+      let userStarNum: number = res.data.result.activityUserInfo.userStarNum
+      console.log('可以抽奖', userStarNum, '次')
+      for (let i = 0; i < userStarNum; i++) {
+        res = await api('superBrandTaskLottery', {"source": "secondfloor", "activityId": activityId})
+        o2s(res)
+        if (res.data.result?.rewardComponent?.beanList?.length) {
+          console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
+        }
+        await wait(2000)
       }
-
-      await wait(2000)
     }
   }
+
+  console.log('开始助力...')
+  await wait(10000)
+
   shareCodesHW = await getshareCodeHW('tewu')
   shareCodes = [...shareCodesSelf, ...shareCodesHW]
+  let full: string[] = []
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     res = await api('superBrandTaskList', {"source": "secondfloor", "activityId": activityId, "assistInfoFlag": 1})
@@ -83,13 +104,14 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
       }
     }
     for (let code of shareCodes) {
-      if (code.itemId !== mine) {
+      if (code.itemId !== mine && !full.includes(code.itemId)) {
         console.log(`账号${index + 1} 去助力 ${code.itemId} ${shareCodesSelf.some(self => self.itemId === code.itemId) ? '*内部*' : ''}`)
         res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": code.activityId, "encryptProjectId": code.encryptProjectId, "encryptAssignmentId": code.encryptAssignmentId, "assignmentType": 2, "itemId": code.itemId, "actionType": 0})
         if (res.data.bizCode === '0') {
           console.log('助力成功')
         } else if (res.data.bizCode === '103') {
           console.log('助力满了')
+          full.push(code.itemId)
         } else if (res.data.bizCode === '108') {
           console.log('上限')
           break
@@ -100,6 +122,8 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
           console.log('其他错误', res.data.bizMsg)
         }
         await wait(2000)
+      } else {
+        console.log('助力满了，跳过')
       }
     }
   }

@@ -16,7 +16,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
 let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2]
 
 !(async () => {
-  let cookiesArr: any = await requireConfig();
+  let cookiesArr: string[] = await requireConfig();
   for (let [index, value] of cookiesArr.entries()) {
     try {
       cookie = value;

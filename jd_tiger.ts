@@ -8,19 +8,18 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, getshareCodeHW, getShareCodePool, o2s} from './TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, getshareCodeHW, getShareCodePool, o2s, obj2str} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 let cards = {}
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: string[] = await requireConfig()
   if (process.argv[2]) {
     cookiesArr = [decodeURIComponent(process.argv[2])];
     console.log(`收到Cookie：${decodeURIComponent(cookiesArr[0])}`)
   }
-  /*
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -35,9 +34,12 @@ let cards = {}
       let uuid: string = ''
       if (cardCount > 1 && flag) {
         res = await api({"cardId": cardId, "apiMapping": "/api/card/share"})
-        res.msg === '您今天赠送卡片次数已用完'
-          ? flag = false
-          : uuid = res.data
+        if (res.msg === '您今天赠送卡片次数已用完') {
+          console.log('您今天赠送卡片次数已用完')
+          flag = false
+        } else {
+          uuid = res.data
+        }
         await wait(1000)
       }
       cards[decodeURIComponent(UserName)][cardId] = {cardCount, uuid}
@@ -64,10 +66,10 @@ let cards = {}
               let haoxinren: string = decodeURIComponent(key)
               console.log('好心人', haoxinren, cardId)
               res = await api({"uuid": cards[haoxinren][cardId]["uuid"], "apiMapping": "/api/card/receiveCard"})
-              try{
-              console.log(`账号${index + 1} 收到好心人 ${haoxinren} 卡片 ${res.data.cardName} 1张`)
-              }catch(e){
-                o2s('赠送卡片出错',res)
+              try {
+                console.log(`账号${index + 1} 收到好心人 ${haoxinren} 卡片 ${res.data.cardName} 1张`)
+              } catch (e) {
+                console.log('赠送卡片出错', obj2str(res))
               }
               await wait(1000)
               cards[encodeURIComponent(UserName)][cardId]["cardCount"]++
@@ -81,7 +83,6 @@ let cards = {}
     }
   }
   console.log(cards)
-  */
 
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value

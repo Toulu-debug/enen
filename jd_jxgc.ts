@@ -7,7 +7,8 @@ import axios from "axios"
 import * as path from "path"
 import {format} from 'date-fns'
 import {sendNotify} from './sendNotify'
-import {h5st, requireConfig, requestAlgo, wait, exceptCookie, randomWord, randomString, getRandomNumberByRange} from "./TS_USER_AGENTS"
+import {requireConfig, wait, exceptCookie, randomWord} from "./TS_USER_AGENTS"
+import {requestAlgo, geth5st} from "./utils/V3";
 
 let cookie: string = '', res: any = '', UserName: string
 
@@ -36,8 +37,8 @@ interface Params {
 }
 
 !(async () => {
-  await requestAlgo(10001)
-  let cookiesArr: any = await requireConfig()
+  await requestAlgo('c0ff1')
+  let cookiesArr: string[] = await requireConfig()
   let except: string[] = exceptCookie(path.basename(__filename))
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
@@ -111,7 +112,7 @@ interface Params {
     res = await api('friend/QueryHireReward', '_time,zone')
     await wait(2000)
     for (let t of res.data.hireReward) {
-      if (t.date !== format(Date.now(), "yyyyMMdd")) {
+      if (t.date !== format(Date.now(), "yyyyMMdd") && new Date().getHours() >= 6) {
         res = await api('friend/HireAward', '_time,date,type,zone', {date: t.date})
         await wait(2000)
         if (res.ret === 0)
@@ -151,7 +152,7 @@ async function task() {
 
       if (t.dateType === 2 && t.completedTimes < t.targetTimes && [2, 6, 9].indexOf(t.taskType) > -1) {
         console.log('任务开始：', t.taskName)
-        res = await api('DoTask', '_time,bizCode,configExtra,source,taskId', {configExtra: '', taskId: t.taskId, bizCode: t.bizCode})
+        res = await api('DoTask', '_time,_ts,bizCode,configExtra,source,taskId', {taskId: t.taskId, bizCode: t.bizCode, configExtra: ''})
         await wait(5000)
         if (res.ret === 0) {
           console.log('任务完成')
@@ -168,23 +169,34 @@ async function task() {
 }
 
 async function api(fn: string, stk: string, params: Params = {}) {
-  let url: string, t = Date.now()
-  if (['GetUserTaskStatusList', 'DoTask', 'Award'].includes(fn)) {
-    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${t}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
-  } else {
-    url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${t}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${t + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+  let url: string, timestamp = Date.now()
+  let t: { key: string, value: string } [] = [
+    {key: '_time', value: timestamp.toString()},
+    {key: '_ts', value: timestamp.toString()},
+    {key: 'bizCode', value: 'dream_factory'},
+    {key: 'source', value: 'dreamfactory'},
+  ]
+
+  let w: string = randomWord()
+  if (['GetUserTaskStatusList', 'DoTask', 'Award'].includes(fn))
+    url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?source=dreamfactory&_time=${timestamp}&_ts=${timestamp}&_stk=${encodeURIComponent(stk)}&_=${timestamp + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${w}${w}&g_ty=ls`
+  else
+    url = `https://m.jingxi.com/dreamfactory/${fn}?zone=dream_factory&_time=${timestamp}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${timestamp + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${w}${w}&g_ty=ls`
+  for (let [key, value] of Object.entries(params)) {
+    t.push({key, value})
+    url += `&${key}=${value}`
   }
-  url = h5st(url, stk, params, 10001)
+  let h5st = geth5st(t, 'c0ff1')
+  url += `&h5st=${encodeURIComponent(h5st)}`
+
   let {data} = await axios.get(url, {
     headers: {
       'Host': 'm.jingxi.com',
-      'Accept': '*/*',
-      'Connection': 'keep-alive',
-      'User-Agent': `jdpingou;`,
+      'User-Agent': 'jdpingou;',
       'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
       'Referer': 'https://st.jingxi.com/',
       'Cookie': cookie
     }
   })
-  return JSON.parse(data.match(/try.?{jsonpCBK.?\((.*)/)[1])
+  return JSON.parse(data.match(/try.?{jsonpCBK.?.?\((.*)/)[1])
 }

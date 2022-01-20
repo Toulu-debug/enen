@@ -22,7 +22,7 @@ function getRandomIDPro() {
   return i;
 }
 
-async function requestAlgo(appId: string, USER_AGENT: string) {
+async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
   let s = "", a = "0123456789", u = a, c = (Math.random() * 10) | 0;
   do {
     let ss = getRandomIDPro() + ""
