@@ -66,36 +66,6 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
       await wait(2000)
 
       res = await api('query', 'signhb_source,smp,type', {signhb_source: 5, smp: '', type: 1})
-      /*
-      // 日历
-      let rili: number = res.riliremind_task.status
-        "riliremind_task":
-        {
-            "domax": 0,
-            "forwardAlarmTime": "",
-            "getmoney": "0",
-            "getniu": "",
-            "rank": "",
-            "remindpopTitle": "",
-            "remindtime": "",
-            "status": 1,
-            "task": "",
-            "taskLink": "",
-            "taskbtnn": "",
-            "taskbtny": "",
-            "taskname": "",
-            "url": ""
-        }
-      console.log(res.riliremind_task.getmoney)
-      if (rili === 1) {
-        res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=rili_remind&signhb_source=5&ispp=0&sqactive=&tk=&_stk=ispp%2Csignhb_source%2Csqactive%2Ctask%2Ctk&_ste=1&_=${Date.now()}&sceneval=2`, 'ispp,signhb_source,sqactive,task,tk')
-        if (res.ret === 0) {
-          console.log('日历任务完成')
-        } else {
-          console.log('日历任务失败', res)
-        }
-      }
-      */
       for (let t of res.commontask || []) {
         if (t.status === 1) {
           console.log(t.taskname)
@@ -106,18 +76,6 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
             console.log('任务失败：', res.errmsg)
           }
           await wait(3000)
-        }
-      }
-
-      // 喜豆任务
-      res = await api('query', 'ispp,signhb_source,smp,tk,type', {type: 0, signhb_source: 5, smp: '', ispp: 1, tk: ''})
-      let sqactive: string = res.sqactive
-      for (let t of res.commontask) {
-        if (t.status === 1) {
-          console.log('喜豆任务：', t.taskbtnn)
-          res = await api(`https://m.jingxi.com/fanxiantask/signhb/dotask?task=${t.task}&signhb_source=5&ispp=1&sqactive=${sqactive}&tk=&_=${Date.now()}&sceneval=2`, '')
-          console.log('任务完成，获得：', res.sendxd)
-          await wait(2000)
         }
       }
 

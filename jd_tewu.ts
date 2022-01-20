@@ -73,7 +73,7 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
     }
 
     // 抽奖
-    if (new Date().getHours() === 23) {
+    if (new Date().getHours() === 22) {
       res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
       let userStarNum: number = res.data.result.activityUserInfo.userStarNum
       console.log('可以抽奖', userStarNum, '次')
@@ -87,9 +87,6 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
       }
     }
   }
-
-  console.log('开始助力...')
-  await wait(10000)
 
   shareCodesHW = await getshareCodeHW('tewu')
   shareCodes = [...shareCodesSelf, ...shareCodesHW]
