@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool, getRandomNumberByRange, stringify} from '../TS_USER_AGENTS'
+import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, getShareCodePool} from '../TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
@@ -38,7 +38,6 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
   }
 
   // 助力
-  /*
   shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodesHW.length === 0) {
@@ -67,7 +66,6 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: str
       await wait(2000)
     }
   }
-  */
 
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
