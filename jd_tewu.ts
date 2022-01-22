@@ -4,6 +4,7 @@
  */
 
 import axios from 'axios'
+import {sendNotify} from './sendNotify'
 import {requireConfig, wait, o2s, getshareCodeHW} from './TS_USER_AGENTS'
 
 interface ShareCode {
@@ -13,7 +14,7 @@ interface ShareCode {
   itemId: string
 }
 
-let cookie: string = '', UserName: string = '', res: any = '', shareCodes: ShareCode[] = [], shareCodesSelf: ShareCode[] = [], shareCodesHW: any = []
+let cookie: string = '', UserName: string = '', res: any = '', message: string = '', shareCodes: ShareCode[] = [], shareCodesSelf: ShareCode[] = [], shareCodesHW: any = []
 
 
 !(async () => {
@@ -74,19 +75,22 @@ let cookie: string = '', UserName: string = '', res: any = '', shareCodes: Share
 
     // 抽奖
     if (new Date().getHours() === 22) {
+      let sum: number = 0
       res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
       let userStarNum: number = res.data.result.activityUserInfo.userStarNum
       console.log('可以抽奖', userStarNum, '次')
       for (let i = 0; i < userStarNum; i++) {
         res = await api('superBrandTaskLottery', {"source": "secondfloor", "activityId": activityId})
-        o2s(res)
         if (res.data.result?.rewardComponent?.beanList?.length) {
           console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
+          sum += res.data.result.rewardComponent.beanList[0].quantity
         }
         await wait(2000)
       }
+      message += `【京东账号${index + 1}】${UserName}\n抽奖${userStarNum}次，获得京豆${sum}\n\n`
     }
   }
+  await sendNotify('京东-下拉', message)
 
   shareCodesHW = await getshareCodeHW('tewu')
   shareCodes = [...shareCodesSelf, ...shareCodesHW]
