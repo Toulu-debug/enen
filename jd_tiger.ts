@@ -8,6 +8,7 @@
  */
 
 import axios from 'axios'
+import {sendNotify} from './sendNotify'
 import USER_AGENT, {requireConfig, wait, getshareCodeHW, getShareCodePool, o2s, obj2str} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], UserName: string = '', shareCodesSelf: string[] = [], shareCodesHW: string[] = []
@@ -46,6 +47,7 @@ let cards = {}
     }
   }
 
+  // 内部互赠
   console.log(cards)
 
   for (let [index, value] of cookiesArr.entries()) {
@@ -90,6 +92,24 @@ let cards = {}
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     try {
+      // 中奖记录
+      let pageNum: number = 1
+      while (1) {
+        res = await api({pageNum: pageNum, apiMapping: "/api/record/prizeRecord"})
+        console.log('正在加载第', pageNum, '页中奖记录', res.data.list.length)
+        for (let t of res.data.list) {
+          if (t.prizeType === 1) {
+            console.log('获得实物：', t.content)
+            await sendNotify("萌虎", `账号${index + 1} ${UserName}\n获得实物：${t.content}`)
+          }
+        }
+        pageNum++
+        await wait(1000)
+        if (res.data.list.length < 10)
+          break
+      }
+
+      // 任务
       res = await api({"apiMapping": "/api/task/support/getShareId"})
       console.log('助力码：', res.data)
       await wait(1000)
@@ -116,8 +136,10 @@ let cards = {}
                 console.log('任务完成，积分：', res.data.integral, '，京豆：', res.data.jbean)
                 await wait(1000)
               } else if (res.data.taskType === 'FOLLOW_SHOP_TASK') {
-                // console.log('任务完成，获得：', res.data.rewardInfoVo?.integral, res.data.rewardInfoVo?.jbean)
-                console.log(res.data.rewardInfoVo)
+                if (res.data?.rewardInfoVo?.integral && res.data?.rewardInfoVo?.jbean)
+                  console.log('任务完成，积分：', res.data?.rewardInfoVo?.integral, '，京豆：', res.data?.rewardInfoVo?.jbean)
+                else
+                  console.log('任务完成，空气')
               }
             }
           }

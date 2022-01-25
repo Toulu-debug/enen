@@ -121,7 +121,7 @@ interface Params {
     }
 
     console.log('任务列表开始')
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < 30; j++) {
       if (await task() === 0) {
         break
       }

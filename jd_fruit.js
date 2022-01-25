@@ -97,6 +97,15 @@ async function jdFruit() {
       console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.farmInfo.farmUserPro.shareCode}\n`);
       await farmmd5()
 
+      for (let k = 0; k < 3; k++) {
+        try {
+          await runTimes()
+          break
+        } catch (e) {
+        }
+        await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+      }
+
       console.log('当前种植', $.farmInfo.farmUserPro.name)
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
       message += `【已兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`;
@@ -139,6 +148,22 @@ async function jdFruit() {
     $.msg($.name, '', `${errMsg}`)
   }
   await showMsg();
+}
+
+function runTimes() {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
+  })
 }
 
 async function doDailyTask() {

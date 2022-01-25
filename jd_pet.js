@@ -119,6 +119,15 @@ async function jdPet() {
       }
       console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.petInfo.shareCode}\n`);
 
+      for (let k = 0; k < 3; k++) {
+        try {
+          await runTimes()
+          break
+        } catch (e) {
+        }
+        await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+      }
+
       await taskInit();
       if ($.taskInit.resultCode === '9999' || !$.taskInit.result) {
         console.log('初始化任务异常, 请稍后再试');
@@ -143,6 +152,22 @@ async function jdPet() {
     if ($.isNode()) await notify.sendNotify(`${$.name}`, errMsg);
     $.msg($.name, '', `${errMsg}`)
   }
+}
+
+function runTimes() {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=pet&sharecode=${$.petInfo.shareCode}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
+  })
 }
 
 // 收取所有好感度
@@ -278,8 +303,6 @@ async function masterHelpInit() {
  * 运行脚本时你自己的shareCode会在控制台输出, 可以将其分享给他人
  */
 async function slaveHelp() {
-  //$.log(`\n因1.6日好友助力功能下线。故暂时屏蔽\n`)
-  //return
   let helpPeoples = '';
   for (let code of newShareCodes) {
     console.log(`开始助力京东账号${$.index} - ${$.nickName}的好友: ${code}`);

@@ -2,7 +2,6 @@
  * 京东-锦鲤红包
  * 做任务、助力、开红包
  * cron: 1 0,6,18 * * *
- * 固定log，不知道什么时候会gg
  * CK1助力顺序
  * HW.ts -> 内部
  */
@@ -49,7 +48,7 @@ let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2]
     }
     for (let code of shareCodes) {
       if (!fullCode.includes(code)) {
-        console.log(`账号${index + 1} ${UserName} 去助力 ${code}`)
+        console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
         res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~0gga2ik`, "sceneid": "JLHBhPageh5"})
         if (res.data.result.status === 0) {
           console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))

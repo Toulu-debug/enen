@@ -148,6 +148,15 @@ function getTaskDetail(taskId = '') {
               if (data?.data?.result?.taskVos) {
                 console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data?.data?.result?.taskVos[0].assistTaskDetailVo.taskToken}\n`);
                 $.code = data?.data?.result?.taskVos[0].assistTaskDetailVo.taskToken || '';
+
+                for (let k = 0; k < 3; k++) {
+                  try {
+                    await runTimes()
+                    break
+                  } catch (e) {
+                  }
+                  await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+                }
               }
             } else if (taskId === 22) {
               console.log(`${data?.data?.result?.taskVos[0]?.taskName}任务，完成次数：${data?.data?.result?.taskVos[0]?.times}/${data?.data?.result?.taskVos[0]?.maxTimes}`)
@@ -183,6 +192,22 @@ function getTaskDetail(taskId = '') {
           resolve()
         }
       })
+  })
+}
+
+function runTimes() {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=health&sharecode=${$.code}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
   })
 }
 

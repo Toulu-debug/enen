@@ -92,6 +92,15 @@ async function jdPlantBean() {
       $.myPlantUuid = getParam(shareUrl, 'plantUuid')
       console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.myPlantUuid}\n`);
 
+      for (let k = 0; k < 3; k++) {
+        try {
+          await runTimes()
+          break
+        } catch (e) {
+        }
+        await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+      }
+
       roundList = $.plantBeanIndexResult.data.roundList;
       currentRoundId = roundList[1].roundId;//本期的roundId
       lastRoundId = roundList[0].roundId;//上期的roundId
@@ -118,6 +127,22 @@ async function jdPlantBean() {
     if ($.isNode()) await notify.sendNotify(`${$.name}`, errMsg);
     $.msg($.name, '', `${errMsg}`)
   }
+}
+
+function runTimes() {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=bean&sharecode=${$.myPlantUuid}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
+  })
 }
 
 async function doGetReward() {

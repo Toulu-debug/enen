@@ -202,7 +202,7 @@ function h5st(url: string, stk: string, params: object, appId: number = 10032) {
   return url
 }
 
-function getJxToken(cookie: string) {
+function getJxToken(cookie: string, phoneId: string = '') {
   function generateStr(input: number) {
     let src = 'abcdefghijklmnopqrstuvwxyz1234567890'
     let res = ''
@@ -211,8 +211,8 @@ function getJxToken(cookie: string) {
     }
     return res
   }
-
-  let phoneId = generateStr(40)
+  if (!phoneId)
+    phoneId = generateStr(40)
   let timestamp = Date.now().toString()
   let nickname = cookie.match(/pt_pin=([^;]*)/)![1]
   let jstoken = Md5.hashStr('' + decodeURIComponent(nickname) + timestamp + phoneId + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy')
