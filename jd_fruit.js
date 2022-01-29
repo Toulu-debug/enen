@@ -95,7 +95,9 @@ async function jdFruit() {
     await initForFarm();
     if ($.farmInfo.farmUserPro) {
       console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.farmInfo.farmUserPro.shareCode}\n`);
-      await farmmd5()
+      if ($.index === 1) {
+        await farmmd5()
+      }
 
       for (let k = 0; k < 3; k++) {
         try {
