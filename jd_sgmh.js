@@ -112,7 +112,9 @@ function interact_template_getHomeData(timeout = 0) {
               console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${data.data.result.taskVos[i].assistTaskDetailVo.taskToken}\n`);
               for (let code of $.newShareCodes) {
                 if (!code) continue
-                await harmony_collectScore(code, data.data.result.taskVos[i].taskId);
+                let res = await harmony_collectScore(code, data.data.result.taskVos[i].taskId);
+                if(res === '已达到助力上限')
+                  break
                 await $.wait(2000)
               }
             }
@@ -195,7 +197,7 @@ function harmony_collectScore(taskToken,taskId,itemId = "",actionType = 0,timeou
         } catch (e) {
           $.logErr(e, resp);
         } finally {
-          resolve()
+          resolve(data.data.bizMsg)
         }
       })
     },timeout)
