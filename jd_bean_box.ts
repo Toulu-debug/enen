@@ -82,7 +82,6 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
       shareCodeSelf.push({shareCode: res.data.shareCode, groupCode: res.data.groupCode, activeId: res.data.jklInfo.keyId})
       await wait(2000)
     }
-     */
   }
 
   console.log('内部助力', shareCodeSelf)
@@ -102,6 +101,7 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
         break
       await wait(2000)
     }
+  */
   }
 })()
 

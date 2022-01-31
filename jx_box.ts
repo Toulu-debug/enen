@@ -91,12 +91,6 @@ process.env.HW_Priority === 'false' ? HW_Priority = false : ''
           }
         }
       }
-      res = await doubleSign()
-      if (res.retCode === 0) {
-        console.log('双签成功')
-      } else {
-        console.log('双签失败', res)
-      }
     } catch (e: any) {
       console.log(e)
     }
@@ -130,19 +124,4 @@ async function api(fn: string, stk: string, params: Params = {}) {
     }
   })
   return JSON.parse(data.match(/\((.*)/)![1])
-}
-
-async function doubleSign() {
-  let {data} = await axios.get(`https://m.jingxi.com/double_sign/IssueReward?sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`, {
-    headers: {
-      'Host': 'm.jingxi.com',
-      'Accept': '*/*',
-      'Connection': 'keep-alive',
-      'User-Agent': 'jdpingou;',
-      'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-      'Referer': 'https://st.jingxi.com/',
-      'Cookie': cookie
-    }
-  })
-  return JSON.parse(data.match(/jsonpCBK.?\((.*)/)![1])
 }
