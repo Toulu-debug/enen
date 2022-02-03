@@ -36,35 +36,42 @@ let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2]
 
   console.log('内部助力：', shareCodesSelf)
   for (let [index, value] of cookiesArr.entries()) {
-    cookie = value;
-    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    if (shareCodesHW.length === 0) {
-      shareCodesHW = await getshareCodeHW('jlhb')
-    }
-    if (index === 0 || cookiesArr.length === 2) { // 红包1需2个助力
-      shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
-    } else {
-      shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
-    }
-    for (let code of shareCodes) {
-      if (!fullCode.includes(code)) {
-        console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
-        res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~0gga2ik`, "sceneid": "JLHBhPageh5"})
-        if (res.data.result.status === 0) {
-          console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))
-        } else if (res.data.result.status === 3) {
-          console.log('今日助力次数已满')
-          break
-        } else {
-          console.log('助力结果：', res.data.result.statusDesc)
-          if (res.data.result.statusDesc === '啊偶，TA的助力已满，开启自己的红包活动吧~') {
-            fullCode.push(code)
-          }
-        }
-        await wait(1000)
-      } else {
-        console.log(`Code ${code} 已被助满`)
+    try {
+      cookie = value;
+      UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+      if (shareCodesHW.length === 0) {
+        shareCodesHW = await getshareCodeHW('jlhb')
       }
+      if (index === 0 || cookiesArr.length === 2) { // 红包1需2个助力
+        shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+      } else {
+        shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
+      }
+      if (cookiesArr.length > 5 && cookiesArr.length < 8 && index > 5) {  // 红包3需要7个助力
+        shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+      }
+      for (let code of shareCodes) {
+        if (!fullCode.includes(code)) {
+          console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
+          res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, "random": getRandomNumberByRange(36135846, 74613584), "log": `${Date.now()}~0gga2ik`, "sceneid": "JLHBhPageh5"})
+          if (res.data.result.status === 0) {
+            console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))
+          } else if (res.data.result.status === 3) {
+            console.log('今日助力次数已满')
+            break
+          } else {
+            console.log('助力结果：', res.data.result.statusDesc)
+            if (res.data.result.statusDesc === '啊偶，TA的助力已满，开启自己的红包活动吧~') {
+              fullCode.push(code)
+            }
+          }
+          await wait(1000)
+        } else {
+          console.log(`Code ${code} 已被助满`)
+        }
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 
