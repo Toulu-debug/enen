@@ -8,7 +8,7 @@
 
 import axios from 'axios';
 import {sendNotify} from './sendNotify'
-import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, getshareCodeHW} from "./TS_USER_AGENTS";
+import USER_AGENT, {requireConfig, wait, getRandomNumberByRange, getshareCodeHW, o2s} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
@@ -41,7 +41,7 @@ let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2]
     if (shareCodesHW.length === 0) {
       shareCodesHW = await getshareCodeHW('jlhb')
     }
-    if (index === 0) {
+    if (index === 0 || cookiesArr.length === 2) { // 红包1需2个助力
       shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
     } else {
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
