@@ -47,7 +47,7 @@ let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2]
       } else {
         shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
       }
-      if (cookiesArr.length > 5 && cookiesArr.length < 8 && index > 5) {  // 红包3需要7个助力
+      if (cookiesArr.length > 5 && cookiesArr.length < 8 && index > 4) {  // 红包3需要7个助力
         shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
       }
       for (let code of shareCodes) {
