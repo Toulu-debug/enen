@@ -1,3 +1,8 @@
+/**
+ * 京东-汽车-签到
+ * cron: 15 1 * * *
+ */
+
 import axios from 'axios'
 import {requireConfig, wait} from './TS_USER_AGENTS'
 
