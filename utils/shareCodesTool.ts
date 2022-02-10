@@ -2,7 +2,7 @@ import axios from "axios";
 import USER_AGENT, {h5st} from "../TS_USER_AGENTS";
 
 async function bean(cookie: string) {
-  let {data}: any = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${escape(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
+  let {data}: any = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${decodeURIComponent(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
     headers: {
       Cookie: cookie,
       Host: "api.m.jd.com",
@@ -42,15 +42,17 @@ async function health(cookie: string) {
 }
 
 async function pet(cookie: string) {
-  let {data}: any = await axios.post(`https://api.m.jd.com/client.action?functionId=initPetTown`,
-    `body=${escape(JSON.stringify({version: 2, channel: "app"}))}&appid=wh5&loginWQBiz=pet-town&clientVersion=9.0.4`, {
+  let {data} = await axios.post('https://api.m.jd.com/client.action',
+    `functionId=initPetTown&body=${JSON.stringify({"version": 1})}&appid=wh5&client=apple&clientVersion=10.3.6&build=167963&rfs=0000`, {
       headers: {
-        'Cookie': cookie,
-        "User-Agent": USER_AGENT,
-        'Host': "api.m.jd.com",
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Host': 'api.m.jd.com',
+        'Origin': 'https://h5.m.jd.com',
+        'User-Agent': USER_AGENT,
+        'Referer': 'https://h5.m.jd.com/',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Cookie': cookie
       }
-    });
+    })
   return data.result?.shareCode ?? 'null'
 }
 

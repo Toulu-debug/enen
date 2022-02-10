@@ -98,7 +98,7 @@ async function getFarmShareCode(cookie: string) {
     return ''
 }
 
-async function requireConfig(index: number = -1) {
+async function requireConfig(index: number = -1): Promise<string[]> {
   let cookiesArr: string[] = []
   const jdCookieNode = require('./jdCookie.js')
   Object.keys(jdCookieNode).forEach((item) => {
@@ -211,6 +211,7 @@ function getJxToken(cookie: string, phoneId: string = '') {
     }
     return res
   }
+
   if (!phoneId)
     phoneId = generateStr(40)
   let timestamp = Date.now().toString()

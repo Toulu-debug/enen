@@ -2,27 +2,18 @@
  * 农场补充任务
  * cron: 0 11,12 * * *
  */
+
 import axios from 'axios'
-import USER_AGENT, {requireConfig, TotalBean, wait} from './TS_USER_AGENTS'
-import * as dotenv from 'dotenv'
+import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS'
 
-const notify = require('./sendNotify')
-dotenv.config()
-let cookie: string = '', res: any = ''
+let cookie: string = '', res: any = '', UserName: string
 
-let UserName: string, index: number
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1
-    let {isLogin, nickName}: any = await TotalBean(cookie)
-    if (!isLogin) {
-      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
-      continue
-    }
-    console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`)
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     for (let k = 0; k < 3; k++) {
       console.log(`round:${k + 1}`)
@@ -33,6 +24,7 @@ let UserName: string, index: number
             // 领取
             res = await api("browseAdTaskForFarm", {"advertId": t.advertId, "type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
             console.log('领取水滴：', res.amount)
+            await wait(2000)
           } else {
             // 做任务
             res = await api("browseAdTaskForFarm", {"advertId": t.advertId, "type": 0, "version": 14, "channel": 1, "babelChannel": "120"})
@@ -40,8 +32,8 @@ let UserName: string, index: number
               console.log(`${t.mainTitle}：任务完成`)
             else
               console.log(`${t.mainTitle}：任务失败-${res.code}`)
+            await wait((t.time || 3) * 1000)
           }
-          await wait(2000)
         }
       }
       await wait(3000)
