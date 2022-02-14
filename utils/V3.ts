@@ -45,13 +45,14 @@ async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
       'Content-Type': 'application/json',
       "Accept-Encoding": "gzip, deflate, br",
       "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-      'Origin': 'https://prodev.m.jd.com',
-      'Referer': 'https://prodev.m.jd.com/',
+      'host': 'cactus.jd.com',
+      'Referer': 'https://cactus.jd.com',
       'User-Agent': USER_AGENT
     }
   })
   tk = data.data.result.tk;
   genKey = new Function(`return ${data.data.result.algo}`)();
+  return {fp, tk, genKey}
 }
 
 function geth5st(t: { key: string, value: string } [], appId: string) {
@@ -121,5 +122,4 @@ export {
   geth5st,
   get,
   makeShareCodes,
-
 }
