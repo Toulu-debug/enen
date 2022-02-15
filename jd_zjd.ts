@@ -43,7 +43,7 @@ interface Tuan {
           assistStartRecordId: res.data.assistStartRecordId,
           assistedPinEncrypted: res.data.encPin,
         })
-      } else if (res.data.assistStatus === 2) {
+      } else if (res.data.assistStatus === 2 && res.data.canStartNewAssist) {
         // 没开团
         res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
         o2s(res)
@@ -58,6 +58,8 @@ interface Tuan {
           })
           await wait(1000)
         }
+      } else if (!res.data.canStartNewAssist) {
+        console.log('不可开团')
       }
     } catch (e) {
       console.log(e)
@@ -66,6 +68,7 @@ interface Tuan {
     await wait(1000)
   }
 
+  console.log(shareCodeSelf)
   shareCodeHW = getshareCodeHW('zjd')
   let temp: Tuan[]
   if (cookiesArr.length < 4) {
@@ -109,6 +112,7 @@ interface Tuan {
       await wait(2000)
     }
     console.log()
+    await wait(2000)
   }
 })()
 
