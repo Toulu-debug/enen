@@ -120,7 +120,6 @@ interface Tuan {
           console.log('对方已成团')
         } else if (res.success) {
           console.log('助力成功')
-          break
         } else {
           console.log('error', res.resultCode)
           // o2s(res)
