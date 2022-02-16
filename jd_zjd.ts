@@ -37,7 +37,7 @@ interface Tuan {
 
       if (res.data.assistStatus === 1) {
         // 已开，没满
-        console.log('已开团，未满，剩余', Math.round(res.data.assistValidMilliseconds / 1000 / 60), '分钟')
+        console.log('已开团，', res.data.assistedRecords.length, '/', res.data.assistNum, '，剩余', Math.round(res.data.assistValidMilliseconds / 1000 / 60), '分钟')
         shareCodeSelf.push({
           activityIdEncrypted: res.data.id,
           assistStartRecordId: res.data.assistStartRecordId,
@@ -58,17 +58,34 @@ interface Tuan {
           })
           await wait(1000)
         }
+      } else if (res.data.assistedRecords.length === res.data.assistNum) {
+        console.log('已成团')
+        res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
+        console.log('4', res)
+        await wait(2000)
+        if (res.success) {
+          console.log(`开团成功，结束时间：${res.data.endTime}`)
+          res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
+          shareCodeSelf.push({
+            activityIdEncrypted: res.data.id,
+            assistStartRecordId: res.data.assistStartRecordId,
+            assistedPinEncrypted: res.data.encPin,
+          })
+          await wait(1000)
+        }
       } else if (!res.data.canStartNewAssist) {
         console.log('不可开团')
       }
     } catch (e) {
-      console.log(e)
     }
 
-    await wait(1000)
+    await wait(2000)
   }
 
-  console.log(shareCodeSelf)
+  o2s(shareCodeSelf)
+  console.log(shareCodeSelf.length)
+  await wait(5000)
+
   shareCodeHW = getshareCodeHW('zjd')
   let temp: Tuan[]
   if (cookiesArr.length < 4) {
@@ -99,11 +116,14 @@ interface Tuan {
         } else if (res.resultCode === '2400203') {
           console.log('上限')
           break
+        } else if (res.resultCode === '2400205') {
+          console.log('对方已成团')
         } else if (res.success) {
           console.log('助力成功')
           break
         } else {
-          o2s(res)
+          console.log('error', res.resultCode)
+          // o2s(res)
         }
       } catch (e) {
         console.log(e)
