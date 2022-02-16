@@ -94,9 +94,12 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
   await wait(3000)
 
   shareCodesHW = await getshareCodeHW('tewu')
-  shareCodes = [...shareCodesSelf, ...shareCodesHW]
   let full: string[] = []
+
   for (let [index, value] of cookiesArr.entries()) {
+    shareCodes = index === 0
+      ? Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+      : Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     cookie = value
     res = await api('superBrandTaskList', {"source": "run", "activityId": activityId, "assistInfoFlag": 1})
     for (let code of shareCodes) {
