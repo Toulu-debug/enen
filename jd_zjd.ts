@@ -77,30 +77,20 @@ interface Tuan {
         console.log('不可开团')
       }
     } catch (e) {
+      continue
     }
-
     await wait(2000)
   }
 
   o2s(shareCodeSelf)
-  console.log(shareCodeSelf.length)
-  await wait(5000)
-
-  shareCodeHW = getshareCodeHW('zjd')
-  let temp: Tuan[]
-  if (cookiesArr.length < 4) {
-    temp = Array.from([...shareCodeHW, ...shareCodeSelf])
-  } else {
-    temp = shareCodeSelf
-  }
-  for (let item of temp) {
-    if (!encPin.includes(item.assistedPinEncrypted)) {
-      encPin.push(item.assistedPinEncrypted)
-      shareCode.push(item)
-    }
-  }
-
   for (let [index, value] of cookiesArr.entries()) {
+    if (shareCodeHW.length === 0) {
+      shareCodeHW = await getshareCodeHW('zjd');
+    }
+    shareCode = index === 0
+      ? Array.from(new Set([...shareCodeHW, ...shareCodeSelf]))
+      : Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
+
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     let {fp, tk, genKey} = await requestAlgo('d8ac0', USER_AGENT)
@@ -122,7 +112,6 @@ interface Tuan {
           console.log('助力成功')
         } else {
           console.log('error', res.resultCode)
-          // o2s(res)
         }
       } catch (e) {
         console.log(e)
