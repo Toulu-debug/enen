@@ -44,11 +44,11 @@ let cookie: string = '', res: any = '', UserName: string
                   await wait(t.waitDuration * 1000)
                 }
                 res = await api('jdhealth_collectScore', {"taskToken": tp.taskToken, "taskId": t.taskId, "actionType": 0})
-                if (res.data.bizMsg.indexOf('做完') !== -1) {
+                if (res.data.bizMsg.includes('做完')) {
                   console.log(res.data.bizMsg)
                   break
                 } else {
-                  console.log(res.data.bizMsg, res.data.result.score)
+                  console.log(res.data.bizMsg, parseInt(res.data.result.score))
                   await wait(1500)
                 }
               }

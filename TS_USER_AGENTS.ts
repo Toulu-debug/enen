@@ -263,9 +263,13 @@ function randomNumString(e: number) {
   return n
 }
 
-function randomWord() {
+function randomWord(n: number = 1) {
   let t = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', a = t.length
-  return t.charAt(Math.floor(Math.random() * a))
+  let rnd: string = ''
+  for (let i = 0; i < n; i++) {
+    rnd += t.charAt(Math.floor(Math.random() * a))
+  }
+  return rnd
 }
 
 async function getshareCodeHW(key: string) {
