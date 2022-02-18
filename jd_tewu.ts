@@ -25,13 +25,13 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
-    res = await api('showSecondFloorRunInfo', {"source": "run"})
+    res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
     activityId = res.data.result.activityBaseInfo.activityId
     let encryptProjectId: string = res.data.result.activityBaseInfo.encryptProjectId
     await wait(1000)
 
     // 任务
-    res = await api('superBrandTaskList', {"source": "run", "activityId": activityId, "assistInfoFlag": 1})
+    res = await api('superBrandTaskList', {"source": "secondfloor", "activityId": activityId, "assistInfoFlag": 1})
     o2s(res)
 
     for (let t of res.data.result.taskList) {
@@ -41,22 +41,12 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
           let tp = t.ext?.shoppingActivity || t.ext?.followShop
           tp = tp[0]
           console.log(tp.title || tp.shopName, tp.itemId)
-          res = await api('superBrandDoTask', {"source": "run", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": tp.itemId, "actionType": 0})
+          res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": tp.itemId, "actionType": 0})
           console.log(res.data?.bizMsg)
           await wait(2000)
-        } else if (t.ext?.assistTaskDetail) {
-          // 助力码
-          console.log('助力码：', t.ext.assistTaskDetail.itemId)
-          console.log('收到助力：', t.ext?.assistList?.length ?? 0)
-          shareCodesSelf.push({
-            activityId: activityId,
-            encryptProjectId: encryptProjectId,
-            encryptAssignmentId: t.encryptAssignmentId,
-            itemId: t.ext.assistTaskDetail.itemId
-          })
         }
-        //
-        // // 下拉
+
+        // 下拉
         // if (t.ext?.sign2) {
         //   try {
         //     if (new Date().getHours() >= 14 && new Date().getHours() <= 20) {
@@ -69,16 +59,28 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
         //   }
         // }
       }
+
+      // 助力码
+      if (t.ext?.assistTaskDetail) {
+        console.log('助力码：', t.ext.assistTaskDetail.itemId)
+        console.log('收到助力：', t.ext?.assistList?.length ?? 0)
+        shareCodesSelf.push({
+          activityId: activityId,
+          encryptProjectId: encryptProjectId,
+          encryptAssignmentId: t.encryptAssignmentId,
+          itemId: t.ext.assistTaskDetail.itemId
+        })
+      }
     }
 
     // 抽奖
     if (new Date().getHours() === 23) {
       let sum: number = 0
-      res = await api('showSecondFloorRunInfo', {"source": "run"})
-      let userStarNum: number = Math.floor(res.data.result.activityUserInfo.userStarNum / 300)
+      res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
+      let userStarNum: number = res.data.result.activityUserInfo.userStarNum
       console.log('可以抽奖', userStarNum, '次')
       for (let i = 0; i < userStarNum; i++) {
-        res = await api('superBrandTaskLottery', {"source": "run", "activityId": activityId})
+        res = await api('superBrandTaskLottery', {"source": "secondfloor", "activityId": activityId})
         if (res.data.result?.rewardComponent?.beanList?.length) {
           console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
           sum += res.data.result.rewardComponent.beanList[0].quantity
@@ -88,24 +90,27 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
       message += `【京东账号${index + 1}】${UserName}\n抽奖${userStarNum}次，获得京豆${sum}\n\n`
     }
   }
-  await sendNotify('京东特物', message)
+  // await sendNotify('京东-下拉', message)
 
   console.log(shareCodesSelf)
   await wait(3000)
 
   shareCodesHW = await getshareCodeHW('tewu')
+  shareCodes = [...shareCodesSelf, ...shareCodesHW]
   let full: string[] = []
-
   for (let [index, value] of cookiesArr.entries()) {
-    shareCodes = index === 0
-      ? Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
-      : Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
     cookie = value
-    res = await api('superBrandTaskList', {"source": "run", "activityId": activityId, "assistInfoFlag": 1})
+    res = await api('superBrandTaskList', {"source": "secondfloor", "activityId": activityId, "assistInfoFlag": 1})
+    let mine: string = ''
+    for (let t of res.data.result.taskList) {
+      if (t.ext?.assistTaskDetail) {
+        mine = t.ext.assistTaskDetail.itemId
+      }
+    }
     for (let code of shareCodes) {
-      if (!full.includes(code.itemId)) {
+      if (code.itemId !== mine && !full.includes(code.itemId)) {
         console.log(`账号${index + 1} 去助力 ${code.itemId} ${shareCodesSelf.some(self => self.itemId === code.itemId) ? '*内部*' : ''}`)
-        res = await api('superBrandDoTask', {"source": "run", "activityId": code.activityId, "encryptProjectId": code.encryptProjectId, "encryptAssignmentId": code.encryptAssignmentId, "assignmentType": 2, "itemId": code.itemId, "actionType": 0})
+        res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": code.activityId, "encryptProjectId": code.encryptProjectId, "encryptAssignmentId": code.encryptAssignmentId, "assignmentType": 2, "itemId": code.itemId, "actionType": 0})
         if (res.data.bizCode === '0') {
           console.log('助力成功')
         } else if (res.data.bizCode === '103') {
@@ -129,7 +134,7 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
 })()
 
 async function api(fn: string, body: object) {
-  let {data} = await axios.post(`https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=${fn}&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
+  let {data} = await axios.post(`https://api.m.jd.com/api?functionId=${fn}&appid=ProductZ4Brand&client=wh5&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
     headers: {
       'Host': 'api.m.jd.com',
       'Origin': 'https://pro.m.jd.com',

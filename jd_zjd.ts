@@ -111,7 +111,7 @@ interface Tuan {
         } else if (res.success) {
           console.log('助力成功')
         } else {
-          console.log('error', res.resultCode)
+          console.log('error', JSON.stringify(res))
         }
       } catch (e) {
         console.log(e)
