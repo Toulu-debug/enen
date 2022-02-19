@@ -251,8 +251,8 @@ function resetHosts() {
   }
 }
 
-function o2s(arr: object) {
-  console.log(JSON.stringify(arr))
+function o2s(arr: object, title: string = '') {
+  title ? console.log(title, JSON.stringify(arr)) : console.log(JSON.stringify(arr))
 }
 
 function randomNumString(e: number) {
