@@ -6,6 +6,7 @@ let account: { pushplus?: string, pt_pin: string }[] = JSON.parse(readFileSync("
 export async function pushplus(content: string) {
   for (let user of account) {
     if (content.includes(decodeURIComponent(user.pt_pin)) && user.pushplus) {
+      console.log(`[Pushplus] => ${decodeURIComponent(user.pt_pin)}`);
       await send(user.pushplus, content)
     }
   }

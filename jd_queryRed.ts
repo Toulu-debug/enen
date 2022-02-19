@@ -6,7 +6,7 @@ import {requireConfig, wait, randomWord} from "./TS_USER_AGENTS";
 let cookie: string = '', res: any = '', UserName: string
 let message: string = '', allMessage: string = '';
 
-let jdRed: number = 0, jdRedExp: number = 0, date: number = getDate(new Date())
+let date: number = getDate(new Date())
 
 !(async () => {
   if (Object.keys(process.env).includes("QL_DIR"))
@@ -16,6 +16,7 @@ let jdRed: number = 0, jdRedExp: number = 0, date: number = getDate(new Date())
     cookie = value;
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`);
+    let jdRed: number = 0, jdRedExp: number = 0
 
     res = await api()
 
