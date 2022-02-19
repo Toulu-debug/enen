@@ -19,6 +19,9 @@
  * 东东农场 = type=cron,script-path=jd_fruit.js, cronexpr="5 6-18/6 * * *", timeout=3600, enable=true
  *
  * jd免费水果 搬的https://github.com/liuxiaoyucc/jd-helper/blob/a6f275d9785748014fc6cca821e58427162e9336/fruit/fruit.js
+ * 每号间隔（毫秒），默认0毫秒（0分钟）
+ * export fruit_sleep=300000
+ *
  */
 
 const $ = new Env('东东农场');
@@ -48,7 +51,9 @@ const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%2
       await shareCodesFormat();
       await jdFruit();
     }
-    await $.wait(60 * 5.5 * 1000);
+    if ($.isNode()) {
+      process.env.fruit_sleep ? await $.wait(Number(process.env.fruit_sleep)) : ''
+    }
   }
   if ($.isNode() && allMessage && $.ctrTemp) {
     await notify.sendNotify(`${$.name}`, `${allMessage}`)

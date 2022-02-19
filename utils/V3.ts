@@ -30,14 +30,14 @@ function getRandomIDPro() {
   return i;
 }
 
-async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
+async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;', fingerPrint: string = '') {
   let s = "", a = "0123456789", u = a, c = (Math.random() * 10) | 0;
   do {
     let ss = getRandomIDPro() + ""
     if (s.indexOf(ss) == -1) s += ss
   } while (s.length < 3)
   for (let i of s.slice()) u = u.replace(i, '')
-  fp = getRandomIDPro() + "" + s + getRandomIDPro() + c + ""
+  fp = fingerPrint || getRandomIDPro() + "" + s + getRandomIDPro() + c + ""
 
   let {data} = await axios.post(`https://cactus.jd.com/request_algo?g_ty=ajax`, `{"version":"3.0","fp":"${fp}","appId":"${appId}","timestamp":${Date.now()},"platform":"web","expandParams":""}`, {
     headers: {
@@ -62,7 +62,7 @@ function geth5st(t: { key: string, value: string } [], appId: string) {
   let time = Date.now()
   let timestamp = format(time, "yyyyMMddhhmmssSSS");
   let hash1 = genKey(tk, fp.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString();
-  const hash2 = CryptoJS.HmacSHA256(a, hash1.toString()).toString();
+  const hash2 = CryptoJS.HmacSHA256(a, hash1).toString();
   return ["".concat(timestamp.toString()), "".concat(fp.toString()), "".concat(appId.toString()), "".concat(tk), "".concat(hash2), "3.0", "".concat(time.toString())].join(";")
 }
 
