@@ -51,8 +51,12 @@ const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%2
       await shareCodesFormat();
       await jdFruit();
     }
-    if ($.isNode()) {
-      process.env.fruit_sleep ? await $.wait(Number(process.env.fruit_sleep)) : ''
+    if ($.isNode() && process.env.fruit_sleep) {
+      try {
+        await $.wait(Number(process.env.fruit_sleep))
+      } catch (e) {
+        $.logErr("process.env.fruit_sleep value error")
+      }
     }
   }
   if ($.isNode() && allMessage && $.ctrTemp) {
@@ -110,12 +114,7 @@ async function jdFruit() {
       await getTenWaterAward();//领取10浇水奖励
       await getWaterFriendGotAward();//领取为2好友浇水奖励
       await duck();
-      if (!process.env.DO_TEN_WATER_AGAIN) {
-        console.log('执行再次浇水')
-        await doTenWaterAgain();//再次浇水
-      } else {
-        console.log('不执行再次浇水，攒水滴')
-      }
+      // await doTenWaterAgain();//再次浇水
       await predictionFruit();//预测水果成熟时间
     } else {
       console.log(`初始化农场数据异常, 请登录京东 app查看农场0元水果功能是否正常,农场初始化数据: ${JSON.stringify($.farmInfo)}`);
