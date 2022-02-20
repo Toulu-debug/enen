@@ -1,5 +1,6 @@
 import axios from "axios";
 import {readFileSync} from "fs";
+import {o2s} from "../TS_USER_AGENTS";
 
 let account: { pushplus?: string, pt_pin: string }[] = JSON.parse(readFileSync("./utils/account.json").toString());
 
@@ -24,5 +25,7 @@ async function send(token: string, content: string) {
   })
   if (data.code === 200) {
     console.log('pushplus发送成功')
+  } else {
+    o2s(data, 'pushplus发送失败')
   }
 }
