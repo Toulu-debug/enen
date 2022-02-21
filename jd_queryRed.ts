@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {getDate} from "date-fns";
 import {pushplus} from './utils/pushplus';
-import {requireConfig, wait, randomWord} from "./TS_USER_AGENTS";
+import {requireConfig, wait, randomWord, o2s} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string
 let message: string = '', allMessage: string = '';
@@ -19,7 +19,6 @@ let date: number = getDate(new Date())
     let jdRed: number = 0, jdRedExp: number = 0
 
     res = await api()
-
     for (let red of res.data.useRedInfo.redList) {
       if (red.orgLimitStr.includes("京喜")) {
 
@@ -36,7 +35,7 @@ let date: number = getDate(new Date())
     message = `【京东账号${index + 1}】 ${UserName}\n京东红包  ${jdRed.toFixed(2)}\n今日过期  ${jdRedExp.toFixed(2)}\n\n`
     allMessage += message
 
-    await pushplus(message)
+    await pushplus('京东红包', message)
     await wait(1000)
   }
 })()

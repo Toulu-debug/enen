@@ -8,8 +8,9 @@ import * as path from "path"
 import {sendNotify} from './sendNotify'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
 import USER_AGENT, {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
+import {pushplus} from "./utils/pushplus";
 
-let cookie: string = '', UserName: string, index: number, allMessage: string = '', res: any = '', message: string = ''
+let cookie: string = '', UserName: string, allMessage: string = '', res: any = '', message: string = ''
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -25,11 +26,10 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     mkdirSync('./json')
     writeFileSync('./json/jd_track.json', '{}')
   }
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1
-    console.log(`\n开始【京东账号${index}】${UserName}\n`)
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     if (except.includes(encodeURIComponent(UserName))) {
       console.log('已设置跳过')
@@ -37,6 +37,8 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     }
 
     message = ''
+    let markdown: string = ``, i: number = 1
+
     res = await getOrderList()
     await wait(2000)
 
@@ -57,15 +59,20 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
         console.log()
         if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
           message += `${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
+          markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
         }
         orders[orderId] = {
           user: UserName, title, t, status, carrier, carriageId
         }
       }
     }
-    if (message) {
+    console.log(markdown)
+    if (message || markdown) {
       message = `<京东账号${i + 1}>  ${UserName}\n\n${message}`
-      allMessage += message
+      markdown = `#### <${UserName}>\n${markdown}`
+      // await pushplus(message)
+      await pushplus('京东快递更新', markdown, 'markdown')
+      // allMessage += message
     }
     await wait(1000)
   }
@@ -75,8 +82,8 @@ let cookie: string = '', UserName: string, index: number, allMessage: string = '
     orders = orders.replace(new RegExp(decodeURIComponent(acc['pt_pin']), 'g'), acc['remarks'])
   }
   writeFileSync('./json/jd_track.json', orders)
-  if (allMessage)
-    await sendNotify('京东快递更新', allMessage)
+  // if (allMessage)
+  //   await sendNotify('京东快递更新', allMessage)
 })()
 
 async function getOrderList() {

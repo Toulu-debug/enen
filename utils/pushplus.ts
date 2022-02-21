@@ -4,20 +4,21 @@ import {o2s} from "../TS_USER_AGENTS";
 
 let account: { pushplus?: string, pt_pin: string }[] = JSON.parse(readFileSync("./utils/account.json").toString());
 
-export async function pushplus(content: string) {
+export async function pushplus(title: string, content: string, template: string = 'html') {
   for (let user of account) {
     if (content.includes(decodeURIComponent(user.pt_pin)) && user.pushplus) {
       console.log(`[Pushplus] => ${decodeURIComponent(user.pt_pin)}`);
-      await send(user.pushplus, content)
+      await send(user.pushplus, title, content, template)
     }
   }
 }
 
-async function send(token: string, content: string) {
+async function send(token: string, title, content: string, template: string) {
   let {data}: any = await axios.post('https://www.pushplus.plus/send', {
     token: token,
-    title: '京东红包',
+    title: title,
     content: content,
+    template: template
   }, {
     headers: {
       'Content-Type': 'application/json'
