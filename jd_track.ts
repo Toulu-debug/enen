@@ -10,12 +10,21 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
 import USER_AGENT, {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
 import {pushplus} from "./utils/pushplus";
 
-let cookie: string = '', UserName: string, allMessage: string = '', res: any = '', message: string = ''
+let cookie: string = '', UserName: string, allMessage: string = '', res: any = ''
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
   let except: string[] = exceptCookie(path.basename(__filename))
-  let orders: any = {}
+  let orders: any = {}, pushplusArr: { pt_pin: string, pushplus: string }[], pushplusUser: string[] = []
+  try {
+    pushplusArr = JSON.parse(readFileSync('./utils/pushplus.json', 'utf-8').toString())
+  } catch (e) {
+    console.log('utils/pushplus.json 加载错误')
+    pushplusArr = []
+  }
+  for (let user of pushplusArr) {
+    pushplusUser.push(decodeURIComponent(user.pt_pin))
+  }
   if (existsSync('./json')) {
     if (existsSync('./json/jd_track.json')) {
       orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
@@ -36,8 +45,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       continue
     }
 
-    message = ''
-    let markdown: string = ``, i: number = 1
+    let message: string = '', markdown: string = ``, i: number = 1
 
     res = await getOrderList()
     await wait(2000)
@@ -58,32 +66,39 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
         console.log('\t', t, status)
         console.log()
         if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
-          message += `${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
-          markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
+          if (pushplusUser.includes(UserName)) {
+            console.log('+ pushplus')
+            markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
+          } else {
+            console.log('+ sendNotify')
+            message += `${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
+          }
         }
         orders[orderId] = {
           user: UserName, title, t, status, carrier, carriageId
         }
       }
     }
-    console.log(markdown)
-    if (message || markdown) {
-      message = `<京东账号${i + 1}>  ${UserName}\n\n${message}`
+
+    if (message) {
+      message = `<京东账号${index + 1}>  ${UserName}\n\n${message}`
+      allMessage += message
+    }
+    if (markdown) {
       markdown = `#### <${UserName}>\n${markdown}`
-      // await pushplus(message)
       await pushplus('京东快递更新', markdown, 'markdown')
-      // allMessage += message
     }
     await wait(1000)
   }
+
   orders = JSON.stringify(orders, null, 2)
   let account: { pt_pin: string, remarks: string, wxpusher_uid?: string }[] = JSON.parse(readFileSync('./utils/account.json').toString() || '[]') || []
   for (let acc of account) {
     orders = orders.replace(new RegExp(decodeURIComponent(acc['pt_pin']), 'g'), acc['remarks'])
   }
   writeFileSync('./json/jd_track.json', orders)
-  // if (allMessage)
-  //   await sendNotify('京东快递更新', allMessage)
+  if (allMessage)
+    await sendNotify('京东快递更新', allMessage)
 })()
 
 async function getOrderList() {

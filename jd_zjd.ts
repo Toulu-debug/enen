@@ -59,19 +59,21 @@ interface Tuan {
           await wait(1000)
         }
       } else if (res.data.assistedRecords.length === res.data.assistNum) {
-        console.log('已成团')
-        res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
-        console.log('4', res)
-        await wait(2000)
-        if (res.success) {
-          console.log(`开团成功，结束时间：${res.data.endTime}`)
-          res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
-          shareCodeSelf.push({
-            activityIdEncrypted: res.data.id,
-            assistStartRecordId: res.data.assistStartRecordId,
-            assistedPinEncrypted: res.data.encPin,
-          })
-          await wait(1000)
+        console.log('已成团', JSON.stringify(res))
+        if (res.data.canStartNewAssist) {
+          res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
+          console.log('4', res)
+          await wait(2000)
+          if (res.success) {
+            console.log(`开团成功，结束时间：${res.data.endTime}`)
+            res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
+            shareCodeSelf.push({
+              activityIdEncrypted: res.data.id,
+              assistStartRecordId: res.data.assistStartRecordId,
+              assistedPinEncrypted: res.data.encPin,
+            })
+            await wait(1000)
+          }
         }
       } else if (!res.data.canStartNewAssist) {
         console.log('不可开团')

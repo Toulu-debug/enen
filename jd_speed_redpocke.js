@@ -24,7 +24,7 @@ cron "20 0,22 * * *" script-path=https://gitee.com/lxk0301/jd_scripts/raw/master
 const $ = new Env('京东极速版红包');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let cookiesArr = [], cookie = '', message;
-const linkIds = ["7ya6o83WSbNhrbYJqsMfFA", "Eu7-E0CUzqYyhZJo9d3YkQ"];
+const linkIds = ["7ya6o83WSbNhrbYJqsMfFA"];
 const signLinkId = '9WA12jYGulArzWS7vcrwhw';
 let linkId
 
