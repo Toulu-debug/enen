@@ -62,9 +62,13 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
 
       if (t && status) {
         if (status.match(/(?=签收|已取走|已暂存)/)) continue
-        console.log(title)
-        console.log('\t', t, status)
-        console.log()
+        if (!pushplusUser.includes(UserName)) {
+          console.log(title)
+          console.log('\t', t, status)
+          console.log()
+        } else {
+          console.log('隐私保护，不显示日志')
+        }
         if (Object.keys(orders).indexOf(orderId) > -1 && orders[orderId]['status'] !== status) {
           if (pushplusUser.includes(UserName)) {
             console.log('+ pushplus')
