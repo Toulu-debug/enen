@@ -17,13 +17,13 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
   let except: string[] = exceptCookie(path.basename(__filename))
   let orders: any = {}, pushplusArr: { pt_pin: string, pushplus: string }[], pushplusUser: string[] = []
   try {
-    pushplusArr = JSON.parse(readFileSync('./utils/pushplus.json', 'utf-8').toString())
+    pushplusArr = JSON.parse(readFileSync('./utils/account.json').toString())
   } catch (e) {
-    console.log('utils/pushplus.json 加载错误')
-    pushplusArr = []
+    console.log('utils/pushplus.json load failed')
   }
   for (let user of pushplusArr) {
-    pushplusUser.push(decodeURIComponent(user.pt_pin))
+    if (user.pushplus)
+      pushplusUser.push(decodeURIComponent(user.pt_pin))
   }
   if (existsSync('./json')) {
     if (existsSync('./json/jd_track.json')) {
@@ -45,7 +45,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       continue
     }
 
-    let message: string = '', markdown: string = ``, i: number = 1
+    let message: string = '', markdown: string = '', i: number = 1
 
     res = await getOrderList()
     await wait(2000)

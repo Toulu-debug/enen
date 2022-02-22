@@ -8,6 +8,8 @@ import {getRandomNumberByRange, requireConfig, wait} from './TS_USER_AGENTS'
 let cookie: string = '', res: any = '', UserName: string, index: number
 let UA: string = `jdapp;JD4iPhone/167724 (iPhone; iOS ${getRandomNumberByRange(12, 16)}.${getRandomNumberByRange(0, 4)}; Scale/3.00)`
 
+process.env.deleteCart = 'true'
+
 !(async () => {
   if (process.env.deleteCart === 'true') {
     let cookiesArr: string[] = await requireConfig()

@@ -1,19 +1,26 @@
 import axios from "axios";
 import {readFileSync} from "fs";
-import {o2s} from "../TS_USER_AGENTS";
 
-let account: { pushplus?: string, pt_pin: string }[] = JSON.parse(readFileSync("./utils/account.json").toString());
+let account: { pt_pin: string, pushplus?: string } [] = []
 
-export async function pushplus(title: string, content: string, template: string = 'html') {
-  for (let user of account) {
-    if (content.includes(decodeURIComponent(user.pt_pin)) && user.pushplus) {
-      console.log(`[Pushplus] => ${decodeURIComponent(user.pt_pin)}`);
-      await send(user.pushplus, title, content, template)
-    }
-  }
+try {
+  account = JSON.parse(readFileSync("./utils/account.json").toString())
+} catch (e) {
+  console.log('utils/account.json load failed')
 }
 
-async function send(token: string, title, content: string, template: string) {
+export async function pushplus(title: string, content: string, template: string = 'html'): Promise<void> {
+  let token: string
+  for (let user of account) {
+    if (content.includes(decodeURIComponent(user.pt_pin)) && user.pushplus) {
+      token = user.pushplus
+      break
+    }
+  }
+  if (!token) {
+    console.log('no pushplus token')
+    return
+  }
   let {data}: any = await axios.post('https://www.pushplus.plus/send', {
     token: token,
     title: title,
@@ -27,6 +34,6 @@ async function send(token: string, title, content: string, template: string) {
   if (data.code === 200) {
     console.log('pushplus发送成功')
   } else {
-    o2s(data, 'pushplus发送失败')
+    console.log('pushplus发送失败', JSON.stringify(data))
   }
 }

@@ -1,16 +1,28 @@
 import axios from 'axios';
+import {readFileSync} from "fs";
 import {getDate} from "date-fns";
-import {pushplus} from './utils/pushplus';
-import {requireConfig, wait, randomWord, o2s} from "./TS_USER_AGENTS";
+import {sendNotify} from './sendNotify';
+import {pushplus} from "./utils/pushplus";
+import {requireConfig, wait, randomWord} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string
-let message: string = '', allMessage: string = '';
-
-let date: number = getDate(new Date())
+let date: number = getDate(new Date()), message: string = '', allMessage: string = '', pushplusArr: { pt_pin: string, pushplus: string }[], pushplusUser: string[] = []
 
 !(async () => {
   if (Object.keys(process.env).includes("QL_DIR"))
     return
+  try {
+    pushplusArr = JSON.parse(readFileSync('./utils/account.json', 'utf-8').toString())
+  } catch (e) {
+    console.log('utils/pushplus.json 加载错误')
+    pushplusArr = []
+  }
+  for (let user of pushplusArr) {
+    if (user.pushplus) {
+      pushplusUser.push(decodeURIComponent(user.pt_pin))
+    }
+  }
+
   let cookiesArr: string[] = await requireConfig();
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value;
@@ -33,10 +45,16 @@ let date: number = getDate(new Date())
     }
     console.log(parseFloat(jdRed.toFixed(2)), parseFloat(jdRedExp.toFixed(2)))
     message = `【京东账号${index + 1}】 ${UserName}\n京东红包  ${jdRed.toFixed(2)}\n今日过期  ${jdRedExp.toFixed(2)}\n\n`
-    allMessage += message
 
-    await pushplus('京东红包', message)
+    if (pushplusUser.includes(UserName)) {
+      await pushplus('京东红包', message)
+    }
+    allMessage += message
     await wait(1000)
+  }
+
+  if (allMessage) {
+    await sendNotify('京东红包', allMessage)
   }
 })()
 
