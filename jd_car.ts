@@ -21,8 +21,8 @@ let cookie: string = '', res: any = '', UserName: string
 
       await wait(2000)
 
-      res = await cgame()
-      console.log('获得京豆', res.data.beanNum)
+      // res = await cgame()
+      // console.log('获得京豆', res.data.beanNum)
     } catch (e) {
       console.log(e)
     }
