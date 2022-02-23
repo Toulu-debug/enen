@@ -3,6 +3,7 @@ import {Md5} from "ts-md5"
 import * as dotenv from "dotenv"
 import {existsSync, readFileSync, writeFileSync} from "fs"
 import {sendNotify} from './sendNotify'
+
 dotenv.config()
 
 let fingerprint: string | number, token: string = '', enCryptMethodJD: any
@@ -102,13 +103,14 @@ async function requireConfig(): Promise<string[]> {
   let keys: string[] = Object.keys(jdCookieNode)
   for (let i = 0; i < keys.length; i++) {
     let cookie = jdCookieNode[keys[i]]
-    if (await checkCookie(cookie)) {
-      cookiesArr.push(cookie)
-    } else {
-      let username = decodeURIComponent(jdCookieNode[keys[i]].match(/pt_pin=([^;]*)/)![1])
-      console.log('Cookie失效', username)
-      await sendNotify('Cookie失效', '【京东账号】' + username)
-    }
+    cookiesArr.push(cookie)
+    // if (await checkCookie(cookie)) {
+    //   cookiesArr.push(cookie)
+    // } else {
+    //   let username = decodeURIComponent(jdCookieNode[keys[i]].match(/pt_pin=([^;]*)/)![1])
+    //   console.log('Cookie失效', username)
+    //   await sendNotify('Cookie失效', '【京东账号】' + username)
+    // }
   }
   console.log(`共${cookiesArr.length}个京东账号\n`)
   return cookiesArr
