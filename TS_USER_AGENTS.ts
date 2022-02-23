@@ -97,20 +97,23 @@ async function getFarmShareCode(cookie: string) {
     return ''
 }
 
-async function requireConfig(): Promise<string[]> {
+async function requireConfig(check: boolean = false): Promise<string[]> {
   let cookiesArr: string[] = []
   const jdCookieNode = require('./jdCookie.js')
   let keys: string[] = Object.keys(jdCookieNode)
   for (let i = 0; i < keys.length; i++) {
     let cookie = jdCookieNode[keys[i]]
-    cookiesArr.push(cookie)
-    // if (await checkCookie(cookie)) {
-    //   cookiesArr.push(cookie)
-    // } else {
-    //   let username = decodeURIComponent(jdCookieNode[keys[i]].match(/pt_pin=([^;]*)/)![1])
-    //   console.log('Cookie失效', username)
-    //   await sendNotify('Cookie失效', '【京东账号】' + username)
-    // }
+    if (!check) {
+      cookiesArr.push(cookie)
+    } else {
+      if (await checkCookie(cookie)) {
+        cookiesArr.push(cookie)
+      } else {
+        let username = decodeURIComponent(jdCookieNode[keys[i]].match(/pt_pin=([^;]*)/)![1])
+        console.log('Cookie失效', username)
+        await sendNotify('Cookie失效', '【京东账号】' + username)
+      }
+    }
   }
   console.log(`共${cookiesArr.length}个京东账号\n`)
   return cookiesArr
