@@ -13,31 +13,18 @@ interface jxToken {
   timestamp: string
 }
 
-function getRandomIDPro() {
-  let e, a = 10, n = 'number', i = '';
-  switch (n) {
-    case 'alphabet':
-      e = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      break;
-    case 'max':
-      e = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
-      break;
-    case 'number':
-    default:
-      e = '0123456789';
-  }
-  for (; a--;) i += e[(Math.random() * e.length) | 0];
-  return i;
-}
 
-async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;', fingerPrint: string = '') {
-  let s = "", a = "0123456789", u = a, c = (Math.random() * 10) | 0;
-  do {
-    let ss = getRandomIDPro() + ""
-    if (s.indexOf(ss) == -1) s += ss
-  } while (s.length < 3)
-  for (let i of s.slice()) u = u.replace(i, '')
-  fp = fingerPrint || getRandomIDPro() + "" + s + getRandomIDPro() + c + ""
+async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
+  function generateFp() {
+    let e = "0123456789";
+    let a = 13;
+    let i = '';
+    for (; a--;)
+      i += e[Math.random() * e.length | 0];
+    return (i + Date.now()).slice(0, 16)
+  }
+
+  fp = generateFp()
 
   let {data} = await axios.post(`https://cactus.jd.com/request_algo?g_ty=ajax`, `{"version":"3.0","fp":"${fp}","appId":"${appId}","timestamp":${Date.now()},"platform":"web","expandParams":""}`, {
     headers: {

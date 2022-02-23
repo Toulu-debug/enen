@@ -4,7 +4,6 @@
  */
 
 import axios from 'axios'
-import {sendNotify} from './sendNotify'
 import {requireConfig, wait, o2s, getshareCodeHW} from './TS_USER_AGENTS'
 
 interface ShareCode {
@@ -84,6 +83,8 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
         if (res.data.result?.rewardComponent?.beanList?.length) {
           console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
           sum += res.data.result.rewardComponent.beanList[0].quantity
+        } else {
+          console.log('没抽到？', JSON.stringify(res))
         }
         await wait(2000)
       }

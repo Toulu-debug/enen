@@ -1,10 +1,8 @@
 import axios from "axios"
 import {Md5} from "ts-md5"
-import {format} from 'date-fns'
 import * as dotenv from "dotenv"
 import {existsSync, readFileSync, writeFileSync} from "fs"
-
-const CryptoJS = require('crypto-js')
+import {sendNotify} from './sendNotify'
 dotenv.config()
 
 let fingerprint: string | number, token: string = '', enCryptMethodJD: any
@@ -98,19 +96,39 @@ async function getFarmShareCode(cookie: string) {
     return ''
 }
 
-async function requireConfig(index: number = -1): Promise<string[]> {
+async function requireConfig(): Promise<string[]> {
   let cookiesArr: string[] = []
   const jdCookieNode = require('./jdCookie.js')
-  Object.keys(jdCookieNode).forEach((item) => {
-    if (jdCookieNode[item]) {
-      cookiesArr.push(jdCookieNode[item])
+  let keys: string[] = Object.keys(jdCookieNode)
+  for (let i = 0; i < keys.length; i++) {
+    let cookie = jdCookieNode[keys[i]]
+    if (await checkCookie(cookie)) {
+      cookiesArr.push(cookie)
+    } else {
+      let username = decodeURIComponent(jdCookieNode[keys[i]].match(/pt_pin=([^;]*)/)![1])
+      console.log('Cookie失效', username)
+      await sendNotify('Cookie失效', '【京东账号】' + username)
     }
-  })
+  }
   console.log(`共${cookiesArr.length}个京东账号\n`)
-  if (index != -1) {
-    return [cookiesArr[index]]
-  } else {
-    return cookiesArr
+  return cookiesArr
+}
+
+async function checkCookie(cookie) {
+  await wait(1000)
+  try {
+    let {data}: any = await axios.get(`https://api.m.jd.com/client.action?functionId=GetJDUserInfoUnion&appid=jd-cphdeveloper-m&body=${encodeURIComponent(JSON.stringify({"orgFlag": "JD_PinGou_New", "callSource": "mainorder", "channel": 4, "isHomewhite": 0, "sceneval": 2}))}&loginType=2&_=${Date.now()}&sceneval=2&g_login_type=1&callback=GetJDUserInfoUnion&g_ty=ls`, {
+      headers: {
+        'authority': 'api.m.jd.com',
+        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1',
+        'referer': 'https://home.m.jd.com/',
+        'cookie': cookie
+      }
+    })
+    data = JSON.parse(data.match(/GetJDUserInfoUnion\((.*)\)/)[1])
+    return data.retcode === '0';
+  } catch (e) {
+    return false
   }
 }
 
@@ -165,41 +183,6 @@ function generateFp() {
   for (; a--;)
     i += e[Math.random() * e.length | 0]
   return (i + Date.now()).slice(0, 16)
-}
-
-function getQueryString(url: string, name: string) {
-  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i")
-  let r = url.split('?')[1].match(reg)
-  if (r != null) return decodeURIComponent(r[2])
-  return ''
-}
-
-function decrypt(stk: string, url: string, appId: number) {
-  const timestamp = (format(new Date(), 'yyyyMMddhhmmssSSS'))
-  let hash1: string
-  if (fingerprint && token && enCryptMethodJD) {
-    hash1 = enCryptMethodJD(token, fingerprint.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex)
-  } else {
-    const random = '5gkjB6SpmC9s'
-    token = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`
-    fingerprint = 9686767825751161
-    const str = `${token}${fingerprint}${timestamp}${appId}${random}`
-    hash1 = CryptoJS.SHA512(str, token).toString(CryptoJS.enc.Hex)
-  }
-  let st: string = ''
-  stk.split(',').map((item, index) => {
-    st += `${item}:${getQueryString(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`
-  })
-  const hash2 = CryptoJS.HmacSHA256(st, hash1.toString()).toString(CryptoJS.enc.Hex)
-  return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fingerprint.toString()), "".concat(appId.toString()), "".concat(token), "".concat(hash2)].join(";"))
-}
-
-function h5st(url: string, stk: string, params: object, appId: number = 10032) {
-  for (const [key, val] of Object.entries(params)) {
-    url += `&${key}=${val}`
-  }
-  url += '&h5st=' + decrypt(stk, url, appId)
-  return url
 }
 
 function getJxToken(cookie: string, phoneId: string = '') {
@@ -368,9 +351,7 @@ export {
   wait,
   getRandomNumberByRange,
   requestAlgo,
-  decrypt,
   getJxToken,
-  h5st,
   exceptCookie,
   randomString,
   resetHosts,
