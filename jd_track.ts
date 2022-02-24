@@ -3,11 +3,10 @@
  * cron: 0 0-23/4 * * *
  */
 
-import axios from "axios"
 import * as path from "path"
 import {sendNotify} from './sendNotify'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
-import USER_AGENT, {requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
+import USER_AGENT, {get, requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
 import {pushplus} from "./utils/pushplus";
 
 let cookie: string = '', UserName: string, allMessage: string = '', res: any = ''
@@ -47,7 +46,14 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
 
     let message: string = '', markdown: string = '', i: number = 1
 
-    res = await getOrderList()
+    let headers: object = {
+      'authority': 'wq.jd.com',
+      'user-agent': USER_AGENT,
+      'referer': 'https://wqs.jd.com/',
+      'cookie': cookie
+    }
+
+    res = await get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${Date.now()}&sceneval=2&_=${Date.now()}&sceneval=2`, '', headers)
     await wait(2000)
 
     for (let order of res.orderList) {
@@ -57,7 +63,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       let t: string = order.progressInfo?.tip || null
       let status: string = order.progressInfo?.content || null
 
-      res = await getWuliu(orderId, orderType)
+      res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, '', headers)
       let carrier: string = res.carrier, carriageId: string = res.carriageId
 
       if (t && status) {
@@ -123,29 +129,3 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
   if (allMessage)
     await sendNotify('京东快递更新', allMessage)
 })()
-
-async function getOrderList() {
-  let t: number = Date.now()
-  let {data} = await axios.get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${t}&sceneval=2&_=${t + 1}&sceneval=2`, {
-    headers: {
-      'authority': 'wq.jd.com',
-      'user-agent': USER_AGENT,
-      'referer': 'https://wqs.jd.com/',
-      'cookie': cookie
-    }
-  })
-  return data
-}
-
-async function getWuliu(orderId: string, orderType: string) {
-  let {data} = await axios.get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, {
-    headers: {
-      'authority': 'wq.jd.com',
-      'user-agent': USER_AGENT,
-      'referer': 'https://wqs.jd.com/',
-      'cookie': cookie
-    }
-  })
-  await wait(1000)
-  return data
-}

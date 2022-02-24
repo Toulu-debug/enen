@@ -1,10 +1,9 @@
 /**
  * 京东-下拉
- * cron: 15 1,15,22 * * *
+ * cron: 15 8,20 * * *
  */
 
-import axios from 'axios'
-import {requireConfig, wait, o2s, getshareCodeHW} from './TS_USER_AGENTS'
+import {post, requireConfig, wait, o2s, getshareCodeHW} from './TS_USER_AGENTS'
 
 interface ShareCode {
   activityId: number,
@@ -73,7 +72,7 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     }
 
     // 抽奖
-    if (new Date().getHours() === 23) {
+    if (new Date().getHours() === 20) {
       let sum: number = 0
       res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
       let userStarNum: number = res.data.result.activityUserInfo.userStarNum
@@ -135,7 +134,7 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
 })()
 
 async function api(fn: string, body: object) {
-  let {data} = await axios.post(`https://api.m.jd.com/api?functionId=${fn}&appid=ProductZ4Brand&client=wh5&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
+  return await post(`https://api.m.jd.com/api?functionId=${fn}&appid=ProductZ4Brand&client=wh5&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
     headers: {
       'Host': 'api.m.jd.com',
       'Origin': 'https://pro.m.jd.com',
@@ -145,5 +144,4 @@ async function api(fn: string, body: object) {
       'Cookie': cookie
     }
   })
-  return data
 }

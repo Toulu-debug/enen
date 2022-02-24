@@ -5,10 +5,10 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {get, randomNumString, requireConfig, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number, uuid: string
-let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCode: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCodeHW: { shareCode: string, groupCode: string, activeId: string }[] = []
+// let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCode: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCodeHW: { shareCode: string, groupCode: string, activeId: string }[] = []
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -18,12 +18,19 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
 
-    res = await initForTurntableFarm()
+    let headers: object = {
+      'Host': 'api.m.jd.com',
+      'Origin': 'https://h5.m.jd.com',
+      'User-Agent': USER_AGENT,
+      'Referer': 'https://h5.m.jd.com/',
+      'Cookie': cookie
+    }
+    res = await get('https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body=%7B%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5', '', headers)
     let times: number = res.remainLotteryTimes
     console.log('剩余抽奖机会:', times)
     for (let j = 0; j < times; j++) {
       console.log('开始抽奖...')
-      res = await initForTurntableFarm(1)
+      res = await get('https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body=%7B%22type%22%3A1%2C%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5', '', headers)
       if (res.code === '0') {
         if (res.type === 'thanks') {
           console.log('抽奖成功，获得：狗屁')
@@ -36,7 +43,7 @@ let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] 
       await wait(5000)
     }
 
-    uuid = randomString(40)
+    uuid = randomNumString(40)
     for (let j = 0; j < 2; j++) {
       console.log(`Round:${j + 1}`)
       res = await api('beanTaskList', {"viewChannel": "AppHome"})
@@ -119,7 +126,7 @@ async function api(fn: string, body: object) {
   return data
 }
 
-async function qjd(fn: string, body?: object) {
+/*async function qjd(fn: string, body?: object) {
   let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=ld&client=apple&clientVersion=10.0.8&uuid=${uuid}&openudid=${uuid}`, {
     headers: {
       'Host': 'api.m.jd.com',
@@ -129,38 +136,4 @@ async function qjd(fn: string, body?: object) {
     }
   })
   return data
-}
-
-function randomString(e: number) {
-  e = e || 32
-  let t = '0123456789', a = t.length, n = ""
-  for (let i = 0; i < e; i++)
-    n += t.charAt(Math.floor(Math.random() * a))
-  return n
-}
-
-async function initForTurntableFarm(type: number = 0) {
-  let url = type === 0
-    ? 'https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body=%7B%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5'
-    : 'https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body=%7B%22type%22%3A1%2C%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5'
-  let {data} = await axios.get(url, {
-    headers: {
-      'Host': 'api.m.jd.com',
-      'Origin': 'https://h5.m.jd.com',
-      'User-Agent': USER_AGENT,
-      'Referer': 'https://h5.m.jd.com/',
-      'Cookie': cookie
-    }
-  })
-  return data
-}
-
-async function getShareCodeHW() {
-  try {
-    let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/HW_CODES`)
-    console.log('获取HW_CODES成功(api)')
-    shareCodeHW = data['qjd']
-  } catch (e: any) {
-    console.log('获取HW_CODES失败(api)')
-  }
-}
+}*/

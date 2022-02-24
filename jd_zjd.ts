@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios'
-import {getshareCodeHW, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import {post, getshareCodeHW, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 import {requestAlgo} from "./utils/V3";
 import {init, zjdTool} from "./utils/zjd";
 
@@ -133,15 +133,13 @@ async function api(fn: string, params: any) {
   } else {
     h5st = zjdTool(params)
   }
-  let {data} = await axios.post(`https://api.m.jd.com/api?functionId=${fn}&fromType=wxapp&timestamp=${Date.now()}`,
-    `body=${decodeURIComponent(JSON.stringify(params))}&appid=swat_miniprogram&h5st=${h5st}&client=tjj_m&clientVersion=3.1.3`, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; Charset=UTF-8",
-        "Host": "api.m.jd.com",
-        "Referer": "https://servicewechat.com/wxa5bf5ee667d91626/182/page-frame.html",
-        "Cookie": cookie,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36 MicroMessenger/7.0.9.501 NetType/WIFI MiniProgramEnv/Windows WindowsWechat',
-      }
+  return await post(`https://api.m.jd.com/api?functionId=${fn}&fromType=wxapp&timestamp=${Date.now()}`,
+    `body=${decodeURIComponent(JSON.stringify(params))}&appid=swat_miniprogram&h5st=${h5st}&client=tjj_m&clientVersion=3.1.3`,
+    {
+      "Content-Type": "application/x-www-form-urlencoded; Charset=UTF-8",
+      "Host": "api.m.jd.com",
+      "Referer": "https://servicewechat.com/wxa5bf5ee667d91626/182/page-frame.html",
+      "Cookie": cookie,
+      'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36 MicroMessenger/7.0.9.501 NetType/WIFI MiniProgramEnv/Windows WindowsWechat',
     })
-  return data
 }

@@ -1,7 +1,7 @@
 import axios from "axios"
 import {Md5} from "ts-md5"
 import * as dotenv from "dotenv"
-import {existsSync, readFileSync, writeFileSync} from "fs"
+import {existsSync, readFileSync} from "fs"
 import {sendNotify} from './sendNotify'
 
 dotenv.config()
@@ -232,13 +232,6 @@ function randomString(e: number, word?: number) {
   return n
 }
 
-function resetHosts() {
-  try {
-    writeFileSync('/etc/hosts', '')
-  } catch (e) {
-  }
-}
-
 function o2s(arr: object, title: string = '') {
   title ? console.log(title, JSON.stringify(arr)) : console.log(JSON.stringify(arr))
 }
@@ -295,7 +288,7 @@ async function getShareCodePool(key: string, num: number) {
   return shareCode
 }
 
-async function wechat_app_msg(title: string, content: string, user: string) {
+/*async function wechat_app_msg(title: string, content: string, user: string) {
   let corpid: string = "", corpsecret: string = ""
   let {data: gettoken} = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${corpid}&corpsecret=${corpsecret}`)
   let access_token: string = gettoken.access_token
@@ -314,7 +307,7 @@ async function wechat_app_msg(title: string, content: string, user: string) {
   } else {
     console.log('企业微信应用消息发送失败', send)
   }
-}
+}*/
 
 function obj2str(obj: object) {
   return JSON.stringify(obj)
@@ -347,6 +340,33 @@ async function jdpingou() {
   return `jdpingou;iPhone;5.19.0;${version};${randomString(40)};network/wifi;model/${device};appBuild/100833;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/${getRandomNumberByRange(10, 90)};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
 }
 
+function get(url: string, prarms?: string, headers?: any) {
+  return axios.get(url, {
+    params: prarms,
+    headers: headers
+  })
+    .then(res => {
+      if (typeof res.data === 'string' && res.data.match(/^jsonpCBK/)) {
+        return JSON.parse(res.data.match(/jsonpCBK.?\(([\w\W]*)\);/)[1])
+      } else {
+        return res.data
+      }
+    })
+    .catch(err => {
+      console.log(err?.response?.status, err?.response?.statusText)
+    });
+}
+
+function post(url: string, prarms?: string | object, headers?: any): Promise<any> {
+  return axios.post(url, prarms, {
+    headers: headers
+  })
+    .then(res => res.data)
+    .catch(err => {
+      console.log(err?.response?.status, err?.response?.statusText)
+    });
+}
+
 export default USER_AGENT
 export {
   TotalBean,
@@ -359,13 +379,13 @@ export {
   getJxToken,
   exceptCookie,
   randomString,
-  resetHosts,
   o2s,
   randomNumString,
   getshareCodeHW,
   getShareCodePool,
   randomWord,
-  wechat_app_msg,
   obj2str,
-  jdpingou
+  jdpingou,
+  get,
+  post
 }
