@@ -1,5 +1,6 @@
 import axios from "axios";
-import USER_AGENT, {h5st} from "../TS_USER_AGENTS";
+import USER_AGENT, {randomWord} from "../TS_USER_AGENTS";
+import {requestAlgo, geth5st} from './V3'
 
 async function bean(cookie: string) {
   let {data}: any = await axios.post('https://api.m.jd.com/client.action', `functionId=plantBeanIndex&body=${decodeURIComponent(JSON.stringify({version: "9.0.0.1", "monitor_source": "plant_app_plant_index", "monitor_refer": ""}))}&appid=ld&client=apple&area=5_274_49707_49973&build=167283&clientVersion=9.1.0`, {
@@ -97,8 +98,23 @@ async function sgmh(cookie: string) {
 }
 
 async function jxfactory(cookie: string) {
-  let url: string = `https://m.jingxi.com/newtasksys/newtasksys_front/GetUserTaskStatusList?source=dreamfactory&bizCode=dream_factory&_time=${Date.now()}&_stk=${encodeURIComponent('_time,bizCode,source')}&_ste=1&_=${Date.now()}&sceneval=2`
-  url = h5st(url, '_time,bizCode,source', {}, 10001)
+  await requestAlgo('c0ff1')
+  let url: string, timestamp = Date.now()
+  let stk = `_time,bizCode,showAreaTaskFlag,source`, params = {showAreaTaskFlag: '1', bizCode: 'dream_factory'}
+  let t: { key: string, value: string } [] = [
+    {key: '_time', value: timestamp.toString()},
+    {key: '_ts', value: timestamp.toString()},
+    {key: 'bizCode', value: 'dream_factory'},
+    {key: 'source', value: 'dreamfactory'},
+  ]
+  url = `https://m.jingxi.com/newtasksys/newtasksys_front/GetUserTaskStatusList?source=dreamfactory&_time=${timestamp}&_ts=${timestamp}&_stk=${encodeURIComponent(stk)}&_=${timestamp + 3}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
+
+  for (let [key, value] of Object.entries(params)) {
+    t.push({key, value})
+    url += `&${key}=${value}`
+  }
+  let h5st = geth5st(t, 'c0ff1')
+  url += `&h5st=${encodeURIComponent(h5st)}`
   let {data}: any = await axios.get(url, {
     headers: {
       'Referer': 'https://actst.jingxi.com/pingou/dream_factory/index.html',
@@ -107,20 +123,7 @@ async function jxfactory(cookie: string) {
       'Cookie': cookie
     }
   })
-  return data.data?.encryptPin ?? 'null'
-}
-
-async function cash(cookie: string) {
-  let {data}: any = await axios.get(`https://api.m.jd.com/client.action?functionId=cash_mob_home&body=${escape(JSON.stringify({}))}&appid=CashRewardMiniH5Env&appid=9.1.0`, {
-    headers: {
-      'Cookie': cookie,
-      'Host': 'api.m.jd.com',
-      'Content-Type': 'application/json',
-      'Referer': 'http://wq.jd.com/wxapp/pages/hd-interaction/index/index',
-      'User-Agent': USER_AGENT,
-    }
-  })
-  return data.data?.result?.inviteCode ?? 'null'
+  return JSON.parse(data.match(/try{jsonpCBK.?\((.*)/)![1]).data?.encryptPin || 'null'
 }
 
 export {
@@ -130,6 +133,5 @@ export {
   pet,
   factory,
   sgmh,
-  jxfactory,
-  cash,
+  jxfactory
 }
