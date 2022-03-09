@@ -3,7 +3,8 @@
  * cron: 15 8,20 * * *
  */
 
-import {post, requireConfig, wait, o2s, getshareCodeHW} from './TS_USER_AGENTS'
+import axios from 'axios';
+import {requireConfig, wait, o2s, getshareCodeHW} from './TS_USER_AGENTS'
 
 interface ShareCode {
   activityId: number,
@@ -23,7 +24,8 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
-    res = await api('superBrandSecondFloorMainPage', {"source": "secondfloor"})
+    res = await api('showSecondFloorCardInfo', {"source": "secondfloor"})
+
     activityId = res.data.result.activityBaseInfo.activityId
     let encryptProjectId: string = res.data.result.activityBaseInfo.encryptProjectId
     await wait(1000)
@@ -45,17 +47,16 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
         }
 
         // 下拉
-        // if (t.ext?.sign2) {
-        //   try {
-        //     if (new Date().getHours() >= 14 && new Date().getHours() <= 20) {
-        //       res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": t.ext.sign2[0].itemId, "actionType": 0})
-        //       console.log(res.data?.bizMsg)
-        //       await wait(2000)
-        //     }
-        //   } catch (e) {
-        //     console.log(t.ext?.sign2)
-        //   }
-        // }
+        if (t.ext?.sign2) {
+          if (t.ext.currentSectionStatus !== 1) {
+            res = await api('superBrandDoTask', {"source": "secondfloor", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": t.ext.currentSectionItemId, "actionType": 0})
+            console.log(res.data?.bizMsg)
+            await wait(2000)
+            console.log('下拉任务', t.ext?.sign2)
+          } else {
+            console.log('下拉任务 已经完成')
+          }
+        }
       }
 
       // 助力码
@@ -89,12 +90,10 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
       }
       message += `【京东账号${index + 1}】${UserName}\n抽奖${userStarNum}次，获得京豆${sum}\n\n`
     }
+
+    await wait(2000)
   }
-  // await sendNotify('京东-下拉', message)
-
   console.log(shareCodesSelf)
-  await wait(3000)
-
   shareCodesHW = await getshareCodeHW('tewu')
   shareCodes = [...shareCodesSelf, ...shareCodesHW]
   let full: string[] = []
@@ -134,7 +133,7 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
 })()
 
 async function api(fn: string, body: object) {
-  return await post(`https://api.m.jd.com/api?functionId=${fn}&appid=ProductZ4Brand&client=wh5&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
+  let {data} = await axios.post(`https://api.m.jd.com/api?functionId=${fn}&appid=ProductZ4Brand&client=wh5&t=${Date.now()}&body=${encodeURIComponent(JSON.stringify(body))}`, '', {
     headers: {
       'Host': 'api.m.jd.com',
       'Origin': 'https://pro.m.jd.com',
@@ -144,4 +143,5 @@ async function api(fn: string, body: object) {
       'Cookie': cookie
     }
   })
+  return data
 }
