@@ -13,7 +13,6 @@ interface jxToken {
   timestamp: string
 }
 
-
 async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
   function generateFp() {
     let e = "0123456789";
@@ -25,7 +24,6 @@ async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
   }
 
   fp = generateFp()
-
   let {data} = await axios.post(`https://cactus.jd.com/request_algo?g_ty=ajax`, `{"version":"3.0","fp":"${fp}","appId":"${appId}","timestamp":${Date.now()},"platform":"web","expandParams":""}`, {
     headers: {
       'Accept': 'application/json',
@@ -43,12 +41,14 @@ async function requestAlgo(appId: string, USER_AGENT: string = 'jdpingou;') {
 }
 
 function geth5st(t: { key: string, value: string } [], appId: string) {
-  let a = t.map(function (e) {
-    return e["key"] + ":" + e["value"]
-  })["join"]("&")
+  let a = ''
+  t.forEach(({key, value}) => {
+    a += `${key}:${value}&`
+  })
+  a = a.slice(0, -1)
   let time = Date.now()
   let timestamp = format(time, "yyyyMMddhhmmssSSS");
-  let hash1 = genKey(tk, fp.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString();
+  let hash1 = genKey(tk, fp.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex);
   const hash2 = CryptoJS.HmacSHA256(a, hash1).toString();
   return ["".concat(timestamp.toString()), "".concat(fp.toString()), "".concat(appId.toString()), "".concat(tk), "".concat(hash2), "3.0", "".concat(time.toString())].join(";")
 }
