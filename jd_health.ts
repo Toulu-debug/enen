@@ -64,7 +64,6 @@ let cookie: string = '', res: any = '', UserName: string
   }
 })();
 
-
 async function api(fn: string, body: object) {
   let {data} = await axios.post('https://api.m.jd.com/', `functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&client=wh5&clientVersion=1.0.0&uuid=`, {
     headers: {
