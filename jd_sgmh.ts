@@ -3,7 +3,7 @@
  * cron: 20 8 * * *
  */
 
-import {requireConfig, getShareCodePool, o2s, wait} from "./TS_USER_AGENTS"
+import {requireConfig, getShareCodePool, wait} from "./TS_USER_AGENTS"
 import axios from "axios";
 
 let cookie: string = '', UserName: string, res: any
@@ -17,12 +17,19 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     res = await api('healthyDay_getHomeData', {"appId": "1EFRXxg", "taskToken": "", "channelId": 1})
-    o2s(res)
 
     for (let t of res.data.result.taskVos) {
       if (t.taskType === 14) {
         console.log('助力码', t.assistTaskDetailVo?.taskToken)
         shareCodeSelf.push(t.assistTaskDetailVo?.taskToken)
+        // for (let k = 0; k < 3; k++) {
+        //   try {
+        //     await runTimes(t.assistTaskDetailVo?.taskToken)
+        //     break
+        //   } catch (e) {
+        //   }
+        //   await wait(Math.floor(Math.random() * 10 + 3) * 1000)
+        // }
       }
       if ((t.browseShopVo || t.productInfoVos || t.shoppingActivityVos) && t.times < t.maxTimes) {
         for (let i = 0; i < t.maxTimes - t.times; i++) {
@@ -52,8 +59,6 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
   }
 
   // 助力
-
-
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -111,3 +116,12 @@ async function api(fn: string, body: object) {
     })
   return data
 }
+
+// async function runTimes(code: string) {
+//   try {
+//     let {data} = await axios.get(`https://api.jdsharecode.xyz/api/runTimes?activityId=sgmh&sharecode=${code}`)
+//     console.log(data)
+//   } catch (e) {
+//     console.log('上报失败')
+//   }
+// }

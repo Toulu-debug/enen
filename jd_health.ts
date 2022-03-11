@@ -59,7 +59,7 @@ let cookie: string = '', res: any = '', UserName: string
         console.log('Error', e)
         break
       }
-      await wait(10000)
+      await wait(3000)
     }
   }
 })();
