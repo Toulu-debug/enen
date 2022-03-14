@@ -56,17 +56,23 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
     }
 
     // 背包
-    res = await api('myCardInfoForFarm', {"version": 14, "channel": 3, "babelChannel": "10"})
-    o2s(res, 'myCardInfoForFarm')
-    let beanCard: number = res.beanCard  // 换豆卡
-    for (let i = 0; i < 5; i++) {
-      if (totalEnergy >= 100 && beanCard) {
-        data = await api('userMyCardForFarm', {"cardType": "beanCard", "babelChannel": "10", "channel": 3, "version": 14})
-        console.log('使用水滴换豆卡，获得京豆', data.beanCount)
-        totalEnergy -= 100
-        beanCard--
-        await wait(1000)
+    process.env.jdFruitBeanCard = 'True'
+    if (process.env.jdFruitBeanCard.toLowerCase() === 'true') {
+      res = await api('myCardInfoForFarm', {"version": 14, "channel": 3, "babelChannel": "10"})
+      o2s(res, 'myCardInfoForFarm')
+      let beanCard: number = res.beanCard  // 换豆卡
+      console.log('换豆卡数量', beanCard)
+      for (let i = 0; i < 10; i++) {
+        if (totalEnergy >= 100 && beanCard) {
+          data = await api('userMyCardForFarm', {"cardType": "beanCard", "babelChannel": "10", "channel": 3, "version": 14})
+          console.log('使用水滴换豆卡，获得京豆', data.beanCount)
+          totalEnergy -= 100
+          beanCard--
+          await wait(1000)
+        }
       }
+    } else {
+      console.log('未设置水滴换豆卡环境变量')
     }
 
 
@@ -148,13 +154,14 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
     o2s(res)
     if (!res.gotBrowseTaskAdInit.f) {
       for (let t of res.gotBrowseTaskAdInit.userBrowseTaskAds) {
-        // if (t.hadFinishedTimes !== t.limit) {
-        // data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 0, "version": 14, "channel": 1, "babelChannel": "120"})
-        // o2s(data, 'browseAdTaskForFarm')
-        // await wait(t.time * 1000 || 1000)
-        data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
-        console.log('任务完成，获得', data.amount)
-        // }
+        if (t.hadFinishedTimes !== t.limit) {
+          data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 0, "version": 14, "channel": 1, "babelChannel": "120"})
+          o2s(data, 'browseAdTaskForFarm')
+          await wait(t.time * 1000 || 1000)
+          data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
+          console.log('任务完成，获得', data.amount)
+        }
+        await wait(1000)
       }
     }
 
@@ -206,20 +213,25 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
     // 抽奖
     for (let i = 0; i < res.remainLotteryTimes; i++) {
       data = await api('lotteryForTurntableFarm', {"type": 1, "version": 4, "channel": 1})
-      o2s(data, 'lotteryForTurntableFarm')
-      await wait(1000)
+      if (data.type === 'thanks') {
+        console.log('抽奖获得 空气')
+      } else {
+        console.log('抽奖获得', data.type)
+      }
+      await wait(2000)
     }
 
-    // if (!res.timingGotStatus && res.remainLotteryTimes) {
-    //   if (Date.now() > (res.timingLastSysTime + 60 * 60 * res.timingIntervalHours * 1000)) {
-    //     data = await api('timingAwardForTurntableFarm', {"version": 4, "channel": 1})
-    //     await wait(1000)
-    //     o2s(data, 'timingAwardForTurntableFarm')
-    //   } else {
-    //     console.log(`免费赠送的抽奖机会未到时间`)
-    //   }
-    // }
+    if (!res.timingGotStatus && res.remainLotteryTimes) {
+      if (Date.now() > (res.timingLastSysTime + 60 * 60 * res.timingIntervalHours * 1000)) {
+        data = await api('timingAwardForTurntableFarm', {"version": 4, "channel": 1})
+        await wait(1000)
+        o2s(data, 'timingAwardForTurntableFarm')
+      } else {
+        console.log(`免费赠送的抽奖机会未到时间`)
+      }
+    }
 
+    /*
     // 助力
     shareCodePool = await getShareCodePool('farm', 30)
     shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
@@ -244,6 +256,8 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
         break
       }
     }
+
+     */
   }
 })()
 
