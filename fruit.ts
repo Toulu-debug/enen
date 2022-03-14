@@ -1,16 +1,24 @@
 import axios from 'axios'
-import USER_AGENT, {o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import {readFileSync} from "fs";
+import USER_AGENT, {getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', data: any, UserName: string, index: number
+let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = []
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
+  try {
+    shareCodeSelf = JSON.parse(readFileSync('./utils/sharecodes.json').toString()).fruit
+    console.log(shareCodeSelf)
+  } catch (e) {
+    console.log('读取分享码失败')
+  }
+
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1
     console.log(`\n开始【京东账号${index}】${UserName}\n`)
-
 
     // 初始化
     res = await api('initForFarm', {"version": 11, "channel": 3})
@@ -18,9 +26,10 @@ let cookie: string = '', res: any = '', data: any, UserName: string, index: numb
     if (res.todayGotWaterGoalTask.canPop) {
       data = await api('gotWaterGoalTaskForFarm', {"type": 3, "version": 14, "channel": 1, "babelChannel": "120"})
       o2s(data)
-      console.log("弹窗获得水滴", data.amount)
+      console.log("弹窗获得水滴", data.addEnergy)
     }
-    o2s(res)
+    o2s(res, 'initForFarm')
+    let totalEnergy: number = res.farmUserPro.totalEnergy  // 背包剩余水滴
     if (res.farmUserPro.treeState === 2) {
       console.log("可以兑换奖品了")
     } else if (res.farmUserPro.treeState === 0) {
@@ -46,22 +55,70 @@ let cookie: string = '', res: any = '', data: any, UserName: string, index: numb
       }
     }
 
+    // 背包
+    res = await api('myCardInfoForFarm', {"version": 14, "channel": 3, "babelChannel": "10"})
+    o2s(res, 'myCardInfoForFarm')
+    let beanCard: number = res.beanCard  // 换豆卡
+    for (let i = 0; i < 5; i++) {
+      if (totalEnergy >= 100 && beanCard) {
+        data = await api('userMyCardForFarm', {"cardType": "beanCard", "babelChannel": "10", "channel": 3, "version": 14})
+        console.log('使用水滴换豆卡，获得京豆', data.beanCount)
+        totalEnergy -= 100
+        beanCard--
+        await wait(1000)
+      }
+    }
+
+
     // 好友邀请奖励
     res = await api('friendListInitForFarm', {"lastId": null, "version": 14, "channel": 1, "babelChannel": "120"})
+    o2s(res, 'friendListInitForFarm')
+    let friendList: any[] = res.friends
     if (res.inviteFriendCount > res.inviteFriendGotAwardCount) {
-      res = await api('awardInviteFriendForFarm', {})
+      data = await api('awardInviteFriendForFarm', {})
       await wait(1000)
-      o2s(res, '好友邀请奖励')
+      o2s(data, '好友邀请奖励')
+    }
+
+    // 给好友浇水
+    res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
+    o2s(res, 'taskInitForFarm')
+    await wait(1000)
+    console.log(`今日已给${res.waterFriendTaskInit.waterFriendCountKey}个好友浇水`);
+    if (res.waterFriendTaskInit.waterFriendCountKey < res.waterFriendTaskInit.waterFriendMax) {
+      for (let i = res.waterFriendTaskInit.waterFriendCountKey; i < res.waterFriendTaskInit.waterFriendMax; i++) {
+        for (let fr of friendList) {
+          if (fr.friendState === 1) {
+            data = await api('waterFriendForFarm', {"shareCode": fr.shareCode, "version": 14, "channel": 1, "babelChannel": "120"})
+            if (data.code === '0')
+              console.log(`给好友${fr.nickName}浇水成功`)
+            if (data.cardInfo) {
+              console.log('获得卡片')
+            }
+            await wait(2000)
+            break
+          }
+        }
+      }
+    } else if (res.waterFriendTaskInit.waterFriendCountKey === res.waterFriendTaskInit.waterFriendMax && !res.waterFriendTaskInit.waterFriendGotAward) {
+      data = await api('waterFriendGotAwardForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
+      console.log('给好友浇水奖励', data.addWater)
+      await wait(1000)
     }
 
     // 签到
     res = await api('clockInInitForFarm', {"timestamp": Date.now(), "version": 14, "channel": 1, "babelChannel": "120"})
     await wait(1000)
     if (!res.todaySigned) {
-      res = await api('clockInForFarm', {"type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
-      o2s(res)
+      data = await api('clockInForFarm', {"type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
+      if (data.signDay === 7) {
+        data = await api('gotClockInGift', {"type": 2, "version": 14, "channel": 1, "babelChannel": "120"})
+        o2s(data, 'gotClockInGift')
+        await wait(1000)
+      }
       await wait(1000)
     }
+
     res = await api('clockInInitForFarm', {"timestamp": Date.now(), "version": 14, "channel": 1, "babelChannel": "120"})
     for (let t of res.themes || []) {
       if (!t.hadGot) {
@@ -73,17 +130,50 @@ let cookie: string = '', res: any = '', data: any, UserName: string, index: numb
       }
     }
 
+    // 助力奖励
+    res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
+    await wait(1000)
+    o2s(res, 'farmAssistInit')
+    for (let t of res.assistStageList) {
+      if (t.percentage === '100%' && t.stageStaus === 2) {
+        data = await api('receiveStageEnergy', {"version": 14, "channel": 1, "babelChannel": "120"})
+        await wait(1000)
+        console.log('被助力奖励', data.amount)
+      }
+    }
+
+
     // 任务
     res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
     o2s(res)
     if (!res.gotBrowseTaskAdInit.f) {
       for (let t of res.gotBrowseTaskAdInit.userBrowseTaskAds) {
-        if (t.hadFinishedTimes !== t.limit) {
-          data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 0, "version": 14, "channel": 1, "babelChannel": "120"})
-          o2s(data, 'browseAdTaskForFarm')
-          await wait(t.time * 1000 || 1000)
-        }
+        // if (t.hadFinishedTimes !== t.limit) {
+        // data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 0, "version": 14, "channel": 1, "babelChannel": "120"})
+        // o2s(data, 'browseAdTaskForFarm')
+        // await wait(t.time * 1000 || 1000)
+        data = await api('browseAdTaskForFarm', {"advertId": t.advertId, "type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
+        console.log('任务完成，获得', data.amount)
+        // }
       }
+    }
+
+    if (!res.gotThreeMealInit.f) {
+      if (![10, 15, 16, 22, 23].includes(new Date().getHours())) {
+        data = await api('gotThreeMealForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
+        if (data.code === '0') {
+          console.log('定时奖励成功', data.amount)
+        }
+        await wait(1000)
+      }
+    }
+
+    if (res.signInit.todaySigned) {
+      console.log(`今天已签到,已经连续签到${res.signInit.totalSigned}天,下次签到可得${res.signInit.signEnergyEachAmount}g`);
+    } else {
+      data = await api('signForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
+      console.log('签到成功', data.amount)
+      await wait(1000)
     }
 
     if (!res.waterRainInit.f) {
@@ -101,6 +191,59 @@ let cookie: string = '', res: any = '', data: any, UserName: string, index: numb
       console.log('firstWaterTaskForFarm', data.amount)
     }
 
+    // 红包
+    res = await api('initForTurntableFarm', {"version": 4, "channel": 1})
+    o2s(res, 'initForTurntableFarm')
+    for (let t of res.turntableBrowserAds) {
+      if (!t.status) {
+        console.log(t.main)
+        data = await api('browserForTurntableFarm', {"type": 1, "adId": t.adId, "version": 4, "channel": 1})
+        await wait(t.browserTimes * 1000 || 1000)
+        data = await api('browserForTurntableFarm', {"type": 2, "adId": t.adId, "version": 4, "channel": 1})
+      }
+    }
+
+    // 抽奖
+    for (let i = 0; i < res.remainLotteryTimes; i++) {
+      data = await api('lotteryForTurntableFarm', {"type": 1, "version": 4, "channel": 1})
+      o2s(data, 'lotteryForTurntableFarm')
+      await wait(1000)
+    }
+
+    // if (!res.timingGotStatus && res.remainLotteryTimes) {
+    //   if (Date.now() > (res.timingLastSysTime + 60 * 60 * res.timingIntervalHours * 1000)) {
+    //     data = await api('timingAwardForTurntableFarm', {"version": 4, "channel": 1})
+    //     await wait(1000)
+    //     o2s(data, 'timingAwardForTurntableFarm')
+    //   } else {
+    //     console.log(`免费赠送的抽奖机会未到时间`)
+    //   }
+    // }
+
+    // 助力
+    shareCodePool = await getShareCodePool('farm', 30)
+    shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
+    for (let code of shareCodeSelf) {
+      console.log('去助力', code)
+      res = await api('initForFarm', {"mpin": "", "utm_campaign": "t_335139774", "utm_medium": "appshare", "shareCode": code, "utm_term": "Wxfriends", "utm_source": "iosapp", "imageUrl": "", "nickName": "", "version": 14, "channel": 2, "babelChannel": 0})
+      await wait(3000)
+      o2s(res, '助力')
+      if (res.helpResult.code === '7') {
+        console.log('不给自己助力')
+      } else if (res.helpResult.code === '0') {
+        console.log('助力成功,获得', res.helpResult.salveHelpAddWater)
+      } else if (res.helpResult.code === '8') {
+        console.log('上限')
+        break
+      } else if (res.helpResult.code === '9') {
+        console.log('已助力')
+      } else if (res.helpResult.code === '10') {
+        console.log('已满')
+      } else if (res.helpResult.remainTimes === 0) {
+        console.log('次数用完')
+        break
+      }
+    }
   }
 })()
 
