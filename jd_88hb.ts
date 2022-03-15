@@ -12,7 +12,7 @@ import {requireConfig, wait, getshareCodeHW, randomString, randomWord, o2s} from
 const token = require('./utils/jd_jxmc.js').token
 
 let cookie: string = '', res: any = '', UserName: string, UA: string = ''
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], jxToken: any
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], jxToken: any, data: any
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -31,7 +31,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     console.log('助力码：', strUserPin)
     shareCodesSelf.push(strUserPin)
 
-    res = await api('JoinActive', 'phoneid,stepreward_jstoken,strPin,timestamp', {phoneid: jxToken.phoneid,stepreward_jstoken: jxToken.farm_jstoken,strPin: '',timestamp: jxToken.timestamp})
+    res = await api('JoinActive', 'phoneid,stepreward_jstoken,strPin,timestamp', {phoneid: jxToken.phoneid, stepreward_jstoken: jxToken.farm_jstoken, strPin: '', timestamp: jxToken.timestamp})
     res.iRet === 0 ? console.log('JoinActive: 成功') : console.log('JoinActive:', res.sErrMsg)
     await wait(2000)
   }
@@ -39,6 +39,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
   console.log('内部助力码：', shareCodesSelf)
 
   for (let [index, value] of cookiesArr.entries()) {
+    await requestAlgo('e395f')
     cookie = value
     jxToken = await token(cookie)
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -81,6 +82,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
 
   // 拆红包
   for (let [index, value] of cookiesArr.entries()) {
+    await requestAlgo('e395f')
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     jxToken = await token(cookie)
@@ -91,7 +93,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
     await wait(2000)
 
     for (let t of res.Data.gradeConfig) {
-      if (dwHelpedTimes >= t.dwHelpTimes && !t.dwIsHasDraw) {
+      if (dwHelpedTimes >= t.dwHelpTimes && t.dwIsHasDraw === 1) {
         res = await api('DoGradeDraw', 'grade', {grade: t.dwGrade})
         if (res.iRet === 0)
           console.log(`等级${t.dwGrade}红包打开成功`)
@@ -101,7 +103,7 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
         }
         await wait(15000)
       } else {
-        break
+        console.log(`等级${t.dwGrade}红包已打开`)
       }
     }
   }
