@@ -99,5 +99,8 @@ class Faker:
 
 
 if __name__ == '__main__':
-    faker = Faker('用户名', '密码')
-    faker.login()
+    username = ''
+    password = ''
+    if username and password:
+        faker = Faker(username, password)
+        faker.login()
