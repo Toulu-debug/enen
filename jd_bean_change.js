@@ -57,22 +57,10 @@ if ($.isNode()) {
   ].filter((item) => !!item);
 }
 !(async () => {
-  if (!cookiesArr[0]) {
-    $.msg(
-      $.name,
-      '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取',
-      'https://bean.m.jd.com/bean/signIndex.action',
-      {'open-url': 'https://bean.m.jd.com/bean/signIndex.action'},
-    );
-    return;
-  }
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
-      $.UserName = decodeURIComponent(
-        cookie.match(/pt_pin=([^; ]+)(?=;?)/) &&
-        cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1],
-      );
+      $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]);
       $.index = i + 1;
       $.beanCount = 0;
       $.incomeBean = 0;
@@ -88,30 +76,7 @@ if ($.isNode()) {
       $.pet = ''; // 东东萌宠
       $.fruit = ''; // 东东农场
       $.egg = ''; // 京喜牧场
-      await TotalBean();
-      console.log(
-        `\n********开始【京东账号${$.index}】${
-          $.nickName || $.UserName
-        }******\n`,
-      );
-      if (!$.isLogin) {
-        $.msg(
-          $.name,
-          `【提示】cookie已失效`,
-          `京东账号${$.index} ${
-            $.nickName || $.UserName
-          }\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`,
-          {'open-url': 'https://bean.m.jd.com/bean/signIndex.action'},
-        );
-
-        if ($.isNode()) {
-          await notify.sendNotify(
-            `${$.name}cookie已失效 - ${$.UserName}`,
-            `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`,
-          );
-        }
-        continue;
-      }
+      console.log(`\n********开始【京东账号${$.index}】${$.nickName || $.UserName}******\n`);
       await bean();
       await showMsg();
     }
@@ -221,49 +186,6 @@ async function bean() {
   await initPetTown();
   await initFarm();
   await jxncEgg();
-}
-
-function TotalBean() {
-  return new Promise(async (resolve) => {
-    const options = {
-      url: `https://wxapp.m.jd.com/kwxhome/myJd/home.json?&useGuideModule=0&bizId=&brandId=&fromType=wxapp&timestamp=${Date.now()}`,
-      headers: {
-        Cookie: cookie,
-        'content-type': `application/x-www-form-urlencoded`,
-        Connection: `keep-alive`,
-        'Accept-Encoding': `gzip,compress,br,deflate`,
-        Referer: `https://servicewechat.com/wxa5bf5ee667d91626/161/page-frame.html`,
-        Host: `wxapp.m.jd.com`,
-        'User-Agent': `Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.10(0x18000a2a) NetType/WIFI Language/zh_CN`,
-      },
-    };
-    $.post(options, (err, resp, data) => {
-      try {
-        if (err) {
-          $.logErr(err);
-        } else {
-          if (data) {
-            data = JSON.parse(data);
-            if (!data.user) {
-              $.isLogin = false; //cookie过期
-              return;
-            }
-            const userInfo = data.user;
-            if (userInfo) {
-              $.nickName = userInfo.petName;
-              $.beanCount = userInfo.jingBean;
-            }
-          } else {
-            $.log('京东服务器返回空数据');
-          }
-        }
-      } catch (e) {
-        $.logErr(e);
-      } finally {
-        resolve();
-      }
-    });
-  });
 }
 
 function getJingBeanBalanceDetail(page) {
@@ -732,7 +654,11 @@ function Env(t, e) {
         i = i ? i.replace(/\n/g, "").trim() : i;
         let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
         r = r ? 1 * r : 20, r = e && e.timeout ? e.timeout : r;
-        const [o, h] = i.split("@"), n = {url: `http://${h}/v1/scripting/evaluate`, body: {script_text: t, mock_type: "cron", timeout: r}, headers: {"X-Key": o, Accept: "*/*"}};
+        const [o, h] = i.split("@"), n = {
+          url: `http://${h}/v1/scripting/evaluate`,
+          body: {script_text: t, mock_type: "cron", timeout: r},
+          headers: {"X-Key": o, Accept: "*/*"}
+        };
         this.post(n, (t, e, i) => s(i))
       }).catch(t => this.logErr(t))
     }
@@ -741,7 +667,8 @@ function Env(t, e) {
       if (!this.isNode()) return {};
       {
         this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e);
+        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile),
+          s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e);
         if (!s && !i) return {};
         {
           const i = s ? t : e;
@@ -757,7 +684,8 @@ function Env(t, e) {
     writedata() {
       if (this.isNode()) {
         this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e), r = JSON.stringify(this.data);
+        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile),
+          s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e), r = JSON.stringify(this.data);
         s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r)
       }
     }
@@ -861,7 +789,15 @@ function Env(t, e) {
 
     time(t, e = null) {
       const s = e ? new Date(e) : new Date;
-      let i = {"M+": s.getMonth() + 1, "d+": s.getDate(), "H+": s.getHours(), "m+": s.getMinutes(), "s+": s.getSeconds(), "q+": Math.floor((s.getMonth() + 3) / 3), S: s.getMilliseconds()};
+      let i = {
+        "M+": s.getMonth() + 1,
+        "d+": s.getDate(),
+        "H+": s.getHours(),
+        "m+": s.getMinutes(),
+        "s+": s.getSeconds(),
+        "q+": Math.floor((s.getMonth() + 3) / 3),
+        S: s.getMilliseconds()
+      };
       /(y+)/.test(t) && (t = t.replace(RegExp.$1, (s.getFullYear() + "").substr(4 - RegExp.$1.length)));
       for (let e in i) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? i[e] : ("00" + i[e]).substr(("" + i[e]).length)));
       return t
