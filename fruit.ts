@@ -4,6 +4,7 @@ import USER_AGENT, {getShareCodePool, o2s, requireConfig, wait} from './TS_USER_
 
 let cookie: string = '', res: any = '', data: any, UserName: string, index: number
 let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = []
+let message: string = ''
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -140,14 +141,17 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
     res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
     await wait(1000)
     o2s(res, 'farmAssistInit')
+    let farmAssistInit_waterEnergy: number = 0
     for (let t of res.assistStageList) {
       if (t.percentage === '100%' && t.stageStaus === 2) {
         data = await api('receiveStageEnergy', {"version": 14, "channel": 1, "babelChannel": "120"})
         await wait(1000)
-        console.log('被助力奖励', data.amount)
+        farmAssistInit_waterEnergy += t.waterEnergy
+      } else if (t.stageStaus === 3) {
+        farmAssistInit_waterEnergy += t.waterEnergy
       }
     }
-
+    console.log('助力已领取', farmAssistInit_waterEnergy)
 
     // 任务
     res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
@@ -203,10 +207,37 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
     o2s(res, 'initForTurntableFarm')
     for (let t of res.turntableBrowserAds) {
       if (!t.status) {
-        console.log(t.main)
+        console.log("browserForTurntableFarm", t.main)
         data = await api('browserForTurntableFarm', {"type": 1, "adId": t.adId, "version": 4, "channel": 1})
         await wait(t.browserTimes * 1000 || 1000)
         data = await api('browserForTurntableFarm', {"type": 2, "adId": t.adId, "version": 4, "channel": 1})
+      }
+    }
+
+    if (!res.timingGotStatus && res.remainLotteryTimes) {
+      if (Date.now() > (res.timingLastSysTime + 60 * 60 * res.timingIntervalHours * 1000)) {
+        data = await api('timingAwardForTurntableFarm', {"version": 4, "channel": 1})
+        await wait(1000)
+        o2s(data, 'timingAwardForTurntableFarm')
+      } else {
+        console.log(`免费赠送的抽奖机会未到时间`)
+      }
+    }
+
+    // 天天红包助力
+    shareCodePool = await getShareCodePool('farm', 30)
+    shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
+    for (let code of shareCodeSelf) {
+      console.log('去红包助力', code)
+      data = await api('initForFarm', {"shareCode": `${code}-3`, "lng": "0.000000", "lat": "0.000000", "sid": "2871ac0252645ef0e2731aa7d03c1d3w", "un_area": "16_1341_1347_44750", "version": 14, "channel": 1, "babelChannel": 0})
+      await wait(3000)
+      if (data.code === '0') {
+        console.log('红包助力成功')
+      } else if (data.code === '11') {
+        console.log('红包已助力过')
+      } else if (data.code === '13') {
+        console.log('上限')
+        break
       }
     }
 
@@ -221,17 +252,6 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
       await wait(2000)
     }
 
-    if (!res.timingGotStatus && res.remainLotteryTimes) {
-      if (Date.now() > (res.timingLastSysTime + 60 * 60 * res.timingIntervalHours * 1000)) {
-        data = await api('timingAwardForTurntableFarm', {"version": 4, "channel": 1})
-        await wait(1000)
-        o2s(data, 'timingAwardForTurntableFarm')
-      } else {
-        console.log(`免费赠送的抽奖机会未到时间`)
-      }
-    }
-
-    /*
     // 助力
     shareCodePool = await getShareCodePool('farm', 30)
     shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
@@ -256,8 +276,6 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
         break
       }
     }
-
-     */
   }
 })()
 
