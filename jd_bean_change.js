@@ -426,7 +426,7 @@ RemainMessage = "";
 
             await notify.sendNotify(`${$.name}`, `${allMessage}`, {
               url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
-            }, '\n\n本通知 By ccwav Mod', TempMessage)
+            }, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, TempMessage)
           }
           if ($.isNode() && allMessageMonth) {
             await notify.sendNotify(`京东月资产变动`, `${allMessageMonth}`, {
@@ -495,7 +495,7 @@ RemainMessage = "";
 
         await notify.sendNotify(`${$.name}`, `${allMessage}`, {
           url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
-        }, '\n\n本通知 By ccwav Mod', TempMessage)
+        }, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, TempMessage)
       }
       if ($.isNode() && allMessageMonth) {
         await notify.sendNotify(`京东月资产变动`, `${allMessageMonth}`, {
@@ -511,7 +511,7 @@ RemainMessage = "";
         allMessageGp2 = strAllNotify + `\n` + allMessageGp2;
       await notify.sendNotify(`${$.name}#2`, `${allMessageGp2}`, {
         url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
-      }, '\n\n本通知 By ccwav Mod', TempMessage)
+      }, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, TempMessage)
       await $.wait(10 * 1000);
     }
     if ($.isNode() && allMessageGp3) {
@@ -520,7 +520,7 @@ RemainMessage = "";
         allMessageGp3 = strAllNotify + `\n` + allMessageGp3;
       await notify.sendNotify(`${$.name}#3`, `${allMessageGp3}`, {
         url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
-      }, '\n\n本通知 By ccwav Mod', TempMessage)
+      }, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, TempMessage)
       await $.wait(10 * 1000);
     }
     if ($.isNode() && allMessageGp4) {
@@ -529,7 +529,7 @@ RemainMessage = "";
         allMessageGp4 = strAllNotify + `\n` + allMessageGp4;
       await notify.sendNotify(`${$.name}#4`, `${allMessageGp4}`, {
         url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
-      }, '\n\n本通知 By ccwav Mod', TempMessage)
+      }, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, TempMessage)
       await $.wait(10 * 1000);
     }
     if ($.isNode() && allMessage) {
@@ -539,7 +539,7 @@ RemainMessage = "";
 
       await notify.sendNotify(`${$.name}`, `${allMessage}`, {
         url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
-      }, '\n\n本通知 By ccwav Mod', TempMessage)
+      }, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, TempMessage)
       await $.wait(10 * 1000);
     }
 
@@ -1008,10 +1008,8 @@ async function showMsg() {
     if (strAllNotify)
       ReturnMessage = strAllNotify + `\n` + ReturnMessage;
 
-    await notify.sendNotifybyWxPucher(strTitle, `${ReturnMessage}`, `${$.UserName}`, '\n\n本通知 By ccwav Mod', strsummary);
+    await notify.sendNotifybyWxPucher(strTitle, `${ReturnMessage}`, `${$.UserName}`, `\n\n本通知 By ccwav Mod\n\nJDHelloWorld.ts\n${new Date().Format("yyyy-MM-dd hh:mm:ss")}`, strsummary);
   }
-
-  //$.msg($.name, '', ReturnMessage , {"open-url": "https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean"});
 }
 
 async function bean() {
@@ -3096,4 +3094,27 @@ function Env(t, e) {
     }
   }
   (t, e)
+}
+
+Date.prototype.Format = function (fmt) {
+  let n = this, d = fmt, l = {
+    "M+": n.getMonth() + 1,
+    "d+": n.getDate(),
+    "D+": n.getDate(),
+    "h+": n.getHours(),
+    "H+": n.getHours(),
+    "m+": n.getMinutes(),
+    "s+": n.getSeconds(),
+    "w+": n.getDay(),
+    "q+": Math.floor((n.getMonth() + 3) / 3),
+    "S+": n.getMilliseconds()
+  };
+  /(y+)/i.test(d) && (d = d.replace(RegExp.$1, "".concat(n.getFullYear().toString()).substring(4 - RegExp.$1.length)));
+  for (let k in l) {
+    if (new RegExp("(".concat(k, ")")).test(d)) {
+      let a = "S+" === k ? "000" : "00";
+      d = d.replace(RegExp.$1, 1 === RegExp.$1.length ? l[k] : ("".concat(a) + l[k]).substring("".concat(l[k]).length))
+    }
+  }
+  return d;
 }
