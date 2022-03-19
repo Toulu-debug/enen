@@ -10,7 +10,7 @@ import {o2s, wait, requireConfig, getshareCodeHW} from "./TS_USER_AGENTS";
 import {SHA256} from "crypto-js";
 
 let cookie: string = '', res: any = '', UserName: string
-let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = [], full: string[] = []
+let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = []
 
 interface Tuan {
   activityIdEncrypted: string, // id
@@ -43,7 +43,7 @@ interface Tuan {
         // 没开团
         res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
         o2s(res)
-        await wait(1000)
+        await wait(2000)
         if (res.success) {
           console.log(`开团成功，结束时间：${res.data.endTime}`)
           res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
@@ -52,7 +52,7 @@ interface Tuan {
             assistStartRecordId: res.data.assistStartRecordId,
             assistedPinEncrypted: res.data.encPin,
           })
-          await wait(1000)
+          await wait(2000)
         }
       } else if (res.data.assistedRecords.length === res.data.assistNum) {
         console.log('已成团', JSON.stringify(res))
@@ -67,7 +67,7 @@ interface Tuan {
               assistStartRecordId: res.data.assistStartRecordId,
               assistedPinEncrypted: res.data.encPin,
             })
-            await wait(1000)
+            await wait(2000)
           }
         }
       } else if (!res.data.canStartNewAssist) {
@@ -80,6 +80,8 @@ interface Tuan {
   }
 
   o2s(shareCodeSelf)
+  await wait(5000)
+
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodeHW.length === 0) {
       shareCodeHW = await getshareCodeHW('zjd');
@@ -93,32 +95,29 @@ interface Tuan {
     await zjdInit()
 
     for (let code of shareCode) {
-      if (!full.includes(code.assistedPinEncrypted)) {
-        try {
-          console.log(`账号${index + 1} ${UserName} 去助力 ${code.assistedPinEncrypted.replace('\n', '')}`)
-          res = await api('vvipclub_distributeBean_assist', {"activityIdEncrypted": code.activityIdEncrypted, "assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.assistedPinEncrypted, "channel": "FISSION_BEAN", "launchChannel": "undefined"})
+      try {
+        console.log(`账号${index + 1} ${UserName} 去助力 ${code.assistedPinEncrypted.replace('\n', '')}`)
+        res = await api('vvipclub_distributeBean_assist', {"activityIdEncrypted": code.activityIdEncrypted, "assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.assistedPinEncrypted, "channel": "FISSION_BEAN", "launchChannel": "undefined"})
 
-          if (res.resultCode === '9200008') {
-            console.log('不能助力自己')
-          } else if (res.resultCode === '2400203') {
-            console.log('上限')
-            break
-          } else if (res.resultCode === '2400205') {
-            console.log('对方已成团')
-            full.push(code.assistedPinEncrypted)
-          } else if (res.success) {
-            console.log('助力成功')
-          } else {
-            console.log('error', JSON.stringify(res))
-          }
-        } catch (e) {
-          console.log(e)
+        if (res.resultCode === '9200008') {
+          console.log('不能助力自己')
+        } else if (res.resultCode === '2400203') {
+          console.log('上限')
           break
+        } else if (res.resultCode === '2400205') {
+          console.log('对方已成团')
+        } else if (res.resultCode === '9200011') {
+          console.log('已助力过')
+        } else if (res.success) {
+          console.log('助力成功')
+        } else {
+          console.log('error', JSON.stringify(res))
         }
-        await wait(2000)
-      } else {
-        console.log('full')
+      } catch (e) {
+        console.log(e)
+        break
       }
+      await wait(2000)
     }
     console.log()
     await wait(2000)
