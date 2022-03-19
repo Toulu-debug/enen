@@ -1,5 +1,5 @@
 import axios from "axios";
-import USER_AGENT, {o2s, requireConfig, wait} from "./test/TS_USER_AGENTS";
+import USER_AGENT, {o2s, requireConfig, wait} from "./TS_USER_AGENTS";
 
 let cookie: string = '', res: any = '', UserName: string, index: number
 
