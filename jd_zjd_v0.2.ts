@@ -28,7 +28,7 @@ interface Tuan {
       console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
       res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
-      o2s(res)
+      // o2s(res)
       await wait(2000)
 
       if (res.data.assistStatus === 1) {
@@ -42,7 +42,7 @@ interface Tuan {
       } else if (res.data.assistStatus === 2 && res.data.canStartNewAssist) {
         // 没开团
         res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
-        o2s(res)
+        // o2s(res)
         await wait(2000)
         if (res.success) {
           console.log(`开团成功，结束时间：${res.data.endTime}`)
@@ -55,7 +55,7 @@ interface Tuan {
           await wait(2000)
         }
       } else if (res.data.assistedRecords.length === res.data.assistNum) {
-        console.log('已成团', JSON.stringify(res))
+        console.log('已成团')
         if (res.data.canStartNewAssist) {
           res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
           await wait(2000)
