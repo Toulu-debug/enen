@@ -179,12 +179,14 @@ async function api(fn: string, body: object, retry: number = 0) {
       "User-Agent": UA,
     }
   })
+  await wait(5000)
   if (data.rtn_code === 403 && retry < 3) {
     console.log('retry...')
     await wait(1000)
     log = logs[getRandomNumberByRange(0, logs.length - 1)]
     body['random'] = log.match(/"random":"(\d+)"/)[1]
     body['log'] = log.match(/"log":"(.*)"/)[1]
+    await wait(5000)
     await api(fn, body, ++retry)
   }
   return data
