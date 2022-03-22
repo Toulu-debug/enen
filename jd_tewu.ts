@@ -105,6 +105,10 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     cookie = value
     res = await api('superBrandTaskList', {"source": "secondfloor", "activityId": activityId, "assistInfoFlag": 1})
     let mine: string = ''
+    if (!res.data.result?.taskList) {
+      console.log('黑号')
+      continue
+    }
     for (let t of res.data.result.taskList) {
       if (t.ext?.assistTaskDetail) {
         mine = t.ext.assistTaskDetail.itemId
@@ -129,8 +133,6 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
           console.log('其他错误', res.data.bizMsg)
         }
         await wait(2000)
-      } else {
-        console.log('助力满了，跳过')
       }
     }
   }
