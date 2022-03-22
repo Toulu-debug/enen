@@ -25,8 +25,12 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     res = await api('showSecondFloorCardInfo', {"source": "secondfloor"})
-
-    activityId = res.data.result.activityBaseInfo.activityId
+    try {
+      activityId = res.data.result.activityBaseInfo.activityId
+    } catch (e) {
+      console.log('黑号')
+      continue
+    }
     let encryptProjectId: string = res.data.result.activityBaseInfo.encryptProjectId
     await wait(1000)
 
