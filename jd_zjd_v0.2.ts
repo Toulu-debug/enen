@@ -10,7 +10,7 @@ import {o2s, wait, requireConfig, getshareCodeHW} from "./TS_USER_AGENTS";
 import {SHA256} from "crypto-js";
 
 let cookie: string = '', res: any = '', UserName: string
-let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = []
+let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = [], full: string[] = []
 
 interface Tuan {
   activityIdEncrypted: string, // id
@@ -95,29 +95,32 @@ interface Tuan {
     await zjdInit()
 
     for (let code of shareCode) {
-      try {
-        console.log(`账号${index + 1} ${UserName} 去助力 ${code.assistedPinEncrypted.replace('\n', '')}`)
-        res = await api('vvipclub_distributeBean_assist', {"activityIdEncrypted": code.activityIdEncrypted, "assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.assistedPinEncrypted, "channel": "FISSION_BEAN", "launchChannel": "undefined"})
+      if (!full.includes(code.assistedPinEncrypted)) {
+        try {
+          console.log(`账号${index + 1} ${UserName} 去助力 ${code.assistedPinEncrypted.replace('\n', '')}`)
+          res = await api('vvipclub_distributeBean_assist', {"activityIdEncrypted": code.activityIdEncrypted, "assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.assistedPinEncrypted, "channel": "FISSION_BEAN", "launchChannel": "undefined"})
 
-        if (res.resultCode === '9200008') {
-          console.log('不能助力自己')
-        } else if (res.resultCode === '2400203') {
-          console.log('上限')
+          if (res.resultCode === '9200008') {
+            console.log('不能助力自己')
+          } else if (res.resultCode === '2400203') {
+            console.log('上限')
+            break
+          } else if (res.resultCode === '2400205') {
+            console.log('对方已成团')
+            full.push(code.assistedPinEncrypted)
+          } else if (res.resultCode === '9200011') {
+            console.log('已助力过')
+          } else if (res.success) {
+            console.log('助力成功')
+          } else {
+            console.log('error', JSON.stringify(res))
+          }
+        } catch (e) {
+          console.log(e)
           break
-        } else if (res.resultCode === '2400205') {
-          console.log('对方已成团')
-        } else if (res.resultCode === '9200011') {
-          console.log('已助力过')
-        } else if (res.success) {
-          console.log('助力成功')
-        } else {
-          console.log('error', JSON.stringify(res))
         }
-      } catch (e) {
-        console.log(e)
-        break
+        await wait(2000)
       }
-      await wait(2000)
     }
     console.log()
     await wait(2000)
