@@ -129,7 +129,7 @@ async function open() {
           console.log(`红包${j}可拆`)
           res = await api('h5receiveRedpacketAll', {"random": random, "log": log1, "sceneid": "JLHBhPageh5"})
           console.log(res.data.biz_msg, parseFloat(res.data.result.discount))
-          await wait(1000)
+          await wait(6000)
         } else {
           console.log(`${j}`, t.hasAssistNum, '/', t.requireAssistNum)
         }
@@ -138,7 +138,7 @@ async function open() {
     } catch (e) {
       console.log(e)
     }
-    await wait(1000)
+    await wait(3000)
   }
 }
 
@@ -171,7 +171,7 @@ async function help() {
 
           if (res.data.result.status === 0) {
             console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))
-            await wait(1000)
+            await wait(20000)
             break
           } else if (res.data.result.status === 3) {
             console.log('今日助力次数已满')
@@ -182,7 +182,7 @@ async function help() {
               fullCode.push(code)
             }
           }
-          await wait(1000)
+          await wait(20000)
         }
       }
     } catch (e) {
@@ -202,14 +202,13 @@ async function api(fn: string, body: object, retry: number = 0) {
       "User-Agent": UA,
     }
   })
-  await wait(2000)
   if (data.rtn_code === 403 && retry < 3) {
     console.log('retry...')
     await wait(1000)
     log = logs[getRandomNumberByRange(0, logs.length - 1)]
     body['random'] = log.match(/"random":"(\d+)"/)[1]
     body['log'] = log.match(/"log":"(.*)"/)[1]
-    await wait(3000)
+    await wait(10000)
     await api(fn, body, ++retry)
   }
   return data
