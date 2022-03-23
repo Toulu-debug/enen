@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {readFileSync} from "fs";
+import {sendNotify} from './sendNotify';
 import USER_AGENT, {getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', data: any, UserName: string, index: number
@@ -15,11 +16,11 @@ let message: string = ''
     console.log('读取分享码失败')
   }
 
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookie = cookiesArr[i]
+  for (let [index, value] of cookiesArr.entries()) {
+    cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    index = i + 1
-    console.log(`\n开始【京东账号${index}】${UserName}\n`)
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+    message += `【账号${index + 1}】  ${UserName}\n`
 
     // 初始化
     res = await api('initForFarm', {"version": 11, "channel": 3})
@@ -151,7 +152,9 @@ let message: string = ''
         farmAssistInit_waterEnergy += t.waterEnergy
       }
     }
+    console.log('收到助力', res.assistFriendList.length)
     console.log('助力已领取', farmAssistInit_waterEnergy)
+    message += `【助力已领取】  ${farmAssistInit_waterEnergy}\n`
 
     // 任务
     res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
@@ -276,11 +279,14 @@ let message: string = ''
         break
       }
     }
+    message += '\n\n'
   }
+  if (message)
+    await sendNotify('东东农场', message)
 })()
 
 async function api(fn: string, body: object) {
-  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&&appid=wh5&client=apple&clientVersion=10.2.4`, {
+  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&appid=wh5&client=apple&clientVersion=10.2.4`, {
     headers: {
       "Host": "api.m.jd.com",
       "Origin": "https://carry.m.jd.com",
