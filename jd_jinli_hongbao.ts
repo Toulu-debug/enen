@@ -119,6 +119,8 @@ async function open() {
       // 打开助力红包
       let j: number = 1
       res = await api('h5activityIndex', {"isjdapp": 1})
+      o2s(res)
+      await wait(5000)
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
         if (t.packetStatus === 2) {
           console.log(`红包${j}已拆过，获得`, t.packetAmount)
@@ -129,7 +131,7 @@ async function open() {
           console.log(`红包${j}可拆`)
           res = await api('h5receiveRedpacketAll', {"random": random, "log": log1, "sceneid": "JLHBhPageh5"})
           console.log(res.data.biz_msg, parseFloat(res.data.result.discount))
-          await wait(6000)
+          await wait(10000)
         } else {
           console.log(`${j}`, t.hasAssistNum, '/', t.requireAssistNum)
         }
@@ -142,6 +144,21 @@ async function open() {
   }
 }
 
+/**
+ * +
+ * 0
+ * 1
+ * 2
+ * 3
+ * 4
+ * 5
+ * 6
+ * 7
+ * 8
+ * 9
+ * 10
+ */
+
 async function help() {
   for (let [index, value] of cookiesArr.entries()) {
     try {
@@ -150,15 +167,20 @@ async function help() {
       if (shareCodesHW.length === 0) {
         shareCodesHW = await getshareCodeHW('jlhb')
       }
-      // 2 4 9 12
-      if (index === 0 || cookiesArr.length === 2) { // 红包1需2个助力
+      // 1 3 5 5 9 15
+      if (index === 0) {
         shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
       } else {
         shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
       }
-      if (cookiesArr.length > 5 && cookiesArr.length < 8 && index > 4) {  // 红包3需要7个助力
-        shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
-      }
+      // 剩余账号无法助力满下一级红包
+      // if (cookiesArr.length === 4 && index === 3) {
+      //   shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+      // }
+      // else if ([11, 12, 13, 14].includes(cookiesArr.length) && index > 10) {
+      //   shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
+      // }
+
       for (let code of shareCodes) {
         if (!fullCode.includes(code)) {
           UA = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`
@@ -202,6 +224,10 @@ async function api(fn: string, body: object, retry: number = 0) {
       "User-Agent": UA,
     }
   })
+  if (data.rtn_code === 403 && fn === 'h5receiveRedpacketAll') {
+    console.log('拆红包失败，手动去拆')
+    return {}
+  }
   if (data.rtn_code === 403 && retry < 3) {
     console.log('retry...')
     await wait(1000)
