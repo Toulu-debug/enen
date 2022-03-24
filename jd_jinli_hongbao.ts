@@ -1,9 +1,10 @@
 /**
  * 京东-锦鲤红包
- * 做任务、助力、开红包
+ * 只获取前9CK，再多403
+ * 只有助力，红包手动开
  * cron: 1 0,6,18 * * *
  * CK1     HW.ts -> 内部
- * CK2～n  内部   -> HW.ts
+ * CK2～9  内部   -> HW.ts
  */
 
 import axios from 'axios';
@@ -16,11 +17,12 @@ let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: stri
 let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2], log: string = ''
 
 !(async () => {
-  cookiesArr = await requireConfig(false);
+  cookiesArr = await requireConfig(false)
+  cookiesArr = cookiesArr.slice(0, 9)
   await join()
   await getShareCodeSelf()
   await help()
-  await open()
+  // await open()
 })()
 
 async function getShareCodeSelf() {
@@ -38,7 +40,7 @@ async function getShareCodeSelf() {
       console.log(e)
     }
   }
-  console.log('内部助力：', shareCodesSelf)
+  o2s(shareCodesSelf)
 }
 
 async function join() {
@@ -60,6 +62,7 @@ async function join() {
   }
 }
 
+/*
 async function open() {
   let exitOpen: boolean = false
   for (let [index, value] of cookiesArr.entries()) {
@@ -101,6 +104,8 @@ async function open() {
     await wait(3000)
   }
 }
+
+ */
 
 /**
  * +
