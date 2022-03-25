@@ -29,7 +29,7 @@ interface Tuan {
 
       res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
       // o2s(res)
-      await wait(2000)
+      await wait(1000)
 
       if (res.data.assistStatus === 1) {
         // 已开，没满
@@ -43,7 +43,7 @@ interface Tuan {
         // 没开团
         res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
         // o2s(res)
-        await wait(2000)
+        await wait(1000)
         if (res.success) {
           console.log(`开团成功，结束时间：${res.data.endTime}`)
           res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
@@ -52,13 +52,13 @@ interface Tuan {
             assistStartRecordId: res.data.assistStartRecordId,
             assistedPinEncrypted: res.data.encPin,
           })
-          await wait(2000)
+          await wait(1000)
         }
       } else if (res.data.assistedRecords.length === res.data.assistNum) {
         console.log('已成团')
         if (res.data.canStartNewAssist) {
           res = await api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
-          await wait(2000)
+          await wait(1000)
           if (res.success) {
             console.log(`开团成功，结束时间：${res.data.endTime}`)
             res = await api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
@@ -67,7 +67,7 @@ interface Tuan {
               assistStartRecordId: res.data.assistStartRecordId,
               assistedPinEncrypted: res.data.encPin,
             })
-            await wait(2000)
+            await wait(1000)
           }
         }
       } else if (!res.data.canStartNewAssist) {
@@ -76,7 +76,7 @@ interface Tuan {
     } catch (e) {
       continue
     }
-    await wait(2000)
+    await wait(1000)
   }
 
   o2s(shareCodeSelf)
@@ -120,6 +120,8 @@ interface Tuan {
           break
         }
         await wait(2000)
+      } else {
+        console.log('已满', code.assistedPinEncrypted)
       }
     }
     console.log()
