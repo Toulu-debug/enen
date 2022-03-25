@@ -3,7 +3,7 @@
  * cron: 8 0 * * *
  */
 
-import {o2s, post, requireConfig, wait} from './TS_USER_AGENTS'
+import {post, requireConfig, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string
 
@@ -20,8 +20,10 @@ let cookie: string = '', res: any = '', UserName: string
       'referer': 'https://servicewechat.com/wx91d27dbf599dff74/581/page-frame.html',
       'cookie': cookie
     })
-    o2s(res)
-
+    if (res.data)
+      console.log('已签到', res.data.signDays, '天，奖励', res.data.rewardValue, '元')
+    else
+      console.log(res.message)
     await wait(1000)
   }
 })()
