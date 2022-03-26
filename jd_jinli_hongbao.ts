@@ -10,11 +10,11 @@
 import axios from 'axios';
 import {logs} from './utils/jinli_log';
 import {sendNotify} from './sendNotify';
-import {getRandomNumberByRange, getshareCodeHW, o2s, obj2str, randomString, requireConfig, wait} from "./TS_USER_AGENTS";
+import {getRandomNumberByRange, getshareCodeHW, o2s, randomString, requireConfig, wait} from "./TS_USER_AGENTS";
 
 let cookie: string = '', cookiesArr: string[] = [], res: any = '', UserName: string, UA: string = ''
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
-let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2], log: string = ''
+let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6], log: string = ''
 
 !(async () => {
   cookiesArr = await requireConfig(false)
@@ -22,7 +22,7 @@ let min: number[] = [0.02, 0.12, 0.3, 0.6, 0.7, 0.8, 1, 2], log: string = ''
   await join()
   await getShareCodeSelf()
   await help()
-  // await open()
+  await open(false)
 })()
 
 async function getShareCodeSelf() {
@@ -62,8 +62,7 @@ async function join() {
   }
 }
 
-/*
-async function open() {
+async function open(autoOpen: boolean = false) {
   let exitOpen: boolean = false
   for (let [index, value] of cookiesArr.entries()) {
     if (exitOpen)
@@ -72,11 +71,7 @@ async function open() {
       cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
       console.log(`\n开始【京东账号${index + 1}】${UserName}\n`);
-      UA = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`
-      log = logs[getRandomNumberByRange(0, logs.length - 1)]
-      let random = log.match(/"random":"(\d+)"/)[1], log1 = log.match(/"log":"(.*)"/)[1]
 
-      // 打开助力红包
       let j: number = 1
       res = await api('h5activityIndex', {"isjdapp": 1})
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
@@ -87,12 +82,17 @@ async function open() {
           }
         } else if (t.packetStatus === 1) {
           console.log(`红包${j}可拆`)
-          res = await api('h5receiveRedpacketAll', {"random": random, "log": log1, "sceneid": "JLHBhPageh5"})
-          if (obj2str(res) === '{}') {
-            exitOpen = true
+          if (autoOpen) {
+            UA = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`
+            log = logs[getRandomNumberByRange(0, logs.length - 1)]
+            let random = log.match(/"random":"(\d+)"/)[1], log1 = log.match(/"log":"(.*)"/)[1]
+            res = await api('h5receiveRedpacketAll', {"random": random, "log": log1, "sceneid": "JLHBhPageh5"})
+            console.log('打开成功', parseFloat(res.data.result.discount))
+            if (!min.includes(parseFloat(res.data.result.discount))) {
+              await sendNotify('锦鲤红包', `账号${index + 1} ${UserName}\n${t.packetAmount}`)
+            }
+            await wait(10000)
           }
-          console.log(res.data.biz_msg, parseFloat(res.data.result.discount))
-          await wait(10000)
         } else {
           console.log(`${j}`, t.hasAssistNum, '/', t.requireAssistNum)
         }
@@ -104,8 +104,6 @@ async function open() {
     await wait(3000)
   }
 }
-
- */
 
 /**
  * +
