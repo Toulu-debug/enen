@@ -28,7 +28,7 @@ let message: string = ''
 
     for (let i = 0; i < 10; i++) {
       res = await api('cash_homePage', {})
-      if (res.data.result.taskInfos.filter(item => item.doTimes === item.times).length === 0) {
+      if (res.data.result.taskInfos.filter(item => type.includes(item.type) && item.doTimes === item.times).length === taskNum) {
         console.log('任务全部完成')
         break
       }
