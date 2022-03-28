@@ -16,7 +16,6 @@ let cookie: string = '', res: any = '', UserName: string, msg: string = ''
       "Cookie": cookie
     }
 
-    // query
     res = await get(`https://wq.jd.com/wxcontractgw/querypappaycontract?appid=wxae3e8056daea8727&_=${Date.now()}&g_login_type=0&callback=jsonpCBK${randomWord()}&g_tk=1600943825&g_ty=ls`, '', headers)
     if (res.data.status === 1) {
       console.log('免密支付 未启用')
