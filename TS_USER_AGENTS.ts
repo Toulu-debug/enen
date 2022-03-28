@@ -346,8 +346,8 @@ function get(url: string, prarms?: string, headers?: any) {
     headers: headers
   })
     .then(res => {
-      if (typeof res.data === 'string' && res.data.match(/^jsonpCBK/)) {
-        return JSON.parse(res.data.match(/jsonpCBK.?\(([\w\W]*)\);/)[1])
+      if (typeof res.data === 'string' && res.data.includes('jsonpCBK')) {
+        return JSON.parse(res.data.match(/jsonpCBK.?\(([\w\W]*)\);?/)[1])
       } else {
         return res.data
       }
