@@ -7,30 +7,31 @@
  * CK2～9  内部   -> HW.ts
  */
 
-import axios from 'axios';
-import {get, getBeanShareCode, getFarmShareCode, getshareCodeHW, o2s, randomString, requireConfig, wait} from "./TS_USER_AGENTS";
-import {Md5} from "ts-md5";
+import axios from 'axios'
+import {sendNotify} from './sendNotify'
+import {get, getBeanShareCode, getFarmShareCode, getshareCodeHW, o2s, randomString, requireConfig, wait} from "./TS_USER_AGENTS"
+import {Md5} from "ts-md5"
 
 let cookie: string = '', cookiesArr: string[] = [], res: any = '', UserName: string, UA: string = ''
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
-// let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6]
+let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6]
 let log: string = ''
 
 !(async () => {
   cookiesArr = await requireConfig(false)
   cookiesArr = cookiesArr.slice(0, 9)
-  await join()
-  await getShareCodeSelf()
-  await help()
-  // await open(false)
+  // await join()
+  // await getShareCodeSelf()
+  // await help()
+  await open(true)
 })()
 
 async function getShareCodeSelf() {
   for (let [index, value] of cookiesArr.entries()) {
     try {
-      cookie = value;
+      cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`);
+      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
       UA = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`
       res = await api('h5activityIndex', {"isjdapp": 1})
       console.log('红包ID：', res.data.result.redpacketInfo.id)
@@ -46,9 +47,9 @@ async function getShareCodeSelf() {
 async function join() {
   for (let [index, value] of cookiesArr.entries()) {
     try {
-      cookie = value;
+      cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`);
+      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
       UA = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`
       log = await getLog()
       let random = log.match(/"random":"(\d+)"/)[1], log1 = log.match(/"log":"(.*)"/)[1]
@@ -61,7 +62,6 @@ async function join() {
   }
 }
 
-/*
 async function open(autoOpen: boolean = false) {
   let exitOpen: boolean = false
   for (let [index, value] of cookiesArr.entries()) {
@@ -70,7 +70,7 @@ async function open(autoOpen: boolean = false) {
     try {
       cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`);
+      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
       let j: number = 1
       res = await api('h5activityIndex', {"isjdapp": 1})
@@ -84,7 +84,7 @@ async function open(autoOpen: boolean = false) {
           console.log(`红包${j}可拆`)
           if (autoOpen) {
             UA = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`
-            log = logs[getRandomNumberByRange(0, logs.length - 1)]
+            log = await getLog()
             let random = log.match(/"random":"(\d+)"/)[1], log1 = log.match(/"log":"(.*)"/)[1]
             res = await api('h5receiveRedpacketAll', {"random": random, "log": log1, "sceneid": "JLHBhPageh5"})
             console.log('打开成功', parseFloat(res.data.result.discount))
@@ -104,12 +104,11 @@ async function open(autoOpen: boolean = false) {
     await wait(3000)
   }
 }
-*/
 
 async function help() {
   for (let [index, value] of cookiesArr.entries()) {
     try {
-      cookie = value;
+      cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
       if (shareCodesHW.length === 0) {
         shareCodesHW = await getshareCodeHW('jlhb')
@@ -179,13 +178,16 @@ async function getLog() {
   await wait(1000)
   let bean: string = await getBeanShareCode(cookie)
   let pt_pin: string = encodeURIComponent(UserName)
-  let e: string = '"random":"54811600","log":"1648274851050~159nXc2MiBSMDF6WGtBbTAyMQ==.S25feV9NbFN1WUlqWT8ZPwIdET8ePg95E0t0XW1bVmkVcxNLJhU=.81064560~6,1~B2446968989D926D8B5DC49DF3050EC53A26C8F2~19xvf3w~C~ShBHWBELa24fE0ZdWBELa24fE1VBWxELAQsDBR4RRkATChECBwYLBwQFCAYCAQQKDAABAREfE0VWURELEkdHRVRVU0ZXEh8RRldSFwkTRFVHUEdHQFITHBFDVVwRD2gEHAIEBR4KGQIBHAEfAW8fF1lbEgkAHRBQRhELEgICBwcDDFACBwZWCAdXAQAFBwYFCQQCB1BSCAoFAwJRFx8TXkMRCxB/XF1ESBNLCQRsAwcTHBFHEwgCAwcJAgQHCQcCBQYBHBFZWhAJF1ITHBFVQVARDxETHBFdRxAJF3ReX1RfVBJ6W1AfEh8RX1NFFwkTUxEfE0FQRxELawUDAR4LBQNsHBFBXhAJbhFQEh8RUBAfF1ITHBFSEx4RVBEdElIRHRBSF24dElpcUBAJF1VXVlVVV0ZHFx8TUVkRCxBGFx8TU1oRCxBEBh0DHgcRHRBQU2xHEgkRAQARGRFTVBEJE0BSW1deXQ4GBQoCBAUBABEfE19ZFwlqAB8DHQJuGRFTXFxUEwgRVBEdEl5AVhAJF1ITTQ==~0f67kov"'
   if (farm.length > 0 && bean.length > 0) {
     res = await get(`https://api.jdsharecode.xyz/api/jlhb_log?farm=${farm}&bean=${bean}&pin=${Md5.hashStr(pt_pin)}`)
-    if (res === 1)
-      return
-    return e
+    if (res === 1) {
+      console.log('一致性验证失败，脚本退出')
+      process.exit(0)
+    } else {
+      return res
+    }
   } else {
-    return e
+    console.log('获取账号助力码失败，脚本退出')
+    process.exit(0)
   }
 }
