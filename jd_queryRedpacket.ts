@@ -19,7 +19,7 @@ let message: string = ''
         'User-Agent': USER_AGENT
       })
     let day: number = new Date().getDay(), jdRed: number = 0, jdRedExp: number = 0
-    for (let j of res.data.useRedInfo.redList) {
+    for (let j of res.data.useRedInfo?.redList || []) {
       if (j.orgLimitStr.includes('京喜')) {
       } else if (j.activityName.includes('极速版')) {
       } else if (j.orgLimitStr.includes('京东健康')) {
@@ -34,7 +34,7 @@ let message: string = ''
     await pushplus('京东红包', text)
 
     message += `${text}\n\n`
-    await wait(1000)
+    await wait(2000)
   }
   await sendNotify('京东红包', message)
 })()

@@ -493,7 +493,14 @@ async function turntableFarm() {
   await initForTurntableFarm();
   if ($.initForTurntableFarmRes.code === '0') {
     //领取定时奖励 //4小时一次
-    let {timingIntervalHours, timingLastSysTime, sysTime, timingGotStatus, remainLotteryTimes, turntableInfos} = $.initForTurntableFarmRes;
+    let {
+      timingIntervalHours,
+      timingLastSysTime,
+      sysTime,
+      timingGotStatus,
+      remainLotteryTimes,
+      turntableInfos
+    } = $.initForTurntableFarmRes;
 
     if (!timingGotStatus) {
       console.log(`是否到了领取免费赠送的抽奖机会----${sysTime > (timingLastSysTime + 60 * 60 * timingIntervalHours * 1000)}`)
@@ -837,7 +844,11 @@ async function getAwardInviteFriend() {
     if ($.friendList.friends && $.friendList.friends.length > 0) {
       for (let friend of $.friendList.friends) {
         console.log(`\n开始删除好友 [${friend.shareCode}]`);
-        const deleteFriendForFarm = await request('deleteFriendForFarm', {"shareCode": `${friend.shareCode}`, "version": 8, "channel": 1});
+        const deleteFriendForFarm = await request('deleteFriendForFarm', {
+          "shareCode": `${friend.shareCode}`,
+          "version": 8,
+          "channel": 1
+        });
         if (deleteFriendForFarm && deleteFriendForFarm.code === '0') {
           console.log(`删除好友 [${friend.shareCode}] 成功\n`);
         }
@@ -919,7 +930,12 @@ async function doFriendsWater() {
 //领取给3个好友浇水后的奖励水滴
 async function getWaterFriendGotAward() {
   await taskInitForFarm();
-  const {waterFriendCountKey, waterFriendMax, waterFriendSendWater, waterFriendGotAward} = $.farmTask.waterFriendTaskInit
+  const {
+    waterFriendCountKey,
+    waterFriendMax,
+    waterFriendSendWater,
+    waterFriendGotAward
+  } = $.farmTask.waterFriendTaskInit
   if (waterFriendCountKey >= waterFriendMax) {
     if (!waterFriendGotAward) {
       await waterFriendGotAwardForFarm();
@@ -945,7 +961,6 @@ async function receiveFriendInvite() {
       continue
     }
     await inviteFriend(code);
-    // console.log(`接收邀请成为好友结果:${JSON.stringify($.inviteFriendRes)}`)
     if ($.inviteFriendRes && $.inviteFriendRes.helpResult && $.inviteFriendRes.helpResult.code === '0') {
       console.log(`接收邀请成为好友结果成功,您已成为${$.inviteFriendRes.helpResult.masterUserInfo.nickName}的好友`)
     } else if ($.inviteFriendRes && $.inviteFriendRes.helpResult && $.inviteFriendRes.helpResult.code === '17') {
@@ -1121,23 +1136,34 @@ async function receiveStageEnergy() {
 //接受对方邀请,成为对方好友的API
 async function inviteFriend() {
   $.inviteFriendRes = await request(`initForFarm`, {
-    imageUrl: "",
-    nickName: "",
-    shareCode: arguments[0] + '-inviteFriend',
-    version: 4,
-    channel: 2
+    "mpin": "",
+    "utm_campaign": "",
+    "utm_medium": "appshare",
+    "shareCode": arguments[0] + '-inviteFriend',
+    "utm_term": "Wxfriends",
+    "utm_source": "iosapp",
+    "imageUrl": "",
+    "nickName": "",
+    "version": 14,
+    "channel": 2,
+    "babelChannel": 0
   });
 }
 
 // 助力好友API
 async function masterHelp() {
   $.helpResult = await request(`initForFarm`, {
-    imageUrl: "",
-    nickName: "",
-    shareCode: arguments[0],
-    babelChannel: "3",
-    version: 2,
-    channel: 1
+    "mpin": "",
+    "utm_campaign": "t_335139774",
+    "utm_medium": "appshare",
+    "shareCode": arguments[0],
+    "utm_term": "Wxfriends",
+    "utm_source": "iosapp",
+    "imageUrl": "",
+    "nickName": "",
+    "version": 14,
+    "channel": 2,
+    "babelChannel": 0
   });
 }
 
@@ -1230,7 +1256,10 @@ async function initForFarm() {
   return new Promise(resolve => {
     const option = {
       url: `${JD_API_HOST}?functionId=initForFarm`,
-      body: `body=${encodeURIComponent(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`,
+      body: `body=${encodeURIComponent(JSON.stringify({
+        "version": 11,
+        "channel": 3
+      }))}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
       headers: {
         "accept": "*/*",
         "accept-encoding": "gzip, deflate, br",
@@ -1438,7 +1467,7 @@ function safeGet(data) {
 
 function taskUrl(function_id, body = {}) {
   return {
-    url: `${JD_API_HOST}?functionId=${function_id}&body=${encodeURIComponent(JSON.stringify(body))}&appid=wh5`,
+    url: `${JD_API_HOST}?functionId=${function_id}&body=${encodeURIComponent(JSON.stringify(body))}&appid=wh5&client=apple&clientVersion=10.2.4`,
     headers: {
       "Host": "api.m.jd.com",
       "Accept": "*/*",
@@ -1560,7 +1589,11 @@ function Env(t, e) {
         i = i ? i.replace(/\n/g, "").trim() : i;
         let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
         r = r ? 1 * r : 20, r = e && e.timeout ? e.timeout : r;
-        const [o, h] = i.split("@"), n = {url: `http://${h}/v1/scripting/evaluate`, body: {script_text: t, mock_type: "cron", timeout: r}, headers: {"X-Key": o, Accept: "*/*"}};
+        const [o, h] = i.split("@"), n = {
+          url: `http://${h}/v1/scripting/evaluate`,
+          body: {script_text: t, mock_type: "cron", timeout: r},
+          headers: {"X-Key": o, Accept: "*/*"}
+        };
         this.post(n, (t, e, i) => s(i))
       }).catch(t => this.logErr(t))
     }
@@ -1569,7 +1602,8 @@ function Env(t, e) {
       if (!this.isNode()) return {};
       {
         this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e);
+        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile),
+          s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e);
         if (!s && !i) return {};
         {
           const i = s ? t : e;
@@ -1585,7 +1619,8 @@ function Env(t, e) {
     writedata() {
       if (this.isNode()) {
         this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e), r = JSON.stringify(this.data);
+        const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile),
+          s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e), r = JSON.stringify(this.data);
         s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r)
       }
     }
@@ -1689,7 +1724,15 @@ function Env(t, e) {
 
     time(t, e = null) {
       const s = e ? new Date(e) : new Date;
-      let i = {"M+": s.getMonth() + 1, "d+": s.getDate(), "H+": s.getHours(), "m+": s.getMinutes(), "s+": s.getSeconds(), "q+": Math.floor((s.getMonth() + 3) / 3), S: s.getMilliseconds()};
+      let i = {
+        "M+": s.getMonth() + 1,
+        "d+": s.getDate(),
+        "H+": s.getHours(),
+        "m+": s.getMinutes(),
+        "s+": s.getSeconds(),
+        "q+": Math.floor((s.getMonth() + 3) / 3),
+        S: s.getMilliseconds()
+      };
       /(y+)/.test(t) && (t = t.replace(RegExp.$1, (s.getFullYear() + "").substr(4 - RegExp.$1.length)));
       for (let e in i) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? i[e] : ("00" + i[e]).substr(("" + i[e]).length)));
       return t

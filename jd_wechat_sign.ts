@@ -3,9 +3,10 @@
  * cron: 8 0 * * *
  */
 
+import {sendNotify} from './sendNotify'
 import {post, requireConfig, wait} from './TS_USER_AGENTS'
 
-let cookie: string = '', res: any = '', UserName: string
+let cookie: string = '', res: any = '', UserName: string, msg: string = ''
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -20,10 +21,12 @@ let cookie: string = '', res: any = '', UserName: string
       'referer': 'https://servicewechat.com/wx91d27dbf599dff74/581/page-frame.html',
       'cookie': cookie
     })
-    if (res.data)
+    if (res.data) {
       console.log('已签到', res.data.signDays, '天，奖励', res.data.rewardValue, '元')
-    else
+      msg += `【京东账号${index + 1}】  ${UserName}\n已签到  ${res.data.signDays}天\n奖励  ${res.data.rewardValue}元\n\n`
+    } else
       console.log(res.message)
     await wait(1000)
   }
+  await sendNotify('微信小程序签到红包', msg)
 })()

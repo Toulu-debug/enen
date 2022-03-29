@@ -120,11 +120,8 @@ interface Tuan {
           break
         }
         await wait(2000)
-      } else {
-        console.log('已满', code.assistedPinEncrypted)
       }
     }
-    console.log()
     await wait(2000)
   }
 })()

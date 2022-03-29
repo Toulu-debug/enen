@@ -20,19 +20,21 @@ let message: string = ''
       await wait(1000)
       o2s(data, '签到成功')
     }
+    res = await api('cash_homePage', {})
+    await wait(1000)
     let type: number[] = [2, 4, 31, 16, 3, 5, 17, 21]
     let otherTaskNum = res.data.result.taskInfos.filter(item => !type.includes(item.type)).length
     let taskNum = res.data.result.taskInfos.filter(item => type.includes(item.type)).length
-    console.log(otherTaskNum)
-    console.log(taskNum)
+    console.log(taskNum, otherTaskNum)
 
     for (let i = 0; i < 10; i++) {
       res = await api('cash_homePage', {})
+      o2s(res)
       if (res.data.result.taskInfos.filter(item => type.includes(item.type) && item.doTimes === item.times).length === taskNum) {
         console.log('任务全部完成')
         break
       }
-      for (let t of res.data.result.taskInfos) {
+      for (let t of res?.data?.result?.taskInfos || []) {
         if (t.doTimes < t.times && t.type !== 7) {
           console.log(t.name)
           data = await api('cash_doTask', {"type": t.type, "taskInfo": t.desc})
@@ -53,6 +55,10 @@ let message: string = ''
 
 async function api(fn: string, body: object) {
   let sign = await post('https://api.jds.codes/jd/sign', {fn, body})
+  if (!sign?.data?.sign) {
+    o2s(sign, 'getSign Error')
+    return {}
+  }
   return await post(`https://api.m.jd.com/client.action?functionId=${fn}`, sign.data.sign, {
     'Host': 'api.m.jd.com',
     'Cookie': cookie,
