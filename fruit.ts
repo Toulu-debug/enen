@@ -3,24 +3,22 @@ import {readFileSync} from "fs";
 import {sendNotify} from './sendNotify';
 import USER_AGENT, {getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 
-let cookie: string = '', res: any = '', data: any, UserName: string, index: number
-let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = []
+let cookie: string = '', res: any = '', data: any, UserName: string
+let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
 let message: string = ''
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
-  try {
-    shareCodeSelf = JSON.parse(readFileSync('./utils/sharecodes.json').toString()).fruit
-    console.log(shareCodeSelf)
-  } catch (e) {
-    console.log('读取分享码失败')
-  }
-
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
     message += `【账号${index + 1}】  ${UserName}\n`
+
+    if (Object.keys(shareCodeFile)[index]) {
+      shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[index]].split('@')
+    }
+    console.log(`第${index + 1}个账号获取的内部互助`, shareCodeSelf)
 
     // 初始化
     res = await api('initForFarm', {"version": 11, "channel": 3})
@@ -46,7 +44,7 @@ let message: string = ''
     await wait(1000)
     if (!res.newFriendMsg) {
       for (let fr of res.friends) {
-        res = await api('deleteFriendForFarm', {"shareCode": fr.shareCode, "version": 8, "channel": 1})
+        res = await api('deleteFriendForFarm', {"shareCode": fr.shareCode, "version": 14, "channel": 1, "babelChannel": "121"})
         await wait(1000)
         if (res.code === '0') {
           console.log(`删除好友${fr.nickName}成功`)
@@ -58,24 +56,24 @@ let message: string = ''
     }
 
     // 背包
-    process.env.jdFruitBeanCard = 'True'
-    if (process.env.jdFruitBeanCard.toLowerCase() === 'true') {
-      res = await api('myCardInfoForFarm', {"version": 14, "channel": 3, "babelChannel": "10"})
-      o2s(res, 'myCardInfoForFarm')
-      let beanCard: number = res.beanCard  // 换豆卡
-      console.log('换豆卡数量', beanCard)
-      for (let i = 0; i < 10; i++) {
-        if (totalEnergy >= 100 && beanCard) {
-          data = await api('userMyCardForFarm', {"cardType": "beanCard", "babelChannel": "10", "channel": 3, "version": 14})
-          console.log('使用水滴换豆卡，获得京豆', data.beanCount)
-          totalEnergy -= 100
-          beanCard--
-          await wait(1000)
-        }
-      }
-    } else {
-      console.log('未设置水滴换豆卡环境变量')
-    }
+    // process.env.jdFruitBeanCard = 'True'
+    // if (process.env.jdFruitBeanCard.toLowerCase() === 'true') {
+    //   res = await api('myCardInfoForFarm', {"version": 14, "channel": 3, "babelChannel": "10"})
+    //   o2s(res, 'myCardInfoForFarm')
+    //   let beanCard: number = res.beanCard  // 换豆卡
+    //   console.log('换豆卡数量', beanCard)
+    //   for (let i = 0; i < 10; i++) {
+    //     if (totalEnergy >= 100 && beanCard) {
+    //       data = await api('userMyCardForFarm', {"cardType": "beanCard", "babelChannel": "10", "channel": 3, "version": 14})
+    //       console.log('使用水滴换豆卡，获得京豆', data.beanCount)
+    //       totalEnergy -= 100
+    //       beanCard--
+    //       await wait(1000)
+    //     }
+    //   }
+    // } else {
+    //   console.log('未设置水滴换豆卡环境变量')
+    // }
 
 
     // 好友邀请奖励
@@ -137,24 +135,6 @@ let message: string = ''
         console.log('获得水滴', res.amount)
       }
     }
-
-    // 助力奖励
-    res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
-    await wait(1000)
-    o2s(res, 'farmAssistInit')
-    let farmAssistInit_waterEnergy: number = 0
-    for (let t of res.assistStageList) {
-      if (t.percentage === '100%' && t.stageStaus === 2) {
-        data = await api('receiveStageEnergy', {"version": 14, "channel": 1, "babelChannel": "120"})
-        await wait(1000)
-        farmAssistInit_waterEnergy += t.waterEnergy
-      } else if (t.stageStaus === 3) {
-        farmAssistInit_waterEnergy += t.waterEnergy
-      }
-    }
-    console.log('收到助力', res.assistFriendList.length)
-    console.log('助力已领取', farmAssistInit_waterEnergy)
-    message += `【助力已领取】  ${farmAssistInit_waterEnergy}\n`
 
     // 任务
     res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
@@ -279,6 +259,24 @@ let message: string = ''
         break
       }
     }
+    // 助力奖励
+    res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
+    await wait(1000)
+    o2s(res, 'farmAssistInit')
+    let farmAssistInit_waterEnergy: number = 0
+    for (let t of res.assistStageList) {
+      if (t.percentage === '100%' && t.stageStaus === 2) {
+        data = await api('receiveStageEnergy', {"version": 14, "channel": 1, "babelChannel": "120"})
+        await wait(1000)
+        farmAssistInit_waterEnergy += t.waterEnergy
+      } else if (t.stageStaus === 3) {
+        farmAssistInit_waterEnergy += t.waterEnergy
+      }
+    }
+    console.log('收到助力', res.assistFriendList.length)
+    console.log('助力已领取', farmAssistInit_waterEnergy)
+    message += `【助力已领取】  ${farmAssistInit_waterEnergy}\n`
+
     message += '\n\n'
   }
   if (message)
