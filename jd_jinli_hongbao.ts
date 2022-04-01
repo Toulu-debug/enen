@@ -9,7 +9,7 @@
 
 import axios from 'axios'
 import {sendNotify} from './sendNotify'
-import {get, getBeanShareCode, getFarmShareCode, getshareCodeHW, o2s, randomString, requireConfig, wait} from "./TS_USER_AGENTS"
+import {get, getshareCodeHW, o2s, randomString, requireConfig, wait} from "./TS_USER_AGENTS"
 import {Md5} from "ts-md5"
 
 let cookie: string = '', cookiesArr: string[] = [], res: any = '', UserName: string, UA: string = ''
@@ -162,6 +162,11 @@ async function help() {
                 await wait(45000)
                 remain = 0
                 break
+              } else if (res.data.result.statusDesc === '抱歉，你不能为自己助力哦') {
+                console.log('不能助力自己')
+                remain = 0
+                await wait(45000)
+                break
               } else {
                 console.log('助力结果：', res.data.result.statusDesc)
                 if (res.data.result.statusDesc === '啊偶，TA的助力已满，开启自己的红包活动吧~') {
@@ -187,7 +192,7 @@ async function api(fn: string, body: object) {
       "referer": "https://h5.m.jd.com/babelDiy/Zeus/2NUvze9e1uWf4amBhe1AV6ynmSuH/index.html",
       'Content-Type': 'application/x-www-form-urlencoded',
       "X-Requested-With": "com.jingdong.app.mall",
-      "User-Agent": UA,
+      "User-Agent": "Mozilla/5.0 (Linux; U; Android 8.0.0; zh-cn; Mi Note 2 Build/OPR1.170623.032) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/10.1.1",
     }
   })
   return data
