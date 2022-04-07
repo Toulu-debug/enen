@@ -198,7 +198,7 @@ function getTaskDetail(taskId = '') {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=health&sharecode=${$.code}`
+      url: `https://api.jdsharecode.xyz/api/runTimes0407?activityId=health&sharecode=${$.code}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)

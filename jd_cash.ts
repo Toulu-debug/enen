@@ -1,4 +1,5 @@
 import USER_AGENT, {getRandomNumberByRange, o2s, post, requireConfig, wait} from './TS_USER_AGENTS'
+import 'dotenv/config'
 
 let cookie: string = '', res: any = '', data: any, UserName: string
 let message: string = '', pandaToken: string[] = process.env.PANDA_TOKEN ? process.env.PANDA_TOKEN.split('&') : []
@@ -50,6 +51,8 @@ let message: string = '', pandaToken: string[] = process.env.PANDA_TOKEN ? proce
       }
       await wait(2000)
     }
+    const fs = require('fs')
+    fs.writeFileSync('.env', 'PANDA_TOKEN=""\n')
   }
 })()
 

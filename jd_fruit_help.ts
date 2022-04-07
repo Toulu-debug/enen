@@ -1,11 +1,10 @@
 /**
- * 京东-农场助力
+ * 京东-东东农场-助力
  * 所有CK助力顺序
  * 内部 -> 助力池
  * 和jd_fruit.js同方法自己设置内部码
  * 如果没有添加内部码，直接助力助力池
- * cron: 35 0,1,2 * * *
- *
+ * cron: 35 0,3,5 * * *
  */
 
 import axios from 'axios'
@@ -29,19 +28,21 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
       shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[index]].split('@')
     }
     o2s(shareCodeSelf, `第${index + 1}个账号获取的内部互助`)
+    console.log('⬆️ 检查是否获取到内部互助码，有问题及时停止运行，15秒后开始执行')
+    await wait(15000)
 
     res = await api('initForFarm', {"version": 11, "channel": 3})
     try {
       console.log('助力码', res.farmUserPro.shareCode)
       for (let i = 0; i < 5; i++) {
         try {
-          res = await get(`https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${res.farmUserPro.shareCode}`)
+          res = await get(`https://api.jdsharecode.xyz/api/runTimes0407?activityId=farm&sharecode=${res.farmUserPro.shareCode}`)
           console.log(res)
           log.runTimes += `第${i + 1}次${res}\n`
           break
         } catch (e) {
-          console.log(`第${i + 1}次上报失败`)
-          log.runTimes += `第${i + 1}次上报失败\n`
+          console.log(`第${i + 1}次上报失败`, e)
+          log.runTimes += `第${i + 1}次上报失败 ${typeof e === 'object' ? JSON.stringify(e) : e}\n`
           await wait(getRandomNumberByRange(10000, 30000))
         }
       }
@@ -50,11 +51,10 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
       console.log('获取助力码失败，黑号？')
       continue
     }
-
     await wait(1000)
 
     // 助力
-    shareCodePool = await getShareCodePool('farm', 30)
+    shareCodePool = await getShareCodePool('farm', 50)
     shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
 
     for (let code of shareCodeSelf) {

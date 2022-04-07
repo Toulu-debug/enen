@@ -28,7 +28,7 @@ const $ = new Env('东东农场');
 console.log('\n====================Hello World====================\n');
 
 let cookiesArr = [], cookie = '', notify, allMessage = '';
-let newShareCodes = [];
+let newShareCodes = [], shareCodes = []
 let message = '', subTitle = '', option = {}, isFruitFinished = false;
 const retainWater = $.isNode() ? (process.env.retainWater ? process.env.retainWater : 100) : ($.getdata('retainWater') ? $.getdata('retainWater') : 100);//保留水滴大于多少g,默认100g;
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
@@ -38,8 +38,7 @@ const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%2
 let llhelp = true;
 let WP_APP_TOKEN_ONE = "";
 let lnrun = 0;
-let llgetshare = false;
-let NoNeedCodes = [];
+let NoNeedCodes = []
 !(async () => {
   await requireConfig();
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -985,7 +984,7 @@ function shareCodesFormat() {
     } else {
       console.log(`由于您第${$.index}个京东账号未提供shareCode,将采纳本脚本自带的助力码\n`)
       const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
-      newShareCodes = shareCodes[tempIndex].split('@');
+      newShareCodes = shareCodes[tempIndex] ? shareCodes[tempIndex].split('@') : []
     }
     const readShareCodeRes = await readShareCode();
     if (readShareCodeRes && readShareCodeRes.code === 200) {

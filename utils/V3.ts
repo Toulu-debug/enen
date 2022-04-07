@@ -50,7 +50,7 @@ function geth5st(t: { key: string, value: string } [], appId: string) {
   let timestamp = format(time, "yyyyMMddhhmmssSSS");
   let hash1 = genKey(tk, fp.toString(), timestamp.toString(), appId.toString(), CryptoJS).toString(CryptoJS.enc.Hex);
   const hash2 = CryptoJS.HmacSHA256(a, hash1).toString();
-  return ["".concat(timestamp.toString()), "".concat(fp.toString()), "".concat(appId.toString()), "".concat(tk), "".concat(hash2), "3.0", "".concat(time.toString())].join(";")
+  return encodeURIComponent(["".concat(timestamp.toString()), "".concat(fp.toString()), "".concat(appId.toString()), "".concat(tk), "".concat(hash2), "3.0", "".concat(time.toString())].join(";"))
 }
 
 async function get(fn: string, stk: string, params: object, jxToken: jxToken, cookie: string, ua: string = 'jdpingou;') {
