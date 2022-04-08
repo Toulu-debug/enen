@@ -42,6 +42,12 @@ let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
     res = await runningPageHome()
     console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
 
+    if (res.data.runningHomeInfo.nextRunningTime / 1000 < 300) {
+      await wait(res.data.runningHomeInfo.nextRunningTime)
+      res = await runningPageHome()
+      console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
+    }
+
     if (!res.data.runningHomeInfo.nextRunningTime) {
       await requestAlgo('b6ac3', 'jdltapp;')
       console.log('终点目标', assets)
@@ -56,8 +62,8 @@ let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
         } else {
           if (res.data.doubleSuccess) {
             console.log('翻倍成功', parseFloat(res.data.assets))
-          } else if (res.data.assets === '0.01') {
-            console.log('开始跑步')
+          } else if (!res.data.doubleSuccess && !res.data.runningHomeInfo.runningFinish) {
+            console.log('开始跑步', parseFloat(res.data.assets))
           } else {
             console.log('翻倍失败')
             break
