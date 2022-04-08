@@ -351,24 +351,24 @@ async function doTenWaterAgain() {
   if ($.isNode() && process.env.FRUIT_BEAN_CARD) {
     jdFruitBeanCard = process.env.FRUIT_BEAN_CARD;
   }
-  if (`${jdFruitBeanCard}` === 'true' && JSON.stringify($.myCardInfoRes).match('限时翻倍')) {
+  if (beanCard>0 && `${jdFruitBeanCard}` === 'true' && JSON.stringify($.myCardInfoRes).match('限时翻倍')) {
     console.log(`\n您设置的是水滴换豆功能,现在为您换豆`);
 
-    for (let lncount = 0; lncount < $.myCardInfoRes.beanCard; lncount++) {
-      if (totalEnergy >= 150 && $.myCardInfoRes.beanCard > 0) {
+    for (let lncount = 0; lncount < beanCard; lncount++) {
+      if (totalEnergy >= 150 && beanCard > 0) {
         //使用水滴换豆卡
         await userMyCardForFarm('beanCard');
         console.log(`使用水滴换豆卡结果:${JSON.stringify($.userMyCardRes)}`);
         if ($.userMyCardRes.code === '0') {
           totalEnergy = totalEnergy - 100;
           message += `【水滴换豆卡】获得${$.userMyCardRes.beanCount}个京豆\n`;
+          return;
         }
       } else {
-        console.log(`您目前水滴:${totalEnergy}g,水滴换豆卡${$.myCardInfoRes.beanCard}张,暂不满足水滴换豆的条件,为您继续浇水`)
+        console.log(`您目前水滴:${totalEnergy}g,水滴换豆卡${beanCard}张,暂不满足水滴换豆的条件,为您继续浇水`)
         break;
       }
     }
-    return;
   }
   let overageEnergy = totalEnergy - retainWater;
   if (totalEnergy >= ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy)) {
