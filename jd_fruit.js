@@ -82,6 +82,24 @@ async function jdFruit() {
       message = `【水果名称】${$.farmInfo.farmUserPro.name}\n`;
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
       message += `【已兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`;
+
+      try {
+        let myShareCode = $.farmInfo.farmUserPro.shareCode
+        console.log('助力码', myShareCode)
+        await $.wait(2000)
+
+        for (let k = 0; k < 5; k++) {
+          try {
+            await runTimes(myShareCode)
+            break
+          } catch (e) {
+            console.log('runTimes Error', e)
+            await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+          }
+        }
+      } catch (e) {
+        console.log('上报模块出错', e)
+      }
       await masterHelpShare();//助力好友
       if ($.farmInfo.treeState === 2 || $.farmInfo.treeState === 3) {
         option['open-url'] = urlSchema;
@@ -124,6 +142,22 @@ async function jdFruit() {
     $.msg($.name, '', `${errMsg}`)
   }
   await showMsg();
+}
+
+function runTimes(thisShareCode) {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes0407?activityId=farm&sharecode=${thisShareCode}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
+  })
 }
 
 async function doDailyTask() {

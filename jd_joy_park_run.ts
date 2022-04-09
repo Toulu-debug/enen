@@ -41,11 +41,13 @@ let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
 
     res = await runningPageHome()
     console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
+    await wait(1000)
 
     if (res.data.runningHomeInfo.nextRunningTime / 1000 < 300) {
       await wait(res.data.runningHomeInfo.nextRunningTime)
       res = await runningPageHome()
       console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
+      await wait(1000)
     }
 
     if (!res.data.runningHomeInfo.nextRunningTime) {
@@ -73,6 +75,8 @@ let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
       }
     }
 
+    res = await runningPageHome()
+    console.log('🧧', res.data.runningHomeInfo.prizeValue)
     await wait(2000)
   }
 })()

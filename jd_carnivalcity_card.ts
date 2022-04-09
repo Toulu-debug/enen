@@ -6,7 +6,7 @@
 
 import USER_AGENT, {o2s, post, requireConfig, wait} from './TS_USER_AGENTS'
 
-let cookie: string = '', res: any = '', UserName: string
+let cookie: string = '', res: any = '', UserName: string, shareCodeSelf: string[] = []
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -14,6 +14,14 @@ let cookie: string = '', res: any = '', UserName: string
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+
+    if (new Date().getMinutes() < 10) {
+      res = await api({"apiMapping": "/khc/task/getSupport"})
+      console.log('助力码', res.data.shareId)
+      shareCodeSelf.push(res.data.shareId)
+      await wait(1000)
+      continue
+    }
 
     for (let i = 0; i < 30; i++) {
       res = await api({"apiMapping": "/khc/index/headInfo"})
@@ -44,6 +52,10 @@ let cookie: string = '', res: any = '', UserName: string
       console.log('TOP1 ', parseInt(res.data.rankList[0].integral))
       console.log('TOP10', parseInt(res.data.rankList[9].integral))
     }
+    await wait(2000)
+  }
+  if (shareCodeSelf.length !== 0) {
+    o2s(shareCodeSelf)
   }
 })()
 
