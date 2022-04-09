@@ -1,6 +1,5 @@
 import axios from 'axios'
-import {requireConfig, wait} from './TS_USER_AGENTS'
-import USER_AGENT from "./test/TS_USER_AGENTS";
+import USER_AGENT, {requireConfig, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', UserName: string = '', elements: Array<{ desc: string, level: number | null, name: string }>
 
@@ -33,8 +32,7 @@ let cookie: string = '', UserName: string = '', elements: Array<{ desc: string, 
     }).catch(err => {
       console.log(err)
     })
-
-    await wait(1000)
+    await wait(3000)
   }
   desc()
 })()

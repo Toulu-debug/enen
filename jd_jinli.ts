@@ -8,23 +8,25 @@
 
 import axios from 'axios'
 import {sendNotify} from './sendNotify'
-import {get, getshareCodeHW, o2s, requireConfig, wait} from "./TS_USER_AGENTS"
-// import {logs} from './test'
+import {get, getRandomNumberByRange, getshareCodeHW, o2s, requireConfig, wait} from "./TS_USER_AGENTS"
+// import {logs} from './test/2000jinli_log'
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
-let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6], needLog: boolean = true
+let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6], log: string
 
 !(async () => {
   cookiesArr = await requireConfig(false)
-  if (new Date().getHours() === 0) {
-    cookiesArr = cookiesArr.slice(0, 1)
-  } else {
-    cookiesArr = cookiesArr.slice(1, 9)
-  }
+  cookiesArr = cookiesArr.slice(0, 1)
   await join()
   await getShareCodeSelf()
   await help()
+
+  cookiesArr = cookiesArr.slice(1, 9)
+  await join()
+  await getShareCodeSelf()
+  await help()
+  // await open(false)
 })()
 
 async function join() {
@@ -35,7 +37,8 @@ async function join() {
       console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
       for (let i = 0; i < 5; i++) {
         try {
-          res = await api('h5launch', {"followShop": 0})
+          log = await getLog()
+          res = await api('h5launch', {followShop: 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
           console.log('活动初始化：', res.data.result.statusDesc)
           await wait(1000)
           if (res.rtn_code !== 403) {
@@ -56,7 +59,7 @@ async function join() {
 async function getShareCodeSelf(one: boolean = false) {
   if (one) {
     res = await api('h5activityIndex', {"isjdapp": 1})
-    return res.data.result.redpacketInfo.id
+    return res?.data?.result?.redpacketInfo?.id
   } else {
     for (let [index, value] of cookiesArr.entries()) {
       try {
@@ -123,7 +126,7 @@ async function help() {
       if (shareCodesHW.length === 0) {
         shareCodesHW = await getshareCodeHW('jlhb')
       }
-      if (index === 0 && new Date().getHours() === 0) {
+      if (index === 0 && cookiesArr.length === 1) {
         shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
       } else {
         shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
@@ -134,7 +137,8 @@ async function help() {
         if (!fullCode.includes(code) && code !== me) {
           console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
 
-          res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0})
+          log = await getLog()
+          res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
           if (res.data.result.status === 0) {
             console.log('助力成功：', parseFloat(res.data.result.assistReward.discount))
             await wait(45000)
@@ -160,14 +164,6 @@ async function help() {
 }
 
 async function api(fn: string, body: object) {
-  if (needLog || fn === 'startTask') {
-    let log: string = await getLog()
-    Object.assign(body, {
-      random: log.match(/"random":"(\d+)"/)[1],
-      log: log.match(/"log":"(.*)"/)[1],
-      sceneid: 'JLHBhPageh5'
-    })
-  }
   let {data} = await axios.post(`https://api.m.jd.com/api?appid=jinlihongbao&functionId=${fn}&loginType=2&client=jinlihongbao&clientVersion=10.2.4&osVersion=AndroidOS&d_brand=Xiaomi&d_model=Xiaomi`, `body=${encodeURIComponent(JSON.stringify(body))}`, {
     headers: {
       "origin": "https://h5.m.jd.com",
@@ -182,14 +178,14 @@ async function api(fn: string, body: object) {
 }
 
 async function getLog() {
-  let data = await get(`https://api.jdsharecode.xyz/api/jlhb_log`)
+  let data = await get(`https://api.jdsharecode.xyz/api/jlhb`)
   if (data !== 1 && data !== '1') {
     return data
   } else {
     console.log('No log')
     process.exit(0)
   }
-  // let i: number = getRandomNumberByRange(500, 605)
+  // let i: number = getRandomNumberByRange(0, 10)
   // console.log(`log: ${i}`)
   // return logs[i]
 }
