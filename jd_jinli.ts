@@ -8,7 +8,8 @@
 
 import axios from 'axios'
 import {sendNotify} from './sendNotify'
-import {get, getshareCodeHW, o2s, randomString, requireConfig, wait} from "./TS_USER_AGENTS"
+import {get, getshareCodeHW, o2s, requireConfig, wait} from "./TS_USER_AGENTS"
+// import {logs} from './test'
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
@@ -16,11 +17,14 @@ let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6], needL
 
 !(async () => {
   cookiesArr = await requireConfig(false)
-  cookiesArr = cookiesArr.slice(0, 9)
+  if (new Date().getHours() === 0) {
+    cookiesArr = cookiesArr.slice(0, 1)
+  } else {
+    cookiesArr = cookiesArr.slice(1, 9)
+  }
   await join()
   await getShareCodeSelf()
   await help()
-  // await open(false)
 })()
 
 async function join() {
@@ -45,6 +49,7 @@ async function join() {
     } catch (e) {
       console.log(e)
     }
+    await wait(2000)
   }
 }
 
@@ -65,6 +70,7 @@ async function getShareCodeSelf(one: boolean = false) {
       } catch (e) {
         console.log(e)
       }
+      await wait(2000)
     }
     o2s(shareCodesSelf)
   }
@@ -105,7 +111,7 @@ async function open(autoOpen: boolean = false) {
     } catch (e) {
       console.log(e)
     }
-    await wait(3000)
+    await wait(6000)
   }
 }
 
@@ -117,19 +123,11 @@ async function help() {
       if (shareCodesHW.length === 0) {
         shareCodesHW = await getshareCodeHW('jlhb')
       }
-      // 1 3 5 5 9 15
-      if (index === 0) {
+      if (index === 0 && new Date().getHours() === 0) {
         shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
       } else {
         shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW]))
       }
-      // 剩余账号无法助力满下一级红包
-      // if (cookiesArr.length === 4 && index === 3) {
-      //   shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
-      // }
-      // else if ([11, 12, 13, 14].includes(cookiesArr.length) && index > 10) {
-      //   shareCodes = Array.from(new Set([...shareCodesHW, ...shareCodesSelf]))
-      // }
 
       let me: string = await getShareCodeSelf(true)
       for (let code of shareCodes) {
@@ -145,9 +143,6 @@ async function help() {
             console.log('今日助力次数已满')
             await wait(45000)
             break
-          } else if (res.data.result.statusDesc === '抱歉，你不能为自己助力哦') {
-            console.log('不能助力自己')
-            await wait(45000)
           } else {
             console.log('助力结果：', res.data.result.statusDesc)
             if (res.data.result.statusDesc === '啊偶，TA的助力已满，开启自己的红包活动吧~') {
@@ -160,6 +155,7 @@ async function help() {
     } catch (e) {
       console.log(e)
     }
+    await wait(6000)
   }
 }
 
@@ -168,7 +164,8 @@ async function api(fn: string, body: object) {
     let log: string = await getLog()
     Object.assign(body, {
       random: log.match(/"random":"(\d+)"/)[1],
-      log: log.match(/"log":"(.*)"/)[1]
+      log: log.match(/"log":"(.*)"/)[1],
+      sceneid: 'JLHBhPageh5'
     })
   }
   let {data} = await axios.post(`https://api.m.jd.com/api?appid=jinlihongbao&functionId=${fn}&loginType=2&client=jinlihongbao&clientVersion=10.2.4&osVersion=AndroidOS&d_brand=Xiaomi&d_model=Xiaomi`, `body=${encodeURIComponent(JSON.stringify(body))}`, {
@@ -177,13 +174,22 @@ async function api(fn: string, body: object) {
       "referer": "https://h5.m.jd.com/babelDiy/Zeus/2NUvze9e1uWf4amBhe1AV6ynmSuH/index.html",
       'Content-Type': 'application/x-www-form-urlencoded',
       "X-Requested-With": "com.jingdong.app.mall",
-      "User-Agent": `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${randomString(40)}`,
+      "User-Agent": "Mozilla/5.0 (Linux; U; Android 8.0.0; zh-cn; Mi Note 2 Build/OPR1.170623.032) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/10.1.1",
       "Cookie": cookie,
     }
   })
   return data
 }
 
-async function getLog(): Promise<string> {
-  return await get(`https://api.jdsharecode.xyz/api/jlhb_log`)
+async function getLog() {
+  let data = await get(`https://api.jdsharecode.xyz/api/jlhb_log`)
+  if (data !== 1 && data !== '1') {
+    return data
+  } else {
+    console.log('No log')
+    process.exit(0)
+  }
+  // let i: number = getRandomNumberByRange(500, 605)
+  // console.log(`log: ${i}`)
+  // return logs[i]
 }
