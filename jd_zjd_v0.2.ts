@@ -92,8 +92,9 @@ interface Tuan {
 
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    await zjdInit()
+    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
+    await zjdInit()
     for (let code of shareCode) {
       if (!full.includes(code.assistedPinEncrypted)) {
         try {
