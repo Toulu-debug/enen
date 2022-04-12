@@ -85,13 +85,16 @@ let shareCodes: INVITE[] = [], shareCodesHW = [], shareCodesSelf: INVITE[] = []
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
     await requestAlgo('ce6c2', 'jdltapp;')
     let blood: number = res.data.blood
-    /*
     for (let i = 0; i < 4; i++) {
       if (blood <= 1) {
-        console.log('能量剩余1，跳过')
+        console.log('能量剩余1，跳过 A')
         break
       }
       for (let j = 0; j < 4; j++) {
+        if (blood <= 1) {
+          console.log('能量剩余1，跳过 B')
+          break
+        }
         res = await api('happyDigDo', {"round": 1, "rowIdx": i, "colIdx": j, "linkId": "pTTvJeSTrpthgk9ASBVGsw"})
         o2s(res)
 
@@ -112,7 +115,6 @@ let shareCodes: INVITE[] = [], shareCodesHW = [], shareCodesSelf: INVITE[] = []
         await wait(2000)
       }
     }
-     */
 
     // 任务
     /*

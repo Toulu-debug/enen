@@ -1,15 +1,14 @@
 /**
  * 京东-锦鲤红包
  * 6点后做全部CK
- * cron: 5 0,1,6 * * *
+ * cron: 2 0,1,6 * * *
  * CK1     HW.ts -> 内部
  * CK2～n  内部   -> HW.ts
  */
 
 import axios from 'axios'
 import {sendNotify} from './sendNotify'
-import {get, getRandomNumberByRange, getshareCodeHW, o2s, requireConfig, wait} from "./TS_USER_AGENTS"
-// import {logs} from './test/2000jinli_log'
+import {get, getshareCodeHW, o2s, requireConfig, wait} from "./TS_USER_AGENTS"
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
@@ -26,7 +25,7 @@ let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6], log: 
   await join()
   await getShareCodeSelf()
   await help()
-  // await open(false)
+  // await open(true)
 })()
 
 async function join() {
@@ -40,19 +39,18 @@ async function join() {
           log = await getLog()
           res = await api('h5launch', {followShop: 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
           console.log('活动初始化：', res.data.result.statusDesc)
-          await wait(1000)
           if (res.rtn_code !== 403) {
             break
           }
         } catch (e) {
-          console.log('error', e)
+          console.log('log error', e)
           await wait(3000)
         }
       }
     } catch (e) {
       console.log(e)
     }
-    await wait(2000)
+    await wait(1000)
   }
 }
 
@@ -69,11 +67,10 @@ async function getShareCodeSelf(one: boolean = false) {
         res = await api('h5activityIndex', {"isjdapp": 1})
         console.log('红包ID：', res.data.result.redpacketInfo.id)
         shareCodesSelf.push(res.data.result.redpacketInfo.id)
-        await wait(1000)
       } catch (e) {
-        console.log(e)
+        console.log('getShareCodeSelf error', e)
       }
-      await wait(2000)
+      await wait(1000)
     }
     o2s(shareCodesSelf)
   }
@@ -91,22 +88,29 @@ async function open(autoOpen: boolean = false) {
       let j: number = 1
       res = await api('h5activityIndex', {"isjdapp": 1})
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
-        if (t.packetStatus === 2) {
-          console.log(`红包${j}已拆过，获得`, t.packetAmount)
-          if (!min.includes(t.packetAmount)) {
-            await sendNotify('锦鲤红包', `账号${index + 1} ${UserName}\n${t.packetAmount}`)
-          }
-        } else if (t.packetStatus === 1) {
+        if (t.packetStatus === 1) {
+          console.log(`红包${j}可拆`)
+        } else if (t.packetStatus === 2) {
+          console.log(`红包${j}已拆`)
+        }
+        j++
+      }
+      console.log('')
+
+      j = 1
+      for (let t of res.data.result.redpacketConfigFillRewardInfo) {
+        if (t.packetStatus === 1) {
           console.log(`红包${j}可拆`)
           if (autoOpen) {
-            res = await api('h5receiveRedpacketAll', {})
+            log = await getLog()
+            res = await api('h5receiveRedpacketAll', {random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
             console.log('打开成功', parseFloat(res.data.result.discount))
             if (!min.includes(parseFloat(res.data.result.discount))) {
               await sendNotify('锦鲤红包', `账号${index + 1} ${UserName}\n${t.packetAmount}`)
             }
-            await wait(10000)
+            await wait(6000)
           }
-        } else {
+        } else if (![1, 2].includes(t.packetStatus)) {
           console.log(`${j}`, t.hasAssistNum, '/', t.requireAssistNum)
         }
         j++
@@ -185,7 +189,4 @@ async function getLog() {
     console.log('No log')
     process.exit(0)
   }
-  // let i: number = getRandomNumberByRange(0, 10)
-  // console.log(`log: ${i}`)
-  // return logs[i]
 }
