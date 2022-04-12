@@ -10,6 +10,7 @@ if ($request.url.includes('https://api.m.jd.com/client.action')) {
   console.log(s)
   console.log('========================')
   $.msg('获取成功', 'success', '在日志中查看');
+  $.done()
 }
 
 function Env(t, e) {
