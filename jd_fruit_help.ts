@@ -9,6 +9,7 @@
 
 import axios from 'axios'
 import USER_AGENT, {get, getRandomNumberByRange, getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import {getDate} from "date-fns";
 
 let cookie: string = '', res: any = '', data: any, UserName: string
 let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
@@ -29,14 +30,15 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
     }
     o2s(shareCodeSelf, `第${index + 1}个账号获取的内部互助`)
     console.log('⬆️ 检查是否获取到内部互助码，有问题及时停止运行，15秒后开始执行')
-    await wait(15000)
+    // await wait(15000)
 
     res = await api('initForFarm', {"version": 11, "channel": 3})
     try {
       console.log('助力码', res.farmUserPro.shareCode)
       for (let i = 0; i < 5; i++) {
         try {
-          res = await get(`https://api.jdsharecode.xyz/api/runTimes0407?activityId=farm&sharecode=${res.farmUserPro.shareCode}`)
+          let today: number = getDate(new Date())
+          res = await get(`https://api.jdsharecode.xyz/api/runTimes0407?activityId=farm&sharecode=${res.farmUserPro.shareCode}&today=${today}`)
           console.log(res)
           log.runTimes += `第${i + 1}次${res}\n`
           break
