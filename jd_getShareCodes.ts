@@ -2,7 +2,7 @@
  * cron: 59 23 * * 0
  */
 
-import {requireConfig} from "./TS_USER_AGENTS";
+import {requireConfig, wait} from "./TS_USER_AGENTS";
 import {bean, farm, pet, factory, sgmh, jxfactory, health} from "./utils/shareCodesTool";
 
 let cookie: string = '', UserName: string, index: number
@@ -35,6 +35,7 @@ let beans: string = '', farms: string = '', healths: string = '', pets: string =
     s = await sgmh(cookie)
     s ? sgmhs += s + '&' : ''
     console.log('闪购盲盒:', s)
+    await wait(5000)
   }
   console.log('/bean', beans.substring(0, beans.length - 1))
   console.log('/farm', farms.substring(0, farms.length - 1))

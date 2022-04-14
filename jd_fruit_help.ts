@@ -30,9 +30,14 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
     }
     o2s(shareCodeSelf, `第${index + 1}个账号获取的内部互助`)
     console.log('⬆️ 检查是否获取到内部互助码，有问题及时停止运行，15秒后开始执行')
-    // await wait(15000)
+    await wait(15000)
 
     res = await api('initForFarm', {"version": 11, "channel": 3})
+    if (res.code === '6') {
+      console.log('黑号')
+      await wait(5000)
+      continue
+    }
     try {
       console.log('助力码', res.farmUserPro.shareCode)
       for (let i = 0; i < 5; i++) {
@@ -48,7 +53,6 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
           await wait(getRandomNumberByRange(10000, 30000))
         }
       }
-
     } catch (e) {
       console.log('获取助力码失败，黑号？')
       continue
