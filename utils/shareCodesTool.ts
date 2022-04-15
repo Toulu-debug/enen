@@ -17,7 +17,7 @@ async function bean(cookie: string) {
 }
 
 async function farm(cookie: string) {
-  let {data}: any = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${escape(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
+  let {data}: any = await axios.post('https://api.m.jd.com/client.action?functionId=initForFarm', `body=${encodeURIComponent(JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`, {
     headers: {
       "cookie": cookie,
       "origin": "https://home.m.jd.com",
@@ -30,7 +30,7 @@ async function farm(cookie: string) {
 }
 
 async function health(cookie: string) {
-  let {data}: any = await axios.get(`https://api.m.jd.com/client.action/client.action?functionId=jdhealth_getTaskDetail&body=${escape(JSON.stringify({"buildingId": "", taskId: 6, "channelId": 1}))}&client=wh5&clientVersion=1.0.0`, {
+  let {data}: any = await axios.get(`https://api.m.jd.com/client.action/client.action?functionId=jdhealth_getTaskDetail&body=${encodeURIComponent(JSON.stringify({"buildingId": "", taskId: 6, "channelId": 1}))}&client=wh5&clientVersion=1.0.0`, {
     headers: {
       "Cookie": cookie,
       "origin": "https://h5.m.jd.com",
@@ -59,7 +59,7 @@ async function pet(cookie: string) {
 
 async function factory(cookie: string) {
   let {data}: any = await axios.post(`https://api.m.jd.com/client.action?functionId=jdfactory_getTaskDetail`,
-    `functionId=jdfactory_getTaskDetail&body=${escape(JSON.stringify({}))}&client=wh5&clientVersion=9.1.0`, {
+    `functionId=jdfactory_getTaskDetail&body=${encodeURIComponent(JSON.stringify({}))}&client=wh5&clientVersion=9.1.0`, {
       headers: {
         Cookie: cookie,
         origin: "https://h5.m.jd.com",

@@ -1,6 +1,6 @@
 import axios from 'axios'
-import {sendNotify} from './sendNotify';
-import {requireConfig} from './TS_USER_AGENTS'
+import {sendNotify} from '../sendNotify';
+import {requireConfig} from '../TS_USER_AGENTS'
 
 const CryptoJS = require('crypto-js');
 let cookie: string = '', UserName: string
