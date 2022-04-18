@@ -6,7 +6,7 @@
 import * as path from "path"
 import {sendNotify} from './sendNotify'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
-import USER_AGENT, {get, requireConfig, exceptCookie, wait} from "./TS_USER_AGENTS"
+import USER_AGENT, {get, requireConfig, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
 import {pushplus} from "./utils/pushplus";
 
 let cookie: string = '', UserName: string, allMessage: string = '', res: any = ''
@@ -62,6 +62,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       let title: string = order.productList[0].title
       let t: string = order.progressInfo?.tip || null
       let status: string = order.progressInfo?.content || null
+      let shopName: string = order.shopInfo.shopName
 
       res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, '', headers)
       await wait(1000)
@@ -71,7 +72,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
         if (status.match(/(?=签收|已取走|已暂存)/))
           continue
         if (!pushplusUser.includes(UserName)) {
-          console.log(title)
+          console.log(`<${shopName}>\t${title}`)
           console.log('\t', t, status)
           console.log()
         } else {
@@ -83,11 +84,11 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
             markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
           } else {
             console.log('+ sendNotify')
-            message += `${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
+            message += `<${shopName}>\t${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
           }
         }
         orders[orderId] = {
-          user: UserName, title, t, status, carrier, carriageId
+          user: UserName, shopName, title, t, status, carrier, carriageId
         }
       }
     }
@@ -124,7 +125,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
   // 替换通知中的用户名为备注
   orders = JSON.stringify(orders, null, 2)
   for (let acc of account) {
-    orders = orders.replace(new RegExp(decodeURIComponent(acc.pt_pin), 'g'), acc.remarks)
+    orders = orders.replace(new RegExp(decodeURIComponent(acc.pt_pin), 'g'), acc.remarks ?? acc.pt_pin)
   }
   writeFileSync('./json/jd_track.json', orders)
   if (allMessage)
