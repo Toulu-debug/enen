@@ -18,14 +18,14 @@ let min: number[] = [0.02, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6], log: 
   cookiesArr = await requireConfig(false)
   cookiesArr = cookiesArr.slice(0, 1)
   await join()
-  await getShareCodeSelf()
   await help()
 
-  cookiesArr = cookiesArr.slice(1, 9)
+  cookiesArr = cookiesArr.slice(0, 9)
   await join()
   await getShareCodeSelf()
   await help()
-  // await open(true)
+  await task()
+  await open(false)
 })()
 
 async function join() {
@@ -65,7 +65,7 @@ async function getShareCodeSelf(one: boolean = false) {
         UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
         console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
         res = await api('h5activityIndex', {"isjdapp": 1})
-        console.log('红包ID：', res.data.result.redpacketInfo.id)
+        console.log('ID：', res.data.result.redpacketInfo.id)
         shareCodesSelf.push(res.data.result.redpacketInfo.id)
       } catch (e) {
         console.log('getShareCodeSelf error', e)
@@ -89,9 +89,9 @@ async function open(autoOpen: boolean = false) {
       res = await api('h5activityIndex', {"isjdapp": 1})
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
         if (t.packetStatus === 1) {
-          console.log(`红包${j}可拆`)
+          console.log(`${j} 可拆`)
         } else if (t.packetStatus === 2) {
-          console.log(`红包${j}已拆`)
+          console.log(`${j} 已拆`)
         }
         j++
       }
@@ -100,7 +100,7 @@ async function open(autoOpen: boolean = false) {
       j = 1
       for (let t of res.data.result.redpacketConfigFillRewardInfo) {
         if (t.packetStatus === 1) {
-          console.log(`红包${j}可拆`)
+          console.log(`${j} 可拆`)
           if (autoOpen) {
             log = await getLog()
             res = await api('h5receiveRedpacketAll', {random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
@@ -164,6 +164,63 @@ async function help() {
       console.log(e)
     }
     await wait(6000)
+  }
+}
+
+async function task() {
+  for (let [index, value] of cookiesArr.entries()) {
+    try {
+      cookie = value
+      UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+      console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+
+      res = await api('taskHomePage', {})
+      await wait(1000)
+      for (let t of res.data.result.taskInfos) {
+        if (!t.alreadyReceivedCount || t.alreadyReceivedCount < t.requireCount) {
+          if ([2, 3, 4, 5, 8].includes(t.taskType)) {
+            log = await getLog()
+            res = await api('startTask', {"taskType": t.taskType, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
+            console.log(t.title, res.data.biz_msg)
+            await wait(1000)
+            res = await api('getTaskDetailForColor', {taskType: t.taskType})
+            await wait(1000)
+            for (let tp of res.data.result.advertDetails) {
+              if (tp.status === 0) {
+                res = await api('taskReportForColor', {"taskType": t.taskType, "detailId": tp.id})
+                console.log(t.title, tp.name, res.data.biz_msg)
+                await wait(1000)
+              }
+            }
+          }
+        }
+        if (t.innerStatus === 3) {
+          log = await getLog()
+          res = await api('h5receiveRedpacketAll', {"taskType": t.taskType, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
+          console.log(`${t.title} 打开成功，获得`, parseFloat(res.data.result.discount))
+          if (!min.includes(parseFloat(res.data.result.discount)))
+            await sendNotify(`锦鲤红包`, `账号${index + 1} ${UserName}\n${res.data.result.discount}`)
+          await wait(1000)
+        }
+      }
+      await wait(1000)
+
+      res = await api('taskHomePage', {})
+      await wait(1000)
+      for (let t of res.data.result.taskInfos) {
+        if (t.innerStatus === 3) {
+          log = await getLog()
+          res = await api('h5receiveRedpacketAll', {"taskType": t.taskType, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
+          console.log(`${t.title} 打开成功，获得`, parseFloat(res.data.result.discount))
+          if (!min.includes(parseFloat(res.data.result.discount)))
+            await sendNotify(`锦鲤红包`, `账号${index + 1} ${UserName}\n${res.data.result.discount}`)
+          await wait(3000)
+        }
+      }
+      await wait(2000)
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 
