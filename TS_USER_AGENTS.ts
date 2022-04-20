@@ -57,6 +57,7 @@ function TotalBean(cookie: string) {
 }
 
 function getRandomNumberByRange(start: number, end: number) {
+  end <= start && (end = start + 100)
   return Math.floor(Math.random() * (end - start) + start)
 }
 
