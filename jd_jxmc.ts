@@ -345,7 +345,7 @@ async function api(fn: string, stk: string, params: Params = {}) {
     url += `&${key}=${value}`
   }
   let h5st = geth5st(t, '00df8')
-  url += `&h5st=${encodeURIComponent(h5st)}`
+  url += `&h5st=${h5st}`
   try {
     let {data}: any = await axios.get(url, {
       headers: {

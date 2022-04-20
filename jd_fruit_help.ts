@@ -29,8 +29,6 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
       shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[index]].split('@')
     }
     o2s(shareCodeSelf, `第${index + 1}个账号获取的内部互助`)
-    console.log('⬆️ 检查是否获取到内部互助码，有问题及时停止运行，15秒后开始执行')
-    await wait(15000)
 
     res = await api('initForFarm', {"version": 11, "channel": 3})
     if (res.code === '6') {
