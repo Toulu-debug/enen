@@ -1,7 +1,36 @@
-import USER_AGENT, {post, requireConfig, wait} from './TS_USER_AGENTS'
-import {getSign} from "./test/sign";
+/**
+ * 京东-领现金
+ * 兼容panda api和本地sign
+ *
+ * 使用panda sign
+ * export PANDA_TOKEN=""
+ * 本地sign算法 import {getSign} from './test/sign'
+ */
 
-let cookie: string = '', res: any = '', data: any, UserName: string
+import USER_AGENT, {post, requireConfig, wait} from './TS_USER_AGENTS'
+import {existsSync} from "fs";
+
+let cookie: string = '', res: any = '', data: any, UserName: string, PANDA_TOKEN: string = undefined, getSign: any = undefined
+
+if (existsSync('./test/sign.ts')) {
+  getSign = require('./test/sign').getSign
+  console.log('使用本地sign')
+} else {
+  console.log('未找到本地sign')
+  PANDA_TOKEN = process.env.PANDA_TOKEN
+  if (PANDA_TOKEN) {
+    console.log('使用panda api')
+    getSign = async (fn: string, body: object) => {
+      let {data} = await post('https://api.jds.codes/jd/sign', {'fn': fn, 'body': body}, {
+        'Authorization': `Bearer ${PANDA_TOKEN}`
+      })
+      return data.sign
+    }
+  } else {
+    console.log('未设置PANDA_TOKEN\n脚本退出')
+    process.exit(0)
+  }
+}
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -51,7 +80,7 @@ let cookie: string = '', res: any = '', data: any, UserName: string
 })()
 
 async function api(fn: string, body: object) {
-  let sign = getSign(fn, body)
+  let sign = PANDA_TOKEN ? await getSign(fn, body) : getSign(fn, body)
   return await post(`https://api.m.jd.com/client.action?functionId=${fn}`, sign, {
     'Host': 'api.m.jd.com',
     'Cookie': cookie,
