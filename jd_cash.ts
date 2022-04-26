@@ -5,7 +5,7 @@ let cookie: string = '', res: any = '', data: any, UserName: string
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
-  for (let [index, value] of Object.entries(cookiesArr)) {
+  for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)

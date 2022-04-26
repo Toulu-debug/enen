@@ -4,9 +4,10 @@
  */
 
 import axios from 'axios'
+import * as path from "path"
 import {Md5} from "ts-md5"
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, o2s, randomWord, getshareCodeHW} from './TS_USER_AGENTS'
+import {requireConfig, getBeanShareCode, getFarmShareCode, wait, o2s, randomWord, getshareCodeHW, exceptCookie} from './TS_USER_AGENTS'
 import {requestAlgo, geth5st} from "./utils/V3";
 import {existsSync, readFileSync} from "fs";
 
@@ -16,6 +17,7 @@ let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo:
 let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
 
 !(async () => {
+  let except: string[] = exceptCookie(path.basename(__filename))
   if (existsSync('./utils/account.json')) {
     try {
       account = JSON.parse(readFileSync('./utils/account.json').toString())
@@ -30,6 +32,10 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
     ua = null
     for (let acc of account) {
       if (acc?.pt_pin.includes(UserName)) {
@@ -203,7 +209,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
         console.log('Feed未知错误:', res)
         break
       }
-      await wait(8000)
+      await wait(10000)
     }
     await wait(8000)
 
