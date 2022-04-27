@@ -1,5 +1,4 @@
 /*
-author: 疯疯
 东东健康社区
 更新时间：2021-4-22
 活动入口：京东APP首页搜索 "玩一玩"即可
@@ -27,8 +26,8 @@ console.log('\n====================Hello World====================\n')
 
 const jdCookieNode = $.isNode() ? require("./jdCookie.js") : "";
 let cookiesArr = [], cookie = "", message;
-const inviteCodes = ['']
-const randomCount = $.isNode() ? 20 : 5;
+// const inviteCodes = ['']
+// const randomCount = $.isNode() ? 20 : 5;
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
     cookiesArr.push(jdCookieNode[item]);
@@ -71,7 +70,7 @@ const JD_API_HOST = "https://api.m.jd.com/client.action";
         }
       }
 
-      await shareCodesFormat()
+      // await shareCodesFormat()
       await main()
       await showMsg()
     }
@@ -98,7 +97,7 @@ async function main() {
       await $.wait(1000)
     }
     await collectScore()
-    await helpFriends()
+    // await helpFriends()
     await getTaskDetail(22);
     await getTaskDetail(-1)
   } catch (e) {
@@ -106,6 +105,7 @@ async function main() {
   }
 }
 
+/*
 async function helpFriends() {
   for (let code of $.newShareCodes) {
     if (!code) continue
@@ -118,6 +118,7 @@ async function helpFriends() {
     await $.wait(1000)
   }
 }
+*/
 
 function showMsg() {
   return new Promise(async resolve => {
@@ -262,6 +263,7 @@ function safeGet(data) {
   }
 }
 
+/*
 function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
@@ -309,6 +311,7 @@ function shareCodesFormat() {
     resolve();
   })
 }
+*/
 
 function requireConfig() {
   return new Promise(resolve => {
