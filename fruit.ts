@@ -38,6 +38,7 @@ let message: string = ''
       let totalEnergy: number = res.farmUserPro.totalEnergy  // 背包剩余水滴
       if (res.farmUserPro.treeState === 2) {
         console.log("可以兑换奖品了")
+        await sendNotify("东东农场", `账号${index + 1}  ${UserName}\n\n已成熟`)
       } else if (res.farmUserPro.treeState === 0) {
         console.log("自动种植")
       }
