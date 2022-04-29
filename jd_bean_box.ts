@@ -25,12 +25,12 @@ let cookie: string = '', res: any = '', UserName: string, index: number, uuid: s
       'Referer': 'https://h5.m.jd.com/',
       'Cookie': cookie
     }
-    res = await get('https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body=%7B%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5', '', headers)
+    res = await get('https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body=%7B%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5', headers)
     let times: number = res.remainLotteryTimes
     console.log('剩余抽奖机会:', times)
     for (let j = 0; j < times; j++) {
       console.log('开始抽奖...')
-      res = await get('https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body=%7B%22type%22%3A1%2C%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5', '', headers)
+      res = await get('https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body=%7B%22type%22%3A1%2C%22version%22%3A4%2C%22channel%22%3A1%7D&appid=wh5', headers)
       if (res.code === '0') {
         if (res.type === 'thanks') {
           console.log('抽奖成功，获得：狗屁')

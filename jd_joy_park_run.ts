@@ -1,7 +1,7 @@
 /**
  * 汪汪乐园-跑步
- * 默认翻倍到0.08红包结束
- * export JD_JOY_PARK_RUN_ASSETS="0.08"
+ * 默认翻倍到0.04红包结束
+ * export JD_JOY_PARK_RUN_ASSETS="0.04"
  * cron: 20 * * * *
  */
 
@@ -9,7 +9,7 @@ import {get, post, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./h5st"
 
 let cookie: string = '', res: any = '', data: any, UserName: string
-let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.08')
+let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -86,7 +86,7 @@ async function api(fn: string, body: object) {
 }
 
 async function runningPageHome() {
-  return get(`https://api.m.jd.com/?functionId=runningPageHome&body=%7B%22linkId%22:%22L-sOanK_5RJCz7I314FpnQ%22,%22isFromJoyPark%22:true,%22joyLinkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22%7D&t=${Date.now()}&appid=activities_platform&client=ios&clientVersion=3.1.0`, '', {
+  return get(`https://api.m.jd.com/?functionId=runningPageHome&body=%7B%22linkId%22:%22L-sOanK_5RJCz7I314FpnQ%22,%22isFromJoyPark%22:true,%22joyLinkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22%7D&t=${Date.now()}&appid=activities_platform&client=ios&clientVersion=3.1.0`, {
     'Host': 'api.m.jd.com',
     'Origin': 'https://h5platform.jd.com',
     'User-Agent': 'jdltapp;',

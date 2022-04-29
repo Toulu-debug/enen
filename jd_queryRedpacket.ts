@@ -11,13 +11,12 @@ let message: string = ''
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
-    res = await get(`https://m.jingxi.com/user/info/QueryUserRedEnvelopesV2?type=1&orgFlag=JD_PinGou_New&page=1&cashRedType=1&redBalanceFlag=1&channel=1&_=${Date.now()}&sceneval=2&g_login_type=1&g_ty=ls`, '',
-      {
-        'Host': 'm.jingxi.com',
-        'Referer': 'https://st.jingxi.com/my/redpacket.shtml',
-        "Cookie": cookie,
-        'User-Agent': USER_AGENT
-      })
+    res = await get(`https://m.jingxi.com/user/info/QueryUserRedEnvelopesV2?type=1&orgFlag=JD_PinGou_New&page=1&cashRedType=1&redBalanceFlag=1&channel=1&_=${Date.now()}&sceneval=2&g_login_type=1&g_ty=ls`, {
+      'Host': 'm.jingxi.com',
+      'Referer': 'https://st.jingxi.com/my/redpacket.shtml',
+      "Cookie": cookie,
+      'User-Agent': USER_AGENT
+    })
     let day: number = new Date().getDay(), jdRed: number = 0, jdRedExp: number = 0
     for (let j of res.data.useRedInfo?.redList || []) {
       if (j.orgLimitStr.includes('京喜')) {

@@ -53,7 +53,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       'cookie': cookie
     }
 
-    res = await get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${Date.now()}&sceneval=2&_=${Date.now()}&sceneval=2`, '', headers)
+    res = await get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${Date.now()}&sceneval=2&_=${Date.now()}&sceneval=2`, headers)
     await wait(1000)
 
     for (let order of res.orderList) {
@@ -64,7 +64,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       let status: string = order.progressInfo?.content || null
       let shopName: string = order.shopInfo.shopName
 
-      res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, '', headers)
+      res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, headers)
       await wait(1000)
       let carrier: string = res.carrier, carriageId: string = res.carriageId
 

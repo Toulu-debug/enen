@@ -342,10 +342,9 @@ async function jdpingou() {
   return `jdpingou;iPhone;5.19.0;${version};${randomString(40)};network/wifi;model/${device};appBuild/100833;ADID/;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/0;hasOCPay/0;supportBestPay/0;session/${getRandomNumberByRange(10, 90)};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
 }
 
-function get(url: string, prarms?: string | object, headers?: any): Promise<any> {
+function get(url: string, headers?: any): Promise<any> {
   return new Promise((resolve, reject) => {
     axios.get(url, {
-      params: prarms,
       headers: headers
     }).then(res => {
       if (typeof res.data === 'string' && res.data.includes('jsonpCBK')) {
