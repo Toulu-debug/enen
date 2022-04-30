@@ -6,7 +6,7 @@
 import {requireConfig, wait, post, o2s} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 
-let cookie: string = '', res: any = '', UserName: string = '', h5stTool = new H5ST("15097", "jdltapp;", "8317250570595470");
+let cookie: string = '', res: any = '', UserName: string = '', h5stTool: H5ST = new H5ST("15097", "jdltapp;", "8317250570595470");
 
 !(async () => {
   let cookiesArr: any = await requireConfig()
@@ -42,15 +42,15 @@ let cookie: string = '', res: any = '', UserName: string = '', h5stTool = new H5
 })()
 
 async function api(fn: string, body: object) {
-  let timestamp: number = Date.now(), t: { key: string, value: string } [] = [
-    {key: 'appid', value: 'activities_platform'},
-    {key: 'body', value: JSON.stringify(body)},
-    {key: 'client', value: 'H5'},
-    {key: 'clientVersion', value: '1.0.0'},
-    {key: 'functionId', value: fn},
-    {key: 't', value: timestamp.toString()},
-  ]
-  let h5st: string = h5stTool.__genH5st(t)
+  let timestamp: number = Date.now()
+  let h5st: string = h5stTool.__genH5st({
+    appid: 'activities_platform',
+    body: JSON.stringify(body),
+    client: 'H5',
+    clientVersion: '1.0.0',
+    functionId: fn,
+    t: timestamp.toString()
+  })
   return await post('https://api.m.jd.com/', `functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=H5&clientVersion=1.0.0&h5st=${h5st}`, {
     'Host': 'api.m.jd.com',
     'User-Agent': 'jdltapp;android;3.8.16;',

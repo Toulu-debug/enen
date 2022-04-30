@@ -12,7 +12,7 @@ import {existsSync, readFileSync} from "fs";
 import axios from "axios";
 
 const token = require('./utils/jd_jxmc.js').token
-const h5stTool = new H5ST("00df8", "jdpingou;", "")
+const h5stTool: H5ST = new H5ST("00df8", "jdpingou;", "")
 
 let cookie: string = '', res: any = '', shareCodes: string[] = [], homePageInfo: any = '', jxToken: any = '', UserName: string = '', ua: string = null, account: { pt_pin: string, remarks: string, jdpingou: string }[] = []
 let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
@@ -333,22 +333,22 @@ async function getTask() {
 }
 
 async function api(fn: string, stk: string, params: Params = {}) {
-  let url: string, t: { key: string, value: string } [] = [
-    {key: 'activeid', value: 'jxmc_active_0001'},
-    {key: 'activekey', value: 'null'},
-    {key: 'channel', value: '7'},
-    {key: 'jxmc_jstoken', value: jxToken['farm_jstoken']},
-    {key: 'phoneid', value: jxToken['phoneid']},
-    {key: 'sceneid', value: '1001'},
-    {key: 'timestamp', value: jxToken['timestamp']},
-  ]
+  let url: string, t: { [key: string]: string } = {
+    activeid: 'jxmc_active_0001',
+    activekey: 'null',
+    channel: '7',
+    jxmc_jstoken: jxToken['farm_jstoken'],
+    phoneid: jxToken['phoneid'],
+    sceneid: '1001',
+    timestamp: jxToken['timestamp'],
+  }
   if (['GetUserTaskStatusList', 'DoTask', 'Award'].indexOf(fn) > -1)
     url = `https://m.jingxi.com/newtasksys/newtasksys_front/${fn}?_=${Date.now()}&source=jxmc&bizCode=jxmc&_stk=${encodeURIComponent(stk)}&_ste=1&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
   else
     url = `https://m.jingxi.com/jxmc/${fn}?channel=7&sceneid=1001&activeid=jxmc_active_0001&activekey=null&jxmc_jstoken=${jxToken['farm_jstoken']}&timestamp=${jxToken['timestamp']}&phoneid=${jxToken['phoneid']}&_stk=${encodeURIComponent(stk)}&_ste=1&_=${Date.now()}&sceneval=2&g_login_type=1&callback=jsonpCBK${randomWord()}&g_ty=ls`
 
   for (let [key, value] of Object.entries(params)) {
-    t.push({key, value})
+    t[key] = value
     url += `&${key}=${value}`
   }
   let h5st: string = h5stTool.__genH5st(t)

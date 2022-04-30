@@ -8,12 +8,13 @@
  */
 
 import axios from 'axios'
+import {getDate} from "date-fns"
+import {H5ST} from "./utils/h5st"
 import USER_AGENT, {get, getRandomNumberByRange, getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
-import {getDate} from "date-fns";
 
 let cookie: string = '', res: any = '', data: any, UserName: string
 let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
-let message: string = '', log: { help: string, runTimes: string } = {help: '', runTimes: ''}
+let message: string = '', log: { help: string, runTimes: string } = {help: '', runTimes: ''}, h5stTool: H5ST = new H5ST("0c010", USER_AGENT, "8389547038003203")
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -25,6 +26,7 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
     log.help += `【账号${index + 1}】  ${UserName}\n`
     log.runTimes += `【账号${index + 1}】  ${UserName}\n`
 
+    await h5stTool.__genAlgo()
     if (Object.keys(shareCodeFile)[index]) {
       shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[index]].split('@')
     }
@@ -116,7 +118,14 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
 })()
 
 async function api(fn: string, body: object) {
-  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&appid=wh5&client=apple&clientVersion=10.2.4`, {
+  let h5st: string = h5stTool.__genH5st({
+    'appid': 'wh5',
+    'body': JSON.stringify(body),
+    'client': 'apple',
+    'clientVersion': '10.2.4',
+    'functionId': fn,
+  })
+  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&appid=wh5&client=apple&clientVersion=10.2.4&h5st=${h5st}`, {
     headers: {
       "Host": "api.m.jd.com",
       "Origin": "https://carry.m.jd.com",

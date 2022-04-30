@@ -1,11 +1,10 @@
-import axios from 'axios'
-import {readFileSync} from "fs";
 import {sendNotify} from './sendNotify';
-import USER_AGENT, {getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {get, getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import {H5ST} from "./utils/h5st";
 
 let cookie: string = '', res: any = '', data: any, UserName: string
 let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
-let message: string = ''
+let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, "8389547038003203")
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
@@ -14,6 +13,7 @@ let message: string = ''
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
     message += `【账号${index + 1}】  ${UserName}\n`
+    await h5stTool.__genAlgo()
 
     try {
       if (Object.keys(shareCodeFile)[index]) {
@@ -23,6 +23,8 @@ let message: string = ''
 
       // 初始化
       res = await api('initForFarm', {"version": 11, "channel": 3})
+      o2s(res)
+
       if (res.code === '6') {
         console.log('黑号')
         await wait(5000)
@@ -125,9 +127,9 @@ let message: string = ''
       if (!res.todaySigned) {
         data = await api('clockInForFarm', {"type": 1, "version": 14, "channel": 1, "babelChannel": "120"})
         if (data.signDay === 7) {
-          data = await api('gotClockInGift', {"type": 2, "version": 14, "channel": 1, "babelChannel": "120"})
-          o2s(data, 'gotClockInGift')
-          await wait(1000)
+          // data = await api('gotClockInGift', {"type": 2, "version": 14, "channel": 1, "babelChannel": "120"})
+          // o2s(data, 'gotClockInGift')
+          // await wait(1000)
         }
         await wait(1000)
       }
@@ -146,6 +148,16 @@ let message: string = ''
       // 任务
       res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
       o2s(res)
+      if (res.signInit.todaySigned) {
+        console.log(`今天已签到,已经连续签到${res.signInit.totalSigned}天,下次签到可得${res.signInit.signEnergyEachAmount}g`);
+      } else {
+        data = await api('signForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
+        o2s(data, 'signForFarm')
+
+        console.log('签到成功', data.amount)
+        await wait(1000)
+      }
+
       if (!res.gotBrowseTaskAdInit.f) {
         for (let t of res.gotBrowseTaskAdInit.userBrowseTaskAds) {
           if (t.hadFinishedTimes !== t.limit) {
@@ -167,14 +179,6 @@ let message: string = ''
           }
           await wait(1000)
         }
-      }
-
-      if (res.signInit.todaySigned) {
-        console.log(`今天已签到,已经连续签到${res.signInit.totalSigned}天,下次签到可得${res.signInit.signEnergyEachAmount}g`);
-      } else {
-        data = await api('signForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
-        console.log('签到成功', data.amount)
-        await wait(1000)
       }
 
       if (!res.waterRainInit.f) {
@@ -248,7 +252,7 @@ let message: string = ''
       for (let code of shareCodeSelf) {
         console.log('去助力', code)
         res = await api('initForFarm', {"mpin": "", "utm_campaign": "t_335139774", "utm_medium": "appshare", "shareCode": code, "utm_term": "Wxfriends", "utm_source": "iosapp", "imageUrl": "", "nickName": "", "version": 14, "channel": 2, "babelChannel": 0})
-        await wait(3000)
+        await wait(6000)
         o2s(res, '助力')
         if (res.helpResult.code === '7') {
           console.log('不给自己助力')
@@ -296,15 +300,19 @@ let message: string = ''
 })()
 
 async function api(fn: string, body: object) {
-  let {data} = await axios.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&appid=wh5&client=apple&clientVersion=10.2.4`, {
-    headers: {
-      "Host": "api.m.jd.com",
-      "Origin": "https://carry.m.jd.com",
-      "User-Agent": USER_AGENT,
-      "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-      "Referer": "https://carry.m.jd.com/",
-      "Cookie": cookie
-    }
+  let h5st: string = h5stTool.__genH5st({
+    'appid': 'wh5',
+    'body': JSON.stringify(body),
+    'client': 'apple',
+    'clientVersion': '10.2.4',
+    'functionId': fn,
   })
-  return data
+  return await get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&appid=wh5&client=apple&clientVersion=10.2.4&h5st=${h5st}`, {
+    "Host": "api.m.jd.com",
+    "Origin": "https://carry.m.jd.com",
+    "User-Agent": USER_AGENT,
+    "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+    "Referer": "https://carry.m.jd.com/",
+    "Cookie": cookie
+  })
 }

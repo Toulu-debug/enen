@@ -33,15 +33,15 @@ let cookie: string = '', res: any = '', UserName: string = '', h5stTool: any = n
 })()
 
 async function api(fn: string, body: object) {
-  let timestamp: number = Date.now(), t: { key: string, value: string } [] = [
-    {key: 'appid', value: 'activities_platform'},
-    {key: 'body', value: JSON.stringify(body)},
-    {key: 'client', value: 'H5'},
-    {key: 'clientVersion', value: '1.0.0'},
-    {key: 'functionId', value: fn},
-    {key: 't', value: timestamp.toString()},
-  ]
-  let h5st: string = h5stTool.__genH5st(t)
+  let timestamp: number = Date.now()
+  let h5st: string = h5stTool.__genH5st({
+    appid: 'activities_platform',
+    body: JSON.stringify(body),
+    client: 'H5',
+    clientVersion: '1.0.0',
+    functionId: fn,
+    t: timestamp.toString(),
+  })
   return await get(`https://api.m.jd.com/?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&h5st=${h5st}`, {
     'Host': 'api.m.jd.com',
     'Origin': 'https://prodev.m.jd.com',
