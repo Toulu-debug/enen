@@ -18,72 +18,80 @@ let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04'), c
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
-    await h5stTool.__genAlgo()
-    res = await team('runningTeamInfo', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
-    o2s(res)
-    if (!captainId && res.data.members.length === 0) {
-      console.log('组队ID不存在,开始创建组队')
-      captainId = res.data.captainId
-    } else if (captainId && res.data.members.length === 0) {
-      console.log('已有组队ID，未加入队伍')
-      res = await team('runningJoinTeam', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "captainId": captainId})
-      if (res.code === 0) {
-        console.log('组队成功')
-        for (let member of res.data.members) {
-          if (member.captain) {
-            console.log('队长', member.nickName)
-            break
+    try {
+      await h5stTool.__genAlgo()
+      res = await team('runningTeamInfo', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+      o2s(res)
+      if (!captainId && res.data.members.length === 0) {
+        console.log('组队ID不存在,开始创建组队')
+        captainId = res.data.captainId
+      } else if (captainId && res.data.members.length === 0) {
+        console.log('已有组队ID，未加入队伍')
+        res = await team('runningJoinTeam', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "captainId": captainId})
+        if (res.code === 0) {
+          console.log('组队成功')
+          for (let member of res.data.members) {
+            if (member.captain) {
+              console.log('队长', member.nickName)
+              break
+            }
+          }
+          if (res.data.members.length === 6) {
+            console.log('队伍已满')
+            captainId = ''
           }
         }
-        if (res.data.members.length === 6) {
-          console.log('队伍已满')
-          captainId = ''
-        }
+      } else {
+        console.log('已组队', res.data.members.length)
       }
-    } else {
-      console.log('已组队', res.data.members.length)
+    } catch (e) {
+      console.log('组队 Error', e)
     }
 
-    res = await runningPageHome()
-    console.log('🧧', res.data.runningHomeInfo.prizeValue)
-    await wait(2000)
-
-    console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
-    if (res.data.runningHomeInfo.nextRunningTime && res.data.runningHomeInfo.nextRunningTime / 1000 < 300) {
-      await wait(res.data.runningHomeInfo.nextRunningTime)
+    try {
       res = await runningPageHome()
+      console.log('🧧', res.data.runningHomeInfo.prizeValue)
+      await wait(2000)
+
       console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
-      await wait(1000)
-    }
-
-    if (!res.data.runningHomeInfo.nextRunningTime) {
-      console.log('终点目标', assets)
-      for (let i = 0; i < 10; i++) {
-        res = await api('runningOpenBox', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
-        if (parseFloat(res.data.assets) >= assets) {
-          let assets: number = parseFloat(res.data.assets)
-          res = await api('runningPreserveAssets', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
-          console.log('领取成功', assets)
-          break
-        } else {
-          if (res.data.doubleSuccess) {
-            console.log('翻倍成功', parseFloat(res.data.assets))
-            await wait(5000)
-          } else if (!res.data.doubleSuccess && !res.data.runningHomeInfo.runningFinish) {
-            console.log('开始跑步', parseFloat(res.data.assets))
-            await wait(5000)
-          } else {
-            console.log('翻倍失败')
-            break
-          }
-        }
-        await wait(5000)
+      if (res.data.runningHomeInfo.nextRunningTime && res.data.runningHomeInfo.nextRunningTime / 1000 < 300) {
+        await wait(res.data.runningHomeInfo.nextRunningTime)
+        res = await runningPageHome()
+        console.log('能量恢复中', secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000), '能量棒', res.data.runningHomeInfo.energy)
+        await wait(1000)
       }
-    }
 
-    res = await runningPageHome()
-    console.log('🧧', res.data.runningHomeInfo.prizeValue)
-    await wait(2000)
+      if (!res.data.runningHomeInfo.nextRunningTime) {
+        console.log('终点目标', assets)
+        for (let i = 0; i < 10; i++) {
+          res = await api('runningOpenBox', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+          if (parseFloat(res.data.assets) >= assets) {
+            let assets: number = parseFloat(res.data.assets)
+            res = await api('runningPreserveAssets', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+            console.log('领取成功', assets)
+            break
+          } else {
+            if (res.data.doubleSuccess) {
+              console.log('翻倍成功', parseFloat(res.data.assets))
+              await wait(5000)
+            } else if (!res.data.doubleSuccess && !res.data.runningHomeInfo.runningFinish) {
+              console.log('开始跑步', parseFloat(res.data.assets))
+              await wait(5000)
+            } else {
+              console.log('翻倍失败')
+              break
+            }
+          }
+          await wait(5000)
+        }
+      }
+
+      res = await runningPageHome()
+      console.log('🧧', res.data.runningHomeInfo.prizeValue)
+      await wait(2000)
+    } catch (e) {
+      console.log('跑步 Error', e)
+    }
   }
 })()
 
