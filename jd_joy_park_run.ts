@@ -26,8 +26,7 @@ let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04'), c
       captainId = res.data.captainId
     } else if (captainId && res.data.members.length === 0) {
       console.log('已有组队ID，未加入队伍')
-
-      res = await team('runningJoinTeam', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "captainId": "IReO3ad-dyrjil-pq4FZeg"})
+      res = await team('runningJoinTeam', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "captainId": captainId})
       if (res.code === 0) {
         console.log('组队成功')
         for (let member of res.data.members) {
