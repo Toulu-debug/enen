@@ -15,7 +15,6 @@ interface ShareCode {
 
 let cookie: string = '', UserName: string = '', res: any = '', message: string = '', shareCodes: ShareCode[] = [], shareCodesSelf: ShareCode[] = [], shareCodesHW: any = []
 
-
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
   let activityId: number
@@ -28,7 +27,8 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     try {
       activityId = res.data.result.activityBaseInfo.activityId
     } catch (e) {
-      console.log('黑号')
+      console.log('获取活动信息错误')
+      await wait(2000)
       continue
     }
     let encryptProjectId: string = res.data.result.activityBaseInfo.encryptProjectId
