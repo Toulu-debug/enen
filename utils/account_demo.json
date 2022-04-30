@@ -3,10 +3,11 @@
     "pt_pin": "与jdCookie中pt_pin相同，禁止出现中文",
     "remarks": "备注",
     "pushplus": "",
-    "jdpingou": "jdpingou;"
+    "jdpingou": "jdpingou;",
+    "joy_park_run": 0.04
   },
   {
     "pt_pin": "jd_xxxx",
-    "remarks": "大师兄"
+    "joy_park_run": 0.08
   }
 ]

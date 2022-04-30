@@ -7,16 +7,35 @@
 
 import {get, post, o2s, requireConfig, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
+import {existsSync, readFileSync} from "fs";
 
 let cookie: string = '', res: any = '', data: any, UserName: string
-let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04'), captainId: string = '', h5stTool: H5ST = new H5ST('b6ac3', 'jdltapp;', '1804945295425750')
+let assets: number = 0.04, captainId: string = '', h5stTool: H5ST = new H5ST('b6ac3', 'jdltapp;', '1804945295425750')
 
 !(async () => {
   let cookiesArr: string[] = await requireConfig()
+  let account: { pt_pin: string, joy_park_run: number }[] = []
+  if (existsSync('./utils/account.json')) {
+    try {
+      account = JSON.parse(readFileSync('./utils/account.json').toString())
+    } catch (e) {
+      console.log('./utils/account.json 加载出错')
+    }
+  }
+
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+
+    assets = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
+    for (let user of account) {
+      if (user.pt_pin === encodeURIComponent(UserName) && user.joy_park_run) {
+        console.log('自定义终点', user.joy_park_run)
+        assets = parseFloat(user.joy_park_run.toString())
+        break
+      }
+    }
 
     try {
       await h5stTool.__genAlgo()
