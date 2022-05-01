@@ -5,11 +5,12 @@
  * cron: 20 * * * *
  */
 
-import {get, post, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import {get, post, requireConfig, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 import {existsSync, readFileSync} from "fs";
+import {getDate} from "date-fns";
 
-let cookie: string = '', res: any = '', data: any, UserName: string
+let cookie: string = '', res: any = '', UserName: string = ''
 let assets: number = 0.04, captainId: string = '', h5stTool: H5ST = new H5ST('b6ac3', 'jdltapp;', '1804945295425750')
 
 !(async () => {
@@ -38,9 +39,19 @@ let assets: number = 0.04, captainId: string = '', h5stTool: H5ST = new H5ST('b6
     }
 
     try {
+      res = await team('runningMyPrize', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "pageSize": 20, "time": null, "ids": null})
+      let sum: number = 0
+      for (let t of res.data.detailVos) {
+        if (getDate(new Date(t.createTime)) === new Date().getDate()) {
+          sum = add(sum, t.amount)
+        } else {
+          break
+        }
+      }
+      console.log('今日收益', sum)
+
       await h5stTool.__genAlgo()
       res = await team('runningTeamInfo', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
-      o2s(res)
       if (!captainId && res.data.members.length === 0) {
         console.log('组队ID不存在,开始创建组队')
         captainId = res.data.captainId
@@ -62,6 +73,7 @@ let assets: number = 0.04, captainId: string = '', h5stTool: H5ST = new H5ST('b6
         }
       } else {
         console.log('已组队', res.data.members.length)
+        console.log('战队收益', res.data.teamSumPrize)
       }
     } catch (e) {
       console.log('组队 Error', e)
@@ -166,4 +178,21 @@ function secondsToMinutes(seconds: number) {
   let minutes: number = Math.floor(seconds / 60)
   let second: number = Math.floor(seconds % 60)
   return `${minutes}分${second}秒`
+}
+
+// 小数加法
+function add(num1: number, num2: number) {
+  let r1: number, r2: number
+  try {
+    r1 = num1.toString().split('.')[1].length
+  } catch (e) {
+    r1 = 0
+  }
+  try {
+    r2 = num2.toString().split('.')[1].length
+  } catch (e) {
+    r2 = 0
+  }
+  let m: number = Math.pow(10, Math.max(r1, r2))
+  return (num1 * m + num2 * m) / m
 }

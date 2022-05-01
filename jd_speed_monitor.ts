@@ -1,6 +1,6 @@
 import axios from 'axios'
-import {sendNotify} from '../sendNotify';
-import {requireConfig} from '../TS_USER_AGENTS'
+import {sendNotify} from './sendNotify';
+import {requireConfig} from './TS_USER_AGENTS'
 
 const CryptoJS = require('crypto-js');
 let cookie: string = '', UserName: string
@@ -28,8 +28,8 @@ let cookie: string = '', UserName: string
 
   for (let t of data.data.gears) {
     console.log(t.amount)
-    if (t.amount === '50') {
-      await sendNotify('极速版金币', '50个金币已到账，请注意查收')
+    if (t.amount === '50' || t.amount === '10') {
+      await sendNotify('极速版金币', `${t.amount}🧧`)
       break
     }
   }
