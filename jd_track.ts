@@ -16,7 +16,7 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
   let except: string[] = exceptCookie(path.basename(__filename))
   let orders: any = {}, pushplusArr: { pt_pin: string, pushplus: string }[], pushplusUser: string[] = []
   try {
-    pushplusArr = JSON.parse(readFileSync('./utils/account.json').toString())
+    pushplusArr = JSON.parse(readFileSync('./utils/pushplus.json').toString())
   } catch (e) {
     console.log('utils/pushplus.json load failed')
   }
