@@ -103,33 +103,37 @@ let shareCodes: INVITE[] = [], shareCodesHW = [], shareCodesSelf: INVITE[] = []
     res = await api('happyDigHome', {"linkId": "pTTvJeSTrpthgk9ASBVGsw"})
     let blood: number = res.data.blood
     for (let i = 0; i < 4; i++) {
-      if (blood <= 1) {
-        console.log('能量剩余1，跳过 A')
-        break
-      }
-      for (let j = 0; j < 4; j++) {
+      try {
         if (blood <= 1) {
-          console.log('能量剩余1，跳过 B')
+          console.log('能量剩余1，跳过 A')
           break
         }
-        res = await api('happyDigDo', {"round": 1, "rowIdx": i, "colIdx": j, "linkId": "pTTvJeSTrpthgk9ASBVGsw"})
-        o2s(res)
+        for (let j = 0; j < 4; j++) {
+          if (blood <= 1) {
+            console.log('能量剩余1，跳过 B')
+            break
+          }
+          res = await api('happyDigDo', {"round": 1, "rowIdx": i, "colIdx": j, "linkId": "pTTvJeSTrpthgk9ASBVGsw"})
+          o2s(res)
 
-        if (res.data.chunk.type === 1) {
-          console.log('挖到👎')
-        } else if (res.data.chunk.type === 2) {
-          console.log('挖到🧧', parseFloat(res.data.chunk.value))
-        } else if (res.data.chunk.type === 4) {
-          console.log('挖到💣')
+          if (res.data.chunk.type === 1) {
+            console.log('挖到👎')
+          } else if (res.data.chunk.type === 2) {
+            console.log('挖到🧧', parseFloat(res.data.chunk.value))
+          } else if (res.data.chunk.type === 4) {
+            console.log('挖到💣')
+          }
+          await wait(1000)
+          res = await api('happyDigHome', {"linkId": "pTTvJeSTrpthgk9ASBVGsw"})
+          if (res.data.blood === 1) {
+            blood = 1
+            console.log('能量剩余1，退出')
+            break
+          }
+          await wait(4000)
         }
-        await wait(1000)
-        res = await api('happyDigHome', {"linkId": "pTTvJeSTrpthgk9ASBVGsw"})
-        if (res.data.blood === 1) {
-          blood = 1
-          console.log('能量剩余1，退出')
-          break
-        }
-        await wait(4000)
+      } catch (e) {
+        console.log('error', res?.errMsg)
       }
     }
   }

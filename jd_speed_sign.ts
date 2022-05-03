@@ -3,7 +3,7 @@
  * cron: 45 0 * * *
  */
 
-import {requireConfig, wait, post, o2s} from './TS_USER_AGENTS'
+import {requireConfig, wait, post} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 
 let cookie: string = '', res: any = '', UserName: string = '', h5stTool: H5ST = new H5ST("15097", "jdltapp;", "8317250570595470");
@@ -17,7 +17,6 @@ let cookie: string = '', res: any = '', UserName: string = '', h5stTool: H5ST = 
 
     await h5stTool.__genAlgo()
     res = await api('apSignIn_day', {"linkId": "9WA12jYGulArzWS7vcrwhw", "serviceName": "dayDaySignGetRedEnvelopeSignService", "business": 1})
-    o2s(res)
     try {
       if (res.data.retCode === 0) {
         console.log('签到成功')
