@@ -3,7 +3,6 @@ import {Md5} from "ts-md5"
 import * as dotenv from "dotenv"
 import {existsSync, readFileSync} from "fs"
 import {sendNotify} from './sendNotify'
-import {rejects} from "assert";
 
 dotenv.config()
 

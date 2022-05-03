@@ -32,9 +32,9 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
     o2s(shareCodeSelf, `第${index + 1}个账号获取的内部互助`)
 
     res = await api('initForFarm', {"version": 11, "channel": 3})
-    if (res.code === '6') {
-      console.log('黑号')
-      await wait(5000)
+    if (res.code !== '0') {
+      console.log('初始化失败')
+      await wait(2000)
       continue
     }
     try {
@@ -62,32 +62,37 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
     shareCodePool = await getShareCodePool('farm', 50)
     shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
 
-    for (let code of shareCodeSelf) {
-      console.log(`账号 ${UserName} 去助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}`)
-      res = await api('initForFarm', {"mpin": "", "utm_campaign": "t_335139774", "utm_medium": "appshare", "shareCode": code, "utm_term": "Wxfriends", "utm_source": "iosapp", "imageUrl": "", "nickName": "", "version": 14, "channel": 2, "babelChannel": 0})
-      await wait(5000)
-      if (res.helpResult.code === '7') {
-        console.log('不给自己助力')
-      } else if (res.helpResult.code === '0') {
-        console.log('助力成功,获得', res.helpResult.salveHelpAddWater)
-        log.help += `助力成功 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
-      } else if (res.helpResult.code === '8') {
-        console.log('上限')
-        break
-      } else if (res.helpResult.code === '9') {
-        console.log('已助力')
-        log.help += `已助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
-      } else if (res.helpResult.code === '10') {
-        console.log('已满')
-      } else if (res.helpResult.remainTimes === 0) {
-        console.log('上限')
-        break
-      }
-    }
-    await wait(10000)
+    // for (let code of shareCodeSelf) {
+    //   console.log(`账号 ${UserName} 去助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}`)
+    //   res = await api('initForFarm', {"mpin": "", "utm_campaign": "t_335139774", "utm_medium": "appshare", "shareCode": code, "utm_term": "Wxfriends", "utm_source": "iosapp", "imageUrl": "", "nickName": "", "version": 14, "channel": 2, "babelChannel": 0})
+    //   await wait(5000)
+    //   if (res.helpResult.code === '7') {
+    //     console.log('不给自己助力')
+    //   } else if (res.helpResult.code === '0') {
+    //     console.log('助力成功,获得', res.helpResult.salveHelpAddWater)
+    //     log.help += `助力成功 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
+    //   } else if (res.helpResult.code === '8') {
+    //     console.log('上限')
+    //     break
+    //   } else if (res.helpResult.code === '9') {
+    //     console.log('已助力')
+    //     log.help += `已助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
+    //   } else if (res.helpResult.code === '10') {
+    //     console.log('已满')
+    //   } else if (res.helpResult.remainTimes === 0) {
+    //     console.log('上限')
+    //     break
+    //   }
+    // }
+    // await wait(10000)
 
     // 助力奖励
     res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
+    if (res.code !== '0') {
+      console.log('farmAssistInit Error')
+      await wait(2000)
+      continue
+    }
     await wait(3000)
     o2s(res, 'farmAssistInit')
     let farmAssistInit_waterEnergy: number = 0
