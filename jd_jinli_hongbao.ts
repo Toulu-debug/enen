@@ -25,8 +25,9 @@ let min: number[] = [0.02, 0.03, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6],
 
   cookiesArr = await requireConfig(false)
   cookiesArr = cookiesArr.slice(0, 9)
-  if (new Date().getHours() !== 6)
+  if ([0, 1].includes(new Date().getHours())) {
     await join()
+  }
   await getShareCodeSelf()
   await help()
   await open(0)
@@ -43,11 +44,11 @@ async function join() {
           log = await getLog()
           res = await api('h5launch', {followShop: 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
           console.log('活动初始化：', res.data.result.statusDesc)
-          if (res.rtn_code !== 403) {
+          if (res.rtn_code === 0) {
             break
           }
         } catch (e) {
-          console.log('log error', e)
+          console.log('join error', res.rtn_code)
           await wait(3000)
         }
       }
@@ -146,8 +147,8 @@ async function help() {
             if (success) break
             log = await getLog()
             res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
-            if (res.rtn_code === 403) {
-              console.log('log error')
+            if (res.rtn_code !== 0) {
+              console.log('help error', res.rtn_code)
               await wait(5000)
             } else {
               success = true
@@ -200,7 +201,16 @@ async function getLog() {
       process.exit(0)
     }
   } else {
-    let {data} = await get(`http://www.madrabbit.cf:8080/license/log?tg_id=${tg_id}&token=${rabbitToken}`)
-    return `'"random":"${data.random}","log":"${data.log}"'`
+    console.log('rabbit log')
+    let data: any = ''
+    for (let i = 0; i < 10; i++) {
+      try {
+        data = await get(`http://www.madrabbit.cf:8080/license/log?tg_id=${tg_id}&token=${rabbitToken}`)
+        break
+      } catch (e) {
+        console.log('rabbit log api error')
+      }
+    }
+    return `'"random":"${data.data.random}","log":"${data.data.log}"'`
   }
 }
