@@ -10,7 +10,7 @@ import {o2s, wait, requireConfig, getshareCodeHW} from "./TS_USER_AGENTS";
 import {SHA256} from "crypto-js";
 
 let cookie: string = '', res: any = '', UserName: string
-let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = [], full: string[] = []
+let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = []
 
 interface Tuan {
   activityIdEncrypted: string, // id
@@ -107,7 +107,6 @@ interface Tuan {
           break
         } else if (res.resultCode === '2400205') {
           console.log('对方已成团')
-          full.push(code.assistedPinEncrypted)
         } else if (res.resultCode === '9200011') {
           console.log('已助力过')
         } else if (res.success) {
