@@ -120,8 +120,8 @@ async function requireConfig(check: boolean = false): Promise<string[]> {
   return cookiesArr
 }
 
-async function checkCookie(cookie) {
-  await wait(1000)
+async function checkCookie(cookie: string) {
+  await wait(3000)
   try {
     let {data}: any = await axios.get(`https://api.m.jd.com/client.action?functionId=GetJDUserInfoUnion&appid=jd-cphdeveloper-m&body=${encodeURIComponent(JSON.stringify({"orgFlag": "JD_PinGou_New", "callSource": "mainorder", "channel": 4, "isHomewhite": 0, "sceneval": 2}))}&loginType=2&_=${Date.now()}&sceneval=2&g_login_type=1&callback=GetJDUserInfoUnion&g_ty=ls`, {
       headers: {
