@@ -5,10 +5,11 @@
  * cron: 20 * * * *
  */
 
-import {get, post, requireConfig, wait} from './TS_USER_AGENTS'
+import {exceptCookie, get, post, requireConfig, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 import {existsSync, readFileSync} from "fs";
 import {getDate} from "date-fns";
+import * as path from "path"
 
 let cookie: string = '', res: any = '', UserName: string = ''
 let assets: number = 0, captainId: string = '', h5stTool: H5ST = new H5ST('b6ac3', 'jdltapp;', '1804945295425750')
@@ -23,11 +24,16 @@ let assets: number = 0, captainId: string = '', h5stTool: H5ST = new H5ST('b6ac3
       console.log('./utils/account.json 加载出错')
     }
   }
+  let except: string[] = exceptCookie(path.basename(__filename))
 
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
 
     assets = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.04')
     for (let user of account) {
@@ -40,15 +46,18 @@ let assets: number = 0, captainId: string = '', h5stTool: H5ST = new H5ST('b6ac3
 
     try {
       res = await team('runningMyPrize', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "pageSize": 20, "time": null, "ids": null})
-      let sum: number = 0, rewardAmount: number = res.data.rewardAmount
+      let sum: number = 0, rewardAmount: number = res.data.rewardAmount, success: number = 0
       for (let t of res.data.detailVos) {
         if (getDate(new Date(t.createTime)) === new Date().getDate()) {
           sum = add(sum, t.amount)
+          success++
         } else {
           break
         }
       }
-      console.log('今日收益', sum)
+      console.log('成功', success)
+      console.log('收益', sum)
+
       if (res.data.runningCashStatus.currentEndTime) {
         if (res.data.runningCashStatus.status === 0) {
           console.log('可提现', rewardAmount)
