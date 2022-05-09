@@ -3,12 +3,12 @@
  * cron: 15 1 * * *
  */
 
-import {post, requireConfig, wait} from './TS_USER_AGENTS'
+import {post, getCookie, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

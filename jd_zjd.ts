@@ -6,7 +6,7 @@
 
 import axios from "axios";
 import {zjdInit, zjdH5st} from "./utils/jd_zjd_tool.js";
-import {o2s, wait, requireConfig, getshareCodeHW} from "./TS_USER_AGENTS";
+import {o2s, wait, getCookie, getshareCodeHW} from "./TS_USER_AGENTS";
 import {SHA256} from "crypto-js";
 
 let cookie: string = '', res: any = '', UserName: string
@@ -19,7 +19,7 @@ interface Tuan {
 }
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     try {
       await zjdInit()

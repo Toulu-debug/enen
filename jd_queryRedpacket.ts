@@ -1,12 +1,12 @@
 import {sendNotify} from './sendNotify'
 import {pushplus} from "./utils/pushplus"
-import USER_AGENT, {get, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {get, getCookie, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string
 let message: string = ''
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

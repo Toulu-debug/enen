@@ -6,7 +6,7 @@
 import axios from 'axios'
 import {Md5} from 'ts-md5'
 import {getDate} from 'date-fns'
-import {requireConfig, wait, getJxToken, getBeanShareCode, getFarmShareCode, randomWord, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
+import {getCookie, wait, getJxToken, getBeanShareCode, getFarmShareCode, randomWord, getshareCodeHW, getShareCodePool} from './TS_USER_AGENTS'
 import {requestAlgo, geth5st} from "./utils/V3"
 import {existsSync, readFileSync} from "fs";
 
@@ -77,7 +77,7 @@ interface Params {
   }
 
   await requestAlgo('92a36', 'jdpingou;')
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

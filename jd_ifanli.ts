@@ -1,11 +1,11 @@
 import axios from 'axios'
-import USER_AGENT, {o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import {o2s, getCookie, wait} from './TS_USER_AGENTS'
 
 
 let cookie: string = '', res: any = ''
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     let UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

@@ -5,13 +5,13 @@
 //  */
 //
 // import axios from "axios"
-// import {requireConfig, wait, h5st, o2s, getshareCodeHW} from "./TS_USER_AGENTS"
+// import {getCookie, wait, h5st, o2s, getshareCodeHW} from "./TS_USER_AGENTS"
 //
 // let cookie: string = '', UserName: string, index: number, res: any = ''
 // let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodeHW: string[] = []
 //
 // !(async () => {
-//   let cookiesArr: string[] = await requireConfig()
+//   let cookiesArr: string[] = await getCookie()
 //   for (let i = 0; i < cookiesArr.length; i++) {
 //     cookie = cookiesArr[i]
 //     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

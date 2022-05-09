@@ -3,13 +3,13 @@
  */
 
 import axios from 'axios'
-import {post, getRandomNumberByRange, requireConfig, wait} from './TS_USER_AGENTS'
+import {post, getRandomNumberByRange, getCookie, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number
 let UA: string = `jdapp;JD4iPhone/167724 (iPhone; iOS ${getRandomNumberByRange(12, 16)}.${getRandomNumberByRange(0, 4)}; Scale/3.00)`
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

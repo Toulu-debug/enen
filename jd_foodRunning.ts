@@ -1,7 +1,5 @@
 import axios from "axios";
-import USER_AGENT, {TotalBean} from "./TS_USER_AGENTS";
-
-const notify = require('./sendNotify')
+import USER_AGENT from "./TS_USER_AGENTS";
 
 let cookie: string = '', cookiesArr: string[] = [], res: any;
 let token2: string = '', buyerNick: string = '', UserName: string;
@@ -13,12 +11,7 @@ let index: number, remain: number = 0;
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     index = i + 1;
-    let {isLogin, nickName}: any = await TotalBean(cookie)
-    if (!isLogin) {
-      notify.sendNotify(__filename.split('/').pop(), `cookie已失效\n京东账号${index}：${nickName || UserName}`)
-      continue;
-    }
-    console.log(`\n开始【京东账号${index}】${nickName || UserName}\n`);
+    console.log(`\n开始【京东账号${index}】${UserName}\n`);
     await getIsvToken2();
     res = await api('setMixNick');
     buyerNick = res.data.data.msg

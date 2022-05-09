@@ -1,15 +1,14 @@
 import axios from 'axios';
-import USER_AGENT, {TotalBean, requireConfig, wait} from "./TS_USER_AGENTS";
+import USER_AGENT, {getCookie, wait} from "./TS_USER_AGENTS";
 import * as dotenv from 'dotenv';
 
-const notify = require('./sendNotify')
 dotenv.config()
 let token: string, token2: string, actorUuid: string, shopId: number, pin: string, uuid: string;
 let milk: number;
 let cookie: string = '', res: any = '', UserName: string, index: number;
 
 async function main() {
-  let cookiesArr: string[] = await requireConfig();
+  let cookiesArr: string[] = await getCookie();
   for (let i = 0; i < cookiesArr.length; i++) {
     try {
       cookie = cookiesArr[i];
@@ -119,7 +118,7 @@ function api(fn: string, body: Object): Object {
 function getIsvToken() {
   return new Promise<void>(async resolve => {
     let {data}: any = await axios.post("https://api.m.jd.com/client.action?functionId=genToken&clientVersion=10.0.2&client=android&uuid=818aa057737ba6a4&st=1623934987178&sign=0877498be29cda51b9628fa0195f412f&sv=111",
-      `body=${escape('{"action":"to","to":"https%3A%2F%2Fh5.m.jd.com%2FbabelDiy%2FZeus%2F3KSjXqQabiTuD1cJ28QskrpWoBKT%2Findex.html%3FbabelChannel%3D45%26collectionId%3D519"}')}`, {
+      `body=${decodeURIComponent('{"action":"to","to":"https%3A%2F%2Fh5.m.jd.com%2FbabelDiy%2FZeus%2F3KSjXqQabiTuD1cJ28QskrpWoBKT%2Findex.html%3FbabelChannel%3D45%26collectionId%3D519"}')}`, {
         headers: {
           'Host': 'api.m.jd.com',
           'charset': 'UTF-8',

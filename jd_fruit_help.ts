@@ -9,14 +9,14 @@
 
 import {getDate} from "date-fns"
 import {H5ST} from "./utils/h5st"
-import USER_AGENT, {get, getRandomNumberByRange, getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {get, getRandomNumberByRange, getShareCodePool, o2s, getCookie, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', data: any, UserName: string
 let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
 let message: string = '', log: { help: string, runTimes: string } = {help: '', runTimes: ''}, h5stTool: H5ST = new H5ST("0c010", USER_AGENT, "8389547038003203")
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -42,7 +42,7 @@ let message: string = '', log: { help: string, runTimes: string } = {help: '', r
       for (let i = 0; i < 5; i++) {
         try {
           let today: number = getDate(new Date())
-          res = await get(`https://api.jdsharecode.xyz/api/runTimes0407?activityId=farm&sharecode=${res.farmUserPro.shareCode}&today=${today}`)
+          res = await get(`https://api.jdsharecode.xyz/api/runTimes0509?activityId=farm&sharecode=${res.farmUserPro.shareCode}&today=${today}`)
           console.log(res)
           log.runTimes += `第${i + 1}次${res}\n`
           break

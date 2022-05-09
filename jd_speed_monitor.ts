@@ -1,12 +1,12 @@
 import axios from 'axios'
 import {sendNotify} from './sendNotify';
-import {requireConfig} from './TS_USER_AGENTS'
+import {getCookie} from './TS_USER_AGENTS'
 
 const CryptoJS = require('crypto-js');
 let cookie: string = '', UserName: string
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   cookie = cookiesArr[Math.random() * cookiesArr.length | 0]
   UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
   console.log(`<Start> ${UserName}\n`)

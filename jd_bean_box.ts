@@ -5,13 +5,13 @@
  */
 
 import axios from 'axios'
-import USER_AGENT, {get, randomNumString, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {get, randomNumString, getCookie, wait} from './TS_USER_AGENTS'
 
 let cookie: string = '', res: any = '', UserName: string, index: number, uuid: string
 // let shareCodeSelf: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCode: { shareCode: string, groupCode: string, activeId: string }[] = [], shareCodeHW: { shareCode: string, groupCode: string, activeId: string }[] = []
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

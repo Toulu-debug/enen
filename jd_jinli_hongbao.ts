@@ -8,7 +8,7 @@
 
 import {sendNotify} from './sendNotify'
 import * as dotenv from 'dotenv'
-import {get, post, getshareCodeHW, o2s, requireConfig, wait} from "./TS_USER_AGENTS"
+import {get, post, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
 
 let rabbitToken: string = process.env.RABBIT_TOKEN || '', tg_id: string = process.env.TG_ID || ''
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
@@ -18,12 +18,12 @@ let min: number[] = [0.02, 0.03, 0.12, 0.3, 0.4, 0.6, 0.7, 0.8, 1, 1.2, 2, 3.6],
 
 !(async () => {
   dotenv.config()
-  cookiesArr = await requireConfig(false)
+  cookiesArr = await getCookie()
   cookiesArr = cookiesArr.slice(0, 1)
   await join()
   await help()
 
-  cookiesArr = await requireConfig(false)
+  cookiesArr = await getCookie()
   cookiesArr = cookiesArr.slice(0, 9)
   if ([0, 1].includes(new Date().getHours())) {
     await join()

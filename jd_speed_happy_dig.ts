@@ -6,7 +6,7 @@
  * CK2～n  内部   -> HW.ts
  */
 
-import {get, getshareCodeHW, o2s, randomString, requireConfig, wait} from './TS_USER_AGENTS'
+import {get, getshareCodeHW, o2s, randomString, getCookie, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st";
 
 let cookie: string = '', res: any = '', UserName: string, data: any, h5stTool: any = new H5ST("ce6c2", "jdltapp;", "9929056438203725")
@@ -19,7 +19,7 @@ interface INVITE {
 let shareCodes: INVITE[] = [], shareCodesHW = [], shareCodesSelf: INVITE[] = []
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     try {
       cookie = value

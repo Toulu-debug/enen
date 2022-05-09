@@ -4,14 +4,15 @@
  */
 
 import axios from "axios";
-import {requireConfig, requestAlgo, o2s, wait, randomWord} from "./TS_USER_AGENTS";
+import {getCookie, o2s, wait, randomWord} from "./TS_USER_AGENTS";
+import {requestAlgo} from "./utils/V3";
 import {sendNotify} from './sendNotify'
 
 let cookie: string = '', res: any = '', message: string = '';
 
 !(async () => {
-  await requestAlgo(10001)
-  let cookiesArr: string[] = await requireConfig();
+  await requestAlgo('10001')
+  let cookiesArr: string[] = await getCookie();
   cookie = cookiesArr[Math.floor(Math.random() * cookiesArr.length)];
 
   /*

@@ -1,5 +1,5 @@
 import {sendNotify} from './sendNotify';
-import USER_AGENT, {get, getShareCodePool, o2s, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {get, getShareCodePool, o2s, getCookie, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st";
 
 let cookie: string = '', res: any = '', data: any, UserName: string
@@ -7,7 +7,7 @@ let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: strin
 let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, "8389547038003203")
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

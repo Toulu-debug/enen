@@ -7,7 +7,7 @@ import axios from "axios"
 import * as path from "path"
 import {format} from 'date-fns'
 import {sendNotify} from './sendNotify'
-import {requireConfig, wait, exceptCookie, randomWord} from "./TS_USER_AGENTS"
+import {getCookie, wait, exceptCookie, randomWord} from "./TS_USER_AGENTS"
 import {requestAlgo, geth5st} from "./utils/V3";
 
 let cookie: string = '', res: any = '', UserName: string
@@ -38,7 +38,7 @@ interface Params {
 
 !(async () => {
   await requestAlgo('c0ff1')
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   let except: string[] = exceptCookie(path.basename(__filename))
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value

@@ -3,7 +3,7 @@
  * cron: 15 8,20 * * *
  */
 
-import USER_AGENT, {requireConfig, wait, o2s, getshareCodeHW, post} from './TS_USER_AGENTS'
+import USER_AGENT, {getCookie, wait, o2s, getshareCodeHW, post} from './TS_USER_AGENTS'
 
 interface ShareCode {
   activityId: number,
@@ -15,7 +15,7 @@ interface ShareCode {
 let cookie: string = '', UserName: string = '', res: any = '', message: string = '', shareCodes: ShareCode[] = [], shareCodesSelf: ShareCode[] = [], shareCodesHW: any = [], black: string[] = []
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   let activityId: number
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
@@ -136,6 +136,7 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
         break
       } else if (res.data.bizCode === '4001') {
         console.log('助力码过期')
+        full.push(code.itemId)
       } else {
         o2s(res, 'error')
       }

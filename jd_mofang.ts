@@ -4,7 +4,7 @@
  * cron: 10 9,12,15 * * *
  */
 
-import {requireConfig, wait, post, get} from './TS_USER_AGENTS'
+import {getCookie, wait, post, get} from './TS_USER_AGENTS'
 import {existsSync} from "fs";
 import * as dotenv from 'dotenv'
 
@@ -18,7 +18,7 @@ let rabbitToken: string = process.env.RABBIT_TOKEN || '', tg_id: string = proces
   } else {
     console.log('./test/mf_log not found')
   }
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: any = await getCookie()
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i]
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

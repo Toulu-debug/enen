@@ -6,13 +6,13 @@
 import * as path from "path"
 import {sendNotify} from './sendNotify'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
-import USER_AGENT, {get, requireConfig, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
+import USER_AGENT, {get, getCookie, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
 import {pushplus} from "./utils/pushplus";
 
 let cookie: string = '', UserName: string, allMessage: string = '', res: any = ''
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   let except: string[] = exceptCookie(path.basename(__filename))
   let orders: any = {}, pushplusArr: { pt_pin: string, pushplus: string }[], pushplusUser: string[] = []
   try {

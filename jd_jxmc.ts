@@ -6,7 +6,7 @@
 import * as path from "path"
 import {Md5} from "ts-md5"
 import {sendNotify} from './sendNotify'
-import {requireConfig, getBeanShareCode, getFarmShareCode, wait, o2s, randomWord, getshareCodeHW, exceptCookie, get} from './TS_USER_AGENTS'
+import {getCookie, getBeanShareCode, getFarmShareCode, wait, o2s, randomWord, getshareCodeHW, exceptCookie, get} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st";
 import {existsSync, readFileSync} from "fs";
 import axios from "axios";
@@ -27,7 +27,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     }
   }
 
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: any = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

@@ -5,7 +5,7 @@
 
 import axios from 'axios';
 import * as path from 'path';
-import {requireConfig, wait, exceptCookie, randomWord} from './TS_USER_AGENTS';
+import {getCookie, wait, exceptCookie, randomWord} from './TS_USER_AGENTS';
 import {requestAlgo, geth5st} from "./utils/V3";
 import {existsSync, readFileSync} from "fs";
 
@@ -23,7 +23,7 @@ let {cow, token} = require('./utils/jd_jxmc.js'), ua: string = 'jdpingou;';
   }
 
   await requestAlgo('00df8', 'jdpingou;');
-  let cookiesArr: string[] = await requireConfig();
+  let cookiesArr: string[] = await getCookie();
   let except: string[] = exceptCookie(path.basename(__filename));
 
   for (let i = 0; i < cookiesArr.length; i++) {

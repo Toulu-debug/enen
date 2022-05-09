@@ -4,13 +4,13 @@
  */
 
 import {sendNotify} from './sendNotify'
-import {post, requireConfig, wait} from './TS_USER_AGENTS'
+import {post, getCookie, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 
 let cookie: string = '', res: any = '', UserName: string, msg: string = '', h5stTool: H5ST = new H5ST("9a38a", 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN', "6468223550974529");
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

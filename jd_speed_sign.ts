@@ -3,13 +3,13 @@
  * cron: 45 0 * * *
  */
 
-import {requireConfig, wait, post} from './TS_USER_AGENTS'
+import {getCookie, wait, post} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 
 let cookie: string = '', res: any = '', UserName: string = '', h5stTool: H5ST = new H5ST("15097", "jdltapp;", "8317250570595470");
 
 !(async () => {
-  let cookiesArr: any = await requireConfig()
+  let cookiesArr: any = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

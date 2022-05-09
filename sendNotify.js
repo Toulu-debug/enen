@@ -447,7 +447,7 @@ function ddBotNotify(text, desp) {
       json: {
         "msgtype": "text",
         "text": {
-          "content": ` ${text}\n\n${desp}`
+          "content": `${text}\n\n${desp}`
         }
       },
       headers: {

@@ -4,7 +4,7 @@
 //  */
 //
 // import axios from 'axios'
-// import {requireConfig, wait, requestAlgo, h5st, randomWord} from './TS_USER_AGENTS'
+// import {getCookie, wait, requestAlgo, h5st, randomWord} from './TS_USER_AGENTS'
 //
 // let cookie: string = '', res: any = ''
 // process.env.CFD_LOOP_DELAY ? console.log('设置延迟:', parseInt(process.env.CFD_LOOP_DELAY)) : console.log('设置延迟:10000~25000随机')
@@ -12,7 +12,7 @@
 // let UserName: string, index: number
 // !(async () => {
 //   await requestAlgo()
-//   let cookiesArr: string[] = await requireConfig()
+//   let cookiesArr: string[] = await getCookie()
 //
 //   while (1) {
 //     if (new Date().getHours() === 0 && new Date().getMinutes() < 10)

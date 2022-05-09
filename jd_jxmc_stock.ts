@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 import {readFileSync, writeFileSync, existsSync} from "fs";
-import {requireConfig, wait, getRandomNumberByRange, randomWord, randomString} from './TS_USER_AGENTS';
+import {getCookie, wait, getRandomNumberByRange, randomWord, randomString} from './TS_USER_AGENTS';
 import {requestAlgo, geth5st} from "./utils/V3";
 import {token} from './utils/jd_jxmc.js'
 import {sendNotify} from './sendNotify'
@@ -15,7 +15,7 @@ let cookie: string = '', res: any = '', UserName: string, jxToken: { farm_jstoke
 
 !(async () => {
   await requestAlgo('00df8');
-  let cookiesArr: string[] = await requireConfig();
+  let cookiesArr: string[] = await getCookie();
   cookie = cookiesArr[getRandomNumberByRange(0, cookiesArr.length)];
   UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
   if (!existsSync('./json/jxmc_stock.json')) {

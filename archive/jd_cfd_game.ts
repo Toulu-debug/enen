@@ -4,7 +4,7 @@
 //  */
 //
 // import axios from 'axios'
-// import {requireConfig, wait, requestAlgo, h5st, getJxToken, randomWord} from './TS_USER_AGENTS'
+// import {getCookie, wait, requestAlgo, h5st, getJxToken, randomWord} from './TS_USER_AGENTS'
 //
 // let cookie: string = '', res: any = '', UserName: string, index: number, token: any = {}
 //
@@ -64,7 +64,7 @@
 //
 // !(async () => {
 //   await requestAlgo()
-//   let cookiesArr: string[] = await requireConfig()
+//   let cookiesArr: string[] = await getCookie()
 //   for (let i = 0; i < cookiesArr.length; i++) {
 //     cookie = cookiesArr[i]
 //     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

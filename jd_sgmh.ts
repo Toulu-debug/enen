@@ -3,14 +3,14 @@
  * cron: 20 8 * * *
  */
 
-import {requireConfig, getShareCodePool, wait} from "./TS_USER_AGENTS"
+import {getCookie, getShareCodePool, wait} from "./TS_USER_AGENTS"
 import axios from "axios";
 
 let cookie: string = '', UserName: string, res: any
 let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: string[] = []
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

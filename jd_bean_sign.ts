@@ -1,13 +1,13 @@
 import axios from "axios";
 import {readFileSync, writeFileSync, unlinkSync} from "fs";
 import {execSync} from "child_process";
-import {requireConfig} from "./TS_USER_AGENTS";
+import {getCookie} from "./TS_USER_AGENTS";
 import {sendNotify} from './sendNotify';
 
 let message: string = '';
 
 async function main() {
-  let cookiesArr: string[] = await requireConfig();
+  let cookiesArr: string[] = await getCookie();
   let cookiesNobyDa: {
     cookie: string
   }[] = []

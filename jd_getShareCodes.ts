@@ -2,13 +2,13 @@
  * cron: 59 23 * * 0
  */
 
-import {requireConfig, wait} from "./TS_USER_AGENTS";
+import {getCookie, wait} from "./TS_USER_AGENTS";
 import {bean, farm, pet, factory, sgmh, jxfactory, health} from "./utils/shareCodesTool";
 
 let cookie: string = '', UserName: string, index: number
 let beans: string = '', farms: string = '', healths: string = '', pets: string = '', factorys: string = '', jxfactorys: string = '', sgmhs: string = '', s: string = '';
 !(async () => {
-  let cookiesArr: string[] = await requireConfig();
+  let cookiesArr: string[] = await getCookie();
   for (let i = 0; i < cookiesArr.length; i++) {
     cookie = cookiesArr[i];
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

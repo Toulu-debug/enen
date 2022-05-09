@@ -7,7 +7,7 @@
  * 本地sign算法 import {getSign} from './test/sign'
  */
 
-import USER_AGENT, {post, requireConfig, wait} from './TS_USER_AGENTS'
+import USER_AGENT, {post, getCookie, wait} from './TS_USER_AGENTS'
 import {existsSync} from "fs";
 
 let cookie: string = '', res: any = '', data: any, UserName: string, PANDA_TOKEN: string = undefined, getSign: any = undefined
@@ -33,7 +33,7 @@ if (existsSync('./test/sign.ts')) {
 }
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])

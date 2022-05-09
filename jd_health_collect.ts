@@ -5,12 +5,12 @@
 
 import axios from "axios";
 import * as path from "path"
-import USER_AGENT, {requireConfig, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
+import USER_AGENT, {getCookie, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
 
 let cookie: string = '', UserName: string, res: any = ''
 
 !(async () => {
-  let cookiesArr: string[] = await requireConfig()
+  let cookiesArr: string[] = await getCookie()
   let except: string[] = exceptCookie(path.basename(__filename))
 
   for (let [index, value] of cookiesArr.entries()) {
