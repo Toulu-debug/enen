@@ -9,6 +9,7 @@ import {exceptCookie, get, o2s, post, getCookie, wait} from './TS_USER_AGENTS'
 import {H5ST} from "./utils/h5st"
 import {getDate} from "date-fns";
 import * as path from "path"
+import * as dotenv from 'dotenv'
 
 let cookie: string = '', res: any = '', UserName: string = '', fp_448de: string = '' || process.env.FP_448DE, fp_b6ac3: string = '' || process.env.FP_B6AC3
 let assets: number = 0, captainId: string = '', h5stTool: H5ST = null
@@ -16,6 +17,7 @@ let assets: number = 0, captainId: string = '', h5stTool: H5ST = null
 !(async () => {
   let cookiesArr: string[] = await getCookie()
   let except: string[] = exceptCookie(path.basename(__filename))
+  dotenv.config()
 
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
