@@ -1,20 +1,20 @@
-import {sendNotify} from './sendNotify'
-import {pushplus} from "./utils/pushplus"
-import USER_AGENT, {get, getCookie, wait} from './TS_USER_AGENTS'
+import USER_AGENT from './TS_USER_AGENTS'
+import {JDHelloWorld} from "./JDHelloWorld2";
 
-let cookie: string = '', res: any = '', UserName: string
-let message: string = ''
+class Jd_queryRedpacket extends JDHelloWorld {
+  constructor() {
+    super();
+  }
 
-!(async () => {
-  let cookiesArr: string[] = await getCookie()
-  for (let [index, value] of cookiesArr.entries()) {
-    cookie = value
-    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
-    res = await get(`https://m.jingxi.com/user/info/QueryUserRedEnvelopesV2?type=1&orgFlag=JD_PinGou_New&page=1&cashRedType=1&redBalanceFlag=1&channel=1&_=${Date.now()}&sceneval=2&g_login_type=1&g_ty=ls`, {
+  async init() {
+    await this.run(new Jd_queryRedpacket)
+  }
+
+  async main(user: { UserName: string, cookie: string }) {
+    let res: any = await this.get(`https://m.jingxi.com/user/info/QueryUserRedEnvelopesV2?type=1&orgFlag=JD_PinGou_New&page=1&cashRedType=1&redBalanceFlag=1&channel=1&_=${Date.now()}&sceneval=2&g_login_type=1&g_ty=ls`, {
       'Host': 'm.jingxi.com',
       'Referer': 'https://st.jingxi.com/my/redpacket.shtml',
-      "Cookie": cookie,
+      "Cookie": user.cookie,
       'User-Agent': USER_AGENT
     })
     let day: number = new Date().getDay(), jdRed: number = 0, jdRedExp: number = 0
@@ -29,14 +29,14 @@ let message: string = ''
       }
     }
     console.log(jdRed, '  今日过期：', jdRedExp)
-    let text: string = `【账号】  ${UserName}\n京东红包  ${jdRed}\n今日过期  ${jdRedExp}`
-    await pushplus('京东红包', text)
-
-    message += `${text}\n\n`
-    await wait(2000)
+    let msg = `【账号】  ${user.UserName}\n京东红包  ${jdRed}\n今日过期  ${jdRedExp}\n\n`
+    return {
+      msg: msg
+    }
   }
-  await sendNotify('京东红包', message)
-})()
+}
+
+new Jd_queryRedpacket().init().then().catch()
 
 function add(arg1: number, arg2: number) {
   let r1, r2, m

@@ -5,6 +5,8 @@ interface User {
     UserAgent: string;
 }
 declare class JDHelloWorld {
+    scriptName: string;
+    constructor(scriptName?: string);
     getCookie(check?: boolean): Promise<string[]>;
     checkCookie(cookie: string): Promise<boolean>;
     exceptCookie(filename?: string): any;

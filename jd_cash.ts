@@ -7,20 +7,18 @@
  * 本地sign算法 import {getSign} from './test/sign'
  */
 
-import {JDHelloWorld} from "./JDHelloWorld";
-
-import USER_AGENT, {o2s} from './TS_USER_AGENTS'
+import {User, JDHelloWorld} from "./JDHelloWorld";
 import {getSign} from "./test/sign";
 
 class CASH extends JDHelloWorld {
-  cookie: string;
+  cookie: string
 
   constructor() {
     super();
   }
 
   async init() {
-    await this.run(new CASH)
+    await this.run(new CASH())
   }
 
   async api(fn: string, body: object) {
@@ -28,15 +26,12 @@ class CASH extends JDHelloWorld {
     return await this.post(`https://api.m.jd.com/client.action?functionId=${fn}`, sign, {
       'Host': 'api.m.jd.com',
       'Cookie': this.cookie,
-      'content-type': 'application/x-www-form-urlencoded',
-      'user-agent': USER_AGENT,
-      'referer': ''
+      'user-agent': 'jdapp;',
     })
   }
 
-  async main(cookie: string) {
-    this.cookie = cookie
-    await this.wait(5000)
+  async main(user: User) {
+    this.cookie = user.cookie
     let res: any = await this.api('cash_homePage', {})
     if (res.data.result.signedStatus !== 1) {
       console.log('今日未签到')
@@ -55,8 +50,6 @@ class CASH extends JDHelloWorld {
 
     for (let i = 0; i < 10; i++) {
       res = await this.api('cash_homePage', {})
-      o2s(res)
-
       if (res.data.result.taskInfos.filter(item => type.includes(item.type) && item.doTimes === item.times).length === taskNum) {
         console.log('任务全部完成')
         break
