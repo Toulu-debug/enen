@@ -2,7 +2,7 @@ import axios from "axios"
 import {Md5} from "ts-md5"
 import * as dotenv from "dotenv"
 import {existsSync, readFileSync} from "fs"
-import {sendNotify} from './test/sendNotify'
+import {sendNotify} from './sendNotify'
 
 dotenv.config()
 const USER_AGENTS_ARR: string[] = [
