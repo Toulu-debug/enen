@@ -1,5 +1,4 @@
-import USER_AGENT from './TS_USER_AGENTS'
-import {JDHelloWorld} from "./JDHelloWorld2";
+import {JDHelloWorld, User} from "./JDHelloWorld";
 
 class Jd_queryRedpacket extends JDHelloWorld {
   constructor() {
@@ -7,15 +6,15 @@ class Jd_queryRedpacket extends JDHelloWorld {
   }
 
   async init() {
-    await this.run(new Jd_queryRedpacket)
+    await this.run(new Jd_queryRedpacket())
   }
 
-  async main(user: { UserName: string, cookie: string }) {
+  async main(user: User) {
     let res: any = await this.get(`https://m.jingxi.com/user/info/QueryUserRedEnvelopesV2?type=1&orgFlag=JD_PinGou_New&page=1&cashRedType=1&redBalanceFlag=1&channel=1&_=${Date.now()}&sceneval=2&g_login_type=1&g_ty=ls`, {
       'Host': 'm.jingxi.com',
       'Referer': 'https://st.jingxi.com/my/redpacket.shtml',
       "Cookie": user.cookie,
-      'User-Agent': USER_AGENT
+      'User-Agent': user.UserAgent
     })
     let day: number = new Date().getDay(), jdRed: number = 0, jdRedExp: number = 0
     for (let j of res.data.useRedInfo?.redList || []) {

@@ -13,7 +13,7 @@ declare class JDHelloWorld {
     get(url: string, headers?: any): Promise<unknown>;
     post(url: string, data: any, headers?: any): Promise<object>;
     wait(ms?: number): Promise<unknown>;
-    o2s(obj: object): void;
+    o2s(obj: object, title?: string): void;
     run(son: {
         main: Function;
     }): Promise<void>;

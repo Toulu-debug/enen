@@ -1,6 +1,6 @@
 import {User, JDHelloWorld} from "./JDHelloWorld";
 
-class TASK extends JDHelloWorld {
+class Joy_Park extends JDHelloWorld {
   user: User
 
   constructor() {
@@ -8,7 +8,7 @@ class TASK extends JDHelloWorld {
   }
 
   async init() {
-    await this.run(new TASK())
+    await this.run(new Joy_Park())
   }
 
   async api(fn: string, body: Object): Promise<object> {
@@ -38,4 +38,4 @@ class TASK extends JDHelloWorld {
   }
 }
 
-new TASK().init().then()
+new Joy_Park().init().then()
