@@ -5,7 +5,7 @@
  */
 
 import {H5ST} from "./utils/h5st"
-import {User, JDHelloWorld} from "./JDHelloWorld";
+import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 
 class Wechat_sign extends JDHelloWorld {
   constructor() {

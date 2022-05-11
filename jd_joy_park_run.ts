@@ -7,7 +7,7 @@
 
 import {H5ST} from "./utils/h5st"
 import {getDate} from "date-fns";
-import {JDHelloWorld, User} from "./JDHelloWorld";
+import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
 class Joy_Park_Run extends JDHelloWorld {
   teamTool: H5ST

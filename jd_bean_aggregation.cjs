@@ -2,7 +2,7 @@
  * select name, bean from bean_change where date=today and amount > 0 group by name order by amount desc
  */
 
-const {JDHelloWorld} = require("./JDHelloWorld")
+const {JDHelloWorld} = require("./TS_JDHelloWorld")
 const {getDate} = require("date-fns");
 const ConsoleGrid = require("console-grid");
 

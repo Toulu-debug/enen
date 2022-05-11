@@ -1,4 +1,4 @@
-import {User, JDHelloWorld} from "./JDHelloWorld";
+import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 
 class Joy_Park extends JDHelloWorld {
   user: User

@@ -7,7 +7,7 @@
  * 本地sign算法 import {getSign} from './test/sign'
  */
 
-import {User, JDHelloWorld} from "./JDHelloWorld";
+import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 import {getSign} from "./test/sign";
 
 class CASH extends JDHelloWorld {

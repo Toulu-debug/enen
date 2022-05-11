@@ -1,4 +1,4 @@
-import {JDHelloWorld, User} from "./JDHelloWorld";
+import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
 class Jd_queryRedpacket extends JDHelloWorld {
   constructor() {
