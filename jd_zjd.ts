@@ -82,6 +82,7 @@ interface Tuan {
   o2s(shareCodeSelf)
   await wait(2000)
 
+  let full: string[] = []
   for (let [index, value] of cookiesArr.entries()) {
     if (shareCodeHW.length === 0) {
       shareCodeHW = await getshareCodeHW('zjd');
@@ -96,6 +97,8 @@ interface Tuan {
 
     await zjdInit()
     for (let code of shareCode) {
+      if (full.includes(code.assistedPinEncrypted))
+        continue
       try {
         console.log(`账号${index + 1} ${UserName} 去助力 ${code.assistedPinEncrypted.replace('\n', '')}`)
         res = await api('vvipclub_distributeBean_assist', {"activityIdEncrypted": code.activityIdEncrypted, "assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.assistedPinEncrypted, "channel": "FISSION_BEAN", "launchChannel": "undefined"})
@@ -107,6 +110,7 @@ interface Tuan {
           break
         } else if (res.resultCode === '2400205') {
           console.log('对方已成团')
+          full.push(code.assistedPinEncrypted)
         } else if (res.resultCode === '9200011') {
           console.log('已助力过')
         } else if (res.success) {

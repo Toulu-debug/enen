@@ -14,6 +14,8 @@ declare class JDHelloWorld {
     post(url: string, data: any, headers?: any): Promise<object>;
     wait(ms?: number): Promise<unknown>;
     o2s(obj: object, title?: string): void;
+    getShareCodePool(key: string, num: number): Promise<string[]>;
+    getRandomNumberByRange(start: number, end: number): number;
     run(son: {
         main: Function;
     }): Promise<void>;
