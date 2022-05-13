@@ -1,8 +1,8 @@
 /**
  * 汪汪乐园-跑步+组队
  * cron: 20 * * * *
- * export FP_448DE=""  // url: runningMyPrize => h5st.split(';')[1]
- * export FP_B6AC3=""  // url: runningOpenBox => h5st.split(';')[1]
+ * export FP_448DE=""
+ * export FP_B6AC3=""
  */
 
 import {H5ST} from "./utils/h5st"
@@ -23,7 +23,7 @@ class Joy_Park_Run extends JDHelloWorld {
     await this.run(new Joy_Park_Run())
   }
 
-  // 秒转时分秒
+  // 秒转分:秒
   secondsToMinutes(seconds: number) {
     let minutes: number = Math.floor(seconds / 60)
     let second: number = Math.floor(seconds % 60)
@@ -101,6 +101,33 @@ class Joy_Park_Run extends JDHelloWorld {
     })
   }
 
+  async startRunning(res: any, assets: number) {
+    if (!res.data.runningHomeInfo.nextRunningTime) {
+      console.log('终点目标', assets)
+      for (let i = 0; i < 5; i++) {
+        res = await this.api('runningOpenBox', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+        if (parseFloat(res.data.assets) >= assets) {
+          let assets: number = parseFloat(res.data.assets)
+          res = await this.api('runningPreserveAssets', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+          console.log('领取成功', assets)
+          break
+        } else {
+          if (res.data.doubleSuccess) {
+            console.log('翻倍成功', parseFloat(res.data.assets))
+            await this.wait(10000)
+          } else if (!res.data.doubleSuccess && !res.data.runningHomeInfo.runningFinish) {
+            console.log('开始跑步', parseFloat(res.data.assets))
+            await this.wait(10000)
+          } else {
+            console.log('翻倍失败')
+            break
+          }
+        }
+      }
+    }
+    await this.wait(3000)
+  }
+
   async main(user: User) {
     this.user = user
     let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.08')
@@ -167,6 +194,7 @@ class Joy_Park_Run extends JDHelloWorld {
       res = await this.runningPageHome()
       console.log('🧧', res.data.runningHomeInfo.prizeValue)
       console.log('💊', res.data.runningHomeInfo.energy)
+      let energy: number = res.data.runningHomeInfo.energy
       await this.wait(2000)
 
       console.log('⏳', this.secondsToMinutes(res.data.runningHomeInfo.nextRunningTime / 1000))
@@ -175,37 +203,16 @@ class Joy_Park_Run extends JDHelloWorld {
         await this.wait(res.data.runningHomeInfo.nextRunningTime + 3000)
         res = await this.runningPageHome()
         await this.wait(1000)
-      } else if (res.data.runningHomeInfo.nextRunningTime && res.data.runningHomeInfo.nextRunningTime / 1000 > 3000 && res.data.runningHomeInfo.energy !== 0) {
+      }
+      await this.startRunning(res, assets)
+
+      for (let i = 0; i < energy; i++) {
         console.log('💉')
         res = await this.api('runningUseEnergyBar', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
         console.log(res.errMsg)
         res = await this.runningPageHome()
+        await this.startRunning(res, assets)
         await this.wait(1000)
-      }
-
-      if (!res.data.runningHomeInfo.nextRunningTime) {
-        console.log('终点目标', assets)
-        for (let i = 0; i < 10; i++) {
-          res = await this.api('runningOpenBox', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
-          if (parseFloat(res.data.assets) >= assets) {
-            let assets: number = parseFloat(res.data.assets)
-            res = await this.api('runningPreserveAssets', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
-            console.log('领取成功', assets)
-            break
-          } else {
-            if (res.data.doubleSuccess) {
-              console.log('翻倍成功', parseFloat(res.data.assets))
-              await this.wait(5000)
-            } else if (!res.data.doubleSuccess && !res.data.runningHomeInfo.runningFinish) {
-              console.log('开始跑步', parseFloat(res.data.assets))
-              await this.wait(5000)
-            } else {
-              console.log('翻倍失败')
-              break
-            }
-          }
-          await this.wait(5000)
-        }
       }
 
       res = await this.runningPageHome()
