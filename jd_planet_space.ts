@@ -33,12 +33,21 @@ class Planet_Space extends JDHelloWorld {
     for (let i = 0; i < 4; i++) {
       res = await this.api('explorePlanet_taskList', {"activityId": 1})
       let encryptProjectId: string = res.data.result.componentTaskPid
+      let specialComponentTaskPid: string = res.data.result.specialComponentTaskPid
+      let specialComponentTaskInfo: any[] = res.data.result.specialComponentTaskInfo
+      let componentTaskInfo: any[] = res.data.result.componentTaskInfo
       let remain: boolean = res.data.result.componentTaskInfo.some(item => !item.taskDesc.includes('加入品牌') && item.completedItemCount !== item.groupItemCount)
+
+      for (let t of specialComponentTaskInfo) {
+        console.log('特殊任务', t.taskDesc)
+        res = await this.api('explorePlanet_taskReport', {"activityId": 1, "encryptTaskId": t.encryptTaskId, "encryptProjectId": specialComponentTaskPid, "itemId": t.itemId})
+        console.log(res.data.biz_msg)
+      }
+
       console.log(remain)
       if (remain) {
-        for (let t of res.data.result.componentTaskInfo) {
+        for (let t of componentTaskInfo) {
           if (t.completedItemCount !== t.groupItemCount && !t.taskDesc.includes('加入品牌')) {
-            console.log(t.taskDesc)
             console.log(t.taskDesc)
             res = await this.api('explorePlanet_taskReport', {"activityId": 1, "encryptTaskId": t.encryptTaskId, "encryptProjectId": encryptProjectId, "itemId": t.itemId})
             await this.wait(t.waitDuration || 1000)
@@ -50,7 +59,20 @@ class Planet_Space extends JDHelloWorld {
         break
       }
     }
-    console.log('===')
+
+    res = await this.api('explorePlanet_homePage', {"channel": "1"})
+    let drawCardChance: number = res.data.result.drawCardChance || 0
+    console.log('抽奖次数', drawCardChance)
+    for (let i = 0; i < drawCardChance; i++) {
+      res = await this.api('explorePlanet_explore', {"activityId": 1})
+      this.o2s(res)
+      if (res.data.result.cardInfo) {
+        console.log('抽到卡片')
+      } else if (res.data.result.couponInfo) {
+        console.log('抽到券')
+      }
+      await this.wait(2000)
+    }
 
     res = await this.api('explorePlanet_taskList', {"activityId": 1})
     let code: string
@@ -65,6 +87,7 @@ class Planet_Space extends JDHelloWorld {
   }
 
   async help(users: User[]) {
+    this.o2s(this.shareCodeSelf, '内部助力码')
     let full: string[] = ['b'], shareCodeHW: string[] = []
     for (let user of users) {
       this.user = user
