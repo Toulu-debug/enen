@@ -146,7 +146,7 @@ class Joy_Park_Run extends JDHelloWorld {
       }
 
       for (let t of res?.data?.detailVos || []) {
-        if (getDate(new Date(t.createTime)) === new Date().getDate()) {
+        if (t.amount > 0 && getDate(new Date(t.createTime)) === new Date().getDate()) {
           sum = this.add(sum, t.amount)
           success++
         } else {
