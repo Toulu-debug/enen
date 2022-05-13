@@ -76,11 +76,11 @@ class Planet_Space extends JDHelloWorld {
 
     res = await this.api('explorePlanet_taskList', {"activityId": 1})
     let code: string
-    if (!res.result?.assistTaskInfo?.groupId) {
+    if (!res.data.result?.assistTaskInfo?.groupId) {
       res = await this.api('explorePlanet_openGroup', {"activityId": 1})
-      code = res.data.result.groupId
+      code = res.data.result.assistTaskInfo.groupId
     } else {
-      code = res.result.assistTaskInfo.groupId
+      code = res.data.result.assistTaskInfo.groupId
     }
     console.log('助力码', code)
     this.shareCodeSelf.push(code)
