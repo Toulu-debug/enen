@@ -36,7 +36,7 @@ class Wechat_sign extends JDHelloWorld {
     })
     if (res.data) {
       console.log('已签到', res.data.signDays, '天，奖励', res.data.rewardValue, '元')
-      return {msg: `【京东账号${user.i + 1}】  ${user.UserName}\n已签到  ${res.data.signDays}天\n奖励  ${res.data.rewardValue}元\n\n`}
+      return {msg: `【京东账号${user.index + 1}】  ${user.UserName}\n已签到  ${res.data.signDays}天\n奖励  ${res.data.rewardValue}元\n\n`}
     } else {
       console.log(res.message)
     }

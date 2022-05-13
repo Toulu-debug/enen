@@ -7,7 +7,7 @@
 
 import {zjdInit, zjdH5st} from "./utils/jd_zjd_tool.js";
 import {SHA256} from "crypto-js";
-import {JDHelloWorld, User} from "./JDHelloWorld2";
+import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
 let shareCodeSelf: Tuan[] = [], shareCode: Tuan[] = [], shareCodeHW: any = []
 

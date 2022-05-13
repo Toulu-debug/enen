@@ -3,7 +3,7 @@
  * CK1 -> 优先HW.ts
  */
 
-import {JDHelloWorld, User} from "./JDHelloWorld2";
+import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
 class Planet_Space extends JDHelloWorld {
   user: User
