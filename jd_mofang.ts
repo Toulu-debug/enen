@@ -4,9 +4,11 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
+import {Log} from "./log";
 
 class Mofang extends JDHelloWorld {
   user: User
+  mfTool: Log
 
   constructor() {
     super()
@@ -20,7 +22,7 @@ class Mofang extends JDHelloWorld {
     await this.wait(1000)
     return await this.post("https://api.m.jd.com/client.action", params, {
       'Content-Type': 'application/x-www-form-urlencoded',
-      "User-Agent": this.user.UserAgent,
+      "User-Agent": "MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
       'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2bf3XEEyWG11pQzPGkKpKX2GxJz2/index.html',
       'Origin': 'https://h5.m.jd.com',
       'Host': 'api.m.jd.com',
@@ -29,17 +31,13 @@ class Mofang extends JDHelloWorld {
   }
 
   async getLog(): Promise<string> {
-    let data = await this.get(`http://127.0.0.1:10007?fn=doInteractiveAssignment&uid=${encodeURIComponent(this.user.UserName)}`)
-    if (data !== 1 && data !== '1') {
-      return data.toString()
-    } else {
-      console.log('No log')
-      process.exit(0)
-    }
+    return await this.mfTool.main()
   }
 
   async main(user: User) {
     this.user = user
+    this.mfTool = new Log('50091', 'doInteractiveAssignment', 'XMFhPageh5')
+    await this.mfTool.init()
     let log: string = ''
     let res: any = await this.api("functionId=getInteractionHomeInfo&body=%7B%22sign%22%3A%22u6vtLQ7ztxgykLEr%22%7D&appid=content_ecology&client=wh5&clientVersion=1.0.0")
     let sign: string = res.result.taskConfig.projectId
@@ -61,7 +59,6 @@ class Mofang extends JDHelloWorld {
               console.log('已签到')
             }
           }
-
           for (let proInfo of t.ext.productsInfo ?? []) {
             if (proInfo.status === 1) {
               console.log(t.assignmentName)
