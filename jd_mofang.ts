@@ -38,9 +38,10 @@ class Mofang extends JDHelloWorld {
     this.user = user
     this.mfTool = new Log('50091', 'doInteractiveAssignment', 'XMFhPageh5')
     await this.mfTool.init()
-    let log: string = ''
-    let res: any = await this.api("functionId=getInteractionHomeInfo&body=%7B%22sign%22%3A%22u6vtLQ7ztxgykLEr%22%7D&appid=content_ecology&client=wh5&clientVersion=1.0.0")
-    let sign: string = res.result.taskConfig.projectId
+    let log: string = '', res: any
+    res = await this.api("functionId=getInteractionHomeInfo&body=%7B%22sign%22%3A%22u6vtLQ7ztxgykLEr%22%7D&appid=content_ecology&client=wh5&clientVersion=1.0.0")
+
+    let sign: string = res.result.taskConfig.projectId, rewardSign: string = res.result.giftConfig.projectId
 
     res = await this.api(`functionId=queryInteractiveInfo&body=%7B%22encryptProjectId%22%3A%22${sign}%22%2C%22sourceCode%22%3A%22acexinpin0823%22%2C%22ext%22%3A%7B%7D%7D&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
     for (let t of res.assignmentList) {
@@ -115,6 +116,32 @@ class Mofang extends JDHelloWorld {
         }
       }
     }
+
+    res = await this.api(`functionId=queryInteractiveRewardInfo&body=${encodeURIComponent(JSON.stringify({"encryptProjectId": rewardSign, "sourceCode": "acexinpin0823", "ext": {"needExchangeRestScore": "1"}}))}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+    let score: number = res.exchangeRestScoreMap["367"]
+    console.log('当前碎片', score)
+
+    if (score >= 3) {
+      log = await this.getLog()
+      res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({"encryptProjectId": rewardSign, "encryptAssignmentId": "khdCzL9YRdYjh3dWFXfZLteUTYu", "sourceCode": "acexinpin0823", "itemId": "", "actionType": "", "completionFlag": "", "ext": {"exchangeNum": 1}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFDHh5"}})}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+      if (res.subCode === '0') {
+        console.log('兑换成功', res.rewardsInfo.successRewards['3'][0].rewardName)
+        score -= 3
+      } else {
+        console.log('兑换失败', res.msg)
+      }
+    }
+    if (score >= 1) {
+      log = await this.getLog()
+      res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({"encryptProjectId": rewardSign, "encryptAssignmentId": "2VUEMo9KjtktsQNvb2yHED2m2oCh", "sourceCode": "acexinpin0823", "itemId": "", "actionType": "", "completionFlag": "", "ext": {"exchangeNum": 1}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFDHh5"}})}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+      if (res.subCode === '0') {
+        console.log('兑换成功', res.rewardsInfo.successRewards['3'][0].rewardName)
+        score -= 1
+      } else {
+        console.log('兑换失败', res.msg)
+      }
+    }
+    console.log('当前碎片', score)
   }
 }
 
