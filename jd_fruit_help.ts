@@ -7,20 +7,19 @@
  * cron: 35 0,3,5 * * *
  */
 
-import {User, JDHelloWorld} from "./JDHelloWorld2";
+import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 import {getDate} from "date-fns"
 import {H5ST} from "./utils/h5st"
+import * as dotenv from "dotenv"
 
+dotenv.config()
 let res: any = '', data: any = '', shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
 
 class Fruit_Help extends JDHelloWorld {
   user: User
   h5stTool: H5ST
   message: string = ''
-  log: {
-    help: string,
-    runTimes: string
-  }
+  log: { help: string, runTimes: string }
 
   constructor() {
     super()

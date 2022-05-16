@@ -4,7 +4,7 @@
  */
 
 import {H5ST} from "./utils/h5st"
-import {JDHelloWorld, User} from "./JDHelloWorld2";
+import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
 class Speed_Sign extends JDHelloWorld {
   cookie: string
