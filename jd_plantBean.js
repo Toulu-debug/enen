@@ -30,7 +30,7 @@ console.log('\n====================Hello World====================\n')
 //Node.js用户请在jdCookie.js处填写京东ck;
 //ios等软件用户直接用NobyDa的jd cookie
 let jdNotify = true;  //是否开启静默运行。默认true开启
-let cookiesArr = [], cookie = '', jdPlantBeanShareArr = [], isBox = false, notify, newShareCodes, option, message,
+let cookiesArr = [], cookie = '', notify, newShareCodes, option, message,
   subTitle;
 //京东接口地址
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
@@ -633,7 +633,12 @@ function requireConfig() {
     notify = $.isNode() ? require('./sendNotify') : '';
     //Node.js用户请在jdCookie.js处填写京东ck;
     const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
-    const jdPlantBeanShareCodes = $.isNode() ? require('./jdPlantBeanShareCodes.js') : '';
+    let jdPlantBeanShareCodes = ''
+    if ($.isNode()) {
+      const dotenv = require('dotenv');
+      dotenv.config();
+      jdPlantBeanShareCodes = require('./jdPlantBeanShareCodes')
+    }
     //IOS等用户直接用NobyDa的jd cookie
     if ($.isNode()) {
       Object.keys(jdCookieNode).forEach((item) => {
