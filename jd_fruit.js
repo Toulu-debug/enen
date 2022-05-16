@@ -21,7 +21,6 @@ if ($.isNode() && process.env.CC_NOHELPAFTER8) {
     }
   }
 }
-const fs = require('fs');
 let boolneedUpdate = false;
 let TempShareCache = [];
 let WP_APP_TOKEN_ONE = "";
@@ -41,6 +40,7 @@ let NoNeedCodes = [];
       subTitle = '';
       option = {};
       $.retry = 0;
+      await shareCodesFormat();
       lnrun++;
       await jdFruit();
       if (lnrun === 5) {
@@ -69,6 +69,24 @@ async function jdFruit() {
       message = `【水果名称】${$.farmInfo.farmUserPro.name}\n`;
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
       message += `【已兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`;
+
+      try {
+        let myShareCode = $.farmInfo.farmUserPro.shareCode
+        console.log('助力码', myShareCode)
+        await $.wait(1000)
+        for (let k = 0; k < 5; k++) {
+          try {
+            await runTimes(myShareCode)
+            break
+          } catch (e) {
+            console.log('runTimes Error', e)
+            await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+          }
+        }
+      } catch (e) {
+        console.log('上报模块出错', e)
+      }
+
       await masterHelpShare();//助力好友
       if ($.farmInfo.treeState === 2 || $.farmInfo.treeState === 3) {
         option['open-url'] = urlSchema;
@@ -1435,6 +1453,65 @@ function requireConfig() {
     }
     console.log(`您提供了${$.shareCodesArr.length}个账号的农场助力码\n`);
     resolve()
+  })
+}
+
+function shareCodesFormat() {
+  return new Promise(async resolve => {
+    newShareCodes = [];
+    if ($.shareCodesArr[$.index - 1]) {
+      newShareCodes = $.shareCodesArr[$.index - 1].split('@');
+    } else {
+      console.log(`由于您第${$.index}个京东账号未提供shareCode,将采纳本脚本自带的助力码\n`)
+      const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
+      newShareCodes = shareCodes[tempIndex] ? shareCodes[tempIndex].split('@') : []
+    }
+    const readShareCodeRes = await readShareCode();
+    if (readShareCodeRes && readShareCodeRes.code === 200) {
+      newShareCodes = [...new Set([...newShareCodes, ...(readShareCodeRes.data || [])])];
+    }
+    console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
+    resolve();
+  })
+}
+
+function readShareCode() {
+  return new Promise(async resolve => {
+    $.get({url: `https://api.jdsharecode.xyz/api/farm/50`, timeout: 10000}, (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(JSON.stringify(err))
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (data) {
+            console.log(`随机取个50码放到您固定的互助码后面(不影响已有固定互助)`)
+            data = JSON.parse(data);
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+    await $.wait(10000);
+    resolve()
+  })
+}
+
+function runTimes(thisShareCode) {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes0509?activityId=farm&sharecode=${thisShareCode}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
   })
 }
 
