@@ -3,13 +3,13 @@ interface User {
     UserName: string;
     cookie: string;
     UserAgent: string;
+    end?: boolean;
 }
 declare class JDHelloWorld {
     scriptName: string;
-    needHelp: boolean;
     cookiesArr: string[];
     users: User[];
-    constructor(scriptName?: string, needHelp?: boolean);
+    constructor(scriptName?: string);
     getCookie(check?: boolean): Promise<void>;
     checkCookie(cookie: string): Promise<boolean>;
     exceptCookie(filename?: string): any;

@@ -7,7 +7,7 @@
  * cron: 35 0,3,5 * * *
  */
 
-import {User, JDHelloWorld} from "./TS_JDHelloWorld";
+import {User, JDHelloWorld} from "./JDHelloWorld2";
 import {getDate} from "date-fns"
 import {H5ST} from "./utils/h5st"
 
@@ -16,9 +16,18 @@ let res: any = '', data: any = '', shareCodeSelf: string[] = [], shareCodePool: 
 class Fruit_Help extends JDHelloWorld {
   user: User
   h5stTool: H5ST
+  message: string = ''
+  log: {
+    help: string,
+    runTimes: string
+  }
 
   constructor() {
     super()
+    this.log = {
+      help: '',
+      runTimes: ''
+    }
   }
 
   async init() {
@@ -48,14 +57,14 @@ class Fruit_Help extends JDHelloWorld {
     this.h5stTool = new H5ST("0c010", user.UserAgent, "8389547038003203")
 
     await this.h5stTool.__genAlgo()
-    if (Object.keys(shareCodeFile)[user.i]) {
-      shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[user.i]].split('@')
+    if (Object.keys(shareCodeFile)[user.index]) {
+      shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[user.index]].split('@')
     }
-    this.o2s(shareCodeSelf, `第${user.i + 1}个账号获取的内部互助`)
+    this.o2s(shareCodeSelf, `第${user.index + 1}个账号获取的内部互助`)
 
-    // message += `【账号${user.i + 1}】  ${UserName}\n`
-    // log.help += `【账号${user.i + 1}】  ${UserName}\n`
-    // log.runTimes += `【账号${user.i + 1}】  ${UserName}\n`
+    this.message += `【账号${user.index + 1}】  ${user.UserName}\n`
+    this.log.help += `【账号${user.index + 1}】  ${user.UserName}\n`
+    this.log.runTimes += `【账号${user.index + 1}】  ${user.UserName}\n`
 
     res = await this.api('initForFarm', {"version": 11, "channel": 3})
     if (res.code !== '0') {
@@ -69,11 +78,11 @@ class Fruit_Help extends JDHelloWorld {
           let today: number = getDate(new Date())
           res = await this.get(`https://api.jdsharecode.xyz/api/runTimes0509?activityId=farm&sharecode=${res.farmUserPro.shareCode}&today=${today}`)
           console.log(res)
-          // log.runTimes += `第${i + 1}次${res}\n`
+          this.log.runTimes += `第${i + 1}次${res}\n`
           break
         } catch (e) {
           console.log(`第${i + 1}次上报失败`, e)
-          // log.runTimes += `第${i + 1}次上报失败 ${typeof e === 'object' ? JSON.stringify(e) : e}\n`
+          this.log.runTimes += `第${i + 1}次上报失败 ${typeof e === 'object' ? JSON.stringify(e) : e}\n`
           await this.wait(this.getRandomNumberByRange(10000, 30000))
         }
       }
@@ -95,13 +104,13 @@ class Fruit_Help extends JDHelloWorld {
         console.log('不给自己助力')
       } else if (res.helpResult.code === '0') {
         console.log('助力成功,获得', res.helpResult.salveHelpAddWater)
-        // log.help += `助力成功 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
+        this.log.help += `助力成功 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
       } else if (res.helpResult.code === '8') {
         console.log('上限')
         break
       } else if (res.helpResult.code === '9') {
         console.log('已助力')
-        // log.help += `已助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
+        this.log.help += `已助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
       } else if (res.helpResult.code === '10') {
         console.log('已满')
       } else if (res.helpResult.remainTimes === 0) {
@@ -118,7 +127,6 @@ class Fruit_Help extends JDHelloWorld {
       return
     }
     await this.wait(3000)
-    // this.o2s(res, 'farmAssistInit')
     let farmAssistInit_waterEnergy: number = 0
     for (let t of res.assistStageList) {
       if (t.percentage === '100%' && t.stageStaus === 2) {
@@ -131,8 +139,14 @@ class Fruit_Help extends JDHelloWorld {
     }
     console.log('收到助力', res.assistFriendList.length)
     console.log('助力已领取', farmAssistInit_waterEnergy)
-    // message += `【助力已领取】  ${farmAssistInit_waterEnergy}\n`
-    // message += '\n\n'
+
+    this.message += `【助力已领取】  ${farmAssistInit_waterEnergy}\n\n`
+    this.message += '\n\n'
+    if (user.end) {
+      console.log(this.message)
+      console.log(this.log.help)
+      console.log(this.log.runTimes)
+    }
     await this.wait(60000)
   }
 }

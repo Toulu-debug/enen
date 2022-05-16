@@ -206,7 +206,10 @@ class Joy_Park_Run extends JDHelloWorld {
       }
       await this.startRunning(res, assets)
 
+      res = await this.runningPageHome()
       for (let i = 0; i < energy; i++) {
+        if (res.data.runningHomeInfo.nextRunningTime / 1000 < 3000)
+          break
         console.log('💉')
         res = await this.api('runningUseEnergyBar', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
         console.log(res.errMsg)

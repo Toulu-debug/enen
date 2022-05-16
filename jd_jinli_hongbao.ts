@@ -9,7 +9,6 @@
 import * as dotenv from 'dotenv'
 import {get, post, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
 
-let rabbitToken: string = process.env.RABBIT_TOKEN || '', tg_id: string = process.env.TG_ID || ''
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
 let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], log: string
 
@@ -148,25 +147,11 @@ async function api(fn: string, body: object) {
 }
 
 async function getLog() {
-  if (!rabbitToken && !tg_id) {
-    let data = await get(`https://api.jdsharecode.xyz/api/jlhb`)
-    if (data !== 1 && data !== '1') {
-      return data
-    } else {
-      console.log('No log')
-      process.exit(0)
-    }
+  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?t=${Date.now()}`)
+  if (data !== 1 && data !== '1') {
+    return data
   } else {
-    console.log('rabbit log')
-    let data: any = ''
-    for (let i = 0; i < 10; i++) {
-      try {
-        data = await get(`http://www.madrabbit.cf:8080/license/log?tg_id=${tg_id}&token=${rabbitToken}`)
-        break
-      } catch (e) {
-        console.log('rabbit log api error')
-      }
-    }
-    return `'"random":"${data.data.random}","log":"${data.data.log}"'`
+    console.log('No log')
+    process.exit(0)
   }
 }

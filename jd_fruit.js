@@ -385,7 +385,7 @@ async function doTenWaterAgain() {
   if ($.isNode() && process.env.FRUIT_BEAN_CARD) {
     jdFruitBeanCard = process.env.FRUIT_BEAN_CARD;
   }
-  if (beanCard>0 && `${jdFruitBeanCard}` === 'true' && JSON.stringify($.myCardInfoRes).match('限时翻倍')) {
+  if (beanCard > 0 && `${jdFruitBeanCard}` === 'true' && JSON.stringify($.myCardInfoRes).match('限时翻倍')) {
     console.log(`\n您设置的是水滴换豆功能,现在为您换豆`);
 
     for (let lncount = 0; lncount < beanCard; lncount++) {
@@ -1212,14 +1212,7 @@ async function inviteFriend() {
 
 // 助力好友API
 async function masterHelp() {
-  $.helpResult = await request(`initForFarm`, {
-    imageUrl: "",
-    nickName: "",
-    shareCode: arguments[0],
-    babelChannel: "3",
-    version: 2,
-    channel: 1
-  });
+  $.helpResult = await request(`initForFarm`, {"mpin": "", "utm_campaign": "t_335139774", "utm_medium": "appshare", "shareCode": arguments[0], "utm_term": "Wxfriends", "utm_source": "iosapp", "imageUrl": "", "nickName": "", "version": 14, "channel": 2, "babelChannel": 0});
 }
 
 /**

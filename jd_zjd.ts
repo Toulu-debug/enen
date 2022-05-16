@@ -23,7 +23,7 @@ class Zjd extends JDHelloWorld {
   zjd_open: number
 
   constructor() {
-    super('', true)
+    super()
   }
 
   async init() {
