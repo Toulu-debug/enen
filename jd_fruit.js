@@ -542,8 +542,11 @@ async function turntableFarm() {
         continue
       }
       await lotteryMasterHelp(code);
-      // console.log('天天抽奖助力结果',lotteryMasterHelpRes.helpResult)
-      if ($.lotteryMasterHelpRes?.helpResult?.code === '0') {
+      if (!$.lotteryMasterHelpRes?.helpResult?.code){
+        console.log($.lotteryMasterHelpRes)
+        break
+      }
+      if ($.lotteryMasterHelpRes.helpResult.code === '0') {
         console.log(`天天抽奖-助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}成功\n`)
       } else if ($.lotteryMasterHelpRes.helpResult.code === '11') {
         console.log(`天天抽奖-不要重复助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}\n`)
@@ -1164,14 +1167,7 @@ async function browserForTurntableFarm(type, adId) {
  * 天天抽奖拿好礼-助力API(每人每天三次助力机会)
  */
 async function lotteryMasterHelp() {
-  $.lotteryMasterHelpRes = await request(`initForFarm`, {
-    imageUrl: "",
-    nickName: "",
-    shareCode: arguments[0] + '-3',
-    babelChannel: "3",
-    version: 4,
-    channel: 1
-  });
+  $.lotteryMasterHelpRes = await request(`initForFarm`, {"shareCode": arguments[0] + "-3", "lng": "0.000000", "lat": "0.000000", "sid": "2871ac0252645ef0e2731aa7d03c1d3w", "un_area": "16_1341_1347_44750", "version": 14, "channel": 1, "babelChannel": 0});
 }
 
 //领取5人助力后的额外奖励API
