@@ -1,12 +1,28 @@
-import {JDHelloWorld, User} from "./TS_JDHelloWorld";
+import {JDHelloWorld, User} from "./JDHelloWorld2";
 
 class Jd_queryRedpacket extends JDHelloWorld {
   constructor() {
-    super();
+    super("京东红包");
   }
 
   async init() {
     await this.run(new Jd_queryRedpacket())
+  }
+
+  add(arg1: number, arg2: number) {
+    let r1, r2, m
+    try {
+      r1 = arg1.toString().split('.')[1].length
+    } catch (e) {
+      r1 = 0
+    }
+    try {
+      r2 = arg2.toString().split('.')[1].length
+    } catch (e) {
+      r2 = 0
+    }
+    m = Math.pow(10, Math.max(r1, r2))
+    return parseFloat(((arg1 * m + arg2 * m) / m).toFixed(2))
   }
 
   async main(user: User) {
@@ -22,9 +38,9 @@ class Jd_queryRedpacket extends JDHelloWorld {
       } else if (j.activityName.includes('极速版')) {
       } else if (j.orgLimitStr.includes('京东健康')) {
       } else {
-        jdRed = add(jdRed, j.balance)
+        jdRed = this.add(jdRed, j.balance)
         if (new Date(j.endTime * 1000).getDay() === day)
-          jdRedExp = add(jdRedExp, j.balance)
+          jdRedExp = this.add(jdRedExp, j.balance)
       }
     }
     console.log(jdRed, '  今日过期：', jdRedExp)
@@ -35,20 +51,4 @@ class Jd_queryRedpacket extends JDHelloWorld {
   }
 }
 
-new Jd_queryRedpacket().init().then().catch()
-
-function add(arg1: number, arg2: number) {
-  let r1, r2, m
-  try {
-    r1 = arg1.toString().split('.')[1].length
-  } catch (e) {
-    r1 = 0
-  }
-  try {
-    r2 = arg2.toString().split('.')[1].length
-  } catch (e) {
-    r2 = 0
-  }
-  m = Math.pow(10, Math.max(r1, r2))
-  return parseFloat(((arg1 * m + arg2 * m) / m).toFixed(2))
-}
+new Jd_queryRedpacket().init().then()

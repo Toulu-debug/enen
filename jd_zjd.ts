@@ -103,7 +103,6 @@ class Zjd extends JDHelloWorld {
   async help(users: User[]) {
     this.o2s(shareCodeSelf)
     await this.wait(2000)
-    let full: string[] = []
     for (let user of users) {
       if (shareCodeHW.length === 0) {
         shareCodeHW = await this.getshareCodeHW('zjd');
@@ -115,8 +114,6 @@ class Zjd extends JDHelloWorld {
       console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
       await zjdInit()
       for (let code of shareCode) {
-        if (full.includes(code.assistedPinEncrypted))
-          continue
         try {
           console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.assistedPinEncrypted.replace('\n', '')}`)
 
@@ -128,7 +125,6 @@ class Zjd extends JDHelloWorld {
             break
           } else if (res.resultCode === '2400205') {
             console.log('对方已成团')
-            full.push(code.assistedPinEncrypted)
           } else if (res.resultCode === '9200011') {
             console.log('已助力过')
           } else if (res.success) {
