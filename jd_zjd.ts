@@ -104,6 +104,7 @@ class Zjd extends JDHelloWorld {
     this.o2s(shareCodeSelf)
     await this.wait(2000)
     for (let user of users) {
+      this.cookie = user.cookie
       if (shareCodeHW.length === 0) {
         shareCodeHW = await this.getshareCodeHW('zjd');
       }
