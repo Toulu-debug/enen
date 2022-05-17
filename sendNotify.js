@@ -6,6 +6,9 @@
  * @param author 作者仓库等信息  例：`本脚本免费使用 By：xxx`
  * @returns {Promise<unknown>}
  */
+
+const dotenv = require('dotenv');
+dotenv.config();
 const querystring = require("querystring");
 const fs = require('fs');
 const {format} = require("date-fns");
@@ -390,10 +393,10 @@ function tgBotNotify(text, desp) {
       const options = {
         url: `https://${TG_API_HOST}/bot${TG_BOT_TOKEN}/sendMessage`,
         json: {
-            chat_id: `${TG_USER_ID}`,
-            text: `${text}\n\n${desp}`,
-            disable_web_page_preview:true,
-          },
+          chat_id: `${TG_USER_ID}`,
+          text: `${text}\n\n${desp}`,
+          disable_web_page_preview: true,
+        },
         headers: {
           'Content-Type': 'application/json',
         },
