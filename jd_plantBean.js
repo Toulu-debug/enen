@@ -635,9 +635,12 @@ function requireConfig() {
     const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
     let jdPlantBeanShareCodes = ''
     if ($.isNode()) {
-      const dotenv = require('dotenv');
-      dotenv.config();
-      jdPlantBeanShareCodes = require('./jdPlantBeanShareCodes')
+      try {
+        const dotenv = require('dotenv');
+        dotenv.config();
+        jdPlantBeanShareCodes = require('./jdPlantBeanShareCodes')
+      } catch (e) {
+      }
     }
     //IOS等用户直接用NobyDa的jd cookie
     if ($.isNode()) {

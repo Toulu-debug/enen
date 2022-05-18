@@ -541,9 +541,12 @@ function requireConfig() {
     const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
     let jdPetShareCodes = ''
     if ($.isNode()) {
-      const dotenv = require('dotenv');
-      dotenv.config();
-      jdPetShareCodes = require('./jdPetShareCodes')
+      try {
+        const dotenv = require('dotenv');
+        dotenv.config();
+        jdPetShareCodes = require('./jdPetShareCodes')
+      } catch (e) {
+      }
     }
     //IOS等用户直接用NobyDa的jd cookie
     if ($.isNode()) {
@@ -569,8 +572,6 @@ function requireConfig() {
       if ($.getdata('jd_pet_inviter')) $.shareCodesArr = $.getdata('jd_pet_inviter').split('\n').filter(item => !!item);
       console.log(`\nBoxJs设置的${$.name}好友邀请码:${$.getdata('jd_pet_inviter') ? $.getdata('jd_pet_inviter') : '暂无'}\n`);
     }
-    // console.log(`$.shareCodesArr::${JSON.stringify($.shareCodesArr)}`)
-    // console.log(`jdPetShareArr账号长度::${$.shareCodesArr.length}`)
     console.log(`您提供了${$.shareCodesArr.length}个账号的东东萌宠助力码\n`);
     resolve()
   })

@@ -118,7 +118,7 @@ class Health extends JDHelloWorld {
         try {
           if (res.data.bizMsg === '助力失败丨啊哦您今日的爱心值已爆棚，明天继续吧') {
             break
-          } else if (res.data.bizMsg === '助力已满员！谢谢你哦~')
+          } else if (res.data.bizMsg === '助力失败丨助力已满员！谢谢你哦~')
             full.push(code)
           else
             console.log(res.data.bizMsg)

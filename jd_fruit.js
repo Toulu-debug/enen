@@ -542,7 +542,7 @@ async function turntableFarm() {
         continue
       }
       await lotteryMasterHelp(code);
-      if (!$.lotteryMasterHelpRes?.helpResult?.code){
+      if (!$.lotteryMasterHelpRes?.helpResult?.code) {
         console.log($.lotteryMasterHelpRes)
         break
       }
@@ -1419,9 +1419,12 @@ function requireConfig() {
 
     let jdFruitShareCodes = ''
     if ($.isNode()) {
-      const dotenv = require('dotenv');
-      dotenv.config()
-      jdFruitShareCodes = require('./jdFruitShareCodes')
+      try {
+        const dotenv = require('dotenv');
+        dotenv.config()
+        jdFruitShareCodes = require('./jdFruitShareCodes')
+      } catch (e) {
+      }
     }
     $.shareCodesArr = [];
     if ($.isNode()) {
