@@ -52,58 +52,59 @@ let cookie: string = '', UserName: string, allMessage: string = '', res: any = '
       'referer': 'https://wqs.jd.com/',
       'cookie': cookie
     }
-
-    res = await get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${Date.now()}&sceneval=2&_=${Date.now()}&sceneval=2`, headers)
-    await wait(1000)
-
-    for (let order of res.orderList) {
-      let orderId: string = order.orderId
-      let orderType: string = order.orderType
-      let title: string = order.productList[0].title
-      let t: string = order.progressInfo?.tip || null
-      let status: string = order.progressInfo?.content || null
-      let shopName: string = order.shopInfo.shopName
-
-      res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, headers)
+    try {
+      res = await get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${Date.now()}&sceneval=2&_=${Date.now()}&sceneval=2`, headers)
       await wait(1000)
-      let carrier: string = res.carrier, carriageId: string = res.carriageId
 
-      if (t && status) {
-        if (status.match(/(?=签收|已取走|已暂存)/))
-          continue
-        if (!pushplusUser.includes(UserName)) {
-          console.log(`<${shopName}>\t${title}`)
-          console.log('\t', t, status)
-          console.log()
-        } else {
-          console.log('隐私保护，不显示日志')
-        }
-        if (!Object.keys(orders).includes(orderId) || orders[orderId]['status'] !== status) {
-          if (pushplusUser.includes(UserName)) {
-            console.log('+ pushplus')
-            markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
+      for (let order of res.orderList) {
+        let orderId: string = order.orderId
+        let orderType: string = order.orderType
+        let title: string = order.productList[0].title
+        let t: string = order.progressInfo?.tip || null
+        let status: string = order.progressInfo?.content || null
+        let shopName: string = order.shopInfo.shopName
+
+        res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, headers)
+        await wait(1000)
+        let carrier: string = res.carrier, carriageId: string = res.carriageId
+
+        if (t && status) {
+          if (status.match(/(?=签收|已取走|已暂存)/))
+            continue
+          if (!pushplusUser.includes(UserName)) {
+            console.log(`<${shopName}>\t${title}`)
+            console.log('\t', t, status)
+            console.log()
           } else {
-            console.log('+ sendNotify')
-            message += `<${shopName}>\t${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
+            console.log('隐私保护，不显示日志')
+          }
+          if (!Object.keys(orders).includes(orderId) || orders[orderId]['status'] !== status) {
+            if (pushplusUser.includes(UserName)) {
+              console.log('+ pushplus')
+              markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
+            } else {
+              console.log('+ sendNotify')
+              message += `<${shopName}>\t${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
+            }
+          }
+          orders[orderId] = {
+            user: UserName, shopName, title, t, status, carrier, carriageId
           }
         }
-        orders[orderId] = {
-          user: UserName, shopName, title, t, status, carrier, carriageId
-        }
       }
-    }
 
-    if (message) {
-      message = `【京东账号${index + 1}】  ${UserName}\n\n${message}`
-      allMessage += message
+      if (message) {
+        message = `【京东账号${index + 1}】  ${UserName}\n\n${message}`
+        allMessage += message
+      }
+      if (markdown) {
+        markdown = `#### <${UserName}>\n${markdown}`
+        await pushplus('京东快递更新', markdown, 'markdown')
+      }
+      await wait(1000)
+    } catch (e) {
     }
-    if (markdown) {
-      markdown = `#### <${UserName}>\n${markdown}`
-      await pushplus('京东快递更新', markdown, 'markdown')
-    }
-    await wait(1000)
   }
-
 
   let account: { pt_pin: string, remarks: string }[] = []
   try {

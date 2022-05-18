@@ -3,7 +3,8 @@
  * cron: 15 8,20 * * *
  */
 
-import USER_AGENT, {getCookie, wait, o2s, getshareCodeHW, post} from './TS_USER_AGENTS'
+import USER_AGENT, {getCookie, wait, o2s, getshareCodeHW, post, exceptCookie} from './TS_USER_AGENTS'
+import * as path from "path";
 
 interface ShareCode {
   activityId: number,
@@ -13,6 +14,7 @@ interface ShareCode {
 }
 
 let cookie: string = '', UserName: string = '', res: any = '', message: string = '', shareCodes: ShareCode[] = [], shareCodesSelf: ShareCode[] = [], shareCodesHW: any = [], black: string[] = []
+let except: string[] = exceptCookie(path.basename(__filename))
 
 !(async () => {
   let cookiesArr: string[] = await getCookie()
@@ -21,86 +23,95 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
-
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
     res = await api('showSecondFloorCardInfo', {"source": "card"})
     try {
       activityId = res.data.result.activityBaseInfo.activityId
-    } catch (e) {
-      console.log('获取活动信息错误')
-      black.push(UserName)
-      await wait(2000)
-      continue
-    }
-    let encryptProjectId: string = res.data.result.activityBaseInfo.encryptProjectId
-    await wait(1000)
 
-    // 任务
-    res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
-    o2s(res)
+      let encryptProjectId: string = res.data.result.activityBaseInfo.encryptProjectId
+      await wait(1000)
+      let divide: boolean = res.data.result.activityCardInfo.divideStatus === 0 && res.data.result.activityCardInfo.cardStatus === 1
 
-    for (let t of res.data.result.taskList) {
-      if (t.completionCnt !== t.assignmentTimesLimit) {
-        // 浏览、关注
-        if (t.ext?.shoppingActivity || t.ext?.followShop) {
-          let tp = t.ext?.shoppingActivity || t.ext?.followShop
-          tp = tp[0]
-          console.log(tp.title || tp.shopName, tp.itemId)
-          res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": tp.itemId, "actionType": 0})
-          console.log(res.data?.bizMsg)
-          await wait(2000)
-        }
+      // 任务
+      res = await api('superBrandTaskList', {"source": "card", "activityId": activityId, "assistInfoFlag": 1})
+      for (let t of res.data.result.taskList) {
+        if (t.completionCnt !== t.assignmentTimesLimit) {
+          // 浏览、关注
+          if (t.ext?.shoppingActivity || t.ext?.followShop) {
+            let tp = t.ext?.shoppingActivity || t.ext?.followShop
+            tp = tp[0]
+            console.log(tp.title || tp.shopName, tp.itemId)
+            res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": tp.itemId, "actionType": 0})
+            console.log(res.data?.bizMsg)
+            await wait(2000)
+          }
 
-        // 下拉
-        if (t.ext?.sign2) {
-          for (let sign of t.ext.sign2) {
-            if (sign.status === 0 && [10, 18].includes(new Date().getHours())) {
-              res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": t.ext.currentSectionItemId, "actionType": 0})
-              console.log(res.data?.bizMsg)
-              await wait(2000)
-              console.log('下拉任务', t.ext?.sign2)
-            } else if (sign.status !== 0) {
-              console.log(`${sign.beginTime} 签到完成`)
+          // 下拉
+          if (t.ext?.sign2) {
+            for (let sign of t.ext.sign2) {
+              if (sign.status === 0 && [10, 18].includes(new Date().getHours())) {
+                res = await api('superBrandDoTask', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "encryptAssignmentId": t.encryptAssignmentId, "assignmentType": t.assignmentType, "itemId": t.ext.currentSectionItemId, "actionType": 0})
+                console.log(res.data?.bizMsg)
+                await wait(2000)
+                console.log('下拉任务', t.ext?.sign2)
+              } else if (sign.status !== 0) {
+                console.log(`${sign.beginTime} 签到完成`)
+              }
             }
           }
         }
-      }
 
-      // 助力码
-      if (t.ext?.assistTaskDetail) {
-        console.log('助力码：', t.ext.assistTaskDetail.itemId)
-        console.log('收到助力：', t.ext?.assistList?.length ?? 0)
-        shareCodesSelf.push({
-          activityId: activityId,
-          encryptProjectId: encryptProjectId,
-          encryptAssignmentId: t.encryptAssignmentId,
-          itemId: t.ext.assistTaskDetail.itemId
-        })
-      }
-    }
-
-    // 抽奖
-    try {
-      if (new Date().getHours() === 20) {
-        let sum: number = 0
-        res = await api('superBrandSecondFloorMainPage', {"source": "card"})
-        let userStarNum: number = res.data.result.activityUserInfo.userStarNum
-        console.log('可以抽奖', userStarNum, '次')
-        for (let i = 0; i < userStarNum; i++) {
-          res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId})
-          if (res.data.result?.rewardComponent?.beanList?.length) {
-            console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
-            sum += res.data.result.rewardComponent.beanList[0].quantity
-          } else {
-            console.log('没抽到？', JSON.stringify(res))
-          }
-          await wait(2000)
+        // 助力码
+        if (t.ext?.assistTaskDetail) {
+          console.log('助力码：', t.ext.assistTaskDetail.itemId)
+          console.log('收到助力：', t.ext?.assistList?.length ?? 0)
+          shareCodesSelf.push({
+            activityId: activityId,
+            encryptProjectId: encryptProjectId,
+            encryptAssignmentId: t.encryptAssignmentId,
+            itemId: t.ext.assistTaskDetail.itemId
+          })
         }
-        message += `【京东账号${index + 1}】${UserName}\n抽奖${userStarNum}次，获得京豆${sum}\n\n`
+      }
+
+      // 抽奖
+      try {
+        if (new Date().getHours() === 20) {
+          let sum: number = 0
+          res = await api('superBrandSecondFloorMainPage', {"source": "card"})
+          let userStarNum: number = res.data.result.activityUserInfo.userStarNum
+          console.log('可以抽奖', userStarNum, '次')
+          for (let i = 0; i < userStarNum; i++) {
+            res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId})
+            if (res.data.result?.rewardComponent?.beanList?.length) {
+              console.log('抽奖获得京豆：', res.data.result.rewardComponent.beanList[0].quantity)
+              sum += res.data.result.rewardComponent.beanList[0].quantity
+            } else {
+              console.log('没抽到？', JSON.stringify(res))
+            }
+            await wait(2000)
+          }
+          message += `【京东账号${index + 1}】${UserName}\n抽奖${userStarNum}次，获得京豆${sum}\n\n`
+        }
+      } catch (e) {
+        console.log('error')
+      }
+      await wait(2000)
+
+      if (divide) {
+        console.log('瓜分')
+        res = await api('superBrandTaskLottery', {"source": "card", "activityId": activityId, "encryptProjectId": encryptProjectId, "tag": "divide"})
+        if (res.data.success) {
+          console.log('瓜分成功', res.data.result?.rewardComponent?.beanList[0]?.quantity)
+        }
       }
     } catch (e) {
-      console.log('error')
+      black.push(UserName)
+      await wait(2000)
     }
-    await wait(2000)
   }
 
   o2s(shareCodesSelf)
@@ -111,6 +122,10 @@ let cookie: string = '', UserName: string = '', res: any = '', message: string =
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    if (except.includes(encodeURIComponent(UserName))) {
+      console.log('已设置跳过')
+      continue
+    }
     if (black.includes(UserName)) {
       console.log('黑号')
       continue
