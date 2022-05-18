@@ -19,7 +19,7 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, "838954
       if (Object.keys(shareCodeFile)[index]) {
         shareCodeSelf = shareCodeFile[Object.keys(shareCodeFile)[index]].split('@')
       }
-      console.log(`第${index + 1}个账号获取的内部互助`, shareCodeSelf)
+      o2s(shareCodeSelf, `第${index + 1}个账号获取的内部互助`)
 
       // 初始化
       res = await api('initForFarm', {"version": 11, "channel": 3})
