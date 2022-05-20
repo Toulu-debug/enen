@@ -222,7 +222,7 @@ class Joy_Park_Run extends JDHelloWorld {
       console.log('🧧', res.data.runningHomeInfo.prizeValue)
       await this.wait(2000)
     } catch (e) {
-      console.log('Error', e)
+      console.log('Error', e.message)
       await this.wait(3000)
     }
   }

@@ -1,10 +1,10 @@
 /**
- * 京东-新品-魔方
+ * 🐢魔方
  * cron: 10 9,12,15 * * *
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {Log} from "./log";
+import {Log} from "./utils/mf_log";
 
 class Mofang extends JDHelloWorld {
   user: User
@@ -12,10 +12,11 @@ class Mofang extends JDHelloWorld {
 
   constructor() {
     super()
+    this.mfTool = new Log()
   }
 
   async init() {
-    await this.run(new Mofang())
+    await this.run(this)
   }
 
   async api(params: string) {
@@ -36,8 +37,6 @@ class Mofang extends JDHelloWorld {
 
   async main(user: User) {
     this.user = user
-    this.mfTool = new Log('50091', 'doInteractiveAssignment', 'XMFhPageh5')
-    await this.mfTool.init()
     let log: string = '', res: any
     res = await this.api("functionId=getInteractionHomeInfo&body=%7B%22sign%22%3A%22u6vtLQ7ztxgykLEr%22%7D&appid=content_ecology&client=wh5&clientVersion=1.0.0")
 

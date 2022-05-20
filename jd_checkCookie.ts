@@ -18,9 +18,9 @@ class Check_cookie extends JDHelloWorld {
     })
     data = JSON.parse(data.match(/GetJDUserInfoUnion\((.*)\)/)[1])
     if (data.retcode === '0') {
-      console.log('Cookie有效')
+      console.log('✅')
     } else {
-      console.log('Cookie无效')
+      console.log('❌')
       return {msg: `Cookie无效 账号${user.index + 1} ${user.UserName}`}
     }
   }
