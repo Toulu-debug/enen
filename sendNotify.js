@@ -7,13 +7,14 @@
  * @returns {Promise<unknown>}
  */
 
-const dotenv = require('dotenv');
-dotenv.config();
-const querystring = require("querystring");
-const fs = require('fs');
-const {format} = require("date-fns");
 const $ = new Env();
+const dotenv = require('dotenv');
+const fs = require('fs');
+const querystring = require("querystring");
+const {format} = require("date-fns");
+
 const timeout = 15000;//超时时间(单位毫秒)
+dotenv.config({path: `${__dirname}/.env`});
 // =======================================微信server酱通知设置区域===========================================
 //此处填你申请的SCKEY.
 //(环境变量名 PUSH_KEY)
