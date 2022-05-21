@@ -128,6 +128,14 @@ class Joy_Park_Run extends JDHelloWorld {
     await this.wait(3000)
   }
 
+  async rank(sum: number) {
+    try {
+      let data: any = await this.post('https://api.jdsharecode.xyz/api/joy_run_rank', {value: sum})
+      data.rank !== '-1' ? console.log(`领先${data.rank}的本库用户`) : ''
+    } catch (e) {
+    }
+  }
+
   async main(user: User) {
     this.user = user
     let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.08')
@@ -143,6 +151,7 @@ class Joy_Park_Run extends JDHelloWorld {
         res = await this.api('runningPrizeDraw', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "type": 2})
         await this.wait(2000)
         console.log(res.data.message)
+        res = await this.team('runningMyPrize', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "pageSize": 20, "time": null, "ids": null})
       }
 
       for (let t of res?.data?.detailVos || []) {
@@ -154,7 +163,10 @@ class Joy_Park_Run extends JDHelloWorld {
         }
       }
       console.log('成功', success)
-      console.log('收益', parseFloat(sum.toFixed(2)))
+      sum = parseFloat(sum.toFixed(2))
+      console.log('收益', sum)
+      await this.rank(sum)
+
       res = await this.team('runningTeamInfo', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
       if (!this.captainId) {
         if (res.data.members.length === 0) {
