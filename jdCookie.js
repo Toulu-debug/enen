@@ -1,9 +1,15 @@
-/*
-此文件为Node.js专用。其他用户请忽略
- */
-//此处填写京东账号cookie。
+const fs = require('fs')
+const dotenv = require('dotenv')
+
 let CookieJDs = []
-// 判断环境变量里面是否有京东ck
+
+try {
+  process.chdir(__dirname)
+  fs.accessSync('.env', fs.constants.R_OK)
+  dotenv.config()
+} catch (e) {
+}
+
 if (process.env.JD_COOKIE) {
   if (process.env.JD_COOKIE.indexOf('&') > -1) {
     CookieJDs = process.env.JD_COOKIE.split('&');

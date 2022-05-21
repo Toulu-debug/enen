@@ -11,7 +11,7 @@ declare class JDHelloWorld {
     users: User[];
     constructor(scriptName?: string);
     getCookie(): Promise<void>;
-    exceptCookie(filename?: string): any;
+    exceptCookie(filename?: string): string[];
     get(url: string, headers?: any): Promise<unknown>;
     post(url: string, data: any, headers?: any): Promise<object>;
     wait(ms?: number): Promise<unknown>;
