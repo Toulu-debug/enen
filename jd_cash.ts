@@ -1,14 +1,10 @@
 /**
  * 京东-领现金
- * 兼容panda api和本地sign
- *
- * 使用panda sign
+ * 使用panda sign api
  * export PANDA_TOKEN=""
- * 本地sign算法 import {getSign} from './test/sign'
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
-import {getSign} from "./test/sign";
 
 class CASH extends JDHelloWorld {
   cookie: string
@@ -18,11 +14,11 @@ class CASH extends JDHelloWorld {
   }
 
   async init() {
-    await this.run(new CASH())
+    await this.run(this)
   }
 
   async api(fn: string, body: object) {
-    let sign = getSign(fn, body)
+    let sign = this.pandaSign(fn, body)
     return await this.post(`https://api.m.jd.com/client.action?functionId=${fn}`, sign, {
       'Host': 'api.m.jd.com',
       'Cookie': this.cookie,

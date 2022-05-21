@@ -18,8 +18,8 @@ declare class JDHelloWorld {
     o2s(obj: object, title?: string): void;
     getShareCodePool(key: string, num: number): Promise<string[]>;
     getshareCodeHW(key: string): Promise<string[]>;
+    pandaSign(fn: string, body: object): Promise<any>;
     getRandomNumberByRange(start: number, end: number): number;
-    getRandomString(e: number, word?: number): string;
     getRandomNumString(e: number): string;
     run(son: {
         main: any;
