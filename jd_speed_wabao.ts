@@ -2,6 +2,7 @@
  * 极速版-挖宝
  * cron: 2 0,1,6 * * *
  * export FP_CE6C2=""
+ * CK1 优先助力 HW.ts
  * TODO 提现
  */
 
