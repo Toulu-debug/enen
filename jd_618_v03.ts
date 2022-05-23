@@ -38,17 +38,6 @@ class Jd_618 extends JDHelloWorld {
     })
   }
 
-  async xcx(fn: string, body: object) {
-    return this.post('https://api.m.jd.com/', `appid=signed_mp&client=xcx&clientVersion=-1&functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&loginType=1&loginWQBiz=`, {
-      'Host': 'api.m.jd.com',
-      'Accept': '*/*',
-      'Connection': 'keep-alive',
-      'User-Agent': 'MiniProgramEnv/Windows',
-      'Referer': 'https://servicewechat.com/wx91d27dbf599dff74/621/page-frame.html',
-      'Cookie': this.user.cookie
-    })
-  }
-
   async qryViewkitCallbackResult(taskToken: string) {
     let body: object = {"dataSource": "newshortAward", "method": "getTaskAward", "reqParams": `{\"taskToken\":\"${taskToken}\"}`}
     let data = await this.logTool.qry('qryViewkitCallbackResult', body)
@@ -87,7 +76,15 @@ class Jd_618 extends JDHelloWorld {
 
     console.log('签到', res.data.result.homeMainInfo.todaySignStatus)
 
-    // 下次抽奖需要金币
+    // res = await this.api('promote_pk_getHomeData',{})
+    // if (res.data.result.userAward === '0.00') {
+    //   data = await this.api('promote_pk_receiveAward', {})
+    //   console.log('领取膨胀🧧', parseFloat(data.data.result.value))
+    // } else {
+    //   console.log('已领取膨胀🧧', parseFloat(res.data.result.userAward))
+    // }
+    // return
+
     for (let i = 0; i < 20; i++) {
       if (nextLevelScore <= totalScore) {
         console.log(nextLevelScore, totalScore)
@@ -153,24 +150,27 @@ class Jd_618 extends JDHelloWorld {
       }
 
       res = await this.api('template_mongo_getHomeData', {"taskToken": "", "appId": appId, "actId": ActivityId, "channelId": 1})
-      let userLightChance: number = res.data.result.userInfo.userLightChance
+      let userLightChance: number = res.data.result.userInfo.userLightChance, fragmentList: number[] = res.data.result.userInfo.fragmentList
       console.log('可抽奖', userLightChance)
-      for (let i = 0; i < userLightChance; i++) {
-        data = await this.api('template_mongo_lottery', {"appId": appId, "fragmentId": i + 1})
-        this.o2s(data)
-        console.log(data.data.result.userAwardDto)
-        await this.wait(1000)
+      let lotteryTimes: number = 0
+      for (let i = 1; i < 7; i++) {
+        if (lotteryTimes === userLightChance)
+          break
+        if (!fragmentList.includes(i)) {
+          data = await this.api('template_mongo_lottery', {"appId": appId, "fragmentId": i})
+          console.log(data.data.result.userAwardDto)
+          await this.wait(2000)
+          lotteryTimes++
+        }
       }
-
     }
-
 
     log = await this.getLog()
     res = await this.api('promote_collectAutoScore', {ss: JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
     console.log('收金币', parseInt(res.data.result.produceScore))
     await this.wait(3000)
 
-    for (let loop = 0; loop < 3; loop++) {
+    for (let loop = 0; loop < 1; loop++) {
       try {
         console.log('loop', loop)
         res = await this.api('promote_getTaskDetail', {})
@@ -190,10 +190,22 @@ class Jd_618 extends JDHelloWorld {
         }
 
         for (let t of res.data.result.taskVos) {
-          if (t.taskName.includes('下单') || t.taskName.includes('小程序')) {
+          if (t.taskName.includes('下单')) {
             console.log('pass', t)
             continue
           }
+
+          if (t.taskName.includes('小程序')) {
+            for (let tp of t.shoppingActivityVos) {
+              if (tp.status === 1) {
+                log = await this.getLog()
+                data = await this.api('promote_collectScore', {"taskId": t.taskId, "taskToken": tp.taskToken, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
+                console.log(parseInt(data.data.result.acquiredScore))
+                await this.wait(2000)
+              }
+            }
+          }
+
           if (t.browseShopVo) {
             for (let tp of t.browseShopVo) {
               if (tp.status === 1) {
@@ -202,19 +214,15 @@ class Jd_618 extends JDHelloWorld {
 
                 data = await this.api('followShop', {"shopId": tp.shopId, "follow": true, "type": "0"})
                 console.log('followShop', data.msg)
+                await this.wait(1000)
 
-                data = await this.api('promote_collectScore', {
-                  "taskId": t.taskId.toString(),
-                  "taskToken": tp.taskToken,
-                  "actionType": 1,
-                  "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})
-                })
+                data = await this.api('promote_collectScore', {"taskId": t.taskId.toString(), "taskToken": tp.taskToken, "actionType": 1, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
                 console.log(data.data.bizMsg)
 
                 await this.wait(t.waitDuration * 1000 || 3000)
                 data = await this.qryViewkitCallbackResult(tp.taskToken)
                 console.log(data.toast.subTitle)
-                await this.wait(5000)
+                await this.wait(8000)
               }
             }
           }
@@ -224,12 +232,7 @@ class Jd_618 extends JDHelloWorld {
               if (tp.status === 1) {
                 log = await this.getLog()
                 console.log(tp.title)
-                data = await this.api('promote_collectScore', {
-                  "taskId": t.taskId,
-                  "taskToken": tp.taskToken,
-                  "actionType": 1,
-                  "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})
-                })
+                data = await this.api('promote_collectScore', {"taskId": t.taskId, "taskToken": tp.taskToken, "actionType": 1, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
                 console.log(data.data.bizMsg)
                 await this.wait(t.waitDuration * 1000 || 3000)
                 data = await this.qryViewkitCallbackResult(tp.taskToken)
@@ -253,11 +256,7 @@ class Jd_618 extends JDHelloWorld {
             for (let tp of res.data.result.taskVos[0].browseShopVo.slice(0, 4)) {
               if (tp.status === 1) {
                 log = await this.getLog()
-                data = await this.api('promote_collectScore', {
-                  "taskId": t.taskId,
-                  "taskToken": tp.taskToken,
-                  "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})
-                })
+                data = await this.api('promote_collectScore', {"taskId": t.taskId, "taskToken": tp.taskToken, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
                 console.log(data.data.result.successToast)
                 await this.wait(2000)
               }
@@ -317,39 +316,37 @@ class Jd_618 extends JDHelloWorld {
       }
 
       res = await this.api('promote_pk_getHomeData', {})
-      let memberCount: number = res.data.result.groupInfo.memberList.length
-      console.log('当前队伍有', memberCount, '人')
-      let groupJoinInviteId = ""
+      if (res.data.result.memberList) {
+        let memberCount: number = res.data.result.groupInfo.memberList.length
+        console.log('当前队伍有', memberCount, '人')
+        let groupJoinInviteId = ""
 
-      if (memberCount < 20) {
-        groupJoinInviteId = res.data.result.groupInfo.groupJoinInviteId
-        console.log('队伍未满', groupJoinInviteId)
-      }
-
-      if (shareCodeHW_group.length === 0) {
-        shareCodeHW_group = await this.getshareCodeHW('lyb_group')
-      }
-      if (user.index === users.length - 1) {
-        groupJoinInviteId = shareCodeHW[0]
-      }
-
-      if (memberCount === 1) {
-        log = await this.getLog()
-        res = await this.api('promote_pk_joinGroup', {
-          "inviteId": groupJoinInviteId,
-          "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}),
-          "confirmFlag": 1
-        })
-        await this.wait(3000)
-        if (res.data.bizCode === 0) {
-          console.log('加入队伍成功')
-        } else {
-          console.log(res.data.bizMsg)
+        if (!groupJoinInviteId && memberCount < 20) {
+          groupJoinInviteId = res.data.result.groupInfo.groupJoinInviteId
+          console.log('队伍未满', groupJoinInviteId)
         }
-        res = await this.api('promote_pk_getHomeData', {})
-        this.o2s(res, 'promote_pk_getHomeData')
+
+        if (shareCodeHW_group.length === 0) {
+          shareCodeHW_group = await this.getshareCodeHW('lyb_group')
+        }
+        if (user.index === users.length - 1) {
+          groupJoinInviteId = shareCodeHW[0]
+        }
+
+        if (memberCount === 1) {
+          log = await this.getLog()
+          res = await this.api('promote_pk_joinGroup', {"inviteId": groupJoinInviteId, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}), "confirmFlag": 1})
+          await this.wait(3000)
+          if (res.data.bizCode === 0) {
+            console.log('加入队伍成功')
+          } else {
+            console.log(res.data.bizMsg)
+          }
+          res = await this.api('promote_pk_getHomeData', {})
+          this.o2s(res, 'promote_pk_getHomeData')
+        }
+        await this.wait(3000)
       }
-      await this.wait(5000)
     }
   }
 }

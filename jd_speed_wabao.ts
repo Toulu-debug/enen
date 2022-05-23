@@ -78,6 +78,8 @@ class Jd_speed_wabao extends JDHelloWorld {
   }
 
   async help(users: User[]) {
+    console.log('内部助力')
+    this.o2s(this.shareCodesSelf)
     let res: any, shareCodesHW: any = [], shareCodes: any
     for (let user of users) {
       this.cookie = user.cookie

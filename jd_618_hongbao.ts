@@ -76,7 +76,6 @@ let shareCodeHW: string[] = [], shareCodeSelf: string  [] = [], shareCode: strin
       await wait(1000)
     }
   }
-
 })()
 
 async function api(fn: string, body: object) {
