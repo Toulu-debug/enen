@@ -112,16 +112,30 @@ class Jd_618 extends JDHelloWorld {
           } else if (tp.followShopVo || tp.productInfoVos || tp.shoppingActivityVos) {
             for (let i = tp.times; i < tp.maxTimes; i++) {
               let vos: any = tp.followShopVo || tp.productInfoVos || tp.shoppingActivityVos
+              console.log(tp.taskName)
               data = await this.api('template_mongo_collectScore', {"taskToken": vos[i].taskToken, "taskId": tp.taskId, "actionType": 0, "appId": appId, "safeStr": `{\"random\":\"${log.random}\",\"sceneid\":\"RAGJSYh5\",\"log\":\"${log.log}\"}`})
               console.log(parseInt(data.data.result.acquiredScore))
               await this.wait(1000)
             }
+          } else if (tp.taskName.includes('会员') || tp.taskName.includes('下单')) {
+            console.log(tp.taskName, 'pass')
           } else {
             console.log(tp)
           }
           await this.wait(3000)
         }
       }
+
+      res = await this.api('template_mongo_getHomeData', {"taskToken": "", "appId": appId, "actId": ActivityId, "channelId": 1})
+      let userLightChance: number = res.data.result.userInfo.userLightChance
+      console.log('可抽奖', userLightChance)
+      for (let i = 0; i < userLightChance; i++) {
+        data = await this.api('template_mongo_lottery', {"appId": appId, "fragmentId": i + 1})
+        this.o2s(data)
+        console.log(data.data.result.userAwardDto)
+        await this.wait(1000)
+      }
+
     }
 
 
