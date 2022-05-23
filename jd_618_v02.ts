@@ -272,6 +272,9 @@ class Jd_618 extends JDHelloWorld {
             console.log('助力成功', parseFloat(res.data.result.acquiredScore))
             if (res.data.result?.redpacket?.value)
               console.log('🧧', parseFloat(res.data.result?.redpacket?.value))
+          } else if (res.data.bizMsg === '助力次数用完啦~') {
+            console.log(res.data.bizMsg)
+            break
           } else if (res.data.bizMsg === '好友人气爆棚，不需要助力啦~') {
             console.log(res.data.bizMsg)
             full.push(code)
