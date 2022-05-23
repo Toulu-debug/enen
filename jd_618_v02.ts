@@ -1,14 +1,15 @@
 /**
- * CK倒1 优先助力HW.ts
+ * CK1   优先助力HW.ts
+ * CK倒1 优先组队HW.ts
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 import {Log_618} from "./utils/log_618";
-import {wait} from "./TS_USER_AGENTS";
 
 class Jd_618 extends JDHelloWorld {
   user: User
   logTool: Log_618 = new Log_618()
+  shareCodeSelf: string[] = []
 
   constructor() {
     super();
@@ -90,6 +91,10 @@ class Jd_618 extends JDHelloWorld {
         console.log('loop', loop)
         res = await this.api('promote_getTaskDetail', {})
         this.o2s(res)
+        let inviteId: string = res.data.result.inviteId
+        console.log('助力码', inviteId)
+        if (!this.shareCodeSelf.includes(inviteId))
+          this.shareCodeSelf.push(inviteId)
 
         for (let t of res.data.result.lotteryTaskVos[0].badgeAwardVos) {
           if (t.status === 3) {
@@ -100,10 +105,12 @@ class Jd_618 extends JDHelloWorld {
         }
 
         for (let t of res.data.result.taskVos) {
+          if (t.taskName.includes('下单') || t.taskName.includes('小程序')) {
+            console.log('pass', t)
+            continue
+          }
           if (t.browseShopVo) {
             for (let tp of t.browseShopVo) {
-              if (tp.shopName.includes('小程序'))
-                continue
               if (tp.status === 1) {
                 console.log(tp.shopName)
                 log = await this.getLog()
@@ -167,7 +174,7 @@ class Jd_618 extends JDHelloWorld {
                   "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})
                 })
                 console.log(data.data.result.successToast)
-                await wait(2000)
+                await this.wait(2000)
               }
             }
           }
@@ -181,13 +188,41 @@ class Jd_618 extends JDHelloWorld {
   }
 
   async help(users: User[]) {
-    let shareCodeHW: string[] = []
+    let shareCodeHW_group: string[] = [], shareCodeHW: string[] = [], shareCode: string[] = []
     for (let user of users) {
       console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
       this.user = user
       let res: any, log: { log: string, random: string }
       res = await this.api('promote_getHomeData', {})
       let secretp: string = res.data.result.homeMainInfo.secretp
+
+      if (shareCodeHW.length === 0)
+        shareCodeHW = await this.getshareCodeHW('lyb')
+
+      if (user.index === 0) {
+        shareCode = Array.from(new Set([...shareCodeHW, ...this.shareCodeSelf]))
+      } else {
+        shareCode = Array.from(new Set([...this.shareCodeSelf, ...shareCodeHW]))
+      }
+      this.o2s(this.shareCodeSelf, '内部助力')
+      for (let code of shareCode) {
+        console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code}`)
+        log = await this.getLog()
+        res = await this.api('promote_collectScore', {
+          "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}),
+          "actionType": "0",
+          "inviteId": code
+        })
+        if (res.data.bizCode === 0) {
+          console.log('助力成功', parseFloat(res.data.result.acquiredScore))
+          if (res.data.result?.redpacket?.value)
+            console.log('🧧', parseFloat(res.data.result?.redpacket?.value))
+        } else {
+          console.log(res.data.bizMsg)
+        }
+        await this.wait(4000)
+      }
+
       res = await this.api('promote_pk_getHomeData', {})
       let memberCount: number = res.data.result.groupInfo.memberList.length
       console.log('当前队伍有', memberCount, '人')
@@ -198,10 +233,9 @@ class Jd_618 extends JDHelloWorld {
         console.log('队伍未满', groupJoinInviteId)
       }
 
-      if (shareCodeHW.length === 0) {
-        shareCodeHW = await this.getshareCodeHW('lyb_group')
+      if (shareCodeHW_group.length === 0) {
+        shareCodeHW_group = await this.getshareCodeHW('lyb_group')
       }
-      // let shareCode: string[] = []
       if (user.index === users.length - 1) {
         groupJoinInviteId = shareCodeHW[0]
       }
