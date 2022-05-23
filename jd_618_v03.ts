@@ -82,9 +82,35 @@ class Jd_618 extends JDHelloWorld {
     let res: any, data: any, log: { random: string, log: string }
     res = await this.api('promote_getHomeData', {})
     let secretp: string = res.data.result.homeMainInfo.secretp
-    console.log('当前金币', parseInt(res.data.result.homeMainInfo.raiseInfo.totalScore))
+    let totalScore: number = parseInt(res.data.result.homeMainInfo.raiseInfo.totalScore), nextLevelScore: number = parseInt(res.data.result.homeMainInfo.raiseInfo.scenceMap.sceneInfo[0].redNum.nextLevelScore)
+    console.log('当前金币', totalScore)
 
     console.log('签到', res.data.result.homeMainInfo.todaySignStatus)
+
+    // 下次抽奖需要金币
+    for (let i = 0; i < 20; i++) {
+      if (nextLevelScore <= totalScore) {
+        console.log(nextLevelScore, totalScore)
+        try {
+          log = await this.logTool.main()
+          let scenceId: number = this.getRandomNumberByRange(1, 5)
+          if (i === 0) scenceId = 1
+          console.log(scenceId)
+          res = await this.api('promote_raise', {"scenceId": scenceId, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
+          if (res.data.result.levelUpAward.redNum) {
+            console.log('转盘分红', res.data.result.levelUpAward.redNum)
+          } else {
+            console.log('转盘其他奖励')
+          }
+          res = await this.api('promote_getHomeData', {})
+          totalScore = parseInt(res.data.result.homeMainInfo.raiseInfo.totalScore)
+          nextLevelScore = parseInt(res.data.result.homeMainInfo.raiseInfo.scenceMap.sceneInfo[0].redNum.nextLevelScore)
+          await this.wait(3000)
+        } catch (e) {
+          break
+        }
+      }
+    }
 
     res = await this.api('qryCompositeMaterials', {"qryParam": "[{\"type\":\"advertGroup\",\"mapTo\":\"brand\",\"id\":\"06306976\"}]", "activityId": "2fUope8TDN3dUJfNzQswkBLc7uE8", "pageId": "", "reqSrc": "", "applyKey": "jd_star"})
     this.o2s(res)
@@ -140,16 +166,7 @@ class Jd_618 extends JDHelloWorld {
 
 
     log = await this.getLog()
-    res = await this.api('promote_collectAutoScore', {
-      ss: JSON.stringify({
-        extraData: {
-          log: encodeURIComponent(log.log),
-          sceneid: 'RAhomePageh5'
-        },
-        secretp: secretp,
-        random: log.random
-      })
-    })
+    res = await this.api('promote_collectAutoScore', {ss: JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
     console.log('收金币', parseInt(res.data.result.produceScore))
     await this.wait(3000)
 
