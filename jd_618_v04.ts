@@ -6,6 +6,11 @@
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 import {Log_618} from "./utils/log_618";
 
+interface GROUP {
+  groupJoinInviteId: string,
+  mpin: string
+}
+
 class Jd_618 extends JDHelloWorld {
   user: User
   logTool: Log_618 = new Log_618()
@@ -74,16 +79,22 @@ class Jd_618 extends JDHelloWorld {
     let totalScore: number = parseInt(res.data.result.homeMainInfo.raiseInfo.totalScore), nextLevelScore: number = parseInt(res.data.result.homeMainInfo.raiseInfo.scenceMap.sceneInfo[0].redNum.nextLevelScore)
     console.log('当前金币', totalScore)
 
-    console.log('签到', res.data.result.homeMainInfo.todaySignStatus)
-
-    // res = await this.api('promote_pk_getHomeData',{})
-    // if (res.data.result.userAward === '0.00') {
-    //   data = await this.api('promote_pk_receiveAward', {})
-    //   console.log('领取膨胀🧧', parseFloat(data.data.result.value))
-    // } else {
-    //   console.log('已领取膨胀🧧', parseFloat(res.data.result.userAward))
-    // }
-    // return
+    if (res.data.result.homeMainInfo.todaySignStatus === 0) {
+      console.log('开始签到')
+      log = await this.getLog()
+      data = await this.api('promote_sign', {"ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
+      if (data.data?.result?.awardResult?.redPacketResult) {
+        console.log('🧧', parseFloat(data.data.result.awardResult.redPacketResult.value))
+      } else if (data?.data?.result?.scoreResult) {
+        console.log('金币', parseInt(data.data.result.scoreResult.todaySignScore))
+      } else {
+        this.o2s(data)
+      }
+      await this.wait(3000)
+    } else {
+      console.log('已签到')
+    }
+    return
 
     for (let i = 0; i < 20; i++) {
       if (nextLevelScore <= totalScore) {
@@ -175,7 +186,7 @@ class Jd_618 extends JDHelloWorld {
     console.log('收金币', parseInt(res.data.result.produceScore))
     await this.wait(3000)
 
-    for (let loop = 0; loop < 1; loop++) {
+    for (let loop = 0; loop < 3; loop++) {
       try {
         console.log('loop', loop)
         res = await this.api('promote_getTaskDetail', {})
@@ -277,7 +288,29 @@ class Jd_618 extends JDHelloWorld {
   }
 
   async help(users: User[]) {
-    let shareCodeHW_group: string[] = [], shareCodeHW: string[] = [], shareCode: string[] = [], full: string[] = []
+    let shareCodeHW_group: any = [], shareCodeHW: any = [], shareCode: any = [], full: string[] = [], groups: GROUP[] = []
+    for (let user of users) {
+      try {
+        console.log(`\n开始【京东账号${user.index + 1}】${user.UserName} 获取队伍信息\n`)
+        this.user = user
+        let res: any
+        res = await this.api('promote_pk_getHomeData', {})
+        if (res.data.result.groupInfo.memberList) {
+          let memberCount: number = res.data.result.groupInfo.memberList.length
+          console.log('当前队伍有', memberCount, '人')
+          let groupJoinInviteId = ""
+
+          if (memberCount < 30) {
+            groupJoinInviteId = res.data.result.groupInfo.groupJoinInviteId
+            res = await this.api('getEncryptedPinColor', {})
+            groups.push({mpin: res.result, groupJoinInviteId: groupJoinInviteId})
+            console.log('队伍未满', groupJoinInviteId)
+          }
+        }
+      } catch (e) {
+      }
+    }
+
     for (let user of users) {
       try {
         console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
@@ -288,7 +321,6 @@ class Jd_618 extends JDHelloWorld {
 
         if (shareCodeHW.length === 0)
           shareCodeHW = await this.getshareCodeHW('lyb')
-
         if (user.index === 0) {
           shareCode = Array.from(new Set([...shareCodeHW, ...this.shareCodeSelf]))
         } else {
@@ -323,33 +355,27 @@ class Jd_618 extends JDHelloWorld {
 
         res = await this.api('promote_pk_getHomeData', {})
         if (res.data.result.groupInfo.memberList) {
-          let memberCount: number = res.data.result.groupInfo.memberList.length
-          console.log('当前队伍有', memberCount, '人')
-          let groupJoinInviteId = ""
-
-          if (!groupJoinInviteId && memberCount < 20) {
-            groupJoinInviteId = res.data.result.groupInfo.groupJoinInviteId
-            console.log('队伍未满', groupJoinInviteId)
-          }
-
           if (shareCodeHW_group.length === 0) {
             shareCodeHW_group = await this.getshareCodeHW('lyb_group')
           }
           if (user.index === users.length - 1) {
-            groupJoinInviteId = shareCodeHW[0]
+            groups = [...shareCodeHW_group, ...groups]
           }
-
+          let memberCount: number = res.data.result.groupInfo.memberList.length
           if (memberCount === 1) {
-            log = await this.getLog()
-            res = await this.api('promote_pk_joinGroup', {"inviteId": groupJoinInviteId, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}), "confirmFlag": 1})
-            await this.wait(3000)
-            if (res.data.bizCode === 0) {
-              console.log('加入队伍成功')
-            } else {
-              console.log(res.data.bizMsg)
+            for (let group of groups) {
+              log = await this.getLog()
+              res = await this.api('collectFriendRecordColor', {"mpin": group.mpin, "businessCode": "20136", "assistType": "2", "shareSource": 1})
+              res = await this.api('promote_pk_joinGroup', {"inviteId": group.groupJoinInviteId, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}), "confirmFlag": 1})
+              await this.wait(3000)
+              if (res.data.bizCode === 0) {
+                console.log('加入队伍成功')
+                break
+              } else {
+                console.log(res.data.bizMsg)
+              }
+              res = await this.api('promote_pk_getHomeData', {})
             }
-            res = await this.api('promote_pk_getHomeData', {})
-            this.o2s(res, 'promote_pk_getHomeData')
           }
           await this.wait(3000)
         }
