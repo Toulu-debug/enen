@@ -158,7 +158,12 @@ class Jd_618 extends JDHelloWorld {
           break
         if (!fragmentList.includes(i)) {
           data = await this.api('template_mongo_lottery', {"appId": appId, "fragmentId": i})
-          console.log(data.data.result.userAwardDto)
+          if (data.data.result.userAwardDto.couponVo)
+            console.log(data.data.result.userAwardDto.couponVo.prizeName)
+          else if (data.data.result.userAwardDto.scoreVo)
+            console.log(parseInt(data.data.result.userAwardDto.scoreVo.quantity), '金币')
+          else
+            console.log(data.data.result.userAwardDto)
           await this.wait(2000)
           lotteryTimes++
         }
@@ -316,7 +321,7 @@ class Jd_618 extends JDHelloWorld {
       }
 
       res = await this.api('promote_pk_getHomeData', {})
-      if (res.data.result.memberList) {
+      if (res.data.result.groupInfo.memberList) {
         let memberCount: number = res.data.result.groupInfo.memberList.length
         console.log('当前队伍有', memberCount, '人')
         let groupJoinInviteId = ""
