@@ -279,78 +279,82 @@ class Jd_618 extends JDHelloWorld {
   async help(users: User[]) {
     let shareCodeHW_group: string[] = [], shareCodeHW: string[] = [], shareCode: string[] = [], full: string[] = []
     for (let user of users) {
-      console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
-      this.user = user
-      let res: any, log: { log: string, random: string }
-      res = await this.api('promote_getHomeData', {})
-      let secretp: string = res.data.result.homeMainInfo.secretp
+      try {
+        console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
+        this.user = user
+        let res: any, log: { log: string, random: string }
+        res = await this.api('promote_getHomeData', {})
+        let secretp: string = res.data.result.homeMainInfo.secretp
 
-      if (shareCodeHW.length === 0)
-        shareCodeHW = await this.getshareCodeHW('lyb')
+        if (shareCodeHW.length === 0)
+          shareCodeHW = await this.getshareCodeHW('lyb')
 
-      if (user.index === 0) {
-        shareCode = Array.from(new Set([...shareCodeHW, ...this.shareCodeSelf]))
-      } else {
-        shareCode = Array.from(new Set([...this.shareCodeSelf, ...shareCodeHW]))
-      }
-      this.o2s(this.shareCodeSelf, '内部助力')
-      for (let code of shareCode) {
-        if (!full.includes(code)) {
-          console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code}`)
-          log = await this.getLog()
-          res = await this.api('promote_collectScore', {
-            "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}),
-            "actionType": "0",
-            "inviteId": code
-          })
-          if (res.data.bizCode === 0) {
-            console.log('助力成功', parseFloat(res.data.result.acquiredScore))
-            if (res.data.result?.redpacket?.value)
-              console.log('🧧', parseFloat(res.data.result?.redpacket?.value))
-          } else if (res.data.bizMsg === '助力次数用完啦~') {
-            console.log(res.data.bizMsg)
-            break
-          } else if (res.data.bizMsg === '好友人气爆棚，不需要助力啦~') {
-            console.log(res.data.bizMsg)
-            full.push(code)
-          } else {
-            console.log(res.data.bizMsg)
+        if (user.index === 0) {
+          shareCode = Array.from(new Set([...shareCodeHW, ...this.shareCodeSelf]))
+        } else {
+          shareCode = Array.from(new Set([...this.shareCodeSelf, ...shareCodeHW]))
+        }
+        this.o2s(this.shareCodeSelf, '内部助力')
+        for (let code of shareCode) {
+          if (!full.includes(code)) {
+            console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code}`)
+            log = await this.getLog()
+            res = await this.api('promote_collectScore', {
+              "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}),
+              "actionType": "0",
+              "inviteId": code
+            })
+            if (res.data.bizCode === 0) {
+              console.log('助力成功', parseFloat(res.data.result.acquiredScore))
+              if (res.data.result?.redpacket?.value)
+                console.log('🧧', parseFloat(res.data.result?.redpacket?.value))
+            } else if (res.data.bizMsg === '助力次数用完啦~') {
+              console.log(res.data.bizMsg)
+              break
+            } else if (res.data.bizMsg === '好友人气爆棚，不需要助力啦~') {
+              console.log(res.data.bizMsg)
+              full.push(code)
+            } else {
+              console.log(res.data.bizMsg)
+            }
+            await this.wait(4000)
           }
-          await this.wait(4000)
-        }
-      }
-
-      res = await this.api('promote_pk_getHomeData', {})
-      if (res.data.result.groupInfo.memberList) {
-        let memberCount: number = res.data.result.groupInfo.memberList.length
-        console.log('当前队伍有', memberCount, '人')
-        let groupJoinInviteId = ""
-
-        if (!groupJoinInviteId && memberCount < 20) {
-          groupJoinInviteId = res.data.result.groupInfo.groupJoinInviteId
-          console.log('队伍未满', groupJoinInviteId)
         }
 
-        if (shareCodeHW_group.length === 0) {
-          shareCodeHW_group = await this.getshareCodeHW('lyb_group')
-        }
-        if (user.index === users.length - 1) {
-          groupJoinInviteId = shareCodeHW[0]
-        }
+        res = await this.api('promote_pk_getHomeData', {})
+        if (res.data.result.groupInfo.memberList) {
+          let memberCount: number = res.data.result.groupInfo.memberList.length
+          console.log('当前队伍有', memberCount, '人')
+          let groupJoinInviteId = ""
 
-        if (memberCount === 1) {
-          log = await this.getLog()
-          res = await this.api('promote_pk_joinGroup', {"inviteId": groupJoinInviteId, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}), "confirmFlag": 1})
+          if (!groupJoinInviteId && memberCount < 20) {
+            groupJoinInviteId = res.data.result.groupInfo.groupJoinInviteId
+            console.log('队伍未满', groupJoinInviteId)
+          }
+
+          if (shareCodeHW_group.length === 0) {
+            shareCodeHW_group = await this.getshareCodeHW('lyb_group')
+          }
+          if (user.index === users.length - 1) {
+            groupJoinInviteId = shareCodeHW[0]
+          }
+
+          if (memberCount === 1) {
+            log = await this.getLog()
+            res = await this.api('promote_pk_joinGroup', {"inviteId": groupJoinInviteId, "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random}), "confirmFlag": 1})
+            await this.wait(3000)
+            if (res.data.bizCode === 0) {
+              console.log('加入队伍成功')
+            } else {
+              console.log(res.data.bizMsg)
+            }
+            res = await this.api('promote_pk_getHomeData', {})
+            this.o2s(res, 'promote_pk_getHomeData')
+          }
           await this.wait(3000)
-          if (res.data.bizCode === 0) {
-            console.log('加入队伍成功')
-          } else {
-            console.log(res.data.bizMsg)
-          }
-          res = await this.api('promote_pk_getHomeData', {})
-          this.o2s(res, 'promote_pk_getHomeData')
         }
-        await this.wait(3000)
+      } catch (e) {
+        console.log('e')
       }
     }
   }
