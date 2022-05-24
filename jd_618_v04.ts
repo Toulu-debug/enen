@@ -94,7 +94,6 @@ class Jd_618 extends JDHelloWorld {
     } else {
       console.log('已签到')
     }
-    return
 
     for (let i = 0; i < 20; i++) {
       if (nextLevelScore <= totalScore) {
