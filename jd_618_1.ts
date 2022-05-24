@@ -1,4 +1,6 @@
 /**
+ * 京东骑驴
+ * cron: 10 8,15,20 * * *
  * CK1   优先助力HW.ts
  * CK倒1 优先组队HW.ts
  */
@@ -18,6 +20,7 @@ class Jd_618 extends JDHelloWorld {
 
   constructor() {
     super();
+    console.log('version: 1300')
   }
 
   async init() {
@@ -161,7 +164,6 @@ class Jd_618 extends JDHelloWorld {
           } else {
             console.log(tp)
           }
-          await this.wait(3000)
         }
       }
 
@@ -206,11 +208,6 @@ class Jd_618 extends JDHelloWorld {
         }
 
         for (let t of res.data.result.taskVos) {
-          // if (t.taskName.includes('下单')) {
-          //   console.log('pass', t)
-          //   continue
-          // }
-
           if (t.taskName.includes('小程序')) {
             for (let tp of t.shoppingActivityVos) {
               if (tp.status === 1) {
@@ -366,7 +363,7 @@ class Jd_618 extends JDHelloWorld {
               if (res.data.result?.redpacket?.value)
                 console.log('🧧', parseFloat(res.data.result?.redpacket?.value))
             } else if (res.data.bizMsg === '助力次数用完啦~') {
-              console.log(res.data.bizMsg)
+              console.log('上限')
               break
             } else if (res.data.bizMsg === '好友人气爆棚，不需要助力啦~') {
               console.log(res.data.bizMsg)
@@ -405,7 +402,7 @@ class Jd_618 extends JDHelloWorld {
           await this.wait(3000)
         }
       } catch (e) {
-        console.log('e')
+        console.log(e)
       }
     }
   }
