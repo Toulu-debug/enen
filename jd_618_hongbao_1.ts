@@ -28,7 +28,7 @@ let shareCodeHW: string[] = [], shareCodeSelf: string  [] = [], shareCode: strin
       console.log('🧧', parseFloat(res.data.result.userAward))
 
       log = await tool.main()
-      await wait(3000)
+      await wait(4000)
 
       res = await api('promote_pk_getExpandDetail', {"ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
       console.log('助力码', res.data.result.inviteId)
@@ -69,7 +69,7 @@ let shareCodeHW: string[] = [], shareCodeSelf: string  [] = [], shareCode: strin
           "inviteId": code
         })
         console.log(res.data.bizMsg)
-        await wait(3000)
+        await wait(4000)
       }
     } catch (e) {
       console.log('error', e)
