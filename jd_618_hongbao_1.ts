@@ -43,10 +43,8 @@ let shareCodeHW: string[] = [], shareCodeSelf: string  [] = [], shareCode: strin
       console.log('助力码', res.data.result.inviteId)
       shareCodeSelf.push(res.data.result.inviteId)
     } catch (e) {
-      console.log('error', e)
-    } finally {
-      await wait(1000)
     }
+    await wait(2000)
   }
 
   console.log('内部互助')
