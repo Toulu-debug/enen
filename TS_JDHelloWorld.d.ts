@@ -20,7 +20,10 @@ declare class JDHelloWorld {
     getshareCodeHW(key: string): Promise<string[]>;
     getRandomNumberByRange(start: number, end: number): number;
     getRandomNumString(e: number): string;
-    getUuid(len: number): string;
+    getEncStr(fn: string, body: {
+        id?: number;
+        taskType?: number;
+    }): object;
     run(son: {
         main: any;
         help?: any;
