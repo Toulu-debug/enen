@@ -98,7 +98,7 @@ async function help() {
           console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
           for (let i = 0; i < 5; i++) {
             if (success) break
-            log = await getLog()
+            log = await getLog(index)
             res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
             if (res.rtn_code !== 0) {
               console.log('help error', res.rtn_code)
@@ -146,8 +146,8 @@ async function api(fn: string, body: object) {
   })
 }
 
-async function getLog() {
-  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?t=${Date.now()}`)
+async function getLog(index: number = -1) {
+  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?t=${Date.now()}&index=${index}&pwd=${__dirname}`)
   if (data !== 1 && data !== '1') {
     return data
   } else {
