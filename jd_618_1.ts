@@ -68,7 +68,7 @@ class Jd_618 extends JDHelloWorld {
         "taskToken": tp.taskToken,
         "ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})
       })
-      this.o2s(data)
+      this.o2s(data, 'async feed')
       times++
       await this.wait(3000)
     }
@@ -92,7 +92,7 @@ class Jd_618 extends JDHelloWorld {
       } else if (data?.data?.result?.scoreResult) {
         console.log('金币', parseInt(data.data.result.scoreResult.todaySignScore))
       } else {
-        this.o2s(data)
+        this.o2s(data, 'promote_sign')
       }
       await this.wait(3000)
     } else {
@@ -101,6 +101,7 @@ class Jd_618 extends JDHelloWorld {
 
     for (let i = 0; i < 20; i++) {
       res = await this.api('promote_getHomeData', {})
+      if (i === 0) console.log('当前分红', parseInt(res.data.result.homeMainInfo.raiseInfo.redInfo.red))
       let sceneInfo: any = res.data.result.homeMainInfo.raiseInfo.scenceMap.sceneInfo
       sceneInfo.sort((a, b) => parseInt(a.redNum.nextLevelScore) - parseInt(b.redNum.nextLevelScore))
       sceneInfo = sceneInfo[0]
@@ -120,11 +121,13 @@ class Jd_618 extends JDHelloWorld {
         } catch (e) {
           break
         }
+      } else {
+        break
       }
+      await this.wait(2000)
     }
 
     res = await this.api('qryCompositeMaterials', {"qryParam": "[{\"type\":\"advertGroup\",\"mapTo\":\"brand\",\"id\":\"06306976\"}]", "activityId": "2fUope8TDN3dUJfNzQswkBLc7uE8", "pageId": "", "reqSrc": "", "applyKey": "jd_star"})
-    this.o2s(res)
     let qryList: any = res.data.brand.list
     for (let t of qryList) {
       let ActivityId: string = t.extension.venderLink1.match(/Zeus\/(\w*)/)[1]
@@ -182,7 +185,6 @@ class Jd_618 extends JDHelloWorld {
       try {
         console.log('loop', loop)
         res = await this.api('promote_getTaskDetail', {})
-        this.o2s(res)
         if (loop === 0) {
           let inviteId: string = res.data.result.inviteId
           console.log('助力码', inviteId)
@@ -298,6 +300,7 @@ class Jd_618 extends JDHelloWorld {
   }
 
   async help(users: User[]) {
+    return
     let shareCodeHW_group: any = [], shareCodeHW: any = [], shareCode: any = [], full: string[] = [], groups: GROUP[] = []
     /*
     for (let user of users) {
@@ -340,6 +343,7 @@ class Jd_618 extends JDHelloWorld {
         } else {
           shareCode = Array.from(new Set([...this.shareCodeSelf, ...shareCodeHW]))
         }
+
         this.o2s(this.shareCodeSelf, '内部助力')
         for (let code of shareCode) {
           if (!full.includes(code)) {
