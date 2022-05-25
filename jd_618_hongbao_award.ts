@@ -5,8 +5,9 @@
 
 import axios from 'axios'
 import USER_AGENT, {getCookie, wait} from './TS_USER_AGENTS'
+import {sendNotify} from './sendNotify'
 
-let cookie: string = '', res: any = '', UserName: string, index: number
+let cookie: string = '', res: any = '', UserName: string, index: number, message: string = ''
 
 !(async () => {
   let cookiesArr: string[] = await getCookie()
@@ -20,6 +21,7 @@ let cookie: string = '', res: any = '', UserName: string, index: number
       res = await api('promote_pk_receiveAward', {})
       if (res.data.success) {
         console.log('领取膨胀红包', parseFloat(res.data.result.value))
+        message += `账号${index + 1}  ${UserName}\n领取膨胀红包 ${res.data.result.value}\n\n`
       } else {
         console.log(res.data.bizMsg)
       }
@@ -28,6 +30,8 @@ let cookie: string = '', res: any = '', UserName: string, index: number
     }
     await wait(2000)
   }
+  if (message)
+    await sendNotify("领取膨胀红包", message)
 })()
 
 async function api(fn: string, body: object) {

@@ -40,6 +40,7 @@ let shareCodeHW: string[] = [], shareCodeSelf: string  [] = [], shareCode: strin
 
       res = await api('promote_pk_getExpandDetail', {"ss": JSON.stringify({extraData: {log: encodeURIComponent(log.log), sceneid: 'RAhomePageh5'}, secretp: secretp, random: log.random})})
       console.log('助力码', res.data.result.inviteId)
+      console.log('收到助力', res.data.result.taskVos[0].assistTaskDetailVo.assistInfoVos.length)
       shareCodeSelf.push(res.data.result.inviteId)
     } catch (e) {
     } finally {
