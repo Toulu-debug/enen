@@ -1,10 +1,5 @@
-/**
- * 🐢魔方
- * cron: 10 9,12,15 * * *
- */
-
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {Log} from "./utils/mf_log";
+import {Log} from "./log";
 
 class Mofang extends JDHelloWorld {
   user: User
@@ -12,21 +7,25 @@ class Mofang extends JDHelloWorld {
 
   constructor() {
     super()
-    this.mfTool = new Log()
   }
 
   async init() {
     await this.run(this)
   }
 
-  async api(params: string) {
+  async api(fn: string, body: object) {
     await this.wait(1000)
-    return await this.post("https://api.m.jd.com/client.action", params, {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      "User-Agent": "MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
-      'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/2bf3XEEyWG11pQzPGkKpKX2GxJz2/index.html',
-      'Origin': 'https://h5.m.jd.com',
+    return await this.post("https://api.m.jd.com/client.action", new URLSearchParams({
+      'functionId': fn,
+      'body': JSON.stringify(body),
+      'client': 'wh5',
+      'clientVersion': '1.0.0',
+      'appid': 'content_ecology'
+    }), {
       'Host': 'api.m.jd.com',
+      'Origin': 'https://h5.m.jd.com',
+      'User-Agent': 'jdapp;',
+      'Referer': 'https://h5.m.jd.com/pb/010631430/2bf3XEEyWG11pQzPGkKpKX2GxJz2/index.html',
       'Cookie': this.user.cookie
     })
   }
@@ -37,110 +36,88 @@ class Mofang extends JDHelloWorld {
 
   async main(user: User) {
     this.user = user
+    this.mfTool = new Log('50091', 'doInteractiveAssignment', 'XMFhPageh5')
+    await this.mfTool.init()
+
     let log: string = '', res: any
-    res = await this.api("functionId=getInteractionHomeInfo&body=%7B%22sign%22%3A%22u6vtLQ7ztxgykLEr%22%7D&appid=content_ecology&client=wh5&clientVersion=1.0.0")
+    res = await this.api('getInteractionHomeInfo', {"sign": "u6vtLQ7ztxgykLEr"})
+    let taskConfig_projectId: string = res.result.taskConfig.projectId
+    let projectPoolId: string = res.result.taskConfig.projectPoolId
+    let giftConfig_projectId: string = res.result.giftConfig.projectId
 
-    let sign: string = res.result.taskConfig.projectId, rewardSign: string = res.result.giftConfig.projectId
-
-    res = await this.api(`functionId=queryInteractiveInfo&body=%7B%22encryptProjectId%22%3A%22${sign}%22%2C%22sourceCode%22%3A%22acexinpin0823%22%2C%22ext%22%3A%7B%7D%7D&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+    res = await this.api('queryInteractiveInfo', {"encryptProjectId": taskConfig_projectId, "sourceCode": "acexinpin0823", "ext": {}})
     for (let t of res.assignmentList) {
       if (t.completionCnt < t.assignmentTimesLimit) {
-        if (t.ext) {
-          if (t.assignmentName === '每日签到') {
-            if (t.ext.sign1.status === 1) {
-              let signDay: number = t.ext.sign1.signList?.length || 0, type: number = t.rewards[signDay].rewardType
-              console.log(signDay, type)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({
-                "encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": "1", "actionType": "", "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}
-              })}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log('签到成功')
-            } else {
-              console.log('已签到')
-            }
+        if (t.assignmentName === '每日签到') {
+          if (t.ext.sign1.status === 1) {
+            let signDay: number = t.ext.sign1.signList?.length || 0, type: number = t.rewards[signDay].rewardType
+            console.log(signDay, type)
+            log = await this.getLog()
+            res = await this.api('doInteractiveAssignment', {"encryptProjectId": taskConfig_projectId, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": "1", "actionType": "", "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}})
+            console.log('签到成功')
+          } else {
+            console.log('已签到')
           }
-          for (let proInfo of t.ext.productsInfo ?? []) {
-            if (proInfo.status === 1) {
-              console.log(t.assignmentName)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${encodeURIComponent(JSON.stringify({"encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 0, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}}))}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log(res.msg)
-              if (res.msg === '任务已完成') {
-                break
-              }
-            }
-          }
+        }
 
-          for (let proInfo of t.ext.shoppingActivity ?? []) {
-            if (proInfo.status === 1) {
-              console.log(t.assignmentName)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${encodeURIComponent(JSON.stringify({"encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 1, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}}))}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log(res.msg)
-              await this.wait(t.ext.waitDuration * 1000)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${encodeURIComponent(JSON.stringify({"encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 0, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}}))}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log(res.msg)
-            }
+        for (let proInfo of t.ext.shoppingActivity || t.ext.browseShop || []) {
+          if (proInfo.status === 1) {
+            console.log(t.assignmentName)
+            log = await this.getLog()
+            res = await this.api('doInteractiveAssignment', {"encryptProjectId": taskConfig_projectId, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 1, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}})
+            console.log(res.msg)
+            await this.wait(t.ext.waitDuration * 1000 || 1000)
+            log = await this.getLog()
+            res = await this.api('doInteractiveAssignment', {"encryptProjectId": taskConfig_projectId, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 0, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}})
+            console.log(res.msg)
           }
+        }
 
-          for (let proInfo of t.ext.browseShop ?? []) {
-            if (proInfo.status === 1) {
-              console.log(t.assignmentName)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({
-                "encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 1, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}
-              })}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log(res.msg)
-              await this.wait(t.ext.waitDuration * 1000)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({
-                "encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 0, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}
-              })}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log(res.msg)
-            }
-          }
-
-          for (let proInfo of t.ext.addCart ?? []) {
-            if (proInfo.status === 1) {
-              console.log(t.assignmentName)
-              log = await this.getLog()
-              res = await this.api(`functionId=doInteractiveAssignment&body=${encodeURIComponent(JSON.stringify({"encryptProjectId": sign, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": "0", "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFJGh5"}}))}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-              console.log(res.msg)
-              if (res.msg === '任务已完成') {
-                break
-              }
+        for (let proInfo of t.ext.productsInfo || t.ext.addCart || []) {
+          if (proInfo.status === 1) {
+            console.log(t.assignmentName)
+            log = await this.getLog()
+            res = await this.api('doInteractiveAssignment', {"encryptProjectId": taskConfig_projectId, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 0, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}})
+            console.log(res.msg)
+            if (res.msg === '任务已完成') {
+              break
             }
           }
         }
       }
     }
 
-    res = await this.api(`functionId=queryInteractiveRewardInfo&body=${encodeURIComponent(JSON.stringify({"encryptProjectId": rewardSign, "sourceCode": "acexinpin0823", "ext": {"needExchangeRestScore": "1"}}))}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-    let score: number = res.exchangeRestScoreMap["367"]
-    console.log('当前碎片', score)
+    res = await this.api('queryInteractiveRewardInfo', {"encryptProjectId": giftConfig_projectId, "sourceCode": "acexinpin0823", "ext": {"needExchangeRestScore": "1"}})
+    console.log('当前魔方', res.exchangeRestScoreMap["367"])
 
-    if (score >= 3) {
+    res = await this.api('queryInteractiveRewardInfo', {"encryptProjectPoolId": projectPoolId, "sourceCode": "acexinpin0823", "ext": {"needPoolRewards": 1, "needExchangeRestScore": 1}})
+    console.log('碎片进度', res.exchangeRestScoreMap["368"])
+    let exchangeRestScoreMap368: number = res.exchangeRestScoreMap["368"]
+    for (let i = 1; i < Math.floor(exchangeRestScoreMap368 / 6); i++) {
       log = await this.getLog()
-      res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({"encryptProjectId": rewardSign, "encryptAssignmentId": "khdCzL9YRdYjh3dWFXfZLteUTYu", "sourceCode": "acexinpin0823", "itemId": "", "actionType": "", "completionFlag": "", "ext": {"exchangeNum": 1}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFDHh5"}})}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
+      res = await this.api('doInteractiveAssignment', {"encryptProjectId": giftConfig_projectId, "encryptAssignmentId": "wE62TwscdA52Z4WkpTJq7NaMvfw", "sourceCode": "acexinpin0823", "itemId": "", "actionType": "", "completionFlag": "", "ext": {"exchangeNum": 1}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}})
+      console.log('合成魔方', res.rewardsInfo.successRewards['1'].quantity)
+      if (i === 20) break
+    }
+
+    res = await this.api('queryInteractiveRewardInfo', {"encryptProjectId": giftConfig_projectId, "sourceCode": "acexinpin0823", "ext": {"needExchangeRestScore": "1"}})
+    console.log('当前魔方', res.exchangeRestScoreMap["367"])
+
+    let exchangeRestScoreMap367: number = res.exchangeRestScoreMap["367"], arr: string[] = []
+    exchangeRestScoreMap367 >= 1 ? arr.push('2VUEMo9KjtktsQNvb2yHED2m2oCh') : ''
+    exchangeRestScoreMap367 >= 4 ? arr.push('khdCzL9YRdYjh3dWFXfZLteUTYu') : ''
+    exchangeRestScoreMap367 >= 24 ? arr.push('JkfeMeE5JGmkXiTeJZGzcAWv5cr') : ''
+
+    for (let encryptAssignmentId of arr) {
+      log = await this.getLog()
+      res = await this.api('doInteractiveAssignment', {"encryptProjectId": giftConfig_projectId, "encryptAssignmentId": encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": "", "actionType": "", "completionFlag": "", "ext": {"exchangeNum": 1}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFDHh5"}})
       if (res.subCode === '0') {
         console.log('兑换成功', res.rewardsInfo.successRewards['3'][0].rewardName)
-        score -= 3
       } else {
         console.log('兑换失败', res.msg)
+        break
       }
     }
-    if (score >= 1) {
-      log = await this.getLog()
-      res = await this.api(`functionId=doInteractiveAssignment&body=${JSON.stringify({"encryptProjectId": rewardSign, "encryptAssignmentId": "2VUEMo9KjtktsQNvb2yHED2m2oCh", "sourceCode": "acexinpin0823", "itemId": "", "actionType": "", "completionFlag": "", "ext": {"exchangeNum": 1}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFDHh5"}})}&client=wh5&clientVersion=1.0.0&appid=content_ecology`)
-      if (res.subCode === '0') {
-        console.log('兑换成功', res.rewardsInfo.successRewards['3'][0].rewardName)
-        score -= 1
-      } else {
-        console.log('兑换失败', res.msg)
-      }
-    }
-    console.log('当前碎片', score)
   }
 }
 
