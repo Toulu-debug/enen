@@ -1,19 +1,15 @@
 /**
  * 京东-锦鲤红包
- * 6点后做全部CK
  * cron: 2 0,1,6 * * *
- * CK1     HW.ts -> 内部
- * CK2～n  内部   -> HW.ts
+ * CK1  优先助力HW.ts
  */
 
-import * as dotenv from 'dotenv'
 import {get, post, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], log: string
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], log: string, getLogErrTimes: number = 0
 
 !(async () => {
-  dotenv.config()
   cookiesArr = await getCookie()
   cookiesArr = cookiesArr.slice(0, 1)
   await join()
@@ -142,16 +138,27 @@ async function api(fn: string, body: object) {
     "User-Agent": [
       "Mozilla/5.0 (Linux; U; Android 8.0.0; zh-cn; Mi Note 2 Build/OPR1.170623.032) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/10.1.1",
       "MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
-    ][Math.floor(Math.random() * 2)], "Cookie": cookie,
+    ][Math.floor(Math.random() * 2)],
+    "Cookie": cookie,
   })
 }
 
 async function getLog(index: number = -1) {
-  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?t=${Date.now()}&index=${index}&pwd=${__dirname}`)
-  if (data !== 1 && data !== '1') {
-    return data
-  } else {
-    console.log('No log')
-    process.exit(0)
+  try {
+    let data = await get(`https://api.jdsharecode.xyz/api/jlhb?index=${index}&pwd=${__dirname}`)
+    if (data.toString().includes('random')) {
+      return data
+    } else {
+      console.log('No log')
+      process.exit(0)
+    }
+  } catch (e) {
+    getLogErrTimes++
+    if (getLogErrTimes > 8) {
+      console.log('log api error 8 times, exit')
+      process.exit(0)
+    }
+    await wait(5000)
+    return await getLog(index)
   }
 }
