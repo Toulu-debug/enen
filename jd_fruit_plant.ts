@@ -15,15 +15,34 @@ let cookie: string = '', UserName: string, res: any
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
     res = await api('initForFarm', {"version": 11, "channel": 3, "babelChannel": 0})
-    if (![2, 3].includes(res.farmUserPro.treeState)) {
+    if (![0, 2, 3].includes(res.farmUserPro.treeState)) {
       console.log('正在种植...')
     }
     if (res.farmUserPro.treeState === 2) {
       res = await api('gotCouponForFarm', {"version": 11, "channel": 3, "babelChannel": 0})
       res = await api('initForFarm', {"version": 11, "channel": 3, "babelChannel": 0})
     }
-    if (res.farmUserPro.treeState === 3) {
-      let element = res.farmLevelWinGoods[4][0];
+    if (res.farmUserPro.treeState === 0 || res.farmUserPro.treeState === 3) {
+      let element = {
+        type: null,
+        name: null,
+        prizeLevel: 0,
+      };
+      for (let j = 4; j > 0; j--) {
+        if (res.farmLevelWinGoods[j].length > 0) {
+          let index = Math.floor(Math.random() * res.farmLevelWinGoods[j].length)
+          if (!res.farmLevelWinGoods[j][index]) {
+            index = 0
+          }
+          element = res.farmLevelWinGoods[j][index]
+          break
+        }
+      }
+      if (!element.type) {
+        console.log('当前没有可种植作物')
+        continue
+      }
+      console.log(`正在尝试种植 ${element.prizeLevel} 级作物：${element.name} ...`)
       res = await api('choiceGoodsForFarm', {"imageUrl": '', "nickName": '', "shareCode": '', "goodsType": element.type, "type": "0", "version": 11, "channel": 3, "babelChannel": 0});
       o2s(res)
       await api('gotStageAwardForFarm', {"type": "4", "version": 11, "channel": 3, "babelChannel": 0});
