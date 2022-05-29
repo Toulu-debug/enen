@@ -50,28 +50,40 @@ class Jd_cash_help extends JDHelloWorld {
   async main(user: User) {
     this.user = user
     let res: any
-    res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
-    if (res.data.result.signedStatus !== 1) {
-      console.log('开始签到')
-      await this.doSign()
-      console.log('签到成功')
-    }
-    if (res.data.result.limitTimeRedPacket.receiveStatus === '0') {
-      res = await this.api('cash_join_limited_redpacket', {"id": 5, "level": 3})
-      if (res.data.bizCode === 0) {
-        console.log('开启成功')
-      } else {
-        console.log(res.data.bizMsg)
+    try {
+      res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
+      if (res.data.result.signedStatus !== 1) {
+        console.log('开始签到')
+        await this.doSign()
+        console.log('签到成功')
       }
-    }
+      for (let t of res.data.result.taskInfos) {
+        if (t.doTimes !== t.times) {
+          console.log(t.name)
+          res = await this.api('cash_doTask', {"type": t.type, "taskInfo": t.desc})
+          console.log(res.data.result.totalMoney)
+          res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
+        }
+      }
+      if (res.data.result.limitTimeRedPacket.receiveStatus === '0') {
+        res = await this.api('cash_join_limited_redpacket', {"id": 5, "level": 3})
+        if (res.data.bizCode === 0) {
+          console.log('开启成功')
+        } else {
+          console.log(res.data.bizMsg)
+        }
+      }
 
-    res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
-    if (res.data.result.inviteCode && res.data.result.shareDate) {
-      this.shareCodeSelf.push({
-        inviteCode: res.data.result.inviteCode,
-        shareDate: res.data.result.shareDate
-      })
-      console.log('助力码', res.data.result.inviteCode)
+      res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
+      if (res.data.result.inviteCode && res.data.result.shareDate) {
+        this.shareCodeSelf.push({
+          inviteCode: res.data.result.inviteCode,
+          shareDate: res.data.result.shareDate
+        })
+        console.log('助力码', res.data.result.inviteCode)
+      }
+    } catch (e) {
+      console.log('error', e.message)
     }
   }
 
@@ -79,24 +91,28 @@ class Jd_cash_help extends JDHelloWorld {
     let shareCodeHW: any = [], shareCode: CODE[] = []
     this.o2s(this.shareCodeSelf, '内部助力')
     for (let user of users) {
-      this.user = user
-      let res: any
-      if (shareCodeHW.length === 0) {
-        shareCodeHW = this.getshareCodeHW('cash')
-      }
-      if (user.index === 0) {
-        shareCode = [...shareCodeHW, ...this.shareCodeSelf]
-      } else {
-        shareCode = [...this.shareCodeSelf, ...shareCodeHW]
-      }
-
-      for (let code of shareCode) {
-        console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.inviteCode}`)
-        res = await this.api('redpack_limited_assist', {"inviteCode": code.inviteCode, "shareDate": code.shareDate})
-        console.log(res.data?.result?.limitTimeAssist?.tips)
-        if (res.data?.result?.limitTimeAssist?.assistCode === '207') {
-          break
+      try {
+        this.user = user
+        let res: any
+        if (shareCodeHW.length === 0) {
+          shareCodeHW = this.getshareCodeHW('cash')
         }
+        if (user.index === 0) {
+          shareCode = [...shareCodeHW, ...this.shareCodeSelf]
+        } else {
+          shareCode = [...this.shareCodeSelf, ...shareCodeHW]
+        }
+
+        for (let code of shareCode) {
+          console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.inviteCode}`)
+          res = await this.api('redpack_limited_assist', {"inviteCode": code.inviteCode, "shareDate": code.shareDate})
+          console.log(res.data?.result?.limitTimeAssist?.tips)
+          if (res.data?.result?.limitTimeAssist?.assistCode === '207') {
+            break
+          }
+        }
+      } catch (e) {
+        console.log('error', e.message)
       }
     }
   }
