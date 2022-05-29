@@ -128,14 +128,6 @@ class Joy_Park_Run extends JDHelloWorld {
     await this.wait(3000)
   }
 
-  async rank(sum: number) {
-    try {
-      let data: any = await this.post('https://api.jdsharecode.xyz/api/joy_run_rank', {value: sum})
-      data.rank !== '-1' ? console.log(`领先${data.rank}的本库用户`) : ''
-    } catch (e) {
-    }
-  }
-
   async main(user: User) {
     this.user = user
     let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.08')
@@ -165,7 +157,6 @@ class Joy_Park_Run extends JDHelloWorld {
       console.log('成功', success)
       sum = parseFloat(sum.toFixed(2))
       console.log('收益', sum)
-      await this.rank(sum)
 
       res = await this.team('runningTeamInfo', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
       if (!this.captainId) {

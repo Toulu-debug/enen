@@ -1,3 +1,8 @@
+/**
+ * RegExp:
+ * https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(trade_config|genToken)
+ */
+
 const $ = new Env('cookie');
 
 let cookie = '', s = ''

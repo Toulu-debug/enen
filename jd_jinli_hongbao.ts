@@ -7,7 +7,7 @@
 import {get, post, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], log: string, getLogErrTimes: number = 0
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], log: string
 
 !(async () => {
   cookiesArr = await getCookie()
@@ -144,21 +144,11 @@ async function api(fn: string, body: object) {
 }
 
 async function getLog(index: number = -1) {
-  try {
-    let data = await get(`https://api.jdsharecode.xyz/api/jlhb?index=${index}&pwd=${__dirname}`)
-    if (data.toString().includes('random')) {
-      return data
-    } else {
-      console.log('No log')
-      process.exit(0)
-    }
-  } catch (e) {
-    getLogErrTimes++
-    if (getLogErrTimes > 8) {
-      console.log('log api error 8 times, exit')
-      process.exit(0)
-    }
-    await wait(5000)
-    return await getLog(index)
+  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?index=${index}&pwd=${__dirname}`)
+  if (data !== '1' && data !== 1) {
+    return data
+  } else {
+    console.log('No log')
+    process.exit(0)
   }
 }
