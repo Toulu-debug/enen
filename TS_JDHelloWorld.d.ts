@@ -24,6 +24,7 @@ declare class JDHelloWorld {
         id?: number;
         taskType?: number;
     }): object;
+    cashDoSign(): Promise<unknown>;
     run(son: {
         main: any;
         help?: any;
