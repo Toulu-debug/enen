@@ -1,17 +1,25 @@
 const $ = new Env('cookie');
 
-if ($request.url.includes('https://api.m.jd.com/client.action')) {
-  console.log('========================')
-  let cookie = $request.headers['cookie'] || $request.headers['Cookie']
-  let s = ''
+let cookie = '', s = ''
+if ($request.url.includes('https://api.m.jd.com/client.action?functionId=trade_config')) {
+  // h5
+  cookie = $request.headers['cookie'] || $request.headers['Cookie']
   cookie.match(/(pt_key|pt_pin)[^;]*/g).map(item => {
     s += item + ';'
   })
-  console.log(s)
-  console.log('========================')
-  $.msg('获取成功', 'success', '在日志中查看');
-  $.done()
+
+} else if ($request.url.includes('https://api.m.jd.com/client.action?functionId=genToken')) {
+  cookie = $request.headers['cookie'] || $request.headers['Cookie']
+  cookie.match(/(wskey|pt_pin)[^;]*/g).map(item => {
+    s += item + ';'
+  })
 }
+
+console.log('========================')
+console.log(s)
+console.log('========================')
+$.msg('获取成功', 'success', '在日志中查看');
+$.done()
 
 function Env(t, e) {
   "undefined" != typeof process && JSON.stringify(process.env).indexOf("GITHUB") > -1 && process.exit(0);
