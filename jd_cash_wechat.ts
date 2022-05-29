@@ -1,5 +1,6 @@
 /**
- * 领现金1.5
+ * 小程序-领现金-1.5
+ * cron: 15 7,18 * * *
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
@@ -9,7 +10,7 @@ interface CODE {
   shareDate: string
 }
 
-class Jd_cash_help extends JDHelloWorld {
+class Jd_cash_wechat extends JDHelloWorld {
   user: User
   shareCodeSelf: CODE[] = []
 
@@ -90,10 +91,11 @@ class Jd_cash_help extends JDHelloWorld {
   async help(users: User[]) {
     let shareCodeHW: any = [], shareCode: CODE[] = []
     this.o2s(this.shareCodeSelf, '内部助力')
+    let res: any
+
     for (let user of users) {
       try {
         this.user = user
-        let res: any
         if (shareCodeHW.length === 0) {
           shareCodeHW = this.getshareCodeHW('cash')
         }
@@ -115,7 +117,20 @@ class Jd_cash_help extends JDHelloWorld {
         console.log('error', e.message)
       }
     }
+
+    for (let user of users) {
+      try {
+        this.user = user
+        console.log(`账号${user.index + 1} ${user.UserName}`)
+        for (let i = 1; i < 5; i++) {
+          res = await this.api('cash_open_limited_redpacket', {"node": i})
+          console.log(res.data)
+        }
+      } catch (e) {
+        console.log('error', e.message)
+      }
+    }
   }
 }
 
-new Jd_cash_help().init().then()
+new Jd_cash_wechat().init().then()
