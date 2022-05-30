@@ -66,22 +66,25 @@ class Jd_cash_wechat extends JDHelloWorld {
           res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
         }
       }
-      if (res.data.result.limitTimeRedPacket.receiveStatus === '0') {
+
+      if (new Date().getHours() >= 7 && new Date().getHours() <= 19 && res.data.result.limitTimeRedPacket.receiveStatus === '0') {
         res = await this.api('cash_join_limited_redpacket', {"id": 5, "level": 3})
         if (res.data.bizCode === 0) {
           console.log('开启成功')
         } else {
           console.log(res.data.bizMsg)
         }
-      }
 
-      res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
-      if (res.data.result.inviteCode && res.data.result.shareDate) {
-        this.shareCodeSelf.push({
-          inviteCode: res.data.result.inviteCode,
-          shareDate: res.data.result.shareDate
-        })
-        console.log('助力码', res.data.result.inviteCode)
+        res = await this.api('cash_mob_home', {"isLTRedPacket": "1"})
+        if (res.data.result.inviteCode && res.data.result.shareDate) {
+          this.shareCodeSelf.push({
+            inviteCode: res.data.result.inviteCode,
+            shareDate: res.data.result.shareDate
+          })
+          console.log('助力码', res.data.result.inviteCode)
+        }
+      } else {
+        console.log('不在时间范围内')
       }
     } catch (e) {
       console.log('error', e.message)
