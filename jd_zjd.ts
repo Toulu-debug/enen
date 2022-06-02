@@ -36,6 +36,7 @@ class Zjd extends JDHelloWorld {
   }
 
   async api(fn: string, body: object) {
+    await this.wait(4000)
     let h5st = zjdH5st({
       'fromType': 'wxapp',
       'timestamp': Date.now(),
@@ -68,7 +69,6 @@ class Zjd extends JDHelloWorld {
       // 没开团
       this.openNum++
       res = await this.api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
-      await this.wait(1000)
       if (res.success) {
         console.log(`开团成功，结束时间：${res.data.endTime}`)
         res = await this.api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
@@ -77,13 +77,11 @@ class Zjd extends JDHelloWorld {
           assistStartRecordId: res.data.assistStartRecordId,
           assistedPinEncrypted: res.data.encPin,
         })
-        await this.wait(1000)
       }
     } else if (res.data.assistedRecords.length === res.data.assistNum) {
       console.log('已成团')
       if (res.data.canStartNewAssist) {
         res = await this.api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
-        await this.wait(1000)
         if (res.success) {
           console.log(`开团成功，结束时间：${res.data.endTime}`)
           res = await this.api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
@@ -92,7 +90,6 @@ class Zjd extends JDHelloWorld {
             assistStartRecordId: res.data.assistStartRecordId,
             assistedPinEncrypted: res.data.encPin,
           })
-          await this.wait(1000)
         }
       }
     } else if (!res.data.canStartNewAssist) {
@@ -102,7 +99,6 @@ class Zjd extends JDHelloWorld {
 
   async help(users: User[]) {
     this.o2s(shareCodeSelf)
-    await this.wait(2000)
     for (let user of users) {
       this.cookie = user.cookie
       if (shareCodeHW.length === 0) {
@@ -137,9 +133,7 @@ class Zjd extends JDHelloWorld {
           console.log(e)
           break
         }
-        await this.wait(2000)
       }
-      await this.wait(2000)
     }
   }
 }
