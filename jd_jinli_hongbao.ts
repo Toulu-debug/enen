@@ -7,29 +7,25 @@
 import {get, post, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], log: string
-let step = -1, ck_type = -1
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
+let step = -1, ck_type = -1, random: string = '', log: string = ''
 
 !(async () => {
-  let temp = await getCookie()
-  for (let ck of temp) {
+  let allCookie = await getCookie()
+  for (let ck of allCookie) {
     if (ck.includes('pt_key=app_open')) {
-      temp = [ck]
+      cookiesArr = [ck]
       break
     }
   }
-  console.log('temp', temp)
-  if (temp.length !== 0) {
-    cookiesArr = temp
-  } else {
-    cookiesArr = cookiesArr.slice(0, 1)
+  if (cookiesArr.length === 0) {
+    cookiesArr = allCookie.slice(0, 1)
   }
   step = 0
   await join()
   await help()
 
-  cookiesArr = await getCookie()
-  cookiesArr = cookiesArr.slice(0, 9)
+  cookiesArr = allCookie.slice(0, 9)
   step = 1
   if ([0, 1].includes(new Date().getHours())) {
     await join()
@@ -47,14 +43,14 @@ async function join() {
       console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
       for (let i = 0; i < 3; i++) {
         try {
-          log = await getLog(-1)
-          res = await api('h5launch', {followShop: 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
+          await getLog(-1)
+          res = await api('h5launch', {followShop: 0, random: random, log: log, sceneid: 'JLHBhPageh5'})
           console.log('活动初始化：', res.data.result.statusDesc)
           if (res.rtn_code === 0) {
             break
           }
         } catch (e) {
-          console.log('join error', res.rtn_code)
+          console.log('join error', res?.rtn_code)
           await wait(5000)
         }
       }
@@ -88,8 +84,8 @@ async function help() {
           console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
           for (let i = 0; i < 5; i++) {
             if (success) break
-            log = await getLog(index)
-            res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, random: log.match(/"random":"(\d+)"/)[1], log: log.match(/"log":"(.*)"/)[1], sceneid: 'JLHBhPageh5'})
+            await getLog(index)
+            res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, random: random, log: log, sceneid: 'JLHBhPageh5'})
             if (res.rtn_code !== 0) {
               console.log('help error', res.rtn_code)
               await wait(5000)
@@ -150,7 +146,16 @@ async function api(fn: string, body: object) {
   if (ck_type === 0) {
     ua = 'jdapp;android;10.5.4;;;appBuild/96906;ef/1;ep/%7B%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22ts%22%3A1654261134084%2C%22ridx%22%3A-1%2C%22cipher%22%3A%7B%22sv%22%3A%22CJO%3D%22%2C%22ad%22%3A%22ZWDuCwU2DQYzYWCyZWO4Yq%3D%3D%22%2C%22od%22%3A%22%22%2C%22ov%22%3A%22CzK%3D%22%2C%22ud%22%3A%22ZWDuCwU2DQYzYWCyZWO4Yq%3D%3D%22%7D%2C%22ciphertype%22%3A5%2C%22version%22%3A%221.2.0%22%2C%22appname%22%3A%22com.jingdong.app.mall%22%7D;jdSupportDarkMode/0;Mozilla/5.0 (Linux; Android 11; sdk_gphone_arm64 Build/RSR1.201216.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36'
   }
-  return await post(`https://api.m.jd.com/api?appid=jinlihongbao&functionId=${fn}&loginType=2&client=jinlihongbao&clientVersion=10.2.4&osVersion=AndroidOS&d_brand=Xiaomi&d_model=Xiaomi`, `body=${encodeURIComponent(JSON.stringify(body))}`, {
+  return await post('https://api.m.jd.com/api', new URLSearchParams({
+    'appid': 'jinlihongbao',
+    'body': JSON.stringify(body),
+    'functionId': fn,
+    'loginType': '2',
+    'client': 'jinlihongbao',
+    't': Date.now().toString(),
+    'clientVersion': '10.5.4',
+    'osVersion': '-1',
+  }), {
     "origin": "https://h5.m.jd.com",
     "referer": "https://h5.m.jd.com/babelDiy/Zeus/2NUvze9e1uWf4amBhe1AV6ynmSuH/index.html",
     'Content-Type': 'application/x-www-form-urlencoded',
@@ -160,10 +165,11 @@ async function api(fn: string, body: object) {
   })
 }
 
-async function getLog(index: number = -1) {
+async function getLog(index: number = -1): Promise<void> {
   let data = await get(`https://api.jdsharecode.xyz/api/jlhb?index=${index}&pwd=${__dirname}&step=${step}&ck_type=${ck_type}`)
   if (data !== '1' && data !== 1) {
-    return data
+    random = data.match(/"random":"(\d+)"/)[1]
+    log = data.match(/"log":"(.*)"/)[1]
   } else {
     console.log('No log')
     process.exit(0)
