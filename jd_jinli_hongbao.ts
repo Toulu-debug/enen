@@ -145,9 +145,7 @@ async function api(fn: string, body: object) {
   if (!remote_ua) {
     remote_ua = await get('https://api.jdsharecode.xyz/api/jlhb_ua')
   }
-  let ua: string = ck_type === 0
-    ? remote_ua
-    : 'Mozilla/5.0 (Linux; U; Android 8.0.0; zh-cn; Mi Note 2 Build/OPR1.170623.032) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/10.1.1'
+  let ua: string = ck_type === 0 ? remote_ua : 'Mozilla/5.0 (Linux; U; Android 8.0.0; zh-cn; Mi Note 2 Build/OPR1.170623.032) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/10.1.1'
   return await post('https://api.m.jd.com/api', new URLSearchParams({
     'appid': 'jinlihongbao',
     'body': JSON.stringify(body),
