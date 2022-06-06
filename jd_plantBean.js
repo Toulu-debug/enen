@@ -106,7 +106,7 @@ async function jdPlantBean() {
       currentRoundId = roundList[1].roundId;//本期的roundId
       lastRoundId = roundList[0].roundId;//上期的roundId
       awardState = roundList[0].awardState;
-      $.taskList = $.plantBeanIndexResult.data.taskList;
+      $.taskList = $.plantBeanIndexResult.data?.taskList;
       subTitle = `【京东昵称】${$.plantBeanIndexResult.data.plantUserInfo.plantNickName}`;
       message += `【上期时间】${roundList[0].dateDesc.replace('上期 ', '')}\n`;
       message += `【上期成长值】${roundList[0].growth}\n`;
@@ -390,7 +390,7 @@ async function doTask() {
 function showTaskProcess() {
   return new Promise(async resolve => {
     await plantBeanIndex();
-    $.taskList = $.plantBeanIndexResult.data.taskList;
+    $.taskList = $.plantBeanIndexResult.data?.taskList;
     if ($.taskList && $.taskList.length > 0) {
       console.log("     任务   进度");
       for (let item of $.taskList) {
