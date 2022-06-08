@@ -1,0 +1,11 @@
+{
+  "files": [
+    "utils/h5st.js"
+  ],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "target": "es5",
+    "allowJs": true,
+    "downlevelIteration": true
+  }
+}
