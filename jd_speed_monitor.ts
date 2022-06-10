@@ -28,7 +28,7 @@ let cookie: string = '', UserName: string
 
   for (let t of data.data.gears) {
     console.log(t.amount)
-    if (t.amount === '50' || t.amount === '10') {
+    if (t.amount === '50' || t.amount === '120') {
       await sendNotify('极速版金币', `${t.amount}🧧`)
       break
     }
