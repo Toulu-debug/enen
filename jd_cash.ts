@@ -1,7 +1,5 @@
 /**
  * 京东-领现金
- * 使用panda sign api
- * export PANDA_TOKEN=""
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
@@ -18,7 +16,7 @@ class CASH extends JDHelloWorld {
   }
 
   async api(fn: string, body: object) {
-    let sign = this.pandaSign(fn, body)
+    let sign = await this.getSign(fn, body)
     return await this.post(`https://api.m.jd.com/client.action?functionId=${fn}`, sign, {
       'Host': 'api.m.jd.com',
       'Cookie': this.cookie,
