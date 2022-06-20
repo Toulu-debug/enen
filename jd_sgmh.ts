@@ -22,14 +22,6 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
       if (t.taskType === 14) {
         console.log('助力码', t.assistTaskDetailVo?.taskToken)
         shareCodeSelf.push(t.assistTaskDetailVo?.taskToken)
-        // for (let k = 0; k < 3; k++) {
-        //   try {
-        //     await runTimes(t.assistTaskDetailVo?.taskToken)
-        //     break
-        //   } catch (e) {
-        //   }
-        //   await wait(Math.floor(Math.random() * 10 + 3) * 1000)
-        // }
       }
       if ((t.browseShopVo || t.productInfoVos || t.shoppingActivityVos) && t.times < t.maxTimes) {
         for (let i = 0; i < t.maxTimes - t.times; i++) {
@@ -40,7 +32,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
             tp = t.browseShopVo
           else if (t.shoppingActivityVos)
             tp = t.shoppingActivityVos
-          console.log(tp[i].shopName || tp[i].skuName || tp[i].title)
+          console.log(tp[i]?.shopName || tp[i]?.skuName || tp[i]?.title)
           if (!t.shoppingActivityVos) {
             res = await api('harmony_collectScore', {"appId": "1EFRXxg", "taskToken": tp[i].taskToken, "taskId": t.taskId, "actionType": 1})
             console.log(res.data.bizMsg)
@@ -116,12 +108,3 @@ async function api(fn: string, body: object) {
     })
   return data
 }
-
-// async function runTimes(code: string) {
-//   try {
-//     let {data} = await axios.get(`https://api.jdsharecode.xyz/api/runTimes?activityId=sgmh&sharecode=${code}`)
-//     console.log(data)
-//   } catch (e) {
-//     console.log('上报失败')
-//   }
-// }

@@ -91,16 +91,15 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
         await wait(10000)
         if (res.helpResult.remainTimes === 0) {
           console.log('上限')
-          await wait(50000)
+          await wait(5000)
           break
         }
       }
     } catch (e) {
       console.log('error', e)
     }
-    await wait(60000)
+    await wait(5000)
   }
-
 
   for (let [index, value] of cookiesArr.entries()) {
     try {
@@ -111,7 +110,9 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
       h5stTool = new H5ST("0c010", USER_AGENT, "8389547038003203")
       await h5stTool.__genAlgo()
 
-      res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
+      res = await api('farmAssistInit', {"version": 16, "channel": 1, "babelChannel": "121"})
+      let assistFriendList: number = res.assistFriendList.length
+
       if (res.code !== '0') {
         console.log('farmAssistInit Error')
         continue
@@ -126,7 +127,7 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
           farmAssistInit_waterEnergy += t.waterEnergy
         }
       }
-      console.log('收到助力', res.assistFriendList.length)
+      console.log('收到助力', assistFriendList)
       console.log('助力已领取', farmAssistInit_waterEnergy)
 
       message += `【助力已领取】  ${farmAssistInit_waterEnergy}\n\n`
@@ -134,7 +135,7 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
     } catch (e) {
       console.log('error', e)
     }
-    await wait(5000)
+    await wait(10000)
   }
   message && await sendNotify("农场助力", message)
 })()
@@ -144,7 +145,7 @@ async function api(fn: string, body: object) {
     'appid': 'wh5',
     'body': JSON.stringify(body),
     'client': 'apple',
-    'clientVersion': '11.0.4',
+    'clientVersion': '10.2.4',
     'functionId': fn,
   })
   return await get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${JSON.stringify(body)}&appid=wh5&client=apple&clientVersion=11.0.4&h5st=${h5st}`, {
