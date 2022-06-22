@@ -1,6 +1,6 @@
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 
-class Joy_Park extends JDHelloWorld {
+class Jd_joy_park extends JDHelloWorld {
   user: User
 
   constructor() {
@@ -8,10 +8,10 @@ class Joy_Park extends JDHelloWorld {
   }
 
   async init() {
-    await this.run(new Joy_Park())
+    await this.run(this)
   }
 
-  async api(fn: string, body: Object): Promise<object> {
+  async api(fn: string, body: Object) {
     return await this.post('https://api.m.jd.com/', `functionId=${fn}&body=${JSON.stringify(body)}&_t=${Date.now()}&appid=activities_platform`, {
       'Content-Type': 'application/x-www-form-urlencoded',
       'User-Agent': this.user.UserAgent,
@@ -38,4 +38,4 @@ class Joy_Park extends JDHelloWorld {
   }
 }
 
-new Joy_Park().init().then()
+new Jd_joy_park().init().then()
