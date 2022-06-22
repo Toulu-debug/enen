@@ -20,7 +20,7 @@ class Joy_Park_Run extends JDHelloWorld {
   }
 
   async init() {
-    await this.run(new Joy_Park_Run())
+    await this.run(this)
   }
 
   // 秒转分:秒
@@ -28,23 +28,6 @@ class Joy_Park_Run extends JDHelloWorld {
     let minutes: number = Math.floor(seconds / 60)
     let second: number = Math.floor(seconds % 60)
     return `${minutes}分${second}秒`
-  }
-
-  // 小数加法
-  add(num1: number, num2: number) {
-    let r1: number, r2: number
-    try {
-      r1 = num1.toString().split('.')[1].length
-    } catch (e) {
-      r1 = 0
-    }
-    try {
-      r2 = num2.toString().split('.')[1].length
-    } catch (e) {
-      r2 = 0
-    }
-    let m: number = Math.pow(10, Math.max(r1, r2))
-    return (num1 * m + num2 * m) / m
   }
 
   async team(fn: string, body: object) {
@@ -148,7 +131,7 @@ class Joy_Park_Run extends JDHelloWorld {
 
       for (let t of res?.data?.detailVos || []) {
         if (t.amount > 0 && getDate(new Date(t.createTime)) === new Date().getDate()) {
-          sum = this.add(sum, t.amount)
+          sum += t.amount
           success++
         } else {
           break
