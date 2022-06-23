@@ -4,24 +4,21 @@
  * CK app_open 1  优先助力HW.ts
  */
 
-import {get, post, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
+import {get, getshareCodeHW, o2s, getCookie, wait} from "./TS_USER_AGENTS"
+import axios from "axios";
 
 let cookie: string, cookiesArr: string[] = [], res: any, UserName: string
-let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = []
-let remote_ua: string = null, step = -1, ck_type = -1, random: string = '', log: string = ''
+let shareCodesSelf: string[] = [], shareCodes: string[] = [], shareCodesHW: string[] = [], fullCode: string[] = [], random: string = '', log: string = ''
 
 !(async () => {
-  let allCookie = await getCookie()
-  cookiesArr = cookiesArr.filter(item => {
+  let all = (await getCookie()).filter(item => {
     return item.includes('app_open')
   })
-
-  cookiesArr = allCookie.slice(0, 1)
-  step = 0
+  cookiesArr = all.slice(0, 1)
   await join()
   await help()
 
-  cookiesArr = allCookie.slice(0, 9)
+  cookiesArr = all.slice(0, 9)
   if ([0, 1].includes(new Date().getHours())) {
     await join()
   }
@@ -34,11 +31,10 @@ async function join() {
     try {
       cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-      ck_type = cookie.includes('pt_key=app_open') ? 0 : 1
       console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
       for (let i = 0; i < 3; i++) {
         try {
-          await getLog(-1)
+          await getLog()
           res = await api('h5launch', {followShop: 0, random: random, log: log, sceneid: 'JLHBhPageh5'})
           console.log('活动初始化：', res.data.result.statusDesc)
           if (res.rtn_code === 0) {
@@ -61,7 +57,6 @@ async function help() {
     try {
       cookie = value
       UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-      ck_type = cookie.includes('pt_key=app_open') ? 0 : 1
       if (shareCodesHW.length === 0) {
         shareCodesHW = await getshareCodeHW('jlhb')
       }
@@ -79,7 +74,7 @@ async function help() {
           console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodesSelf.includes(code) ? '*内部*' : ''}`)
           for (let i = 0; i < 5; i++) {
             if (success) break
-            await getLog(index)
+            await getLog()
             res = await api('jinli_h5assist', {"redPacketId": code, "followShop": 0, random: random, log: log, sceneid: 'JLHBhPageh5'})
             if (res.rtn_code !== 0) {
               console.log('help error', res.rtn_code)
@@ -137,31 +132,31 @@ async function getShareCodeSelf(one: boolean = false) {
 }
 
 async function api(fn: string, body: object) {
-  if (!remote_ua) {
-    remote_ua = await get('https://api.jdsharecode.xyz/api/jlhb_ua')
-  }
-  let ua: string = ck_type === 0 ? remote_ua : 'Mozilla/5.0 (Linux; U; Android 8.0.0; zh-cn; Mi Note 2 Build/OPR1.170623.032) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/10.1.1'
-  return await post('https://api.m.jd.com/api', new URLSearchParams({
-    'appid': 'jinlihongbao',
-    'body': JSON.stringify(body),
-    'functionId': fn,
-    'loginType': '2',
-    'client': 'jinlihongbao',
-    't': Date.now().toString(),
-    'clientVersion': '10.5.4',
-    'osVersion': '-1',
+  let {data} = await axios.post('https://api.m.jd.com/api', new URLSearchParams({
+    'body': JSON.stringify(body)
   }), {
-    'origin': 'https://happy.m.jd.com',
-    "referer": "https://happy.m.jd.com/babelDiy/zjyw/3ugedFa7yA6NhxLN5gw2L3PF9sQC/index.html",
-    'Content-Type': 'application/x-www-form-urlencoded',
-    "X-Requested-With": "com.jingdong.app.mall",
-    "User-Agent": ua,
-    "Cookie": cookie,
+    params: {
+      'appid': 'jinlihongbao',
+      'functionId': fn,
+      'loginType': '2',
+      'client': 'jinlihongbao',
+      't': Date.now(),
+      'clientVersion': '11.1.0',
+      'osVersion': '-1'
+    },
+    headers: {
+      'Host': 'api.m.jd.com',
+      'Origin': 'https://happy.m.jd.com',
+      'User-Agent': "jdapp;android;11.1.0;;;appBuild/98139;",
+      'Referer': 'https://happy.m.jd.com/',
+      'Cookie': cookie
+    }
   })
+  return data
 }
 
-async function getLog(index: number = -1): Promise<void> {
-  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?index=${index}&pwd=${__dirname}&step=${step}&ck_type=${ck_type}`)
+async function getLog(): Promise<void> {
+  let data = await get(`https://api.jdsharecode.xyz/api/jlhb?project=${__dirname}`)
   if (data !== '1' && data !== 1) {
     random = data.match(/"random":"(\d+)"/)[1]
     log = data.match(/"log":"(.*)"/)[1]
