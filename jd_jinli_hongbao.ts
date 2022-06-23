@@ -12,21 +12,16 @@ let remote_ua: string = null, step = -1, ck_type = -1, random: string = '', log:
 
 !(async () => {
   let allCookie = await getCookie()
-  for (let ck of allCookie) {
-    if (ck.includes('pt_key=app_open')) {
-      cookiesArr = [ck]
-      break
-    }
-  }
-  if (cookiesArr.length === 0) {
-    cookiesArr = allCookie.slice(0, 1)
-  }
+  cookiesArr = cookiesArr.filter(item => {
+    return item.includes('app_open')
+  })
+
+  cookiesArr = allCookie.slice(0, 1)
   step = 0
   await join()
   await help()
 
   cookiesArr = allCookie.slice(0, 9)
-  step = 1
   if ([0, 1].includes(new Date().getHours())) {
     await join()
   }
@@ -156,8 +151,8 @@ async function api(fn: string, body: object) {
     'clientVersion': '10.5.4',
     'osVersion': '-1',
   }), {
-    "origin": "https://h5.m.jd.com",
-    "referer": "https://h5.m.jd.com/babelDiy/Zeus/2NUvze9e1uWf4amBhe1AV6ynmSuH/index.html",
+    'origin': 'https://happy.m.jd.com',
+    "referer": "https://happy.m.jd.com/babelDiy/zjyw/3ugedFa7yA6NhxLN5gw2L3PF9sQC/index.html",
     'Content-Type': 'application/x-www-form-urlencoded',
     "X-Requested-With": "com.jingdong.app.mall",
     "User-Agent": ua,

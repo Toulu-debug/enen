@@ -32,10 +32,14 @@ class Jd_queryRedpacket extends JDHelloWorld {
       "Cookie": user.cookie,
       'User-Agent': user.UserAgent
     })
-    let day: number = new Date().getDay(), jdRed: number = 0, jdRedExp: number = 0
+    let day: number = new Date().getDay(), jdRed: number = 0, jdRedExp: number = 0, jsRed: number = 0, jsRedExp: number = 0
     for (let j of res.data.useRedInfo?.redList || []) {
+      console.log(j)
       if (j.orgLimitStr.includes('京喜')) {
       } else if (j.activityName.includes('极速版')) {
+        jsRed += j.balance
+        if (new Date(j.endTime * 1000).getDay() === day)
+          jsRedExp = this.add(jsRedExp, j.balance)
       } else if (j.orgLimitStr.includes('京东健康')) {
       } else {
         jdRed = this.add(jdRed, j.balance)
@@ -43,7 +47,8 @@ class Jd_queryRedpacket extends JDHelloWorld {
           jdRedExp = this.add(jdRedExp, j.balance)
       }
     }
-    console.log(jdRed, '  今日过期：', jdRedExp)
+    console.log('京东', jdRed, '  今日过期：', jdRedExp)
+    console.log('极速', jsRed, '  今日过期：', jsRedExp)
     let msg = `【账号】  ${user.UserName}\n京东红包  ${jdRed}\n今日过期  ${jdRedExp}\n\n`
     return {
       msg: msg

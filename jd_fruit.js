@@ -23,11 +23,8 @@ if ($.isNode() && process.env.CC_NOHELPAFTER8) {
     }
   }
 }
-let boolneedUpdate = false;
-let TempShareCache = [];
 let WP_APP_TOKEN_ONE = "";
 let lnrun = 0;
-let llgetshare = false;
 let NoNeedCodes = [];
 !(async () => {
   await requireConfig();
@@ -71,24 +68,6 @@ async function jdFruit() {
       message = `【水果名称】${$.farmInfo.farmUserPro.name}\n`;
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
       message += `【已兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`;
-
-      try {
-        let myShareCode = $.farmInfo.farmUserPro.shareCode
-        console.log('助力码', myShareCode)
-        await $.wait(1000)
-        for (let k = 0; k < 5; k++) {
-          try {
-            await runTimes(myShareCode)
-            break
-          } catch (e) {
-            console.log('runTimes Error', e)
-            await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
-          }
-        }
-      } catch (e) {
-        console.log('上报模块出错', e)
-      }
-
       await masterHelpShare();//助力好友
       if ($.farmInfo.treeState === 2 || $.farmInfo.treeState === 3) {
         option['open-url'] = urlSchema;
@@ -1020,47 +999,6 @@ async function duck() {
   }
 }
 
-async function GetCollect() {
-  try {
-    console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】`);
-    var llfound = false;
-    var strShareCode = "";
-    if (TempShareCache) {
-      for (let j = 0; j < TempShareCache.length; j++) {
-        if (TempShareCache[j].pt_pin == $.UserName) {
-          llfound = true;
-          strShareCode = TempShareCache[j].ShareCode;
-        }
-      }
-    }
-    if (!llfound) {
-      console.log($.UserName + "该账号无缓存，尝试联网获取互助码.....");
-      llgetshare = true;
-      await initForFarm();
-      if ($.farmInfo.farmUserPro) {
-        var tempAddCK = {};
-        strShareCode = $.farmInfo.farmUserPro.shareCode;
-        tempAddCK = {
-          "pt_pin": $.UserName,
-          "ShareCode": strShareCode
-        };
-        TempShareCache.push(tempAddCK);
-        //标识，需要更新缓存文件
-        boolneedUpdate = true;
-      }
-    }
-
-    if (strShareCode) {
-      console.log(`\n` + strShareCode);
-      newShareCodes.push(strShareCode)
-    } else {
-      console.log(`\n数据异常`);
-    }
-  } catch (e) {
-    $.logErr(e);
-  }
-}
-
 // ========================API调用接口========================
 //鸭子，点我有惊喜
 async function getFullCollectionReward() {
@@ -1482,22 +1420,6 @@ function readShareCode() {
     })
     await $.wait(10000);
     resolve()
-  })
-}
-
-function runTimes(thisShareCode) {
-  return new Promise((resolve, reject) => {
-    $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes0509?activityId=farm&sharecode=${thisShareCode}`
-    }, (err, resp, data) => {
-      if (err) {
-        console.log('上报失败', err)
-        reject(err)
-      } else {
-        console.log(data)
-        resolve()
-      }
-    })
   })
 }
 

@@ -37,7 +37,7 @@ def main(ck, index):
 
 
 if __name__ == '__main__':
-    print(sys.argv)
+    print('tread.py', sys.argv)
     get_cookies()
     for i in range(len(cookies)):
         threading.Thread(target=main, args=(cookies[i], i)).start()
