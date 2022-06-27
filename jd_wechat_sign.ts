@@ -43,14 +43,33 @@ class Jd_wechat_sign extends JDHelloWorld {
     } else {
       console.log(res.message)
     }
+    await this.wait(2000)
 
     res = await this.get(`https://api.m.jd.com/signTask/querySignList?client=android&clientVersion=7.18.110&functionId=SignComponent_querySignList&appid=hot_channel&loginType=2&body=%7B%22activityId%22%3A%2210004%22%7D`, headers)
+    let scanAssignmentId: string = res.data.scanTaskInfo.scanAssignmentId, itemId: string = res.data.scanTaskInfo.itemId
     if (!res.data?.scanTaskInfo?.completionFlag) {
       h5stTool = new H5ST("2b5bc", user.UserAgent, process.env.FP_2B5BC || "");
       await h5stTool.__genAlgo()
       h5st = h5stTool.__genH5st({
         appid: 'hot_channel',
-        body: JSON.stringify({"activityId": "10004", "actionType": 0, "scanAssignmentId": res.data.scanTaskInfo.scanAssignmentId, "itemId": res.data.scanTaskInfo.itemId}),
+        body: JSON.stringify({"activityId": "10004", "actionType": 1, scanAssignmentId, itemId}),
+        client: 'android',
+        clientVersion: '7.18.110',
+        functionId: 'SignComponent_doScanTask',
+        t: timestamp.toString(),
+      })
+      res = await this.get(`https://api.m.jd.com/scanTask/startScanTask?client=android&clientVersion=7.18.110&functionId=SignComponent_doScanTask&appid=hot_channel&body=${encodeURIComponent(JSON.stringify({
+        "activityId": "10004",
+        "actionType": 1,
+        "scanAssignmentId": scanAssignmentId,
+        "itemId": res.data.scanTaskInfo.itemId
+      }))}&h5st=${h5st}`, headers)
+      console.log('领取任务', res.success)
+      await this.wait(8000)
+
+      h5st = h5stTool.__genH5st({
+        appid: 'hot_channel',
+        body: JSON.stringify({"activityId": "10004", "actionType": 0, scanAssignmentId, itemId}),
         client: 'android',
         clientVersion: '7.18.110',
         functionId: 'SignComponent_doScanTask',
@@ -59,11 +78,10 @@ class Jd_wechat_sign extends JDHelloWorld {
       res = await this.get(`https://api.m.jd.com/scanTask/startScanTask?client=android&clientVersion=7.18.110&functionId=SignComponent_doScanTask&appid=hot_channel&body=${encodeURIComponent(JSON.stringify({
         "activityId": "10004",
         "actionType": 0,
-        "scanAssignmentId": res.data.scanTaskInfo.scanAssignmentId,
-        "itemId": res.data.scanTaskInfo.itemId
+        scanAssignmentId,
+        itemId
       }))}&h5st=${h5st}`, headers)
-      this.o2s(res)
-      console.log('假火爆，实际应该已完成')
+      console.log('任务完成', res.data.rewardValue)
     } else if (res.data?.scanTaskInfo?.completionFlag) {
       console.log('浏览任务已完成')
     } else {
