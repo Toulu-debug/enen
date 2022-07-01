@@ -67,7 +67,7 @@ class Jd_cash_wechat extends JDHelloWorld {
         }
       }
 
-      if (new Date().getHours() >= 7 && new Date().getHours() <= 19 && res.data.result.limitTimeRedPacket.receiveStatus === '0') {
+      if (new Date().getHours() >= 7 && new Date().getHours() <= 19 && res.data.result?.limitTimeRedPacket?.receiveStatus === '0') {
         res = await this.api('cash_join_limited_redpacket', {"id": 5, "level": 3})
         if (res.data.bizCode === 0) {
           console.log('开启成功')

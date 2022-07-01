@@ -4,7 +4,7 @@ import {H5ST} from "./utils/h5st";
 
 let cookie: string = '', res: any = '', data: any, UserName: string
 let shareCodeSelf: string[] = [], shareCodePool: string[] = [], shareCode: string[] = [], shareCodeFile: object = require('./jdFruitShareCodes')
-let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, "8389547038003203")
+let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process.env.FP_0C010 || "")
 
 !(async () => {
   let cookiesArr: string[] = await getCookie()
