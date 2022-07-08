@@ -55,6 +55,7 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
   }
 
   o2s(shareCodeSelf, '内部互助')
+  let full: string[] = []
   for (let [index, value] of cookiesArr.entries()) {
     try {
       cookie = value
@@ -68,6 +69,10 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
 
       for (let code of shareCode) {
         console.log(`账号${index + 1} ${UserName} 去助力 ${code} ${shareCodeSelf.includes(code) ? "*内部*" : ""}`)
+        if (full.includes(code)) {
+          console.log('full contains')
+          continue
+        }
         res = await api('initForFarm', {"mpin": "", "utm_campaign": "t_335139774", "utm_medium": "appshare", "shareCode": code, "utm_term": "Wxfriends", "utm_source": "iosapp", "imageUrl": "", "nickName": "", "version": 14, "channel": 2, "babelChannel": 0})
         if (res.helpResult.code === '7') {
           console.log('不给自己助力')
@@ -83,6 +88,7 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
           log.help += `已助力 ${code} ${shareCodeSelf.includes(code) ? '*内部*' : ''}\n`
         } else if (res.helpResult.code === '10') {
           console.log('已满')
+          full.push(code)
         } else if (res.helpResult.remainTimes === 0) {
           console.log('上限')
           await wait(10000)
