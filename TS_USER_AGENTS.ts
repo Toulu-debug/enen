@@ -93,6 +93,15 @@ async function getCookie(): Promise<string[]> {
   for (let keys of Object.keys(jdCookieNode)) {
     cookiesArr.push(jdCookieNode[keys])
   }
+  let ptpin_temp: string[] = [], uniqueCookieArr: string[] = []
+  for (let cookie of cookiesArr) {
+    let UserName: string = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
+    if (!ptpin_temp.includes(UserName)) {
+      ptpin_temp.push(UserName)
+      uniqueCookieArr.push(cookie)
+    }
+  }
+  cookiesArr = uniqueCookieArr
   console.log(`共${cookiesArr.length}个京东账号\n`)
   return cookiesArr
 }
