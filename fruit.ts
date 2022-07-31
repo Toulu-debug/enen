@@ -46,7 +46,11 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
       }
 
       // 添加好友
-
+      // for (let i = 0; i < 30; i++) {
+      //   res = await api('waterGoodForFarm', {"version": 16, "channel": 1, "babelChannel": "121"})
+      //   o2s(res, 'waterGoodForFarm')
+      //   await wait(3000)
+      // }
 
       // 删除好友
       res = await api('friendListInitForFarm', {"lastId": null, "version": 14, "channel": 1, "babelChannel": "120"})
