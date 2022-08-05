@@ -34,11 +34,21 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
             tp = t.shoppingActivityVos
           console.log(tp[i]?.shopName || tp[i]?.skuName || tp[i]?.title)
           if (!t.shoppingActivityVos) {
-            res = await api('harmony_collectScore', {"appId": "1EFRXxg", "taskToken": tp[i].taskToken, "taskId": t.taskId, "actionType": 1})
+            res = await api('harmony_collectScore', {
+              "appId": "1EFRXxg",
+              "taskToken": tp[i].taskToken,
+              "taskId": t.taskId,
+              "actionType": 1
+            })
             console.log(res.data.bizMsg)
             await wait(t.waitDuration * 1000 || 2000)
           }
-          res = await api('harmony_collectScore', {"appId": "1EFRXxg", "taskToken": tp[i].taskToken, "taskId": t.taskId, "actionType": 0})
+          res = await api('harmony_collectScore', {
+            "appId": "1EFRXxg",
+            "taskToken": tp[i].taskToken,
+            "taskId": t.taskId,
+            "actionType": 0
+          })
           await wait(1000)
           if (res.data.bizMsg === 'success') {
             console.log('任务完成')
@@ -51,6 +61,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
   }
 
   // 助力
+  let full: string[] = []
   for (let [index, value] of cookiesArr.entries()) {
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
@@ -60,6 +71,10 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
     shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
 
     for (let code of shareCode) {
+      if (full.includes(code)) {
+        console.log('full contains')
+        continue
+      }
       console.log('去助力', code)
       res = await api('harmony_collectScore', {"appId": "1EFRXxg", "taskToken": code, "taskId": 3})
       if (res.data.bizCode === 0) {
@@ -67,6 +82,9 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
       } else if (res.data.bizCode === 108) {
         console.log('上限')
         break
+      } else if (res.data.bizMsg === '助力已满员！谢谢你哦~') {
+        full.push(code)
+        console.log('已满')
       } else {
         console.log('助力失败', res.data.bizMsg)
       }
