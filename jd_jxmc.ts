@@ -61,7 +61,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
       petids = homePageInfo.data.petinfo.map(pet => {
         return pet.petid
       })
-      console.log('当前🐔🐔：', petids)
+      // console.log('当前🐔🐔：', petids)
       petNum = homePageInfo.data.petinfo.length
       coins = homePageInfo.data.coins
     } catch (e: any) {
@@ -217,13 +217,31 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     console.log('除草...start')
     for (let j = 0; j < 30; j++) {
       try {
-        res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type', {type: '2'})
+        res = await api('operservice/Action', 'activeid,activekey,channel,dn,do,dov,dv,eid,fp,jxmc_jstoken,phoneid,sceneid,timestamp,type', {
+          'eid': '',
+          'fp': '',
+          'dv': '',
+          'do': '',
+          'dov': '',
+          'dn': '',
+          'type': '2',
+        })
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
-        console.log('锄草:', res.data.addcoins)
+        console.log('锄草:', res.data.addcoins, res.data.surprise ? '🎁' : '')
         await wait(5000)
         if (res.data.surprise) {
-          res = await api("operservice/GetSelfResult", "activeid,activekey,channel,jxmc_jstoken,phoneid,sceneid,timestamp,type", {type: '14', itemid: 'undefined'})
-          console.log('锄草奖励:', res.data.prizepool)
+          res = await api("operservice/GetSelfResult", "activeid,activekey,channel,commtype,dn,do,dov,dv,eid,fp,jxmc_jstoken,phoneid,sceneid,timestamp,type", {
+            'eid': '',
+            'fp': '',
+            'dv': '',
+            'do': '',
+            'dov': '',
+            'dn': '',
+            'type': '14',
+            'itemid': '{}',
+            'commtype': '3'
+          })
+          console.log('锄草奖励:', res.data.addcoins)
           await wait(5000)
         }
       } catch (e: any) {
@@ -332,7 +350,7 @@ async function getTask() {
   return 0
 }
 
-async function api(fn: string, stk: string, params: Params = {}) {
+async function api(fn: string, stk: string, params: Object = {}) {
   let url: string, t: { [key: string]: string } = {
     activeid: 'jxmc_active_0001',
     activekey: 'null',
