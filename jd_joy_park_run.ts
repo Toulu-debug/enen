@@ -5,7 +5,7 @@
  * export FP_B6AC3=""
  */
 
-import {H5ST} from "./utils/h5st"
+import {H5ST} from "./utils/h5st2"
 import {getDate} from "date-fns";
 import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
@@ -36,13 +36,13 @@ class Joy_Park_Run extends JDHelloWorld {
       appid: "activities_platform",
       body: JSON.stringify(body),
       client: "ios",
-      clientVersion: "3.1.0",
+      clientVersion: "3.9.2",
       functionId: fn,
       t: timestamp.toString()
     })
-    return await this.get(`https://api.m.jd.com/?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=3.1.0&cthr=1&h5st=${h5st}`, {
+    return await this.get(`https://api.m.jd.com/?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=3.9.2&cthr=1&h5st=${h5st}`, {
       'Host': 'api.m.jd.com',
-      'User-Agent': 'jdltapp;',
+      'User-Agent': 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;',
       'Origin': 'https://h5platform.jd.com',
       'X-Requested-With': 'com.jd.jdlite',
       'Referer': 'https://h5platform.jd.com/',
@@ -57,12 +57,12 @@ class Joy_Park_Run extends JDHelloWorld {
         appid: "activities_platform",
         body: JSON.stringify(body),
         client: "ios",
-        clientVersion: "3.1.0",
+        clientVersion: "3.9.2",
         functionId: fn,
         t: timestamp.toString()
       })
     }
-    let params: string = `functionId=${fn}&body=${JSON.stringify(body)}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=3.1.0&cthr=1`
+    let params: string = `functionId=${fn}&body=${JSON.stringify(body)}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=3.9.2&cthr=1`
     h5st && (params += `&h5st=${h5st}`)
     return await this.post('https://api.m.jd.com/', params, {
       'authority': 'api.m.jd.com',
@@ -70,15 +70,15 @@ class Joy_Park_Run extends JDHelloWorld {
       'cookie': this.user.cookie,
       'origin': 'https://h5platform.jd.com',
       'referer': 'https://h5platform.jd.com/',
-      'user-agent': 'jdltapp;iPhone;3.1.0;'
+      'User-Agent': 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;',
     })
   }
 
   async runningPageHome() {
-    return this.get(`https://api.m.jd.com/?functionId=runningPageHome&body=%7B%22linkId%22:%22L-sOanK_5RJCz7I314FpnQ%22,%22isFromJoyPark%22:true,%22joyLinkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22%7D&t=${Date.now()}&appid=activities_platform&client=ios&clientVersion=3.1.0`, {
+    return this.get(`https://api.m.jd.com/?functionId=runningPageHome&body=%7B%22linkId%22:%22L-sOanK_5RJCz7I314FpnQ%22,%22isFromJoyPark%22:true,%22joyLinkId%22:%22LsQNxL7iWDlXUs6cFl-AAg%22%7D&t=${Date.now()}&appid=activities_platform&client=ios&clientVersion=3.9.2`, {
       'Host': 'api.m.jd.com',
       'Origin': 'https://h5platform.jd.com',
-      'User-Agent': 'jdltapp;',
+      'User-Agent': 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;',
       'Referer': 'https://h5platform.jd.com/',
       'Cookie': this.user.cookie
     })
@@ -116,7 +116,7 @@ class Joy_Park_Run extends JDHelloWorld {
     let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.08')
     let rewardAmount: number = 0
     try {
-      this.teamTool = new H5ST('448de', 'jdltapp;', process.env.FP_448DE || '')
+      this.teamTool = new H5ST('448de', 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;', process.env.FP_448DE || '')
       await this.teamTool.__genAlgo()
       let res: any = await this.team('runningMyPrize', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "pageSize": 20, "time": null, "ids": null})
       let sum: number = 0, success: number = 0
@@ -175,7 +175,7 @@ class Joy_Park_Run extends JDHelloWorld {
         console.log('战队收益', res.data.teamSumPrize)
       }
 
-      this.apiTool = new H5ST('b6ac3', 'jdltapp;', process.env.FP_B6AC3 || '')
+      this.apiTool = new H5ST('b6ac3', 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;', process.env.FP_B6AC3 || '')
       await this.apiTool.__genAlgo()
       res = await this.runningPageHome()
       console.log('🧧', res.data.runningHomeInfo.prizeValue)

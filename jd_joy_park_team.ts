@@ -34,7 +34,7 @@ class Joy_Park_Run extends JDHelloWorld {
     })
     return await this.get(`https://api.m.jd.com/?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=3.9.2&cthr=1&h5st=${h5st}`, {
       'Host': 'api.m.jd.com',
-      'User-Agent': 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;',
+      'User-Agent': 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;',
       'Origin': 'https://h5platform.jd.com',
       'X-Requested-With': 'com.jd.jdlite',
       'Referer': 'https://h5platform.jd.com/',
@@ -45,7 +45,7 @@ class Joy_Park_Run extends JDHelloWorld {
   async main(user: User) {
     this.user = user
     try {
-      this.teamTool = new H5ST('448de', 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;', process.env.FP_448DE || '')
+      this.teamTool = new H5ST('448de', 'jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;', process.env.FP_448DE || '')
       await this.teamTool.__genAlgo()
       let res: any
 
@@ -60,7 +60,8 @@ class Joy_Park_Run extends JDHelloWorld {
         } else {
           console.log('队伍已满')
         }
-      } else if (this.captainId && res.data.members.length === 0) {
+      // } else if (this.captainId && res.data.members.length === 0) {
+      } else if (this.captainId) {
         console.log('已有组队ID，未加入队伍')
         res = await this.team('runningJoinTeam', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "captainId": this.captainId})
         if (res.code === 0) {
