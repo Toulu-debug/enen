@@ -21,9 +21,10 @@ class Jd_wechat_sign extends JDHelloWorld {
     await h5stTool.__genAlgo()
     let timestamp: number = Date.now()
     let headers: object = {
-      'content-type': 'application/json',
+      'Host': 'api.m.jd.com',
+      'wqreferer': 'https://wq.jd.com/wxapp/pages/market/market2/index',
       'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN',
-      'referer': 'https://servicewechat.com/wx91d27dbf599dff74/581/page-frame.html',
+      'Referer': 'https://servicewechat.com/wx91d27dbf599dff74/646/page-frame.html',
       'cookie': user.cookie
     }, h5st: string, res: any, signDays: number = 0, rewardValue: number = 0
 
@@ -31,11 +32,10 @@ class Jd_wechat_sign extends JDHelloWorld {
       appid: 'hot_channel',
       body: JSON.stringify({"activityId": "10004"}),
       client: 'android',
-      clientVersion: '7.16.250',
+      clientVersion: '7.20.110',
       functionId: 'SignComponent_doSignTask',
-      t: timestamp.toString(),
     })
-    res = await this.post(`https://api.m.jd.com/signTask/doSignTask?functionId=SignComponent_doSignTask&appid=hot_channel&body={"activityId":"10004"}&client=android&clientVersion=7.16.250&t=${timestamp}&h5st=${h5st}`, '', headers)
+    res = await this.post('https://api.m.jd.com/signTask/doSignTask', `client=android&clientVersion=7.20.110&build=&uuid=oTGnpnBjJRnOBSFRf7gb20sOwxIM&osVersion=macOS%2012.5.0&screen=414*896&networkType=wifi&partner=&forcebot=&d_brand=iMac20%2C1&d_model=iMac20%2C1&lang=zh_CN&wifiBssid=&scope=&functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&body=${encodeURIComponent(JSON.stringify({"activityId": "10004"}))}&h5st=${h5st}`, headers)
     if (res.data) {
       console.log('已签到', res.data.signDays, '天，奖励', res.data.rewardValue, '元')
       signDays = res.data.signDays
@@ -56,14 +56,15 @@ class Jd_wechat_sign extends JDHelloWorld {
         client: 'android',
         clientVersion: '7.18.110',
         functionId: 'SignComponent_doScanTask',
-        t: timestamp.toString(),
       })
-      res = await this.get(`https://api.m.jd.com/scanTask/startScanTask?client=android&clientVersion=7.18.110&functionId=SignComponent_doScanTask&appid=hot_channel&body=${encodeURIComponent(JSON.stringify({
+      res = await this.post('https://api.m.jd.com/scanTask/startScanTask', `client=android&clientVersion=7.18.110&functionId=SignComponent_doScanTask&appid=hot_channel&body=${encodeURIComponent(JSON.stringify({
         "activityId": "10004",
         "actionType": 1,
         "scanAssignmentId": scanAssignmentId,
         "itemId": res.data.scanTaskInfo.itemId
-      }))}&h5st=${h5st}`, headers)
+      }))}&h5st=${h5st}&loginType=2`, headers)
+      this.o2s(res)
+
       console.log('领取任务', res.success)
       await this.wait(8000)
 
@@ -73,14 +74,13 @@ class Jd_wechat_sign extends JDHelloWorld {
         client: 'android',
         clientVersion: '7.18.110',
         functionId: 'SignComponent_doScanTask',
-        t: timestamp.toString(),
       })
-      res = await this.get(`https://api.m.jd.com/scanTask/startScanTask?client=android&clientVersion=7.18.110&functionId=SignComponent_doScanTask&appid=hot_channel&body=${encodeURIComponent(JSON.stringify({
+      res = await this.post('https://api.m.jd.com/scanTask/startScanTask', `client=android&clientVersion=7.18.110&functionId=SignComponent_doScanTask&appid=hot_channel&body=${encodeURIComponent(JSON.stringify({
         "activityId": "10004",
         "actionType": 0,
         scanAssignmentId,
         itemId
-      }))}&h5st=${h5st}`, headers)
+      }))}&h5st=${h5st}&loginType=2`, headers)
       console.log('任务完成', res.data.rewardValue)
     } else if (res.data?.scanTaskInfo?.completionFlag) {
       console.log('浏览任务已完成')
