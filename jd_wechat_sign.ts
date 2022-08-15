@@ -35,7 +35,7 @@ class Jd_wechat_sign extends JDHelloWorld {
       clientVersion: '7.20.110',
       functionId: 'SignComponent_doSignTask',
     })
-    res = await this.post('https://api.m.jd.com/signTask/doSignTask', `client=android&clientVersion=7.20.110&build=&uuid=oTGnpnBjJRnOBSFRf7gb20sOwxIM&osVersion=macOS%2012.5.0&screen=414*896&networkType=wifi&partner=&forcebot=&d_brand=iMac20%2C1&d_model=iMac20%2C1&lang=zh_CN&wifiBssid=&scope=&functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&body=${encodeURIComponent(JSON.stringify({"activityId": "10004"}))}&h5st=${h5st}`, headers)
+    res = await this.post('https://api.m.jd.com/signTask/doSignTask', `client=android&clientVersion=7.20.110&functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&body=${encodeURIComponent(JSON.stringify({"activityId": "10004"}))}&h5st=${h5st}`, headers)
     if (res.data) {
       console.log('已签到', res.data.signDays, '天，奖励', res.data.rewardValue, '元')
       signDays = res.data.signDays
