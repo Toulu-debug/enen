@@ -23,7 +23,7 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
 
       // 初始化
       res = await api('initForFarm', {"version": 11, "channel": 3})
-      o2s(res)
+      o2s(res, 'initForFarm')
 
       if (res.code === '6') {
         console.log('黑号')
@@ -38,18 +38,19 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
       }
       o2s(res, 'initForFarm')
       let totalEnergy: number = res.farmUserPro.totalEnergy  // 背包剩余水滴
+      console.log('背包剩余水滴', totalEnergy)
       if (res.farmUserPro.treeState === 2) {
         console.log("可以兑换奖品了")
         await sendNotify("东东农场", `账号${index + 1}  ${UserName}\n\n已成熟`)
-      } else if (res.farmUserPro.treeState === 0) {
-        console.log("自动种植")
       }
 
-      // 添加好友
-      // for (let i = 0; i < 30; i++) {
+      // for (let i = 0; i < 460; i++) {
       //   res = await api('waterGoodForFarm', {"version": 16, "channel": 1, "babelChannel": "121"})
       //   o2s(res, 'waterGoodForFarm')
-      //   await wait(3000)
+      //   await wait(4000)
+      //   if (res.finished || res.code !== '0') {
+      //     break
+      //   }
       // }
 
       // 删除好友
@@ -247,8 +248,9 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
         } else {
           console.log('抽奖获得', data.type)
         }
-        await wait(2000)
+        await wait(4000)
       }
+      await wait(4000)
 
       // 助力奖励
       res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})
