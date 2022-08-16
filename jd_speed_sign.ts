@@ -3,11 +3,11 @@
  * cron: 45 0 * * *
  */
 
-import {H5ST} from "./utils/h5st"
+import {H5ST} from "./utils/h5st_pro"
 import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
 class Speed_Sign extends JDHelloWorld {
-  cookie: string
+  user: User
   h5stTool: H5ST
 
   constructor() {
@@ -17,7 +17,6 @@ class Speed_Sign extends JDHelloWorld {
   async init() {
     await this.run(new Speed_Sign())
   }
-
 
   async api(fn: string, body: object) {
     let timestamp: number = Date.now()
@@ -29,19 +28,21 @@ class Speed_Sign extends JDHelloWorld {
       functionId: fn,
       t: timestamp.toString()
     })
-    return await this.post('https://api.m.jd.com/', `functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=H5&clientVersion=1.0.0&h5st=${h5st}`, {
+    return await this.post('https://api.m.jd.com/', `functionId=${fn}&body=${JSON.stringify(body)}&t=${timestamp}&appid=activities_platform&client=H5&clientVersion=1.0.0&h5st=${h5st}`, {
       'Host': 'api.m.jd.com',
-      'User-Agent': 'jdltapp;android;3.8.16;',
-      'Origin': 'https://daily-redpacket.jd.com',
-      'Referer': 'https://daily-redpacket.jd.com/',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Cookie': this.cookie
+      'Cookie': this.user.cookie,
+      'accept': 'application/json, text/plain, */*',
+      'content-type': 'application/x-www-form-urlencoded',
+      'origin': 'https://daily-redpacket.jd.com',
+      'user-agent': this.user.UserAgent,
+      'referer': 'https://daily-redpacket.jd.com/'
     })
   }
 
   async main(user: User) {
-    this.cookie = user.cookie
-    this.h5stTool = new H5ST("15097", "jdltapp;", process.env.FP_15097 ?? "");
+    this.user = user
+    this.user.UserAgent = `jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+    this.h5stTool = new H5ST("15097", this.user.UserAgent, process.env.FP_15097 || "", 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw', 'https://daily-redpacket.jd.com');
     await this.h5stTool.__genAlgo()
     let res: any = await this.api('apSignIn_day', {"linkId": "9WA12jYGulArzWS7vcrwhw", "serviceName": "dayDaySignGetRedEnvelopeSignService", "business": 1})
     try {
