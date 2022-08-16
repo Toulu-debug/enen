@@ -1,13 +1,12 @@
 /**
  * 极速版-挖宝
  * cron: 2 0,1,6 * * *
- * export FP_CE6C2=""
+ * export FP_8DD95=""
  * CK1 优先助力 HW.ts
- * TODO 提现
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {H5ST} from "./utils/h5st";
+import {H5ST} from "./utils/h5st_pro";
 
 interface INVITE {
   inviter: string,
@@ -15,7 +14,7 @@ interface INVITE {
 }
 
 class Jd_speed_wabao extends JDHelloWorld {
-  cookie: string
+  user: User
   h5stTool: H5ST
   sharecode: INVITE[] = []
   shareCodesSelf: INVITE[] = []
@@ -33,23 +32,24 @@ class Jd_speed_wabao extends JDHelloWorld {
     let h5st: string = this.h5stTool.__genH5st({
       appid: 'activities_platform',
       body: JSON.stringify(body),
-      client: 'H5',
-      clientVersion: '1.0.0',
+      client: 'ios',
+      clientVersion: '3.9.2',
       functionId: fn,
       t: timestamp.toString(),
     })
-    return await this.get(`https://api.m.jd.com/?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=H5&clientVersion=1.0.0&h5st=${h5st}`, {
-      'Host': 'api.m.jd.com',
-      'Origin': 'https://bnzf.jd.com',
-      'User-Agent': `jdltapp;`,
-      'Referer': 'https://bnzf.jd.com/',
-      'Cookie': this.cookie
+    return await this.get(`https://api.m.jd.com/?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=3.9.2&h5st=${h5st}`, {
+      'authority': 'api.m.jd.com',
+      'origin': 'https://bnzf.jd.com',
+      'referer': 'https://bnzf.jd.com/',
+      'user-agent': this.user.UserAgent,
+      'cookie': this.user.cookie
     })
   }
 
   async main(user: User) {
-    this.cookie = user.cookie
-    this.h5stTool = new H5ST("ce6c2", "jdltapp;", process.env.FP_CE6C2 ?? "9929056438203725")
+    this.user = user
+    this.user.UserAgent = `jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+    this.h5stTool = new H5ST("8dd95", this.user.UserAgent, process.env.FP_8DD95 || '', 'https://bnzf.jd.com/?activityId=pTTvJeSTrpthgk9ASBVGsw', 'https://bnzf.jd.com', this.user.UserName)
     await this.h5stTool.__genAlgo()
 
     let res: any, data: any
@@ -82,7 +82,8 @@ class Jd_speed_wabao extends JDHelloWorld {
     this.o2s(this.shareCodesSelf)
     let res: any, shareCodesHW: any = [], shareCodes: any
     for (let user of users) {
-      this.cookie = user.cookie
+      this.user.cookie = user.cookie
+      this.user.UserAgent = `jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
       console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
 
       try {
@@ -95,9 +96,12 @@ class Jd_speed_wabao extends JDHelloWorld {
         } else {
           shareCodes = [...this.shareCodesSelf, ...shareCodesHW]
         }
+        shareCodes = [{"inviter": "IReO3ad-dyrjil-pq4FZeg", "inviteCode": "0ba9527b9ad24555af6e5db7ba9c6bac65791660644915062"}, {"inviter": "JJ4liT2gNT4b_syynalMQuz7mATs6v030333kI9K9fw", "inviteCode": "e6688787bdba4b9fbd457a3e81ce37bf54461660645189599"}, {"inviter": "H3GVctNZoCwosfA0Gv_0BA", "inviteCode": "9186425e24a04e298599bd23b7d912df81181660645195069"}, {"inviter": "BXuxzLhNISFc5jhjMhjaEw", "inviteCode": "a410aa62d8b64d818a8dc85af8be9e5d42161660645200560"}]
 
         for (let code of shareCodes) {
           console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.inviteCode}`)
+          this.h5stTool = new H5ST("8dd95", this.user.UserAgent, process.env.FP_8DD95 || '', `https://bnzf.jd.com/?activityId=pTTvJeSTrpthgk9ASBVGsw&inviterId=${code.inviter}&inviterCode=${code.inviteCode}&utm_source=iosapp&utm_medium=liteshare&utm_campaign=&utm_term=Qqfriends&ad_od=share`, 'https://bnzf.jd.com', user.UserName)
+          await this.h5stTool.__genAlgo()
           res = await this.api('happyDigHelp', {"linkId": "pTTvJeSTrpthgk9ASBVGsw", "inviter": code.inviter, "inviteCode": code.inviteCode})
           if (res.code === 0) {
             console.log('助力成功')
@@ -118,7 +122,7 @@ class Jd_speed_wabao extends JDHelloWorld {
     }
 
     for (let user of users) {
-      this.cookie = user.cookie
+      this.user.cookie = user.cookie
       console.log(`\n开始【京东账号${user.index + 1}】${user.UserName}\n`)
       await this.h5stTool.__genAlgo()
       res = await this.api('happyDigHome', {"linkId": "pTTvJeSTrpthgk9ASBVGsw"})
