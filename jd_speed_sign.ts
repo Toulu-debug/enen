@@ -15,7 +15,7 @@ class Speed_Sign extends JDHelloWorld {
   }
 
   async init() {
-    await this.run(new Speed_Sign())
+    await this.run(this)
   }
 
   async api(fn: string, body: object) {
@@ -42,7 +42,7 @@ class Speed_Sign extends JDHelloWorld {
   async main(user: User) {
     this.user = user
     this.user.UserAgent = `jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-    this.h5stTool = new H5ST("15097", this.user.UserAgent, process.env.FP_15097 || "", 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw', 'https://daily-redpacket.jd.com');
+    this.h5stTool = new H5ST("15097", this.user.UserAgent, process.env.FP_15097 || "", 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw', 'https://daily-redpacket.jd.com', this.user.UserName);
     await this.h5stTool.__genAlgo()
     let res: any = await this.api('apSignIn_day', {"linkId": "9WA12jYGulArzWS7vcrwhw", "serviceName": "dayDaySignGetRedEnvelopeSignService", "business": 1})
     try {
