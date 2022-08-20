@@ -1,5 +1,5 @@
 /**
- * 汪汪乐园-跑步+组队
+ * 汪汪乐园-跑步+组队+浏览
  * cron: 20 * * * *
  * export FP_448DE=""
  * export FP_B6AC3=""
@@ -119,7 +119,31 @@ class Joy_Park_Run extends JDHelloWorld {
     try {
       this.teamTool = new H5ST('448de', this.user.UserAgent, process.env.FP_448DE || '', 'https://h5platform.jd.com/swm-stable/people-run/index?activityId=L-sOanK_5RJCz7I314FpnQ', 'https://h5platform.jd.com')
       await this.teamTool.__genAlgo()
-      let res: any = await this.team('runningMyPrize', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "pageSize": 20, "time": null, "ids": null})
+      let res: any
+
+      let apTaskList: any = await this.api('apTaskList', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+      for (let t of apTaskList.data) {
+        if (t.taskShowTitle === '逛会场得生命值' && !t.taskFinished) {
+          let apTaskDetail: any = await this.api('apTaskDetail', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "taskType": "BROWSE_CHANNEL", "taskId": t.id, "channel": 4})
+          await this.wait(1000)
+          let taskItemList = apTaskDetail.data.taskItemList
+          for (let i = apTaskDetail.data.status.userFinishedTimes; i < apTaskDetail.data.status.finishNeed; i++) {
+            console.log(taskItemList[i].itemName)
+            res = await this.api('apTaskTimeRecord', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "taskId": 817})
+            await this.wait(31000)
+
+            res = await this.api('apDoTask', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "taskType": "BROWSE_CHANNEL", "taskId": t.id, "channel": 4, "itemId": encodeURIComponent(taskItemList[i].itemId), "checkVersion": true})
+            if (res.success) {
+              console.log('任务完成')
+            } else {
+              this.o2s(res, '任务失败')
+            }
+            await this.wait(3000)
+          }
+        }
+      }
+
+      res = await this.team('runningMyPrize', {"linkId": "L-sOanK_5RJCz7I314FpnQ", "pageSize": 20, "time": null, "ids": null})
       let sum: number = 0, success: number = 0
       rewardAmount = res.data.rewardAmount
       if (res.data.runningCashStatus.currentEndTime && res.data.runningCashStatus.status === 0) {
