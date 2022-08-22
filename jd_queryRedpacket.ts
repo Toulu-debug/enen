@@ -37,7 +37,7 @@ class Jd_queryRedpacket extends JDHelloWorld {
       console.log(j)
       if (j.orgLimitStr.includes('京喜')) {
       } else if (j.activityName.includes('极速版')) {
-        jsRed += j.balance
+        jsRed = this.add(jsRed, j.balance)
         if (new Date(j.endTime * 1000).getDay() === day)
           jsRedExp = this.add(jsRedExp, j.balance)
       } else if (j.orgLimitStr.includes('京东健康')) {
