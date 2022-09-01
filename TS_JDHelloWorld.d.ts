@@ -18,6 +18,7 @@ declare class JDHelloWorld {
     o2s(obj: object, title?: string): void;
     getShareCodePool(key: string, num: number): Promise<string[]>;
     getshareCodeHW(key: string): Promise<string[]>;
+    getRandomWord(): string;
     getRandomNumberByRange(start: number, end: number): number;
     getRandomNumString(e: number): string;
     getEncStr(fn: string, body: {

@@ -35,6 +35,7 @@ class Mofang extends JDHelloWorld {
   }
 
   async main(user: User) {
+    /*
     this.user = user
     this.mfTool = new Log('50091', 'doInteractiveAssignment', 'XMFhPageh5')
     await this.mfTool.init()
@@ -64,6 +65,8 @@ class Mofang extends JDHelloWorld {
           if (proInfo.status === 1) {
             console.log(t.assignmentName)
             log = await this.getLog()
+            console.log(log)
+
             res = await this.api('doInteractiveAssignment', {"encryptProjectId": taskConfig_projectId, "encryptAssignmentId": t.encryptAssignmentId, "sourceCode": "acexinpin0823", "itemId": proInfo.itemId, "actionType": 1, "completionFlag": "", "ext": {}, "extParam": {"businessData": {"random": log.match(/"random":"(\d+)"/)[1]}, "signStr": log.match(/"log":"(.*)"/)[1], "sceneid": "XMFhPageh5"}})
             console.log(res.msg)
             await this.wait(t.ext.waitDuration * 1000 || 1000)
@@ -118,6 +121,7 @@ class Mofang extends JDHelloWorld {
         break
       }
     }
+  */
   }
 }
 
