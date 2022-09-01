@@ -5,7 +5,7 @@
  * export FP_B6AC3=""
  */
 
-import {H5ST} from "./utils/log"
+import {H5ST} from "./utils/h5st_pro"
 import {getDate} from "date-fns";
 import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 
@@ -32,7 +32,7 @@ class Joy_Park_Run extends JDHelloWorld {
 
   async team(fn: string, body: object) {
     let timestamp: number = Date.now(), h5st: string
-    h5st = this.teamTool.__genH5st({
+    h5st = await this.teamTool.__genH5st({
       appid: "activities_platform",
       body: JSON.stringify(body),
       client: "ios",
@@ -53,7 +53,7 @@ class Joy_Park_Run extends JDHelloWorld {
   async api(fn: string, body: object) {
     let timestamp: number = Date.now(), h5st: string = ''
     if (fn === 'runningOpenBox') {
-      h5st = this.apiTool.__genH5st({
+      h5st = await this.apiTool.__genH5st({
         appid: "activities_platform",
         body: JSON.stringify(body),
         client: "ios",
@@ -90,7 +90,10 @@ class Joy_Park_Run extends JDHelloWorld {
       for (let i = 0; i < 5; i++) {
         res = await this.api('runningOpenBox', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
         if (parseFloat(res.data.assets) >= assets) {
-          let assets: number = parseFloat(res.data.assets)
+          assets = parseFloat(res.data.assets)
+          res = await this.api('runningFail', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
+          this.o2s(res, 'runningFail')
+
           res = await this.api('runningPreserveAssets', {"linkId": "L-sOanK_5RJCz7I314FpnQ"})
           console.log('领取成功', assets)
           break
@@ -117,7 +120,7 @@ class Joy_Park_Run extends JDHelloWorld {
     let assets: number = parseFloat(process.env.JD_JOY_PARK_RUN_ASSETS || '0.08')
     let rewardAmount: number = 0
     try {
-      this.teamTool = new H5ST('448de', this.user.UserAgent, process.env.FP_448DE || '', 'https://h5platform.jd.com/swm-stable/people-run/index?activityId=L-sOanK_5RJCz7I314FpnQ', 'https://h5platform.jd.com')
+      this.teamTool = new H5ST('448de', this.user.UserAgent, process.env.FP_448DE || "", 'https://h5platform.jd.com/swm-stable/people-run/index?activityId=L-sOanK_5RJCz7I314FpnQ', 'https://h5platform.jd.com')
       await this.teamTool.__genAlgo()
       let res: any, apTaskList: any
 
@@ -216,7 +219,7 @@ class Joy_Park_Run extends JDHelloWorld {
         console.log('战队收益', res.data.teamSumPrize)
       }
 
-      this.apiTool = new H5ST('b6ac3', this.user.UserAgent, process.env.FP_B6AC3 || '', 'https://h5platform.jd.com/swm-stable/people-run/index?activityId=L-sOanK_5RJCz7I314FpnQ', 'https://h5platform.jd.com')
+      this.apiTool = new H5ST('b6ac3', this.user.UserAgent, process.env.FP_B6AC3 || "", 'https://h5platform.jd.com/swm-stable/people-run/index?activityId=L-sOanK_5RJCz7I314FpnQ', 'https://h5platform.jd.com')
       await this.apiTool.__genAlgo()
       res = await this.runningPageHome()
       console.log('🧧', res.data.runningHomeInfo.prizeValue)
