@@ -28,7 +28,7 @@ import {getRandomNumberByRange, wait, get} from "./TS_USER_AGENTS"
 
 async function car(db: string, num: number) {
   try {
-    let {data} = await get(`https://api.jdsharecode.xyz/api/${db}/${num}`)
+    let {data} = await get(`https://sharecodepool.cnmb.win/api/${db}/${num}`)
     console.log('获取助力池成功')
     console.log(data.length, data)
   } catch (e: any) {
@@ -38,7 +38,7 @@ async function car(db: string, num: number) {
 
 async function runTimes(db, i) {
   try {
-    await get(`https://api.jdsharecode.xyz/api/runTimes0701?activityId=${db}&sharecode=123`)
+    await get(`https://sharecodepool.cnmb.win/api/runTimes0701?activityId=${db}&sharecode=123`)
     console.log(`${db}上报测试成功 ${i}`)
   } catch (e: any) {
     console.log(`${db}上报测试失败 ${i}`, e)

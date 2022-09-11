@@ -37,7 +37,7 @@ let shareCodeSelf: string[] = [], log: { help: string, runTimes: string } = {hel
       for (let i = 0; i < 5; i++) {
         try {
           let today: number = getDate(new Date())
-          res = await get(`https://api.jdsharecode.xyz/api/runTimes0701?activityId=farm&sharecode=${res.farmUserPro.shareCode}&today=${today}`)
+          res = await get(`https://sharecodepool.cnmb.win/api/runTimes0701?activityId=farm&sharecode=${res.farmUserPro.shareCode}&today=${today}`)
           console.log(res)
           log.runTimes += `第${i + 1}次${res}\n`
           break

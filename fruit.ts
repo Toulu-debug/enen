@@ -47,7 +47,8 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
       // for (let i = 0; i < 460; i++) {
       //   res = await api('waterGoodForFarm', {"version": 16, "channel": 1, "babelChannel": "121"})
       //   o2s(res, 'waterGoodForFarm')
-      //   await wait(4000)
+      //   console.log(res.treeEnergy)
+      //   await wait(2000)
       //   if (res.finished || res.code !== '0') {
       //     break
       //   }
@@ -153,15 +154,6 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
       // 任务
       res = await api('taskInitForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
       o2s(res)
-      if (res.signInit.todaySigned) {
-        console.log(`今天已签到,已经连续签到${res.signInit.totalSigned}天,下次签到可得${res.signInit.signEnergyEachAmount}g`);
-      } else {
-        data = await api('signForFarm', {"version": 14, "channel": 1, "babelChannel": "120"})
-        o2s(data, 'signForFarm')
-
-        console.log('签到成功', data.amount)
-        await wait(1000)
-      }
 
       if (!res.gotBrowseTaskAdInit.f) {
         for (let t of res.gotBrowseTaskAdInit.userBrowseTaskAds) {
@@ -224,33 +216,33 @@ let message: string = '', h5stTool: H5ST = new H5ST("0c010", USER_AGENT, process
       }
 
       // 天天红包助力
-      shareCodePool = await getShareCodePool('farm', 30)
-      shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
-      for (let code of shareCodeSelf) {
-        console.log('去红包助力', code)
-        data = await api('initForFarm', {"shareCode": `${code}-3`, "lng": "0.000000", "lat": "0.000000", "sid": "2871ac0252645ef0e2731aa7d03c1d3w", "un_area": "16_1341_1347_44750", "version": 14, "channel": 1, "babelChannel": 0})
-        await wait(3000)
-        if (data.code === '0') {
-          console.log('红包助力成功')
-        } else if (data.code === '11') {
-          console.log('红包已助力过')
-        } else if (data.code === '13') {
-          console.log('上限')
-          break
-        }
-      }
+      // shareCodePool = await getShareCodePool('farm', 30)
+      // shareCode = Array.from(new Set([...shareCodeSelf, ...shareCodePool]))
+      // for (let code of shareCodeSelf) {
+      //   console.log('去红包助力', code)
+      //   data = await api('initForFarm', {"shareCode": `${code}-3`, "lng": "0.000000", "lat": "0.000000", "sid": "2871ac0252645ef0e2731aa7d03c1d3w", "un_area": "16_1341_1347_44750", "version": 14, "channel": 1, "babelChannel": 0})
+      //   await wait(3000)
+      //   if (data.code === '0') {
+      //     console.log('红包助力成功')
+      //   } else if (data.code === '11') {
+      //     console.log('红包已助力过')
+      //   } else if (data.code === '13') {
+      //     console.log('上限')
+      //     break
+      //   }
+      // }
 
       // 抽奖
-      for (let i = 0; i < res.remainLotteryTimes; i++) {
-        data = await api('lotteryForTurntableFarm', {"type": 1, "version": 4, "channel": 1})
-        if (data.type === 'thanks') {
-          console.log('抽奖获得 空气')
-        } else {
-          console.log('抽奖获得', data.type)
-        }
-        await wait(4000)
-      }
-      await wait(4000)
+      // for (let i = 0; i < res.remainLotteryTimes; i++) {
+      //   data = await api('lotteryForTurntableFarm', {"type": 1, "version": 4, "channel": 1})
+      //   if (data.type === 'thanks') {
+      //     console.log('抽奖获得 空气')
+      //   } else {
+      //     console.log('抽奖获得', data.type)
+      //   }
+      //   await wait(6000)
+      // }
+      await wait(6000)
 
       // 助力奖励
       res = await api('farmAssistInit', {"version": 14, "channel": 1, "babelChannel": "120"})

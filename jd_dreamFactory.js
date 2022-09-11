@@ -2945,7 +2945,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `https://api.jdsharecode.xyz/api/jxfactory/${randomCount}`,
+      url: `https://sharecodepool.cnmb.win/api/jxfactory/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {

@@ -271,7 +271,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     }
     // 获取随机助力码
     try {
-      let {data}: any = await axios.get(`https://api.jdsharecode.xyz/api/jxmc/30`, {timeout: 10000})
+      let {data}: any = await axios.get(`https://sharecodepool.cnmb.win/api/jxmc/30`, {timeout: 10000})
       console.log('获取到30个随机助力码:', data.data)
       shareCodes = Array.from(new Set([...shareCodesSelf, ...shareCodesHW, ...data.data]))
     } catch (e: any) {
@@ -393,7 +393,7 @@ async function makeShareCodes(code: string) {
     let bean: string = await getBeanShareCode(cookie)
     let farm: string = await getFarmShareCode(cookie)
     let pin: string = Md5.hashStr(cookie.match(/pt_pin=([^;]*)/)![1])
-    let data = await get(`https://api.jdsharecode.xyz/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
+    let data = await get(`https://sharecodepool.cnmb.win/api/autoInsert/jxmc?sharecode=${code}&bean=${bean}&farm=${farm}&pin=${pin}`)
     console.log(data.message)
   } catch (e) {
     console.log('自动提交失败')

@@ -514,27 +514,27 @@ async function turntableFarm() {
       }
     }
     //天天抽奖助力
-    console.log('开始天天抽奖--好友助力--每人每天只有三次助力机会.')
-    for (let code of newShareCodes) {
-      if (code === $.farmInfo.farmUserPro.shareCode) {
-        console.log('天天抽奖-不能自己给自己助力\n')
-        continue
-      }
-      await lotteryMasterHelp(code);
-      if (!$.lotteryMasterHelpRes?.helpResult?.code) {
-        console.log($.lotteryMasterHelpRes)
-        break
-      }
-      if ($.lotteryMasterHelpRes.helpResult.code === '0') {
-        console.log(`天天抽奖-助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}成功\n`)
-      } else if ($.lotteryMasterHelpRes.helpResult.code === '11') {
-        console.log(`天天抽奖-不要重复助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}\n`)
-      } else if ($.lotteryMasterHelpRes.helpResult.code === '13') {
-        console.log(`天天抽奖-助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}失败,助力次数耗尽\n`);
-        break;
-      }
-    }
-    console.log(`---天天抽奖次数remainLotteryTimes----${remainLotteryTimes}次`)
+    // console.log('开始天天抽奖--好友助力--每人每天只有三次助力机会.')
+    // for (let code of newShareCodes) {
+    //   if (code === $.farmInfo.farmUserPro.shareCode) {
+    //     console.log('天天抽奖-不能自己给自己助力\n')
+    //     continue
+    //   }
+    //   await lotteryMasterHelp(code);
+    //   if (!$.lotteryMasterHelpRes?.helpResult?.code) {
+    //     console.log($.lotteryMasterHelpRes)
+    //     break
+    //   }
+    //   if ($.lotteryMasterHelpRes.helpResult.code === '0') {
+    //     console.log(`天天抽奖-助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}成功\n`)
+    //   } else if ($.lotteryMasterHelpRes.helpResult.code === '11') {
+    //     console.log(`天天抽奖-不要重复助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}\n`)
+    //   } else if ($.lotteryMasterHelpRes.helpResult.code === '13') {
+    //     console.log(`天天抽奖-助力${$.lotteryMasterHelpRes.helpResult.masterUserInfo.nickName}失败,助力次数耗尽\n`);
+    //     break;
+    //   }
+    // }
+    // console.log(`---天天抽奖次数remainLotteryTimes----${remainLotteryTimes}次`)
     //抽奖
     if (remainLotteryTimes > 0) {
       console.log('开始抽奖')
@@ -1401,7 +1401,7 @@ function shareCodesFormat() {
 
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `https://api.jdsharecode.xyz/api/farm/50`, timeout: 10000}, (err, resp, data) => {
+    $.get({url: `https://sharecodepool.cnmb.win/api/farm/50`, timeout: 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(JSON.stringify(err))
