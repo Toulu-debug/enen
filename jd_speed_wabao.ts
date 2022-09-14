@@ -18,7 +18,6 @@ class Jd_speed_wabao extends JDHelloWorld {
   h5stTool: H5ST
   sharecode: INVITE[] = []
   shareCodesSelf: INVITE[] = []
-  fp: any
 
   constructor() {
     super();
@@ -48,10 +47,10 @@ class Jd_speed_wabao extends JDHelloWorld {
   }
 
   async main(user: User) {
-    this.fp = process.env.FP_8DD95 || await this.getFp()
+    let fp: any = process.env.FP_8DD95 || await this.getFp()
     this.user = user
     this.user.UserAgent = `jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-    this.h5stTool = new H5ST("8dd95", this.user.UserAgent, this.fp, 'https://bnzf.jd.com/?activityId=pTTvJeSTrpthgk9ASBVGsw', 'https://bnzf.jd.com', this.user.UserName)
+    this.h5stTool = new H5ST("8dd95", this.user.UserAgent, fp, 'https://bnzf.jd.com/?activityId=pTTvJeSTrpthgk9ASBVGsw', 'https://bnzf.jd.com', this.user.UserName)
     await this.h5stTool.__genAlgo()
 
     let res: any, data: any
@@ -97,9 +96,10 @@ class Jd_speed_wabao extends JDHelloWorld {
         } else {
           shareCodes = [...this.shareCodesSelf, ...shareCodesHW]
         }
+        let fp: any = process.env.FP_8DD95 || await this.getFp()
         for (let code of shareCodes) {
           console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.inviteCode}`)
-          this.h5stTool = new H5ST("8dd95", this.user.UserAgent, this.fp, `https://bnzf.jd.com/?activityId=pTTvJeSTrpthgk9ASBVGsw&inviterId=${code.inviter}&inviterCode=${code.inviteCode}&utm_source=iosapp&utm_medium=liteshare&utm_campaign=&utm_term=Qqfriends&ad_od=share`, 'https://bnzf.jd.com', user.UserName)
+          this.h5stTool = new H5ST("8dd95", this.user.UserAgent, fp, `https://bnzf.jd.com/?activityId=pTTvJeSTrpthgk9ASBVGsw&inviterId=${code.inviter}&inviterCode=${code.inviteCode}&utm_source=iosapp&utm_medium=liteshare&utm_campaign=&utm_term=Qqfriends&ad_od=share`, 'https://bnzf.jd.com', user.UserName)
           await this.h5stTool.__genAlgo()
           res = await this.api('happyDigHelp', {"linkId": "pTTvJeSTrpthgk9ASBVGsw", "inviter": code.inviter, "inviteCode": code.inviteCode})
           if (res.code === 0) {
