@@ -70,8 +70,6 @@ class Zjd extends JDHelloWorld {
       this.h5stTool = new H5ST('dde2b', this.user.UserAgent, fp, 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html', 'https://servicewechat.com', this.user.UserName)
       await this.h5stTool.__genAlgo()
       res = await this.api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
-      this.o2s(res)
-
       if (res.success) {
         console.log(`开团成功，结束时间：${res.data.endTime}`)
         res = await this.api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
@@ -80,10 +78,14 @@ class Zjd extends JDHelloWorld {
           encPin: res.data.encPin,
           id: res.data.id,
         })
+      } else {
+        this.o2s(res, '开团失败')
       }
     } else if (res.data.assistedRecords.length === res.data.assistNum) {
       console.log('已成团')
       if (res.data.canStartNewAssist) {
+        this.h5stTool = new H5ST('dde2b', this.user.UserAgent, fp, 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html', 'https://servicewechat.com', this.user.UserName)
+        await this.h5stTool.__genAlgo()
         res = await this.api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
         if (res.success) {
           console.log(`开团成功，结束时间：${res.data.endTime}`)
@@ -93,6 +95,8 @@ class Zjd extends JDHelloWorld {
             encPin: res.data.encPin,
             id: res.data.id,
           })
+        } else {
+          this.o2s(res, '开团失败')
         }
       }
     } else if (!res.data.canStartNewAssist) {
@@ -117,7 +121,7 @@ class Zjd extends JDHelloWorld {
       await this.h5stTool.__genAlgo()
       for (let code of shareCode) {
         try {
-          console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${JSON.stringify(code)}`)
+          console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.encPin.replace("\n", "")}`)
           let res: any = await this.api('vvipclub_distributeBean_assist', {"assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.encPin, "activityIdEncrypted": code.id, "channel": "FISSION_BEAN"})
           if (res.success) {
             console.log('助力成功')
