@@ -25,7 +25,7 @@ class H5ST {
     this.url = url
     this.og = og
     this.pin = pin || ''
-    this.api = 'https://api.jdsharecode.xyz/api'
+    this.api = 'https://sharecodepool.cnmb.win/api'
   }
 
   async __genAlgo() {
