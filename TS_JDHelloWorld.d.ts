@@ -15,7 +15,7 @@ declare class JDHelloWorld {
     get(url: string, headers?: any): Promise<unknown>;
     post(url: string, data: any, headers?: any, params?: object): Promise<object | string>;
     wait(ms?: number): Promise<unknown>;
-    o2s(obj: object, title?: string): void;
+    o2s(msg: string | object, title?: string): void;
     getShareCodePool(key: string, num: number): Promise<string[]>;
     getshareCodeHW(key: string): Promise<string[]>;
     getRandomWord(): string;

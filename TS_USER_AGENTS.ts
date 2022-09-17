@@ -2,7 +2,6 @@ import axios from "axios"
 import {Md5} from "ts-md5"
 import * as dotenv from "dotenv"
 import {existsSync, readFileSync} from "fs"
-import {sendNotify} from './sendNotify'
 
 dotenv.config()
 const USER_AGENTS_ARR: string[] = [
@@ -154,8 +153,9 @@ function randomString(e: number, word?: number) {
   return n
 }
 
-function o2s(arr: object, title: string = '') {
-  title ? console.log(title, JSON.stringify(arr)) : console.log(JSON.stringify(arr))
+function o2s(msg: object | string, title: string = '') {
+  title && console.log('⬇️', title, '⬇️')
+  typeof msg === 'string' ? console.log(msg) : console.log(JSON.stringify(msg))
 }
 
 function randomNumString(e: number) {
@@ -312,5 +312,6 @@ export {
   jdpingou,
   get,
   post,
+  USER_AGENT,
   USER_AGENTS_ARR
 }

@@ -1,10 +1,11 @@
 /**
  * 京东-领现金
+ * cron: 30 7,10 * * *
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 
-class CASH extends JDHelloWorld {
+class Jd_cash_signin extends JDHelloWorld {
   cookie: string
 
   constructor() {
@@ -68,4 +69,4 @@ class CASH extends JDHelloWorld {
   }
 }
 
-new CASH().init().then().catch()
+new Jd_cash_signin().init().then()

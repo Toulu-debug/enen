@@ -215,7 +215,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     await wait(8000)
 
     console.log('除草...start')
-    for (let j = 0; j < 30; j++) {
+    for (let j = 0; j < 100; j++) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,dn,do,dov,dv,eid,fp,jxmc_jstoken,phoneid,sceneid,timestamp,type', {
           'eid': '',
@@ -251,7 +251,7 @@ let shareCodesSelf: string[] = [], shareCodesHW: string[] = []
     }
     await wait(6000)
 
-    for (let j = 0; j < 30; j++) {
+    for (let j = 0; j < 100; j++) {
       try {
         res = await api('operservice/Action', 'activeid,activekey,channel,jxmc_jstoken,petid,phoneid,sceneid,timestamp,type', {type: '1', petid: petids[Math.floor((Math.random() * petids.length))]})
         if (res.data.addcoins === 0 || JSON.stringify(res.data) === '{}') break
