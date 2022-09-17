@@ -26,7 +26,7 @@ class Health extends JDHelloWorld {
 
   async runTimes(code: string) {
     try {
-      let data = await this.get(`https://sharecodepool.cnmb.win/api/runTimes0701?activityId=health&sharecode=${code}`)
+      let data = await this.get(`https://sharecodepool.cnmb.win/api/runTimes0917?activityId=health&sharecode=${code}`)
       console.log(data)
     } catch (e) {
       await this.wait(5000)

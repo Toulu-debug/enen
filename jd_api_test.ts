@@ -38,7 +38,7 @@ async function car(db: string, num: number) {
 
 async function runTimes(db, i) {
   try {
-    await get(`https://sharecodepool.cnmb.win/api/runTimes0701?activityId=${db}&sharecode=123`)
+    await get(`https://sharecodepool.cnmb.win/api/runTimes0917?activityId=${db}&sharecode=123`)
     console.log(`${db}上报测试成功 ${i}`)
   } catch (e: any) {
     console.log(`${db}上报测试失败 ${i}`, e)

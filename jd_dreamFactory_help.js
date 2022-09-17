@@ -1768,7 +1768,7 @@ function userInfo() {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://sharecodepool.cnmb.win/api/runTimes0701?activityId=jxfactory&sharecode=${$.encryptPin}`
+      url: `https://sharecodepool.cnmb.win/api/runTimes0917?activityId=jxfactory&sharecode=${$.encryptPin}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)

@@ -16,7 +16,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
-    res = await api('healthyDay_getHomeData', {"appId": "1EFRXxg", "taskToken": "", "channelId": 1})
+    res = await api('healthyDay_getHomeData', {"appId": "1ElZXwKuP", "taskToken": "", "channelId": 1})
 
     for (let t of res.data.result.taskVos) {
       if (t.taskType === 14) {
@@ -35,7 +35,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
           console.log(tp[i]?.shopName || tp[i]?.skuName || tp[i]?.title)
           if (!t.shoppingActivityVos) {
             res = await api('harmony_collectScore', {
-              "appId": "1EFRXxg",
+              "appId": "1ElZXwKuP",
               "taskToken": tp[i].taskToken,
               "taskId": t.taskId,
               "actionType": 1
@@ -44,7 +44,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
             await wait(t.waitDuration * 1000 || 2000)
           }
           res = await api('harmony_collectScore', {
-            "appId": "1EFRXxg",
+            "appId": "1ElZXwKuP",
             "taskToken": tp[i].taskToken,
             "taskId": t.taskId,
             "actionType": 0
@@ -76,7 +76,7 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
         continue
       }
       console.log('去助力', code)
-      res = await api('harmony_collectScore', {"appId": "1EFRXxg", "taskToken": code, "taskId": 3})
+      res = await api('harmony_collectScore', {"appId": "1ElZXwKuP", "taskToken": code, "taskId": 3})
       if (res.data.bizCode === 0) {
         console.log('助力成功')
       } else if (res.data.bizCode === 108) {
@@ -97,12 +97,12 @@ let shareCodeSelf: string[] = [], shareCode: string[] = [], shareCodePool: strin
     cookie = value
     UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
     console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
-    res = await api('healthyDay_getHomeData', {"appId": "1EFRXxg", "taskToken": "", "channelId": 1})
+    res = await api('healthyDay_getHomeData', {"appId": "1ElZXwKuP", "taskToken": "", "channelId": 1})
     await wait(1000)
     let lotteryNum: number = parseInt(res.data.result.userInfo.lotteryNum)
     console.log('可以抽奖', lotteryNum, '次')
     for (let i = 0; i < lotteryNum; i++) {
-      res = await api('interact_template_getLotteryResult', {"appId": "1EFRXxg"})
+      res = await api('interact_template_getLotteryResult', {"appId": "1ElZXwKuP"})
       if (res.data.result.userAwardsCacheDto.type === 0) {
         console.log('抽奖成功 空气')
       } else {

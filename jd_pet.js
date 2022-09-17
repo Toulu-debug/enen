@@ -157,7 +157,7 @@ async function jdPet() {
 function runTimes() {
   return new Promise((resolve, reject) => {
     $.get({
-      url: `https://sharecodepool.cnmb.win/api/runTimes0701?activityId=pet&sharecode=${$.petInfo.shareCode}`
+      url: `https://sharecodepool.cnmb.win/api/runTimes0917?activityId=pet&sharecode=${$.petInfo.shareCode}`
     }, (err, resp, data) => {
       if (err) {
         console.log('上报失败', err)
