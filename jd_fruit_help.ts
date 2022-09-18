@@ -36,6 +36,8 @@ async function api(fn: string, body: object) {
   let cookiesArr: string[] = await getCookie()
   if (!(process.env.FP_8A2AF || process.env.FP_0C010)) {
     console.log('环境变量FP_8A2AF或FP_0C010未设置，抓包关键词8a2af或0c010')
+    fp = await get('https://sharecodepool.cnmb.win/api/fp')
+    console.log('remote fp', fp)
   }
   for (let [index, value] of cookiesArr.entries()) {
     try {
@@ -50,7 +52,7 @@ async function api(fn: string, body: object) {
       res = await api('initForFarm', {"babelChannel": "121", "sid": "", "un_area": "", "version": 18, "channel": 1})
       if (res.code === '6') {
         o2s(res, '初始化失败')
-        await sendNotify('jd_fruit_help.ts error', '环境变量FP_8A2AF或FP_0C010未设置\n抓包关键词8a2af或0c010')
+        await sendNotify('jd_fruit_help.ts error', `账号${index + 1} ${UserName} 需要抓包FP\n\n环境变量FP_8A2AF或FP_0C010未设置\n抓包关键词8a2af或0c010`)
         await wait(3000)
         continue
       }
