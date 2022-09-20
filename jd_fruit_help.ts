@@ -106,7 +106,8 @@ class Jd_fruit_help extends JDHelloWorld {
           } else if (res.helpResult.code === '10') {
             console.log('已满')
             full.push(code)
-          } else if (res.helpResult.remainTimes === 0) {
+          }
+          if (res.helpResult.remainTimes === 0) {
             console.log('上限')
             await this.wait(10000)
             break
