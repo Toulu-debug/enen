@@ -6,7 +6,7 @@
 import {User, JDHelloWorld} from "./TS_JDHelloWorld";
 
 class Jd_cash_signin extends JDHelloWorld {
-  cookie: string
+  user: User
 
   constructor() {
     super();
@@ -20,13 +20,13 @@ class Jd_cash_signin extends JDHelloWorld {
     let sign = await this.getSign(fn, body)
     return await this.post(`https://api.m.jd.com/client.action?functionId=${fn}`, sign, {
       'Host': 'api.m.jd.com',
-      'Cookie': this.cookie,
-      'user-agent': 'jdapp;',
+      'Cookie': this.user.cookie,
+      'user-agent': this.user.UserAgent,
     })
   }
 
   async main(user: User) {
-    this.cookie = user.cookie
+    this.user = user
     let res: any = await this.api('cash_homePage', {})
     if (res.data.result.signedStatus !== 1) {
       console.log('今日未签到')

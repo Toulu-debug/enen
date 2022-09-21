@@ -12,6 +12,7 @@ import {User, JDHelloWorld} from "./TS_JDHelloWorld"
 class Jd_fruit_help extends JDHelloWorld {
   user: User
   shareCodeSelf: string[] = []
+  code2user: object = {}
 
   constructor() {
     super("农场助力");
@@ -48,6 +49,7 @@ class Jd_fruit_help extends JDHelloWorld {
       if (res.code === '0') {
         console.log('助力码', res.farmUserPro.shareCode)
         this.shareCodeSelf.push(res.farmUserPro.shareCode)
+        this.code2user[this.user.UserName] = res.farmUserPro.shareCode
       } else {
         this.o2s(res, 'initForFarm error')
         return {msg: `账号${this.user.index + 1} ${this.user.UserName}\n初始化失败\n${JSON.stringify(res)}`}
@@ -65,6 +67,7 @@ class Jd_fruit_help extends JDHelloWorld {
       try {
         this.user = user
         this.user.UserAgent = `jdapp;iPhone;10.2.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${this.randPhoneId()};network/4g;model/iPhone11,8;addressid/1188016812;appBuild/167724;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1`
+        let myCode: string = this.code2user[this.user.UserName] ?? ""
         let shareCodePool: string[] = await this.getShareCodePool('farm', 50)
         let shareCode: string[] = [...this.shareCodeSelf, ...shareCodePool]
         this.o2s(shareCode, '助力顺序')
@@ -90,8 +93,8 @@ class Jd_fruit_help extends JDHelloWorld {
             console.log('助力成功,获得', res.helpResult.salveHelpAddWater)
             for (let i = 0; i < 5; i++) {
               try {
-                res = await this.get(`https://sharecodepool.cnmb.win/api/runTimes0917?activityId=farm&sharecode=${this.user['code'] ?? ""}&today=${Date.now().toString()}`)
-                console.log(res)
+                let runTimes: string = await this.get(`https://sharecodepool.cnmb.win/api/runTimes0917?activityId=farm&sharecode=${myCode}&today=${Date.now().toString()}`)
+                console.log(runTimes)
                 break
               } catch (e) {
                 console.log(e.message)
@@ -116,6 +119,7 @@ class Jd_fruit_help extends JDHelloWorld {
         }
       } catch (e) {
         console.log(e.message)
+        await this.wait(10000)
       }
     }
   }
