@@ -36,26 +36,31 @@ class Zjd extends JDHelloWorld {
   }
 
   async api(fn: string, body: object) {
-    await this.wait(3000)
+    await this.wait(1000)
     let h5st: string = await this.h5stTool.__genH5st({
-      appid: 'swat_miniprogram',
+      appid: 'vipMiddle',
       body: JSON.stringify(body),
+      client: 'tjj_m',
+      clientVersion: '3.1.3',
       functionId: fn,
     })
-    return this.post(`https://api.m.jd.com/api`, `functionId=${fn}&h5st=${h5st}&body=${encodeURIComponent(JSON.stringify(body))}&appid=swat_miniprogram`, {
-      'user-agent': this.user.UserAgent,
-      'referer': 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html',
-      'Cookie': this.user.cookie,
+    return this.post(`https://api.m.jd.com/api`, `functionId=${fn}&h5st=${h5st}&body=${encodeURIComponent(JSON.stringify(body))}&appid=vipMiddle&client=tjj_m&clientVersion=3.1.3`, {
+      'cookie': this.user.cookie,
+      'origin': 'https://h5platform.jd.com',
+      'referer': 'https://h5platform.jd.com/',
+      'user-agent': this.user.UserAgent
     })
   }
 
   async main(user: User) {
     this.user = user
-    this.user.UserAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E217 MicroMessenger/6.8.0(0x16080000) NetType/WIFI Language/en Branch/Br_trunk MiniProgramEnv/Mac`
+    this.user.UserAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1`
     let fp: any = await this.getFp()
-    this.h5stTool = new H5ST('d8ac0', this.user.UserAgent, fp, 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html', 'https://servicewechat.com', this.user.UserName)
+    console.log(fp, typeof fp)
+    this.h5stTool = new H5ST('aea1e', this.user.UserAgent, fp, 'https://h5platform.jd.com/swm-static/exchange-equity/index.html#/pages/divideBean/divideBean?activeId=779241835423588352', 'https://h5platform.jd.com', this.user.UserName)
     await this.h5stTool.__genAlgo()
     let res: any = await this.api('distributeBeanActivityInfo', {"paramData": {"channel": "FISSION_BEAN"}})
+
     if (res.data.assistStatus === 1) {
       // 已开，没满
       console.log('已开团，', res.data.assistedRecords.length, '/', res.data.assistNum, '，剩余', Math.round(res.data.assistValidMilliseconds / 1000 / 60), '分钟')
@@ -67,7 +72,7 @@ class Zjd extends JDHelloWorld {
     } else if (res.data.assistStatus === 2 && res.data.canStartNewAssist && this.openNum < this.zjd_open) {
       // 没开团
       this.openNum++
-      this.h5stTool = new H5ST('dde2b', this.user.UserAgent, fp, 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html', 'https://servicewechat.com', this.user.UserName)
+      this.h5stTool = new H5ST('82703', this.user.UserAgent, fp, 'https://h5platform.jd.com/swm-static/exchange-equity/index.html#/pages/divideBean/divideBean?activeId=779241835423588352', 'https://h5platform.jd.com', this.user.UserName)
       await this.h5stTool.__genAlgo()
       res = await this.api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
       if (res.success) {
@@ -84,7 +89,7 @@ class Zjd extends JDHelloWorld {
     } else if (res.data.assistedRecords.length === res.data.assistNum) {
       console.log('已成团')
       if (res.data.canStartNewAssist) {
-        this.h5stTool = new H5ST('dde2b', this.user.UserAgent, fp, 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html', 'https://servicewechat.com', this.user.UserName)
+        this.h5stTool = new H5ST('82703', this.user.UserAgent, fp, 'https://h5platform.jd.com/swm-static/exchange-equity/index.html#/pages/divideBean/divideBean?activeId=779241835423588352', 'https://h5platform.jd.com', this.user.UserName)
         await this.h5stTool.__genAlgo()
         res = await this.api('vvipclub_distributeBean_startAssist', {"activityIdEncrypted": res.data.id, "channel": "FISSION_BEAN"})
         if (res.success) {
@@ -108,21 +113,19 @@ class Zjd extends JDHelloWorld {
     this.o2s(shareCodeSelf, '内部助力')
     for (let user of users) {
       this.user = user
-      this.user.UserAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E217 MicroMessenger/6.8.0(0x16080000) NetType/WIFI Language/en Branch/Br_trunk MiniProgramEnv/Mac`
+      this.user.UserAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1`
       if (shareCodeHW.length === 0) {
         shareCodeHW = await this.getshareCodeHW('zjd');
       }
-      shareCode = user.index === 0
-        ? Array.from(new Set([...shareCodeHW, ...shareCodeSelf]))
-        : Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
+      shareCode = user.index === 0 ? Array.from(new Set([...shareCodeHW, ...shareCodeSelf])) : Array.from(new Set([...shareCodeSelf, ...shareCodeHW]))
 
       let fp: any = await this.getFp()
-      this.h5stTool = new H5ST('b9790', this.user.UserAgent, fp, 'https://servicewechat.com/wxa5bf5ee667d91626/173/page-frame.html', 'https://servicewechat.com', this.user.UserName)
+      this.h5stTool = new H5ST('03064', this.user.UserAgent, fp, 'https://h5platform.jd.com/swm-static/exchange-equity/index.html#/pages/divideBean/divideBean?activeId=779241835423588352', 'https://h5platform.jd.com', this.user.UserName)
       await this.h5stTool.__genAlgo()
       for (let code of shareCode) {
         try {
           console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.encPin.replace("\n", "")}`)
-          let res: any = await this.api('vvipclub_distributeBean_assist', {"assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.encPin, "activityIdEncrypted": code.id, "channel": "FISSION_BEAN"})
+          let res: any = await this.api('vvipclub_distributeBean_assist', {"assistStartRecordId": code.assistStartRecordId, "assistedPinEncrypted": code.encPin, "activityIdEncrypted": code.id, "channel": "FISSION_BEAN", "launchChannel": ""})
           if (res.success) {
             console.log('助力成功')
           } else if (res.resultCode === '9200008') {
