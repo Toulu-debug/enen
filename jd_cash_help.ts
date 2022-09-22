@@ -86,7 +86,7 @@ class Jd_cash_help extends JDHelloWorld {
       try {
         this.user = user
         if (shareCodeHW.length === 0) {
-          shareCodeHW = this.getshareCodeHW('cash')
+          shareCodeHW = await this.getshareCodeHW('cash')
         }
         if (user.index === 0) {
           shareCode = [...shareCodeHW, ...this.shareCodeSelf]
@@ -113,7 +113,9 @@ class Jd_cash_help extends JDHelloWorld {
         console.log(`账号${user.index + 1} ${user.UserName}`)
         for (let i = 1; i < 5; i++) {
           res = await this.api('cash_open_limited_redpacket', {"node": i})
-          console.log(res.data)
+          console.log(res.data.bizMsg)
+          if (res.data.bizMsg === '无资格')
+            break
         }
       } catch (e) {
         console.log('error', e.message)
