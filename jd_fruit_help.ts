@@ -8,11 +8,12 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
+import {sendNotify} from "./sendNotify";
 
 class Jd_fruit_help extends JDHelloWorld {
   user: User
   shareCodeSelf: string[] = []
-  code2user: object = {}
+  code2user: {} = {}
 
   constructor() {
     super("农场助力");
@@ -56,13 +57,14 @@ class Jd_fruit_help extends JDHelloWorld {
       }
     } catch (e) {
       console.log(e.message)
+      await this.wait(5000)
       return {msg: `账号${this.user.index + 1} ${this.user.UserName}\n运行出错\n${e.message}`}
     }
   }
 
   async help(users: User[]) {
     this.o2s(this.shareCodeSelf, '内部助力')
-    let res: any, full: string [] = []
+    let res: any, full: string [] = [], message: string = ''
     for (let user of users) {
       try {
         this.user = user
@@ -121,7 +123,63 @@ class Jd_fruit_help extends JDHelloWorld {
         console.log(e.message)
         await this.wait(10000)
       }
+      await this.wait(5000)
     }
+
+    for (let user of users) {
+      try {
+        this.user = user
+        this.user.UserAgent = `jdapp;iPhone;10.2.0;${Math.ceil(Math.random() * 4 + 10)}.${Math.ceil(Math.random() * 4)};${this.randPhoneId()};network/4g;model/iPhone11,8;addressid/1188016812;appBuild/167724;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1`
+        res = await this.get(`https://api.m.jd.com/api?functionId=farmAssistInit&body=${encodeURIComponent(JSON.stringify({"version": 14, "channel": 1, "babelChannel": "120"}))}&appid=wh5&clientVersion=9.1.0`, {
+          "accept": "*/*",
+          "accept-encoding": "gzip, deflate, br",
+          "accept-language": "zh-CN,zh;q=0.9",
+          "cache-control": "no-cache",
+          "cookie": this.user.cookie,
+          "origin": "https://home.m.jd.com",
+          "pragma": "no-cache",
+          "referer": "https://home.m.jd.com/myJd/newhome.action",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-site",
+          "User-Agent": this.user.UserAgent,
+          "Content-Type": "application/x-www-form-urlencoded"
+        })
+        if (res.code === '0') {
+          this.o2s(res)
+          let assistFriendList: number = res.assistFriendList.length
+          let farmAssistInit_waterEnergy: number = 0
+          for (let t of res.assistStageList) {
+            if (t.stageStaus === 2) {
+              await this.get(`https://api.m.jd.com/api?functionId=receiveStageEnergy&body=${encodeURIComponent(JSON.stringify({"version": 14, "channel": 1, "babelChannel": "120"}))}&appid=wh5`, {
+                "Host": "api.m.jd.com",
+                "Accept": "*/*",
+                "Origin": "https://carry.m.jd.com",
+                "Accept-Encoding": "gzip, deflate, br",
+                "User-Agent": this.user.UserAgent,
+                "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+                "Referer": "https://carry.m.jd.com/",
+                "Cookie": this.user.cookie
+              })
+              await this.wait(3000)
+              farmAssistInit_waterEnergy += t.waterEnergy
+            } else if (t.stageStaus === 3) {
+              farmAssistInit_waterEnergy += t.waterEnergy
+            }
+          }
+          console.log('收到助力', assistFriendList)
+          console.log('助力已领取', farmAssistInit_waterEnergy)
+          message += `账号${this.user.index + 1} ${this.user.UserName}\n收到助力${assistFriendList}\n助力已领取${farmAssistInit_waterEnergy}\n\n`
+        } else {
+          this.o2s(res, 'initForFarm error')
+        }
+      } catch (e) {
+        console.log(e.message)
+        await this.wait(5000)
+      }
+      await this.wait(5000)
+    }
+    message && await sendNotify("农场助力", message)
   }
 }
 

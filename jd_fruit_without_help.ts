@@ -228,6 +228,7 @@ class Jd_fruit extends JDHelloWorld {
     } catch (e) {
       console.log('error', e.message)
     }
+    await this.wait(30000)
   }
 
   async help(users: User[]) {
