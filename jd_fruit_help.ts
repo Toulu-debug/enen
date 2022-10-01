@@ -161,6 +161,7 @@ class Jd_fruit_help extends JDHelloWorld {
                 "Referer": "https://carry.m.jd.com/",
                 "Cookie": this.user.cookie
               })
+              console.log('收获助力💧', t.waterEnergy)
               await this.wait(3000)
               farmAssistInit_waterEnergy += t.waterEnergy
             } else if (t.stageStaus === 3) {
