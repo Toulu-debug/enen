@@ -1,5 +1,5 @@
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {logs} from "./test/jinli_log";
+import {logs} from "./test/2000jinli_log";
 import {getRandomNumberByRange} from "./TS_USER_AGENTS";
 
 class Mofang extends JDHelloWorld {
@@ -26,9 +26,19 @@ class Mofang extends JDHelloWorld {
     }), {
       'Host': 'api.m.jd.com',
       'Origin': 'https://h5.m.jd.com',
-      'User-Agent': 'jdapp;',
+      'User-Agent': this.user.UserAgent,
       'Referer': 'https://h5.m.jd.com/pb/010631430/2bf3XEEyWG11pQzPGkKpKX2GxJz2/index.html',
       'Cookie': this.user.cookie
+    })
+  }
+
+  async api2(body: string) {
+    await this.wait(1000)
+    return await this.post('https://api.m.jd.com/client.action?functionId=doInteractiveAssignment', body, {
+      'Host': 'api.m.jd.com',
+      'Cookie': this.user.cookie,
+      'content-type': 'application/x-www-form-urlencoded',
+      'user-agent': 'JD4iPhone'
     })
   }
 
@@ -39,8 +49,11 @@ class Mofang extends JDHelloWorld {
   }
 
   async main(user: User) {
+    if (!user.cookie.includes('app_open')) {
+      return
+    }
     this.user = user
-    let log: string = '', res: any
+    let res: any
     res = await this.api('getInteractionHomeInfo', {"sign": "u6vtLQ7ztxgykLEr"})
     let taskConfig_projectId: string = res.result.taskConfig.projectId
     let projectPoolId: string = res.result.taskConfig.projectPoolId
@@ -86,6 +99,12 @@ class Mofang extends JDHelloWorld {
           }
         }
       }
+    }
+
+    for (let i = 0; i < 4; i++) {
+      res = await this.getSign('doInteractiveAssignment', {"encryptProjectId": taskConfig_projectId, "completionFlag": true, "encryptAssignmentId": "44M5m7wZs5vDAMkaTmYXeppqTsZR", "sourceCode": "acexinpin0823"})
+      res = await this.api2(res)
+      this.o2s(res)
     }
 
     res = await this.api('queryInteractiveRewardInfo', {"encryptProjectId": giftConfig_projectId, "sourceCode": "acexinpin0823", "ext": {"needExchangeRestScore": "1"}})
