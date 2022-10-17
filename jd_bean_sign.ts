@@ -1,41 +1,48 @@
-import axios from "axios";
-import {readFileSync, writeFileSync, unlinkSync} from "fs";
-import {execSync} from "child_process";
-import {getCookie} from "./TS_USER_AGENTS";
-import {sendNotify} from './sendNotify';
+import {User, JDHelloWorld} from "./TS_JDHelloWorld"
 
-let message: string = '';
+class Jd_bean_sign extends JDHelloWorld {
+  user: User
+  iosVer: string
 
-async function main() {
-  let cookiesArr: string[] = await getCookie();
-  let cookiesNobyDa: {
-    cookie: string
-  }[] = []
-
-  for (let i = 0; i < cookiesArr.length; i++) {
-    cookiesNobyDa.push({cookie: cookiesArr[i]})
-  }
-  let data: any = '';
-  try {
-    data = await axios.get('https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js', {timeout: 5000})
-    data = data.data
-    console.log('raw')
-  } catch (e) {
-    console.log('非脚本问题！网络错误，访问github失败')
+  constructor() {
+    super();
   }
 
-  if (data.indexOf('京东多合一签到脚本') > -1) {
-    data = data.replace('var OtherKey = ``;', `var OtherKey = \`${JSON.stringify(cookiesNobyDa)}\`;`)
-    data = data.replace(/ztmFUCxcPMNyUq0P/g, 'q8DNJdpcfRQ69gIx')
-    writeFileSync('./sign.js', data, 'utf-8')
-    execSync('node ./sign.js >> ./sign.log')
-    data = readFileSync('./sign.log', 'utf-8')
-    data = data.match(/【.*/gm)
-    message += data.join('\n').replace(/红包/g, '红包\n\n')
-    unlinkSync('./sign.js')
-    unlinkSync('./sign.log')
+  async init() {
+    await this.run(this)
   }
-  await sendNotify('京东多合一签到脚本 via NobyDa@Github', message)
+
+  async main(user: User) {
+    try {
+      this.user = user
+      this.user.UserAgent = `jdapp;iPhone;11.3.0;`
+      let res: any = await this.get(`https://api.m.jd.com/client.action`, {
+        'Host': 'api.m.jd.com',
+        'referer': 'https://h5.m.jd.com/',
+        'user-agent': this.user.UserAgent,
+        'accept-language': 'zh-CN,zh-Hans;q=0.9',
+        'cookie': this.user.cookie
+      }, {
+        'functionId': 'signBeanAct',
+        'body': '{"fp":"-1","shshshfp":"-1","shshshfpa":"-1","referUrl":"-1","userAgent":"-1","jda":"-1","rnVersion":"3.9"}',
+        'appid': 'ld',
+        'client': 'apple',
+        'clientVersion': '11.3.0',
+        'networkType': 'wifi',
+        'osVersion': this.iosVer,
+        'uuid': '',
+        'openudid': '',
+        'jsonp': `jsonp_${Date.now()}_${this.getRandomNumberByRange(18888, 88888)}`
+      })
+      res = JSON.parse(res.match(/\((.*)\)/)[1])
+      res.code === '0'
+        ? console.log(res.data.dailyAward.title, parseInt(res.data.dailyAward.beanAward.beanCount))
+        : console.log(res.errorMessage)
+    } catch (e) {
+      console.log(e.message)
+      await this.wait(5000)
+    }
+  }
 }
 
-main().then()
+new Jd_bean_sign().init().then()
