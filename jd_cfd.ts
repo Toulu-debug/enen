@@ -96,6 +96,20 @@ class Cfd extends JDHelloWorld {
       }
     }
 
+    // 背包
+    res = await this.api('story/querystorageroom', {
+      _stk: '_cfd_t,_imbfd,bizCode,dwEnv,ptag,source,strDeviceId,strZone',
+    })
+    for (let t of res.Data.Office) {
+      data = await this.api('story/sellgoods', {
+        _stk: '_cfd_t,_imbfd,bizCode,dwEnv,dwSceneId,ptag,source,strDeviceId,strTypeCnt,strZone',
+        dwSceneId: '1',
+        strTypeCnt: `${t.dwType}:${t.dwCount}`,
+      })
+      console.log('卖贝壳', data.Data.ddwCoin)
+      await this.wait(2000)
+    }
+
     // 贝壳
     res = await this.api('story/queryshell', {
       _stk: '_cfd_t,_imbfd,bizCode,dwEnv,ptag,source,strDeviceId,strZone',
