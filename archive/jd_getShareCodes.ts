@@ -2,8 +2,8 @@
  * cron: 59 23 * * 0
  */
 
-import {getCookie, wait} from "./TS_USER_AGENTS";
-import {bean, farm, pet, factory, sgmh, jxfactory, health} from "./utils/shareCodesTool";
+import {getCookie, wait} from "../TS_USER_AGENTS";
+import {bean, farm, pet, factory, sgmh, jxfactory, health} from "../utils/shareCodesTool";
 
 let cookie: string = '', UserName: string, index: number
 let beans: string = '', farms: string = '', healths: string = '', pets: string = '', factorys: string = '', jxfactorys: string = '', sgmhs: string = '', s: string = '';

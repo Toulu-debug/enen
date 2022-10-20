@@ -28,6 +28,7 @@ declare class JDHelloWorld {
     getSign(fn: string, body: object): Promise<string>;
     getIosVer(): string;
     getFp(): Promise<string>;
+    body(body: object): Promise<object>;
     run(son: {
         main: any;
         help?: any;
