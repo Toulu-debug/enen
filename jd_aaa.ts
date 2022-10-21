@@ -1,5 +1,5 @@
 /**
- * cron: 15,35 21 * * *
+ * cron: 0,30 21 * * *
  */
 
 import {JDHelloWorld, User} from "./TS_JDHelloWorld";
@@ -89,6 +89,7 @@ class Cfd extends JDHelloWorld {
   async help(users: User[]) {
     let shareCodeHW: any = [], shareCode: { inviteId: string, mpin: string }[] = []
     this.o2s(this.shareCodeSelf, '内部助力')
+    await this.wait(5000)
     let res: any
     for (let user of users) {
       try {
