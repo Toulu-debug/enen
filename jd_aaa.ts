@@ -7,7 +7,6 @@ import {JDHelloWorld, User} from "./TS_JDHelloWorld";
 class Cfd extends JDHelloWorld {
   user: User
   shareCodeSelf: { inviteId: string, mpin: string }[] = []
-  homeShareCodeSelf: { inviteId: string, mpin: string }[] = []
 
   constructor() {
     super();
@@ -66,11 +65,6 @@ class Cfd extends JDHelloWorld {
         console.log('领取组队金币', res.data.result.produceScore * 1)
       }
 
-      res = await this.api('promote_getTaskDetail', {"appSign": "3"})
-      let inviteId: string = res.data.result.inviteId
-      console.log('助力码', inviteId)
-      this.homeShareCodeSelf.push({inviteId, mpin})
-
       res = await this.api('promote_pk_getExpandDetail', {})
       if (res.data.bizCode === 0) {
         this.o2s(res)
@@ -78,6 +72,10 @@ class Cfd extends JDHelloWorld {
         console.log('助力码', inviteId, mpin)
         console.log('还有', Math.floor(res.data.result.pkExpandDetailResult.remainTime / 60000), '分钟')
         this.shareCodeSelf.push({inviteId, mpin})
+
+        for (let t of res.data.result.pkExpandDetailResult.pkExpandStageVOS) {
+          console.log(`${t.assistNum}/${t.maxAssistNum}`)
+        }
       } else {
         console.log(res.data.bizMsg)
       }
@@ -138,38 +136,7 @@ class Cfd extends JDHelloWorld {
       } catch (e) {
         console.log('error', e.message)
       }
-    }
-
-    shareCodeHW = []
-    for (let user of users) {
-      if (shareCodeHW.length === 0) {
-        shareCodeHW = await this.getshareCodeHW('ssy')
-      }
-      if (user.index === 0) {
-        shareCode = [...shareCodeHW, ...this.shareCodeSelf]
-      } else {
-        shareCode = [...this.shareCodeSelf, ...shareCodeHW]
-      }
-
-      for (let code of shareCode) {
-        console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.inviteId}`)
-        await this.api('promote_getHomeData', {"inviteId": code.inviteId})
-        res = await this.qryViewkitCallbackResult('collectFriendRecordColor', `functionId=collectFriendRecordColor&client=wh5&clientVersion=1.0.0&body={"mpin":"${code.mpin}","businessCode":"20136","assistType":"1","shareSource":1}`)
-        res = await this.api('promote_collectScore', {"actionType": "0", "inviteId": code.inviteId})
-        this.o2s(res, '助力')
-        await this.qryViewkitCallbackResult('collectFriendRecordColor', `functionId=collectFriendRecordColor&client=wh5&clientVersion=1.0.0&body={"mpin":"${code.mpin}","businessCode":"20136","assistType":"2","shareSource":1}`)
-
-        if (res.data.bizCode === 0) {
-          console.log('助力成功')
-          if (res.data.result.times === 8) {
-            console.log('上限')
-            break
-          }
-        } else {
-          console.log('助力失败', res.data.bizMsg)
-        }
-        await this.wait(3000)
-      }
+      await this.wait(3000)
     }
   }
 }
