@@ -82,7 +82,6 @@ class Cfd extends JDHelloWorld {
       'strVersion': '1.0.1',
       'dwIsReJoin': '0',
     })
-    this.o2s(res)
     await this.wait(1000)
 
     for (let xb of res.XbStatus.XBDetail) {

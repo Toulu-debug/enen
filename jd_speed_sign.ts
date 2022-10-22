@@ -1,6 +1,7 @@
 /**
  * 极速版-签到+提现
  * cron: 45 0 * * *
+ * export FP_15097=""
  */
 
 import {H5ST} from "./utils/h5st_pro"
@@ -11,6 +12,10 @@ class Speed_Sign extends JDHelloWorld {
   h5stTool: H5ST
 
   constructor() {
+    if (!process.env.FP_15097) {
+      console.log('FP_15097 undefined')
+      process.exit(0)
+    }
     super();
   }
 
@@ -42,8 +47,7 @@ class Speed_Sign extends JDHelloWorld {
   async main(user: User) {
     this.user = user
     this.user.UserAgent = `jdltapp;iPhone;3.9.2;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-    let fp: any = await this.getFp()
-    this.h5stTool = new H5ST("15097", this.user.UserAgent, fp, 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw', 'https://daily-redpacket.jd.com', this.user.UserName);
+    this.h5stTool = new H5ST("15097", this.user.UserAgent, process.env.FP_15097, 'https://daily-redpacket.jd.com/?activityId=9WA12jYGulArzWS7vcrwhw', 'https://daily-redpacket.jd.com', this.user.UserName);
     await this.h5stTool.__genAlgo()
     let res: any = await this.api('apSignIn_day', {"linkId": "9WA12jYGulArzWS7vcrwhw", "serviceName": "dayDaySignGetRedEnvelopeSignService", "business": 1})
     try {
