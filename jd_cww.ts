@@ -1,6 +1,7 @@
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {H5ST} from "./utils/h5st_3.1";
+import {H5ST} from "./utils/h5st_pro";
 import * as JDJRValidator from './utils/validate_single'
+import {differenceInHours} from "date-fns";
 
 class Cww extends JDHelloWorld {
   user: User
@@ -15,6 +16,10 @@ class Cww extends JDHelloWorld {
   async init() {
     try {
       this.fp = process.env.FP_D7BFE
+      if (!this.fp) {
+        console.log('FP_D7BFE undefined')
+        process.exit(0)
+      }
     } catch (e) {
       console.log(e.message)
     }
@@ -32,10 +37,8 @@ class Cww extends JDHelloWorld {
       't': timestamp.toString()
     })
     let params: string = ''
-    for (let key of Object.keys(body)) {
-      params += '&' + key + '=' + body[key]
-    }
-    return await this.get(`https://api.m.jd.com/api?client=iOS&clientVersion=11.3.0&appid=jdchoujiang_h5&t=${timestamp}&functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&h5st=${h5st}${params}`, {
+    for (let key of Object.keys(body)) params += '&' + key + '=' + body[key]
+    let beforeApiRes = await this.get(`https://api.m.jd.com/api?client=iOS&clientVersion=11.3.0&appid=jdchoujiang_h5&t=${timestamp}&functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&h5st=${h5st}${params}`, {
       'Host': 'api.m.jd.com',
       'Content-Type': 'application/json',
       'Origin': 'https://h5.m.jd.com',
@@ -43,6 +46,13 @@ class Cww extends JDHelloWorld {
       'User-Agent': this.user.UserAgent,
       'Referer': 'https://h5.m.jd.com/',
     })
+    if (JSON.stringify(beforeApiRes).includes("请进行验证")) {
+      let {validate} = await new JDJRValidator.JDJRValidator().start()
+      console.log('validate', validate)
+      return await this.beforeApi(fn, {...body, validate})
+    } else {
+      return beforeApiRes
+    }
   }
 
   async api(fn: string, body: object) {
@@ -83,36 +93,62 @@ class Cww extends JDHelloWorld {
       await this.h5stTool.__genAlgo()
       res = await this.api('petEnterRoom', {"invitePin": "", "reqSource": "h5"})
       this.o2s(res, 'petEnterRoom')
-      await this.wait(1000)
 
+      // feed
+      let lastFeedTime: number = res.data.lastFeedTime
+      if (differenceInHours(Date.now(), lastFeedTime) > 3) {
+        this.h5stTool = new H5ST('15dc2', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+        await this.h5stTool.__genAlgo()
+        res = await this.beforeApi('feed', {"feedCount": "10", "reqSource": "h5"})
+        console.log(res.errorCode)
+        await this.wait(3000)
+      }
+
+      this.h5stTool = new H5ST('922a5', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+      await this.h5stTool.__genAlgo()
       res = await this.api('petGetPetTaskConfig', {"reqSource": "h5"})
       this.o2s(res, 'petGetPetTaskConfig')
       await this.wait(2000)
 
       for (let t of res.datas) {
-        // for (let followShops of t.followShops || []) {
-        //   data = await this.api('followShopColor', {
-        //     'shopId': followShops.shopId,
-        //     'reqSource': 'h5'
-        //   })
-        //   this.o2s(data)
-        //   await this.wait(5000)
-        // }
+        if (t.followShops) {
+          this.h5stTool = new H5ST('79b06', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+          await this.h5stTool.__genAlgo()
+          data = await this.beforeApi('clickIcon', {"code": "1624363341529274068136", "iconCode": "follow_shop", "reqSource": "h5"})
+          this.h5stTool = new H5ST('d91e0', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+          await this.h5stTool.__genAlgo()
+          data = await this.beforeApi('clickIconNew', {"iconCode": "follow_shop", "reqSource": "h5"})
+
+          for (let followShops of t.followShops) {
+            if (followShops.status) continue
+            console.log(t.taskName, followShops.name)
+            this.h5stTool = new H5ST('79b06', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+            await this.h5stTool.__genAlgo()
+            data = await this.beforeApi('clickIcon', {"code": "1624363341529274068136", "iconCode": "follow_shop", "linkAddr": followShops.shopId.toString(), "reqSource": "h5"})
+
+            this.h5stTool = new H5ST('d91e0', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+            await this.h5stTool.__genAlgo()
+            data = await this.beforeApi('clickIconNew', {"iconCode": "follow_shop", "linkAddr": followShops.shopId.toString(), "reqSource": "h5"})
+
+            this.h5stTool = new H5ST('30717', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+            await this.h5stTool.__genAlgo()
+            data = await this.api('followShopColor', {'shopId': followShops.shopId.toString(), 'reqSource': 'h5'})
+            console.log('followShopColor', data.errorCode)
+          }
+        }
 
         if (t.followChannelList) {
           this.h5stTool = new H5ST('d91e0', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
           await this.h5stTool.__genAlgo()
           data = await this.beforeApi('clickIconNew', {"iconCode": "follow_channel", "reqSource": "h5"})
-          this.o2s(data, 'clickIconNew')
-          await this.wait(1000)
-
           this.h5stTool = new H5ST('5f8cb', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
           await this.h5stTool.__genAlgo()
           data = await this.api('getFollowChannels', {"reqSource": "h5"})
-          this.o2s(data, 'getFollowChannels')
           await this.wait(1000)
 
           for (let followChannelList of t.followChannelList) {
+            if (followChannelList.status) continue
+            console.log(t.taskName, followChannelList.channelName)
             this.h5stTool = new H5ST('79b06', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
             await this.h5stTool.__genAlgo()
             data = await this.beforeApi('clickIcon', {"code": "1624363341529274068136", "iconCode": "follow_channel", "linkAddr": followChannelList.channelId, "reqSource": "h5"})
@@ -123,18 +159,34 @@ class Cww extends JDHelloWorld {
 
             this.h5stTool = new H5ST('30717', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
             await this.h5stTool.__genAlgo()
-            data = await this.api('scan', {
-              'channelId': followChannelList.channelId,
-              'taskType': 'FollowChannel',
-              'sid': '66594924',
-              'reqSource': 'h5'
-            })
-            console.log(data.errorCode)
+            data = await this.api('scan', {'channelId': followChannelList.channelId, 'taskType': 'FollowChannel', 'sid': '66594924', 'reqSource': 'h5'})
+            console.log('scan', data.errorCode)
+            await this.wait(5000)
+          }
+        }
+
+        if (t.scanMarketList) {
+          for (let scanMarketList of t.scanMarketList) {
+            if (scanMarketList.status) continue
+            console.log(t.taskName, scanMarketList.marketName)
+
+            this.h5stTool = new H5ST('79b06', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+            await this.h5stTool.__genAlgo()
+            data = await this.beforeApi('clickIcon', {"code": "1624363341529274068136", "iconCode": "scan_market", "linkAddr": scanMarketList.marketLinkH5, "reqSource": "h5"})
+
+            this.h5stTool = new H5ST('d91e0', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+            await this.h5stTool.__genAlgo()
+            data = await this.beforeApi('clickIconNew', {"iconCode": "scan_market", "linkAddr": scanMarketList.marketLinkH5, "reqSource": "h5"})
+
+            this.h5stTool = new H5ST('30717', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+            await this.h5stTool.__genAlgo()
+            data = await this.api('scan', {"marketLink": scanMarketList.marketLinkH5, "marketId": scanMarketList.marketLinkH5, "taskType": "ScanMarket", "sid": "66594924", "reqSource": "h5"})
+            console.log('scanMarketList', data.errorCode)
             await this.wait(5000)
           }
         }
       }
-      await this.wait(10000)
+      await this.wait(5000)
     } catch (e) {
       console.log(e.message)
     }
