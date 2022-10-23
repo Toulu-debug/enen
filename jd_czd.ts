@@ -1,5 +1,5 @@
 /**
- * cron: 15 8 * * *
+ * cron: 15 9,15 * * *
  */
 
 import {JDHelloWorld, User} from "./TS_JDHelloWorld";

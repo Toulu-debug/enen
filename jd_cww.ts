@@ -1,7 +1,7 @@
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
 import {H5ST} from "./utils/h5st_pro";
 import * as JDJRValidator from './utils/validate_single'
-import {differenceInHours} from "date-fns";
+import {differenceInMinutes, format} from "date-fns";
 
 class Cww extends JDHelloWorld {
   user: User
@@ -95,13 +95,40 @@ class Cww extends JDHelloWorld {
       this.o2s(res, 'petEnterRoom')
 
       // feed
+      let petFood: number = res.data.petFood
       let lastFeedTime: number = res.data.lastFeedTime
-      if (differenceInHours(Date.now(), lastFeedTime) > 3) {
+      console.log('狗粮', petFood)
+      console.log('lastFeedTime', format(lastFeedTime, "yyyy-MM-dd HH:mm:ss"))
+      if (differenceInMinutes(Date.now(), lastFeedTime) > 180) {
         this.h5stTool = new H5ST('15dc2', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
         await this.h5stTool.__genAlgo()
         res = await this.beforeApi('feed', {"feedCount": "10", "reqSource": "h5"})
         console.log(res.errorCode)
         await this.wait(3000)
+      }
+
+      res = await this.beforeApi('combatDetail', {"help": false, "reqSource": "h5"})
+      this.o2s(res, 'combatDetail')
+      if (res.data.petRaceResult === 'participate') {
+        console.log('比赛中')
+        for (let raceUser of res.data.raceUsers) {
+          raceUser.myself
+            ? console.log(raceUser.nickName, raceUser.distance)
+            : console.log('对手', raceUser.distance)
+        }
+      } else if (res.data.petRaceResult === 'not_participate') {
+        console.log('开始匹配')
+        this.h5stTool = new H5ST('79b06', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+        await this.h5stTool.__genAlgo()
+        data = await this.beforeApi('clickIcon', {"code": "1624363341529274068136", "iconCode": "race_match", "reqSource": "h5"})
+        this.h5stTool = new H5ST('d91e0', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+        await this.h5stTool.__genAlgo()
+        data = await this.beforeApi('clickIconNew', {"iconCode": "race_match", "reqSource": "h5"})
+
+        this.h5stTool = new H5ST('6f192', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+        await this.h5stTool.__genAlgo()
+        data = await this.beforeApi('combatMatch', {"teamLevel": "2", "reqSource": "h5"})
+        this.o2s(data, 'combatMatch')
       }
 
       this.h5stTool = new H5ST('922a5', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
@@ -186,7 +213,6 @@ class Cww extends JDHelloWorld {
           }
         }
       }
-      await this.wait(5000)
     } catch (e) {
       console.log(e.message)
     }
