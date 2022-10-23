@@ -184,7 +184,7 @@ class Jd_fruit extends JDHelloWorld {
       // 签到页面
       this.h5stTool = new H5ST('08dc3', this.user.UserAgent, this.fp)
       await this.h5stTool.__genAlgo()
-      res = await this.api('clockInInitForFarm', {"timestamp": Date.now(), "version": 18, "channel": 1, "babelChannel": "120"}, true)
+      res = await this.api('clockInInitForFarm', {"timestamp": Date.now(), "version": 18, "channel": 1, "babelChannel": "10"}, true)
       this.h5stTool = new H5ST('4a0b4', this.user.UserAgent, this.fp)
       await this.h5stTool.__genAlgo()
       for (let t of res.themes || []) {
@@ -196,11 +196,20 @@ class Jd_fruit extends JDHelloWorld {
           data.code === '0' && console.log('关注成功💧', data.amount)
         }
       }
+      if (!res.todaySigned) {
+        this.h5stTool = new H5ST('32b94', this.user.UserAgent, this.fp)
+        await this.h5stTool.__genAlgo()
+        data = await this.api('clockInForFarm', {"type": 1, "version": 18, "channel": 1, "babelChannel": "10"}, true)
+        data.code === '0' ? console.log('签到成功', data.amount) : this.o2s(data, '签到失败')
+        await this.wait(2000)
+      } else {
+        console.log('已签到')
+      }
 
       // 删除好友
-      res = await this.api('friendListInitForFarm', {"lastId": null, "version": 18, "channel": 1, "babelChannel": "120"}, false)
       this.h5stTool = new H5ST('eaf91', this.user.UserAgent, this.fp)
       await this.h5stTool.__genAlgo()
+      res = await this.api('friendListInitForFarm', {"lastId": null, "version": 18, "channel": 1, "babelChannel": "120"}, false)
       for (let t of res.friends) {
         data = await this.api('deleteFriendForFarm', {"shareCode": t.shareCode, "version": 18, "channel": 1, "babelChannel": "120"}, true)
         if (data.code === '0') {
