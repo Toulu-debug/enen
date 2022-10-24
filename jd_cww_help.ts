@@ -60,11 +60,11 @@ class Jd_cww_help extends JDHelloWorld {
         if (user.UserName === code.UserName || full.includes(code.UserName)) continue
         console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.UserName}`)
         res = await this.api('helpFriend', {"friendPin": code.UserName, "reqSource": "weapp"})
+        await this.wait(2000)
         console.log(res.errorCode)
 
         if (res.errorCode === 'invite_full') full.push(code.UserName)
         if (res.errorCode === 'help_full') break
-        await this.wait(2000)
       }
     }
   }

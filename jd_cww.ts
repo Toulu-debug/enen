@@ -99,10 +99,18 @@ class Cww extends JDHelloWorld {
       let lastFeedTime: number = res.data.lastFeedTime
       console.log('狗粮', petFood)
       console.log('lastFeedTime', format(lastFeedTime, "yyyy-MM-dd HH:mm:ss"))
-      if (differenceInMinutes(Date.now(), lastFeedTime) > 180) {
+      let feedCount: number = 0
+      for (let t of [10, 20, 40, 80]) {
+        if (petFood < t) {
+          break
+        } else {
+          feedCount = t
+        }
+      }
+      if (differenceInMinutes(Date.now(), lastFeedTime) > 180 && feedCount) {
         this.h5stTool = new H5ST('15dc2', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
         await this.h5stTool.__genAlgo()
-        res = await this.beforeApi('feed', {"feedCount": "10", "reqSource": "h5"})
+        res = await this.beforeApi('feed', {"feedCount": feedCount, "reqSource": "h5"})
         console.log(res.errorCode)
         await this.wait(3000)
       }
@@ -129,6 +137,12 @@ class Cww extends JDHelloWorld {
         await this.h5stTool.__genAlgo()
         data = await this.beforeApi('combatMatch', {"teamLevel": "2", "reqSource": "h5"})
         this.o2s(data, 'combatMatch')
+      } else if (res.data.petRaceResult === 'unreceive') {
+        let winCoin: number = res.data.winCoin
+        this.h5stTool = new H5ST('04889', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
+        await this.h5stTool.__genAlgo()
+        data = await this.beforeApi('combatReceive', {"reqSource": "h5"})
+        console.log('赛跑获胜', winCoin)
       }
 
       this.h5stTool = new H5ST('922a5', this.user.UserAgent, this.fp, "https://h5.m.jd.com/babelDiy/Zeus/2wuqXrZrhygTQzYA7VufBEpj4amH/index.html", "https://h5.m.jd.com/")
@@ -211,6 +225,12 @@ class Cww extends JDHelloWorld {
             console.log('scanMarketList', data.errorCode)
             await this.wait(5000)
           }
+        }
+
+        if (t.receiveStatus === 'unreceive') {
+          data = await this.api('getFood', {"taskType": t.taskType, "reqSource": "h5"})
+          console.log('领取奖励', t.taskName, data.data)
+          await this.wait(1000)
         }
       }
     } catch (e) {
