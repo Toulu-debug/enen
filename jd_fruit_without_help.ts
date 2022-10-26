@@ -74,6 +74,14 @@ class Jd_fruit extends JDHelloWorld {
       }
       let totalEnergy: number = res.farmUserPro.totalEnergy
 
+      // 弹窗水滴
+      if (res.todayGotWaterGoalTask.canPop) {
+        this.h5stTool = new H5ST('c901b', this.user.UserAgent, this.fp)
+        await this.h5stTool.__genAlgo()
+        data = await this.api('gotWaterGoalTaskForFarm', {"type": 3, "version": 18, "channel": 1, "babelChannel": "10"})
+        console.log('弹窗水滴💧', data.addEnergy)
+      }
+
       // 背包
       this.h5stTool = new H5ST('157b6', this.user.UserAgent, this.fp)
       await this.h5stTool.__genAlgo()
@@ -104,7 +112,7 @@ class Jd_fruit extends JDHelloWorld {
         data = await this.api('timingAwardForTurntableFarm', {"version": 4, "channel": 1})
         data.code === '0' && console.log('抽奖次数+', data.addTimes)
       }
-      for (; res.remainLotteryTimes > 0; --res.remainLotteryTimes) {
+      for (let i = 0; i < res.remainLotteryTimes; i++) {
         data = await this.api('lotteryForTurntableFarm', {"type": 1, "version": 4, "channel": 1})
         console.log('抽奖结果', data.type)
         await this.wait(3000)
@@ -115,7 +123,7 @@ class Jd_fruit extends JDHelloWorld {
       await this.h5stTool.__genAlgo()
       res = await this.api('taskInitForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
 
-      if (!res['treasureBoxInit-getBean'].f) {
+      if (!res['treasureBoxInit-getBean']?.f) {
         this.h5stTool = new H5ST('67dfc', this.user.UserAgent, this.fp)
         await this.h5stTool.__genAlgo()
         data = await this.api('ddnc_getTreasureBoxAward', {"type": 1, "babelChannel": "10", "line": "getBean", "version": 18, "channel": 1})
@@ -185,6 +193,34 @@ class Jd_fruit extends JDHelloWorld {
           data.code === '0' && console.log('红包雨💧', data.addEnergy)
           await this.wait(1000)
         }
+      }
+
+      if (!res.waterFriendTaskInit.f) {
+        let friendList = await this.friendListInitForFarm()
+        for (let i = 0; i < 2 - res.waterFriendTaskInit.waterFriendCountKey; i++) {
+          for (let t of friendList.friends) {
+            if (t.friendState === 1) {
+              console.log(`帮好友 ${t.nickName} ${t.shareCode} 浇水`)
+              this.h5stTool = new H5ST('a5a9c', this.user.UserAgent, this.fp)
+              await this.h5stTool.__genAlgo()
+              await this.api('friendInitForFarm', {"shareCode": t.shareCode, "version": 18, "channel": 1, "babelChannel": "10"})
+              this.h5stTool = new H5ST('673a0', this.user.UserAgent, this.fp)
+              await this.h5stTool.__genAlgo()
+              data = await this.api('waterFriendForFarm', {"shareCode": t.shareCode, "version": 18, "channel": 1, "babelChannel": "10"})
+              if (data.code === '0') {
+                console.log('帮助成功')
+              } else {
+                this.o2s(data, '帮助失败')
+                break
+              }
+              await this.wait(2000)
+            }
+          }
+        }
+        this.h5stTool = new H5ST('d08ff', this.user.UserAgent, this.fp)
+        await this.h5stTool.__genAlgo()
+        data = await this.api('waterFriendGotAwardForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
+        console.log('帮好友浇水奖励💧', data.addWater)
       }
 
       // 签到页面
