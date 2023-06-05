@@ -64,7 +64,7 @@ class Jd_Cash extends JDHelloWorld {
         'Cookie': this.user.cookie
       })
       console.log('收到助力', res.data.result.assistDetail[0].assistResult.length)
-      if (1) {
+      if (res.data.result.signedStatus !== 1) {
         console.log('签到')
         res = await this.api('cash_mob_sign', {"version": "1", "channel": "applet", "remind": 0})
         if (res.data.bizCode === 0) {
@@ -75,8 +75,8 @@ class Jd_Cash extends JDHelloWorld {
       }
     } catch (e) {
       console.log(e.message)
-      await this.wait(5000)
     }
+    await this.wait(15000)
   }
 
   async help(users: User[]) {
@@ -99,16 +99,21 @@ class Jd_Cash extends JDHelloWorld {
         for (let code of shareCode) {
           console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code.inviteCode}`)
           res = await this.api('cash_qr_code_assist', {"version": "1", "channel": "applet", "type": 2, "inviteCode": code.inviteCode, "shareDate": code.shareDate, "lng": "", "lat": ""})
-          if (res.data?.bizCode === 0) {
+          if (res.data.bizCode === 0) {
             console.log('助力成功')
+            break
+          } else if (res.data.bizCode === 207) {
+            console.log('上限')
+            break
           } else {
             this.o2s(res, '助力结果')
           }
-          await this.wait(3000)
+          await this.wait(15000)
         }
       } catch (e) {
         console.log(e)
       }
+      await this.wait(15000)
     }
   }
 }
