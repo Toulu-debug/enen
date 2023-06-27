@@ -13,7 +13,7 @@ declare class JDHelloWorld {
     getCookie(): Promise<void>;
     exceptCookie(filename?: string): string[];
     get(url: string, headers?: any, params?: object): Promise<any>;
-    post(url: string, data: any, headers?: any, params?: object): Promise<object | string>;
+    post(url: string, data: any, headers?: any, params?: object): Promise<any>;
     wait(ms?: number): Promise<unknown>;
     o2s(msg: string | object, title?: string): void;
     getShareCodePool(key: string, num: number): Promise<string[]>;
@@ -28,7 +28,9 @@ declare class JDHelloWorld {
     getSign(fn: string, body: object): Promise<string>;
     getIosVer(): string;
     getFp(): Promise<string>;
-    body(body: object): Promise<object>;
+    getFp4_1(): Promise<string>;
+    algo(appId: string, fp: string, ua: string, pin: string, url: string, og: string): Promise<object>;
+    h5st(appid: string, body: object, client: string, clientVersion: string, functionId: string, t: number, appId: string, tk: string, rd: string, enc: string, fp: string, sua: string, pin: string): Promise<string>;
     run(son: {
         main: any;
         help?: any;
