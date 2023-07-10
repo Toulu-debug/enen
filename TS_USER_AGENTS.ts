@@ -179,7 +179,7 @@ async function getshareCodeHW(key: string) {
   let shareCodeHW: string[] = []
   for (let i = 0; i < 5; i++) {
     try {
-      let {data}: any = await axios.get('https://sharecodepool.cnmb.win/api/HW_CODES')
+      let {data}: any = await axios.get('https://sharecodepool.cnmb.pw/api/HW_CODES')
       shareCodeHW = data[key] || []
       if (shareCodeHW.length !== 0) {
         break
@@ -196,7 +196,7 @@ async function getShareCodePool(key: string, num: number) {
   let shareCode: string[] = []
   for (let i = 0; i < 2; i++) {
     try {
-      let {data}: any = await axios.get(`https://sharecodepool.cnmb.win/api/${key}/${num}`)
+      let {data}: any = await axios.get(`https://sharecodepool.cnmb.pw/api/${key}/${num}`)
       shareCode = data.data || []
       console.log(`随机获取${num}个${key}成功：${JSON.stringify(shareCode)}`)
       if (shareCode.length !== 0) {

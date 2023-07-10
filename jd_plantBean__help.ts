@@ -45,7 +45,7 @@ class Jd_plantBean__help extends JDHelloWorld {
 
   async runTimes(code: string) {
     try {
-      let data = await this.get(`https://sharecodepool.cnmb.win/api/runTimes0917?activityId=bean&sharecode=${code}`)
+      let data = await this.get(`https://sharecodepool.cnmb.pw/api/runTimes0917?activityId=bean&sharecode=${code}`)
       console.log(data)
     } catch (e) {
       await this.wait(5000)
