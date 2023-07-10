@@ -1401,7 +1401,7 @@ function shareCodesFormat() {
 
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `https://sharecodepool.cnmb.pw/api/farm/50`, timeout: 10000}, (err, resp, data) => {
+    $.get({url: `http://sharecodepool.cnmb.pw/api/farm/50`, timeout: 10000}, (err, resp, data) => {
       try {
         if (err) {
           console.log(JSON.stringify(err))
