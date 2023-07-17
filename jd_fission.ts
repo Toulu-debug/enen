@@ -39,7 +39,7 @@ class Jd_simple extends JDHelloWorld {
   }
 
   async main(user: User) {
-    for (let j = 0; j < 1; j++) {
+    for (let j = 0; j < 2; j++) {
       this.user = user
       this.user.UserAgent = j === 0 ? `jdapp;iPhone;11.4.0;;;M/5.0;appBuild/168411;jdSupportDarkMode/0;ef/1;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;` : `jdltapp;iPhone;6.3.0;;;M/5.0;hasUPPay/0;pushNoticeIsOpen/0;lang/zh_CN;hasOCPay/0;appBuild/1372;Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
       this.appId = '02f8d'
@@ -70,6 +70,8 @@ class Jd_simple extends JDHelloWorld {
           try {
             if (data.data.prizeType === 2) {
               console.log('🧧', data.data.prizeValue * 1)
+            } else if (data.data.prizeType === 4) {
+              console.log('💰', data.data.prizeValue * 1)
             } else {
               this.o2s(data)
             }
