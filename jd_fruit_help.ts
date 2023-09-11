@@ -4,34 +4,33 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {getH5ST} from "./utils/h5st";
+import {H5ST} from "./utils/h5st"
 
 class Jd_fruit_help extends JDHelloWorld {
   user: User
   shareCodeSelf: string[] = []
-  appid: string = '235ec'
-  fp: string = 'gng5gi963mznng63'
+  h5stTool: H5ST
+  fp: string = ''
 
   constructor() {
     super();
   }
 
   async init() {
-    if (!this.fp) {
-      process.exit()
-    }
+    this.fp = await this.getFp4_1()
     await this.run(this)
   }
 
   async api(fn: string, body: object) {
     let timestamp: number = Date.now()
-    let h5st = await getH5ST(fn, body, this.appid, this.fp, this.user.UserAgent)
-    return await this.get(`https://api.m.jd.com/client.action?functionId=initForFarm&body=${encodeURIComponent(JSON.stringify(body))}&appid=signed_mp&timestamp=${timestamp}&client=mac&clientVersion=3.8.0&loginType=2&h5st=${h5st}`, {
+    let h5st = this.h5stTool.genH5st('235ec', body, 'mac', '3.8.2', fn, timestamp)
+    return await this.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=signed_mp&timestamp=${timestamp}&client=mac&clientVersion=3.8.2&loginType=2&loginWQBiz=ddnc&h5st=${h5st}`, {
       'Host': 'api.m.jd.com',
       'user-agent': this.user.UserAgent,
-      'referer': 'https://servicewechat.com/wx91d27dbf599dff74/712/page-frame.html',
-      'Content-Type': 'application/json',
-      'Cookie': this.user.cookie
+      'Referer': 'https://servicewechat.com/wx91d27dbf599dff74/725/page-frame.html',
+      'Cookie': this.user.cookie,
+      'X-Referer-Package': 'wx91d27dbf599dff74',
+      'X-Referer-Page': '/pages/farm/pages/index/index',
     })
   }
 
@@ -39,18 +38,14 @@ class Jd_fruit_help extends JDHelloWorld {
     try {
       this.user = user
       this.user.UserAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 MicroMessenger/6.8.0(0x16080000) NetType/WIFI MiniProgramEnv/Mac MacWechat/WMPF XWEB/30515`
-      let res: any
-      res = await this.api('initForFarm', {"PATH": "1", "PTAG": "", "ptag": "", "navStart": new Date().toISOString(), "referer": "http://wq.jd.com/wxapp/pages/index/index", "originUrl": "/pages/farm/pages/index/index", "originParams": {"ptag": ""}, "originOpts": {}, "imageUrl": "", "nickName": "", "version": 22, "channel": 2, "babelChannel": 0, "lat": "", "lng": ""})
-      if (res?.farmUserPro?.shareCode) {
-        console.log('助力码', res.farmUserPro.shareCode)
-        this.shareCodeSelf.push(res.farmUserPro.shareCode)
-      } else {
-        console.log('获取助力码失败')
-      }
+      this.h5stTool = new H5ST('235ec', this.fp, this.user.UserAgent, this.user.UserName, 'https://servicewechat.com/wx91d27dbf599dff74/725/page-frame.html', 'https://servicewechat.com')
+      await this.h5stTool.genAlgo()
+      let res: any = await this.api('initForFarm', {"PATH": "1", "PTAG": "", "ptag": "", "referer": "http://wq.jd.com/wxapp/pages/index/index", "originUrl": "/pages/farm/pages/index/index", "imageUrl": "", "nickName": "微信用户", "version": 25, "channel": 2, "babelChannel": 0, "lat": "", "lng": ""})
+      console.log('助力码', res['farmUserPro'].shareCode)
+      this.shareCodeSelf.push(res['farmUserPro'].shareCode)
     } catch (e) {
-      console.log('error', e.message)
+      console.log('获取失败', e)
     }
-    await this.wait(15000)
   }
 
   async help(users: User[]) {
@@ -58,34 +53,22 @@ class Jd_fruit_help extends JDHelloWorld {
     for (let user of users) {
       try {
         this.user = user
-        // this.user.UserAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 MicroMessenger/6.8.0(0x16080000) NetType/WIFI MiniProgramEnv/Mac MacWechat/WMPF XWEB/30515`
+        this.user.UserAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 MicroMessenger/6.8.0(0x16080000) NetType/WIFI MiniProgramEnv/Mac MacWechat/WMPF XWEB/30515`
+        this.h5stTool = new H5ST('235ec', this.fp, this.user.UserAgent, this.user.UserName, 'https://servicewechat.com/wx91d27dbf599dff74/725/page-frame.html', 'https://servicewechat.com')
+        await this.h5stTool.genAlgo()
+
         let shareCodePool: string[] = await this.getShareCodePool('farm', 50)
         let shareCode: string[] = [...this.shareCodeSelf, ...shareCodePool]
 
         for (let code of shareCode) {
           try {
             console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code} ${this.shareCodeSelf.includes(code) ? '*内部*' : ''}`)
-            // res = await this.api('initForFarm', {"ad_od": "share", "mpin": "", "shareCode": code, "utm_campaign": "t_335139774", "utm_medium": "appshare", "utm_source": "androidapp", "utm_term": "Wxfriends", "imageUrl": "", "nickName": "", "version": 22, "channel": 2, "babelChannel": 0, "lat": "", "lng": ""})
-            res = await this.get(`https://api.m.jd.com/client.action?functionId=initForFarm&body=${encodeURIComponent(JSON.stringify({
-              imageUrl: "",
-              nickName: "",
-              shareCode: code,
-              babelChannel: "3",
-              version: 2,
-              channel: 1
-            }))}&appid=wh5`, {
-              "Host": "api.m.jd.com",
-              "Accept": "*/*",
-              "Origin": "https://carry.m.jd.com",
-              "Accept-Encoding": "gzip, deflate, br",
-              "User-Agent": this.user.UserAgent,
-              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-              "Referer": "https://carry.m.jd.com/",
-              "Cookie": this.user.cookie
-            })
-            this.o2s(res)
-            if (res?.helpResult?.remainTimes === 0)
+            res = await this.api('initForFarm', {"ad_od": "share", "mpin": "", "shareCode": code, "utm_campaign": "t_335139774", "utm_medium": "appshare", "utm_source": "androidapp", "utm_term": "Wxfriends", "imageUrl": "", "nickName": "微信用户", "version": 25, "channel": 2, "babelChannel": 0, "lat": "", "lng": ""})
+            console.log(res.helpResult.remainTimes, res.helpResult.code)
+            if (res.helpResult.remainTimes === 0) {
+              console.log('上限')
               break
+            }
           } catch (e) {
             console.log(e.message)
           }
