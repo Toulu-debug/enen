@@ -3,132 +3,81 @@
  * cron: 0 0-23/4 * * *
  */
 
-import * as path from "path"
+import {User, JDHelloWorld} from "./TS_JDHelloWorld"
+import {H5ST} from "./utils/h5st"
+import {readFileSync, writeFileSync} from "fs"
 import {sendNotify} from './sendNotify'
-import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs"
-import USER_AGENT, {get, getCookie, exceptCookie, wait, o2s} from "./TS_USER_AGENTS"
-import {pushplus} from "./utils/pushplus";
 
-let cookie: string = '', UserName: string, allMessage: string = '', res: any = ''
+class Jd_track extends JDHelloWorld {
+  user: User
+  fp: string
+  h5stTool: H5ST
+  arr: { user: string, orderId: string, wareName: string, time: string, content: string }[]
+  existOrderId: string[]
+  msg: string = ''
 
-!(async () => {
-  let cookiesArr: string[] = await getCookie()
-  let except: string[] = exceptCookie(path.basename(__filename))
-  let orders: any = {}, pushplusArr: { pt_pin: string, pushplus: string }[], pushplusUser: string[] = []
-  try {
-    pushplusArr = JSON.parse(readFileSync('./utils/account.json').toString())
-  } catch (e) {
-    console.log('utils/account.json load failed')
+  constructor() {
+    super()
   }
-  for (let user of pushplusArr) {
-    if (user.pushplus)
-      pushplusUser.push(decodeURIComponent(user.pt_pin))
+
+  async init() {
+    this.fp = await this.getFp4_1()
+    this.arr = JSON.parse(readFileSync('json/jd_track.json').toString())
+    this.existOrderId = this.arr.map(t => {
+      return t.orderId
+    })
+    await this.run(this)
   }
-  if (existsSync('./json')) {
-    if (existsSync('./json/jd_track.json')) {
-      orders = JSON.parse(readFileSync('./json/jd_track.json').toString() || '{}')
-    } else {
-      writeFileSync('./json/jd_track.json', '{}')
-    }
-  } else {
-    mkdirSync('./json')
-    writeFileSync('./json/jd_track.json', '{}')
+
+  async api(body: object): Promise<any> {
+    let ts: number = Date.now()
+    let h5st: string = this.h5stTool.genH5st('new_order', body, 'mac', '3.8.2', 'common_order_list', ts)
+    return await this.get(`https://api.m.jd.com/client.action?t=${ts}&loginType=2&loginWQBiz=golden-trade&appid=new_order&client=mac&clientVersion=3.8.2&functionId=common_order_list&body=${encodeURIComponent(JSON.stringify(body))}&h5st=${h5st}`, {
+      'Host': 'api.m.jd.com',
+      'xweb_xhr': '1',
+      'X-Rp-Client': 'mini_2.0.0',
+      'User-Agent': this.user.UserAgent,
+      'X-Referer-Package': 'wx91d27dbf599dff74',
+      'X-Referer-Page': '/pages/order_taro/pages/list/index',
+      'Referer': 'https://servicewechat.com/wx91d27dbf599dff74/728/page-frame.html',
+      'Cookie': this.user.cookie
+    })
   }
-  for (let [index, value] of cookiesArr.entries()) {
-    cookie = value
-    UserName = decodeURIComponent(cookie.match(/pt_pin=([^;]*)/)![1])
-    console.log(`\n开始【京东账号${index + 1}】${UserName}\n`)
 
-    if (except.includes(encodeURIComponent(UserName))) {
-      console.log('已设置跳过')
-      continue
-    }
-
-    let message: string = '', markdown: string = '', i: number = 1
-
-    let headers: object = {
-      'authority': 'wq.jd.com',
-      'user-agent': USER_AGENT,
-      'referer': 'https://wqs.jd.com/',
-      'cookie': cookie
-    }
+  async main(user: User) {
     try {
-      res = await get(`https://wq.jd.com/bases/orderlist/list?order_type=2&start_page=1&last_page=0&page_size=10&callersource=mainorder&t=${Date.now()}&sceneval=2&_=${Date.now()}&sceneval=2`, headers)
-      await wait(1000)
+      this.user = user
+      this.user.UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.5938.132 Safari/537.36 MicroMessenger/6.8.0(0x16080000) NetType/WIFI MiniProgramEnv/Mac MacWechat/WMPF XWEB/30817'
+      this.h5stTool = new H5ST('2d275', this.fp, this.user.UserAgent, this.user.UserName, 'https://servicewechat.com/wx91d27dbf599dff74/728/page-frame.html', 'https://servicewechat.com')
+      await this.h5stTool.genAlgo()
 
-      for (let order of res.orderList) {
-        let orderId: string = order.orderId
-        let orderType: string = order.orderType
-        let title: string = order.productList[0].title
-        let t: string = order.progressInfo?.tip || null
-        let status: string = order.progressInfo?.content || null
-        let shopName: string = order.shopInfo.shopName
-
-        res = await get(`https://wq.jd.com/bases/wuliudetail/dealloglist?deal_id=${orderId}&orderstate=15&ordertype=${orderType}&t=${Date.now()}&sceneval=2`, headers)
-        await wait(1000)
-        let carrier: string = res.carrier, carriageId: string = res.carriageId
-
-        if (t && status) {
-          if (status.match(/(?=签收|已取走|已暂存)/))
-            continue
-          if (!pushplusUser.includes(UserName)) {
-            console.log(`<${shopName}>\t${title}`)
-            console.log('\t', t, status)
-            console.log()
+      let res: any = await this.api({"externalLoginType": 1, "appType": "1", "bizType": "2", "source": "-1", "token": "", "deviceUUId": "", "platform": 2, "uuid": "", "systemBaseInfo": "{\"SDKVersion\":\"2.32.3\",\"system\":\"Mac OS X 13.5.0\"}", "orderListTag": 128, "curTab": "waitReceipt", "referer": "http%3A%2F%2Fwq.jd.com%2Fwxapp%2Fpages%2Fmy%2Findex%2Findex", "page": 1, "pageSize": 10})
+      for (let t of res.body.orderList) {
+        let orderId: string = t.orderId, time: string = t.progressInfo?.tip, content: string = t.progressInfo?.content ?? '', wareName: string = t.wareInfoList[0].wareName
+        if (content) {
+          console.log(orderId, wareName, time, content)
+          if (!this.existOrderId.includes(orderId)) {
+            this.arr.push({user: this.user.UserName, orderId, wareName, time, content})
+            this.msg += `${this.user.UserName}\n${wareName}\n${time} ${content}\n\n`
           } else {
-            console.log('隐私保护，不显示日志')
-          }
-          if (!Object.keys(orders).includes(orderId) || orders[orderId]['status'] !== status) {
-            if (pushplusUser.includes(UserName)) {
-              console.log('+ pushplus')
-              markdown += `${i++}. ${title}\n\t- ${carrier}  ${carriageId}\n\t- ${t}  ${status}\n`
-            } else {
-              console.log('+ sendNotify')
-              message += `<${shopName}>\t${title}\n${carrier}  ${carriageId}\n${t}  ${status}\n\n`
-            }
-          }
-          orders[orderId] = {
-            user: UserName, shopName, title, t, status, carrier, carriageId
+            this.arr.forEach(order => {
+              if (order.orderId === orderId && order.time !== time) {
+                this.msg += `${this.user.UserName}\n${wareName}\n${time} ${content}\n\n`
+              }
+            })
           }
         }
       }
-
-      if (message) {
-        message = `【京东账号${index + 1}】  ${UserName}\n\n${message}`
-        allMessage += message
-      }
-      if (markdown) {
-        markdown = `#### <${UserName}>\n${markdown}`
-        await pushplus('京东快递更新', markdown, 'markdown')
-      }
-      await wait(1000)
+      writeFileSync('json/jd_track.json', JSON.stringify(this.arr, null, 2))
     } catch (e) {
+      console.log(e.message)
+      await this.wait(5000)
     }
   }
 
-  let account: { pt_pin: string, remarks: string }[] = []
-  try {
-    account = JSON.parse(readFileSync('./utils/account.json').toString())
-  } catch (e) {
-    console.log('utils/account.json load failed')
+  async help() {
+    await sendNotify('京东待收货', this.msg)
   }
+}
 
-  // 删除已签收
-  Object.keys(orders).map(key => {
-    if (orders[key].status.match(/(?=签收|已取走|已暂存)/)) {
-      delete orders[key]
-    }
-    if (pushplusUser.includes(orders[key].user)) {
-      orders[key].title = '******'
-    }
-  })
-
-  // 替换通知中的用户名为备注
-  orders = JSON.stringify(orders, null, 2)
-  for (let acc of account) {
-    orders = orders.replace(new RegExp(decodeURIComponent(acc.pt_pin), 'g'), acc.remarks ?? acc.pt_pin)
-  }
-  writeFileSync('./json/jd_track.json', orders)
-  if (allMessage)
-    await sendNotify('京东快递更新', allMessage)
-})()
+new Jd_track().init().then()
