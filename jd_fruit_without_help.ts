@@ -5,7 +5,7 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {H5ST} from "./utils/h5st_3.1";
+import {H5ST} from "./utils/h5st_pro";
 import {addHours, getTime} from "date-fns";
 
 class Jd_fruit extends JDHelloWorld {
@@ -19,18 +19,13 @@ class Jd_fruit extends JDHelloWorld {
   }
 
   async init() {
-    try {
-      this.fp = process.env.FP_8A2AF || process.env.FP_0C010
-      if (!this.fp) this.fp = await this.getFp()
-    } catch (e) {
-      console.log(e.message)
-    }
+    this.fp = await this.getFp()
     await this.run(this)
   }
 
   async api(fn: string, body: object) {
     let timestamp: string = Date.now().toString();
-    let h5st: string = this.h5stTool.__genH5st({
+    let h5st: string = await this.h5stTool.__genH5st({
       'appid': 'signed_wh5',
       'body': JSON.stringify(body),
       'client': 'iOS',
@@ -62,7 +57,7 @@ class Jd_fruit extends JDHelloWorld {
       this.user.UserAgent = `jdapp;iPhone;11.3.0;;;M/5.0;appBuild/168341;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
       let res: any, data: any
 
-      this.h5stTool = new H5ST('8a2af', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('8a2af', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       res = await this.api('initForFarm', {"babelChannel": "10", "sid": "", "un_area": "", "version": 18, "channel": 1})
       if (res.code === '0') {
@@ -83,19 +78,19 @@ class Jd_fruit extends JDHelloWorld {
 
       // 弹窗水滴
       if (res.todayGotWaterGoalTask.canPop) {
-        this.h5stTool = new H5ST('c901b', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('c901b', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         data = await this.api('gotWaterGoalTaskForFarm', {"type": 3, "version": 18, "channel": 1, "babelChannel": "10"})
         console.log('弹窗水滴💧', data.addEnergy)
       }
 
       // 背包
-      this.h5stTool = new H5ST('157b6', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('157b6', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       res = await this.api('myCardInfoForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
       if (res.doubleCard && totalEnergy >= 100) {
         console.log('水滴翻倍卡数量', res.doubleCard)
-        this.h5stTool = new H5ST('86ba5', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('86ba5', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         for (; res.doubleCard > 0; --res.doubleCard) {
           data = await this.api('userMyCardForFarm', {"cardType": "doubleCard", "type": "", "version": 18, "channel": 1, "babelChannel": "10"})
@@ -126,7 +121,7 @@ class Jd_fruit extends JDHelloWorld {
       }
 
       // 任务列表
-      this.h5stTool = new H5ST('fcb5a', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('fcb5a', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       res = await this.api('taskInitForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
 
@@ -144,7 +139,7 @@ class Jd_fruit extends JDHelloWorld {
       // }
 
       if (!res.totalWaterTaskInit.f) {
-        this.h5stTool = new H5ST('0c010', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('0c010', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         for (let i = 0; i < 10 - res.totalWaterTaskTimes; i++) {
           data = await this.api('waterGoodForFarm', {"type": "", "version": 18, "channel": 1, "babelChannel": "10"})
@@ -157,14 +152,14 @@ class Jd_fruit extends JDHelloWorld {
           }
           await this.wait(5000)
         }
-        this.h5stTool = new H5ST('102f5', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('102f5', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         data = await this.api('totalWaterTaskForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
         data.code === '0' && console.log('十次奖励💧', data.totalWaterTaskEnergy)
       }
 
       if (!res.firstWaterInit.f && res.firstWaterInit.totalWaterTimes) {
-        this.h5stTool = new H5ST('0cf1e', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('0cf1e', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         data = await this.api('firstWaterTaskForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
         data.code === '0' && console.log('首次奖励💧', data.amount)
@@ -179,7 +174,7 @@ class Jd_fruit extends JDHelloWorld {
       }
 
       if (!res.gotBrowseTaskAdInit.f) {
-        this.h5stTool = new H5ST('53f09', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('53f09', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         for (let t of res.gotBrowseTaskAdInit.userBrowseTaskAds) {
           if (t.hadFinishedTimes !== t.limit) {
@@ -195,7 +190,7 @@ class Jd_fruit extends JDHelloWorld {
       }
 
       if (!res.waterRainInit.f && Date.now() > getTime(addHours(res.lastTime || 1669906397000, 4))) {
-        this.h5stTool = new H5ST('9983a', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('9983a', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         data = await this.api('waterRainForFarm', {"type": 1, "hongBaoTimes": 99, "version": 14, "channel": 1})
         data.code === '0' ? console.log('红包雨💧', data.addEnergy) : this.o2s(data, '红包雨error')
@@ -208,10 +203,10 @@ class Jd_fruit extends JDHelloWorld {
         for (let t of friendList.friends) {
           if (t.friendState === 1) {
             console.log(`帮好友 ${t.nickName} ${t.shareCode} 浇水`)
-            this.h5stTool = new H5ST('a5a9c', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+            this.h5stTool = new H5ST('a5a9c', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
             await this.h5stTool.__genAlgo()
             await this.api('friendInitForFarm', {"shareCode": t.shareCode, "version": 18, "channel": 1, "babelChannel": "10"})
-            this.h5stTool = new H5ST('673a0', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+            this.h5stTool = new H5ST('673a0', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
             await this.h5stTool.__genAlgo()
             data = await this.api('waterFriendForFarm', {"shareCode": t.shareCode, "version": 18, "channel": 1, "babelChannel": "10"})
             if (data.code === '0') {
@@ -225,17 +220,17 @@ class Jd_fruit extends JDHelloWorld {
             if (finishCount === 2) break
           }
         }
-        this.h5stTool = new H5ST('d08ff', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('d08ff', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         data = await this.api('waterFriendGotAwardForFarm', {"version": 18, "channel": 1, "babelChannel": "10"})
         console.log('帮好友浇水奖励💧', data.addWater)
       }
 
       // 签到页面
-      this.h5stTool = new H5ST('08dc3', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('08dc3', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       res = await this.api('clockInInitForFarm', {"timestamp": Date.now(), "version": 18, "channel": 1, "babelChannel": "10"})
-      this.h5stTool = new H5ST('4a0b4', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('4a0b4', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       for (let t of res.themes || []) {
         if (!t.hadGot) {
@@ -248,7 +243,7 @@ class Jd_fruit extends JDHelloWorld {
       }
 
       if (!res.todaySigned) {
-        this.h5stTool = new H5ST('32b94', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+        this.h5stTool = new H5ST('32b94', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
         await this.h5stTool.__genAlgo()
         data = await this.api('clockInForFarm', {"type": 1, "version": 18, "channel": 1, "babelChannel": "10"})
         data.code === '0' ? console.log('签到成功', data.amount) : this.o2s(data, '签到失败')
@@ -263,7 +258,7 @@ class Jd_fruit extends JDHelloWorld {
       }
 
       // 删除好友
-      this.h5stTool = new H5ST('eaf91', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('eaf91', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       res = await this.friendListInitForFarm()
       for (let t of res.friends) {
@@ -278,7 +273,7 @@ class Jd_fruit extends JDHelloWorld {
       }
 
       // 点鸭子
-      this.h5stTool = new H5ST('5c767', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('5c767', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
       for (let i = 0; i < 10; i++) {
         data = await this.api('getFullCollectionReward', {"type": 2, "version": 18, "channel": 1, "babelChannel": "10"})
@@ -302,7 +297,7 @@ class Jd_fruit extends JDHelloWorld {
     for (let user of users) {
       this.user = user
       this.user.UserAgent = `jdapp;iPhone;10.2.4;;;M/5.0;appBuild/167874;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-      this.h5stTool = new H5ST('8a2af', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/','https://carry.m.jd.com/')
+      this.h5stTool = new H5ST('8a2af', this.user.UserAgent, this.fp, 'https://carry.m.jd.com/', 'https://carry.m.jd.com/')
       await this.h5stTool.__genAlgo()
 
       let shareCodePool: string[] = await this.getShareCodePool('farm', 50)
