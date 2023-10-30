@@ -86,6 +86,17 @@ class Jd_farm extends JDHelloWorld {
             await this.wait(3000)
             data.data.bizCode === 0 ? console.log('任务完成') : console.log('任务失败', data)
           }
+        } else if (t.taskType === 'CUMULATIVE_TIMES') {
+          console.log(`今日浇水${t.taskDoTimes}/10`)
+          for (let i = 0; i < 10 - t.taskDoTimes; i++) {
+            if (bottleWater < 10) break
+            data = await this.api('farm_water', {"version": 1, "waterType": 1})
+            if (data.data.bizCode === 0) {
+              console.log('浇水成功', t.taskDoTimes + i + 1)
+              bottleWater = data.data.result.bottleWater
+            }
+            await this.wait(3000)
+          }
         }
       }
 
