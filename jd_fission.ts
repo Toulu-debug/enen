@@ -4,39 +4,60 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {H5ST} from "./utils/h5st"
+import {readFileSync} from "fs"
+import {JSDOM, ResourceLoader, VirtualConsole} from "jsdom"
+import CryptoJS from "crypto-js";
 
 class Jd_fission extends JDHelloWorld {
   user: User
   fp: string
   appId: string
-  h5stTool: H5ST
   shareCodeSelf: string[] = []
+  htstTool: any
 
   constructor() {
     super();
   }
 
   async init() {
-    this.fp = await this.getFp4_1()
     await this.run(this)
   }
 
+  async h5stToolInit() {
+    let dom = new JSDOM(`<body><script>${readFileSync('utils/h5st_43.js').toString()}</script></body>`, {
+      url: "http://localhost",
+      userAgent: this.user.UserAgent,
+      runScripts: "dangerously",
+      resources: new ResourceLoader({
+        userAgent: this.user.UserAgent
+      }),
+      includeNodeLocations: true,
+      storageQuota: 1000000000,
+      pretendToBeVisual: true,
+      virtualConsole: new VirtualConsole()
+    })
+    this.htstTool = new dom.window.ParamsSign({appId: this.appId})
+  }
+
   async api(fn: string, body: object) {
-    let timestamp: number = Date.now()
-    let h5st: string = this.h5stTool.genH5st('activities_platform', body, 'ios', '12.2.0', fn, timestamp)
-    return await this.post('https://api.m.jd.com/api',
-      `functionId=${fn}&body=${JSON.stringify(body)}&t=${timestamp}&appid=activities_platform&client=ios&clientVersion=12.2.0&h5st=${h5st}`,
-      {
-        'authority': 'api.m.jd.com',
-        'User-Agent': this.user.UserAgent,
-        'origin': 'https://pro.m.jd.com',
-        'referer': 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
-        'Cookie': this.user.cookie,
-        'x-referer-page': 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
-        'x-rp-client': 'h5_1.0.0'
-      }
-    )
+    let t = Date.now()
+    let h5st: string = (await this.htstTool.sign({
+      appid: 'activities_platform',
+      body: CryptoJS.SHA256(JSON.stringify(body)).toString(CryptoJS.enc.Hex),
+      client: 'ios',
+      clientVersion: '12.3.2',
+      functionId: fn,
+      t: t
+    })).h5st
+    return await this.post('https://api.m.jd.com/api', `functionId=${fn}&body=${JSON.stringify(body)}&t=${t}&appid=activities_platform&client=ios&clientVersion=12.3.2&h5st=${h5st}`, {
+      'authority': 'api.m.jd.com',
+      'User-Agent': this.user.UserAgent,
+      'origin': 'https://pro.m.jd.com',
+      'referer': 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
+      'Cookie': this.user.cookie,
+      'x-referer-page': 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
+      'x-rp-client': 'h5_1.0.0'
+    })
   }
 
   async main(user: User) {
@@ -44,12 +65,10 @@ class Jd_fission extends JDHelloWorld {
       try {
         this.user = user
         this.user.UserAgent = j === 0
-          ? `jdapp;iPhone;12.2.0;;;M/5.0;appBuild/168919;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+          ? `jdapp;iPhone;12.3.2;;;M/5.0;appBuild/169031;Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
           : `jdltapp;iPhone;6.3.0;;;M/5.0;hasUPPay/0;pushNoticeIsOpen/0;lang/zh_CN;hasOCPay/0;appBuild/1372;Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
         this.appId = '02f8d'
-        this.h5stTool = new H5ST(this.appId, this.fp, this.user.UserAgent, this.user.UserName, j === 0 ? 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html' : 'https://pro.m.jd.com/jdlite/active/23CeE8ZXA4uFS9M9mTjtta9T4S5x/index.html', 'https://pro.m.jd.com')
-        await this.h5stTool.genAlgo()
-
+        await this.h5stToolInit()
         let res: any, data: any
         let linkId: string = j === 0 ? '3orGfh1YkwNLksxOcN8zWQ' : 'Wvzc_VpNTlSkiQdHT8r7QA'
         res = await this.api('inviteFissionBeforeHome', {"linkId": linkId, "isJdApp": true, "inviter": ""})
@@ -58,19 +77,17 @@ class Jd_fission extends JDHelloWorld {
         await this.wait(1000)
 
         this.appId = 'eb67b'
-        this.h5stTool = new H5ST(this.appId, this.fp, this.user.UserAgent, this.user.UserName, j === 0 ? 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html' : 'https://pro.m.jd.com/jdlite/active/23CeE8ZXA4uFS9M9mTjtta9T4S5x/index.html', 'https://pro.m.jd.com')
-        await this.h5stTool.genAlgo()
+        await this.h5stToolInit()
+
         res = await this.api('inviteFissionHome', {"linkId": linkId, "inviter": ""})
         let lotteryTimes: number = res.data.prizeNum
         console.log('可抽奖', lotteryTimes)
 
         if (lotteryTimes) {
           this.appId = 'c02c6'
-          this.h5stTool = new H5ST(this.appId, this.fp, this.user.UserAgent, this.user.UserName, j === 0 ? 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html' : 'https://pro.m.jd.com/jdlite/active/23CeE8ZXA4uFS9M9mTjtta9T4S5x/index.html', 'https://pro.m.jd.com')
-          await this.h5stTool.genAlgo()
+          await this.h5stToolInit()
           for (let i: number = 0; i < lotteryTimes; i++) {
             data = await this.api('inviteFissionDrawPrize', {"linkId": linkId})
-            await this.wait(5000)
             try {
               if (data.data.prizeType === 2) {
                 console.log('🧧', data.data.prizeValue * 1)
@@ -83,13 +100,13 @@ class Jd_fission extends JDHelloWorld {
               console.log(e.message)
               this.o2s(data)
             }
+            await this.wait(8000)
           }
         }
 
-        /*
+
         this.appId = 'f2b1d'
-        this.h5stTool = new H5ST(this.appId, this.fp, this.user.UserAgent, this.user.UserName, j === 0 ? 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html' : 'https://pro.m.jd.com/jdlite/active/23CeE8ZXA4uFS9M9mTjtta9T4S5x/index.html', 'https://pro.m.jd.com')
-        await this.h5stTool.genAlgo()
+        await this.h5stToolInit()
         let end: boolean = false
         for (let i = 1; i < 5; i++) {
           console.log('page', i)
@@ -107,16 +124,16 @@ class Jd_fission extends JDHelloWorld {
                 data = await this.api('apCashWithDraw', {"businessSource": "NONE", "base": {"id": t.id, "business": "fission", "poolBaseId": t.poolBaseId, "prizeGroupId": t.prizeGroupId, "prizeBaseId": t.prizeBaseId, "prizeType": 4}, "linkId": linkId})
                 console.log(data.data.message, data.data.record.amount * 1)
                 await this.wait(8000)
+                if (data.data.message === '提现中')
+                  break
               }
             }
           } catch (e) {
             console.log(e.message)
             break
           }
-          await this.wait(5000)
+          await this.wait(8000)
         }
-
-         */
       } catch (e) {
         console.log(e.message)
         await this.wait(5000)
@@ -132,16 +149,13 @@ class Jd_fission extends JDHelloWorld {
     for (let j = 0; j < 2; j++) {
       for (let user of users) {
         try {
-          if (shareCodeHW.length === 0)
-            shareCodeHW = await this.getshareCodeHW('fission')
+          if (shareCodeHW.length === 0) shareCodeHW = await this.getshareCodeHW('fission')
           this.user = user
           this.user.UserAgent = j === 0
             ? `jdapp;iPhone;12.2.0;;;M/5.0;appBuild/168919;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
             : `jdltapp;iPhone;6.3.0;;;M/5.0;hasUPPay/0;pushNoticeIsOpen/0;lang/zh_CN;hasOCPay/0;appBuild/1372;Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-          this.h5stTool = new H5ST(this.appId, this.fp, this.user.UserAgent, this.user.UserName, j === 0 ? 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html' : 'https://pro.m.jd.com/jdlite/active/23CeE8ZXA4uFS9M9mTjtta9T4S5x/index.html', 'https://pro.m.jd.com')
-          await this.h5stTool.genAlgo()
-
-          let shareCode: string[] = user.index === 0 ? [...shareCodeHW, ...this.shareCodeSelf] : [...this.shareCodeSelf, ...shareCodeHW]
+          await this.h5stToolInit()
+          let shareCode: string[] = [...shareCodeHW, ...this.shareCodeSelf]
           for (let code of shareCode) {
             console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code}`)
             res = await this.api('inviteFissionhelp', {"linkId": j === 0 ? '3orGfh1YkwNLksxOcN8zWQ' : "Wvzc_VpNTlSkiQdHT8r7QA", "isJdApp": true, "inviter": code})
