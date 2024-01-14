@@ -4,55 +4,49 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import {H5ST_42} from './utils/h5st_4.2'
+import CryptoJS from "crypto-js"
 
 class Jd_fruit_help extends JDHelloWorld {
   user: User
   shareCodeSelf: string[] = []
-  h5stTool: H5ST_42
-  fp: string
+  h5stTool: { sign: Function }
 
   constructor() {
     super();
   }
 
   async init() {
-    this.fp = await this.getFp4_1()
     await this.run(this)
   }
 
   async api(fn: string, body: object) {
     let timestamp: number = Date.now()
-    let h5st = this.h5stTool.h5st({
+    let h5st: string = (await this.h5stTool.sign({
       appid: 'signed_wh5',
-      body: body,
+      body: CryptoJS.SHA256(JSON.stringify(body)).toString(CryptoJS.enc.Hex),
       client: 'iOS',
-      clientVersion: '12.2.5',
+      clientVersion: '12.3.2',
       functionId: fn,
       t: timestamp
-    })
-    return await this.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=signed_wh5&timestamp=${timestamp}&client=iOS&clientVersion=12.2.5&h5st=${h5st}`, {
-      'Host': 'api.m.jd.com',
-      'Origin': 'https://carry.m.jd.com',
+    })).h5st
+    return await this.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=signed_wh5&timestamp=${timestamp}&client=iOS&clientVersion=12.3.2&h5st=${h5st}`, {
+      'authority': 'api.m.jd.com',
+      'cookie': this.user.cookie,
+      'origin': 'https://carry.m.jd.com',
+      'referer': 'https://carry.m.jd.com/',
+      'user-agent': this.user.UserAgent,
       'x-referer-page': 'https://carry.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html',
-      'User-Agent': this.user.UserAgent,
-      'Referer': 'https://carry.m.jd.com/',
-      'x-rp-client': 'h5_1.0.0',
-      'Cookie': this.user.cookie
+      'x-rp-client': 'h5_1.0.0'
     })
   }
 
   async main(user: User) {
     try {
       this.user = user
-      this.user.UserAgent = `jdapp;iPhone;12.2.5;;;M/5.0;appBuild/168943;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-      this.h5stTool = new H5ST_42('8a2af', this.user.UserAgent, this.user.UserName, 'https://carry.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html', 'https://carry.m.jd.com')
-      await this.h5stTool.algo()
-
-      let res: any = await this.api('initForFarm', {"babelChannel": "522", "sid": "", "un_area": "", "version": 26, "channel": 1, "lat": "0", "lng": "0"})
+      this.h5stTool = this.h5st('42', '8a2af', this.user.UserAgent)
+      let res: any = await this.api('initForFarm', {"babelChannel": "522", "version": 26, "channel": 1, "lat": "0", "lng": "0"})
       console.log('助力码', res['farmUserPro'].shareCode)
       this.shareCodeSelf.push(res['farmUserPro'].shareCode)
-
     } catch (e) {
       console.log('获取失败', e)
     }
@@ -64,15 +58,13 @@ class Jd_fruit_help extends JDHelloWorld {
     for (let user of users) {
       try {
         this.user = user
-        this.user.UserAgent = `jdapp;iPhone;12.2.5;;;M/5.0;appBuild/168943;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
-        this.h5stTool = new H5ST_42('8a2af', this.user.UserAgent, this.user.UserName, 'https://carry.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html', 'https://carry.m.jd.com')
-        await this.h5stTool.algo()
+        this.h5stTool = this.h5st('42', '8a2af', this.user.UserAgent)
         let shareCodePool: string[] = await this.getShareCodePool('farm', 50)
         let shareCode: string[] = Array.from(new Set([...this.shareCodeSelf, ...shareCodePool]))
         for (let code of shareCode) {
           try {
-            console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code} ${this.shareCodeSelf.includes(code) ? '*内部*' : ''}`)
-            let res: any = await this.api('initForFarm', {"babelChannel": "522", "shareCode": code, "mpin": "", "from": "kouling", "sid": "", "un_area": "", "version": 26, "channel": 1, "lat": "0", "lng": "0"})
+            console.log(`账号${user.index + 1} ${user.UserName} 去助力 ${code}`)
+            res = await this.api('initForFarm', {"babelChannel": "522", "shareCode": code, "mpin": "", "from": "kouling", "version": 26, "channel": 1, "lat": "0", "lng": "0"})
             console.log('剩余助力', res.helpResult.remainTimes, '助力结果', res.helpResult.code)
             if (res.helpResult.remainTimes === 0) {
               console.log('上限')
@@ -81,7 +73,7 @@ class Jd_fruit_help extends JDHelloWorld {
           } catch (e) {
             console.log(e.message)
           }
-          await this.wait(3000)
+          await this.wait(5000)
         }
       } catch (e) {
         console.log(e)
