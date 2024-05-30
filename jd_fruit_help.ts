@@ -4,12 +4,15 @@
  */
 
 import {User, JDHelloWorld} from "./TS_JDHelloWorld"
-import CryptoJS from "crypto-js"
+import {JSDOM, ResourceLoader, VirtualConsole} from "jsdom";
+import {readFileSync} from "fs";
+import CryptoJS from "crypto-js";
 
 class Jd_fruit_help extends JDHelloWorld {
   user: User
   shareCodeSelf: string[] = []
-  h5stTool: { sign: Function }
+  appId: string
+  htstTool: any
 
   constructor() {
     super();
@@ -19,32 +22,48 @@ class Jd_fruit_help extends JDHelloWorld {
     await this.run(this)
   }
 
+  async h5stToolInit() {
+    let dom = new JSDOM(`<body><script>${readFileSync('utils/h5st_42.js').toString()}</script></body>`, {
+      url: "http://localhost",
+      userAgent: this.user.UserAgent,
+      runScripts: "dangerously",
+      resources: new ResourceLoader({
+        userAgent: this.user.UserAgent
+      }),
+      includeNodeLocations: true,
+      storageQuota: 1000000000,
+      pretendToBeVisual: true,
+      virtualConsole: new VirtualConsole()
+    })
+    this.htstTool = new dom.window.ParamsSign({appId: this.appId})
+  }
+
   async api(fn: string, body: object) {
-    let timestamp: number = Date.now()
-    let h5st: string = (await this.h5stTool.sign({
+    let t = Date.now(), h5st: string = (await this.htstTool.sign({
       appid: 'signed_wh5',
       body: CryptoJS.SHA256(JSON.stringify(body)).toString(CryptoJS.enc.Hex),
       client: 'iOS',
-      clientVersion: '12.3.2',
+      clientVersion: '13.0.2',
       functionId: fn,
-      t: timestamp
+      timestamp: t.toString()
     })).h5st
-    return await this.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=signed_wh5&timestamp=${timestamp}&client=iOS&clientVersion=12.3.2&h5st=${h5st}`, {
-      'authority': 'api.m.jd.com',
-      'cookie': this.user.cookie,
-      'origin': 'https://carry.m.jd.com',
-      'referer': 'https://carry.m.jd.com/',
-      'user-agent': this.user.UserAgent,
+    return await this.get(`https://api.m.jd.com/client.action?functionId=${fn}&body=${encodeURIComponent(JSON.stringify(body))}&appid=signed_wh5&area=0_0_0_0&timestamp=${t}&client=iOS&clientVersion=13.0.2&h5st=${h5st}`, {
+      'Host': 'api.m.jd.com',
+      'Origin': 'https://carry.m.jd.com',
+      'User-Agent': this.user.UserAgent,
+      'Cookie': this.user.cookie,
+      'Referer': 'https://carry.m.jd.com/',
       'x-referer-page': 'https://carry.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html',
-      'x-rp-client': 'h5_1.0.0'
     })
   }
 
   async main(user: User) {
     try {
       this.user = user
-      this.h5stTool = this.h5st('42', '8a2af', this.user.UserAgent)
-      let res: any = await this.api('initForFarm', {"babelChannel": "522", "version": 26, "channel": 1, "lat": "0", "lng": "0"})
+      this.user.UserAgent = `jdapp;iPhone;13.0.2;;;M/5.0;appBuild/169363;jdSupportDarkMode/0;ef/1;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+      this.appId = '8a2af'
+      await this.h5stToolInit()
+      let res: any = await this.api('initForFarm', {"babelChannel": "522", "shareCode": "", "mpin": "", "from": "", "version": 26, "channel": 1, "lat": "0", "lng": "0"})
       console.log('助力码', res['farmUserPro'].shareCode)
       this.shareCodeSelf.push(res['farmUserPro'].shareCode)
     } catch (e) {
@@ -58,7 +77,9 @@ class Jd_fruit_help extends JDHelloWorld {
     for (let user of users) {
       try {
         this.user = user
-        this.h5stTool = this.h5st('42', '8a2af', this.user.UserAgent)
+        this.user.UserAgent = `jdapp;iPhone;13.0.2;;;M/5.0;appBuild/169363;jdSupportDarkMode/0;ef/1;Mozilla/5.0 (iPhone; CPU iPhone OS ${this.getIosVer()} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+        this.appId = '8a2af'
+        await this.h5stToolInit()
         let shareCodePool: string[] = await this.getShareCodePool('farm', 50)
         let shareCode: string[] = Array.from(new Set([...this.shareCodeSelf, ...shareCodePool]))
         for (let code of shareCode) {
