@@ -32,9 +32,9 @@ declare class JDHelloWorld {
     algo(appId: string, fp: string, ua: string, pin: string, url: string, og: string): Promise<object>;
     h5st(version: string, appId: string, ua: string): any;
     run(son: {
-        main: any;
-        help?: any;
-        tips?: any;
+        main: Function;
+        help?: Function;
+        tips?: Function;
     }, help?: Function, tips?: Function): Promise<void>;
 }
 export { User, JDHelloWorld };
